@@ -12,6 +12,6 @@ How to install:
 4. Press Load Unpacked
 5. Select the `src` folder
 
-When updating content, to reload the extension, press the reload arrow.
+When updating content, to reload the extension, press the reload arrow. Before creating a pull request, please test everything thoroughly!
 
 Enjoy :)

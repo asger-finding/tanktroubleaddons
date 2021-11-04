@@ -1,0 +1,109 @@
+{
+  "CSS_DEFAULT_STYLESHEET": "chrome.runtime.getURL('ttaddons\/css\/defaultStyles.css');",
+  "CSS_DARK_STYLESHEET": "chrome.runtime.getURL('ttaddons\/css\/styles.css');",
+  "CSS_DARK_STYLESHEET_CLASSIC": "chrome.runtime.getURL('classicStyle.css');",
+  "CSS_POPUP_DEFAULT_STYLESHEET": "chrome.runtime.getURL('popup\/popupLight.css');",
+  "CSS_POPUP_DARK_STYLESHEET": "chrome.runtime.getURL('popup\/popup.css');",
+  "CSS_ATKINSON_FONT": "chrome.runtime.getURL('ttaddons\/fonts\/Atkinson.css')",
+  "CSS_EMPTY": "chrome.runtime.getURL('empty.css')",
+  "URL_EMPTY": "chrome.runtime.getURL('')",
+  "supportedPaints": "['45','61','152','13','60','153','151','42','43','33']",
+  "REQUESTS": {
+    "darkTheme": "darkTheme",
+    "classicMouse": "classicMouse",
+    "colouredBullets": "colouredBullets",
+    "systemMessages": "systemMessages",
+    "highResTanks": "highResTanks",
+    "musicTheme": "musicTheme",
+    "mazeTheme": "mazeTheme",
+    "alternativeFont": "alternativeFont",
+    "imageEmotes": "imageEmotes",
+    "videoEmotes": "videoEmotes",
+    "konami": "konami"
+  },
+  "THEMES": {
+    "light": {
+      "theme": "light",
+      "gameTheme": "d_url('ttaddons/game/game')",
+      "lobbyGameTheme": "d_url('ttaddons/game/gameLobby')",
+      "deathmatchTheme": "d_url('ttaddons/game/gameModes')",
+      "goldSprite": "d_url('ttaddons/game/gold')",
+      "diamondSprite": "d_url('ttaddons/game/diamond')",
+      "playerPanel": "d_url('ttaddons/game/playerPanel')",
+      "tankSprites": "d_url('ttaddons/game/defaultTankSprites')"
+    },
+    "dark": {
+      "theme": "dark",
+      "gameTheme": "d_url('ttaddons/game/darkGame')",
+      "lobbyGameTheme": "d_url('ttaddons/lobby/darkGame')",
+      "deathmatchTheme": "d_url('ttaddons/lobby/darkGameModes')",
+      "goldSprite": "d_url('ttaddons/game/gold')",
+      "diamondSprite": "d_url('ttaddons/game/diamond')",
+      "playerPanel": "d_url('ttaddons/game/playerPanel')",
+      "tankSprites": "d_url('ttaddons/game/defaultTankSprites')"
+    },
+    "simpleLight": {
+      "theme": "simpleLight",
+      "gameTheme": "d_url('ttaddons/game/simpleLightGame')",
+      "lobbyGameTheme": "d_url('ttaddons/game/gameLobby')",
+      "deathmatchTheme": "d_url('ttaddons/game/gameModes')",
+      "goldSprite": "d_url('ttaddons/game/simpleGold')",
+      "diamondSprite": "d_url('ttaddons/game/simpleDiamond')",
+      "playerPanel": "d_url('ttaddons/game/playerPanel')",
+      "tankSprites": "d_url('ttaddons/game/tankSprites')"
+    },
+    "simpleDark": {
+      "theme": "simpleDark",
+      "gameTheme": "d_url('ttaddons/game/simpleDarkGame')",
+      "lobbyGameTheme": "d_url('ttaddons/lobby/darkGame')",
+      "deathmatchTheme": "d_url('ttaddons/lobby/darkGameModes')",
+      "goldSprite": "d_url('ttaddons/game/simpleGold')",
+      "diamondSprite": "d_url('ttaddons/game/simpleDiamond')",
+      "playerPanel": "d_url('ttaddons/game/playerPanel')",
+      "tankSprites": "d_url('ttaddons/game/tankSprites')"
+    }
+  },
+  "MUSIC": {
+    "RussianMarch": "RussianMarch",
+    "RussianMarchPiano": "RussianMarchPiano"
+  },
+  "POPUP": {
+    "ELEMENT_ID": {
+      "darkTheme": "#darkTheme",
+      "colouredBullets": "#colouredBullets",
+      "classicMouse": "#classicMouse",
+      "systemMessages": "#systemMessages",
+      "musicTheme": "#musicTheme",
+      "alternativeFont": "#alternativeFont",
+      "highResTanks": "#highResTanks",
+      "mazeTheme": "#mazeTheme"
+    },
+    "ELEMENT_CLASS": {
+      "colouredBullets": ".colouredBullets",
+      "classicMouse": ".classicMouse",
+      "systemMessages": ".systemMessages",
+      "musicTheme": ".musicTheme",
+      "alternativeFont": ".alternativeFont",
+      "highResTanks": ".highResTanks",
+      "mazeTheme": "button.maze"
+    },
+    "konami": "_______________________________________________OlZEASG7B9________@8(d3f6#1;<1mn0pq257uvwxy2____-_@8(D3F6#1;<1MN0PQ257UVWXY2_____"
+  },
+  "INSTALL_CONFIG": {
+    "darkTheme": "!!(window?.matchMedia('(prefers-color-scheme: dark)').matches)",
+    "mazeTheme": "!!(window?.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'",
+    "musicTheme": true,
+    "classicMouse": true,
+    "colouredBullets": false,
+    "systemMessages": false,
+    "alternativeFont": false,
+    "highResTanks": false
+  },
+  "LOCALSTORAGE_CONFIG": [
+    "classicMouse",
+    "colouredBullets",
+    "systemMessages",
+    "highResTanks",
+    "mazeTheme"
+  ]
+}

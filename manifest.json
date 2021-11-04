@@ -1,0 +1,40 @@
+{
+  "author": "Commander",
+  "browser_action": {
+    "default_icon": {
+      "16": "ttaddons/src/icon/icon16.png",
+      "19": "ttaddons/src/icon/icon19.png",
+      "32": "ttaddons/src/icon/icon32.png",
+      "38": "ttaddons/src/icon/icon38.png",
+      "48": "ttaddons/src/icon/icon48.png"
+    },
+    "default_popup": "popup.html",
+    "default_title": "TankTroubleAddons"
+  },
+  "content_scripts": [
+    {
+      "js": [ "content.js" ],
+      "matches": [ "*://*.tanktrouble.com/*" ],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "scripts": [ "popup/scripts/background.js" ]
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "description": "TankTroubleAddons — the go-to extension for all your mayhem needs!",
+  "icons": {
+    "128": "ttaddons/src/icon/icon128.png",
+    "16": "ttaddons/src/icon/icon16.png",
+    "32": "ttaddons/src/icon/icon32.png",
+    "48": "ttaddons/src/icon/icon48.png"
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiEFCYjL+l3E18f3RTAhM6IYlrM3aGG6abDH/dsW63Rl0wQOZvnEh+NguvooYta/Veak/iECd0OzZ3UWPsjhP8NtMd1aLGmLtF/s9XtMNpV04YmhmChQHosVgKwUav915O3JRxTIS4AYwMK/7MoT+Ll9j4n5hnqmQfXfP61LSNnIRlT4hZMs/m4cDERlyFGfQVHNCqhSSXx9OVsiAxQ/iaHU9bTpaAjpHZev6mXE1S3bNPlHPpbFuAApydWDrVHvRJjjQC+Ijwz2CDKcHAqOB4UHviX+W96x0DMhBN5MQMTncOjFPCPIPCjW7urS+vyrtco1UV79LPN+asb6QY5BsAwIDAQAB",
+  "manifest_version": 2,
+  "name": "TankTroubleAddons",
+  "permissions": [ "activeTab", "storage", "*://*.tanktrouble.com/*" ],
+  "short_name": "TankTroubleAddons",
+  "update_url": "http://clients2.google.com/service/update2/crx",
+  "version": "2021.09.15.01",
+  "web_accessible_resources": [ "/*" ]
+}

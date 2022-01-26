@@ -1,0 +1,156 @@
+/* Markdown */
+.mdeditor-toolbar {
+  display: flex;
+  height: 22px;
+  color: #757575;
+  border: inherit;
+  border-left: none;
+  border-right: none;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 5px;
+  overflow-y: hidden;
+  overflow-x: overlay;
+}
+.mdeditor-toolbar .mdeditor-toolbar-tool {
+  border: transparent 2px solid;
+  transition-duration: 0.2s;
+  display: flex;
+  align-items: center;
+  min-width: 16px;
+  padding-left: 2px;
+  padding-right: 2px;
+  border-radius: 6px;
+  line-height: 22px;
+  height: 100%;
+  margin-right: 0 3px;
+  text-align: center;
+  user-select: none;
+  white-space: nowrap;
+}
+.mdeditor-toolbar .mdeditor-toolbar-tool svg {
+  stroke-width: 0;
+  fill: #757575;
+  stroke: #757575;
+}
+.mdeditor-toolbar .mdeditor-toolbar-tool.active svg {
+  fill: #000;
+  stroke: #000;
+}
+.mdeditor-toolbar .mdeditor-toolbar-tool:hover {
+  color: #000;
+  border: #ccc 2px solid;
+  background-color: #eee;
+}
+.mdeditor-toolbar .mdeditor-toolbar-tool:first-child {
+  margin: 0;
+  border-radius: 0 6px 6px 0;
+}
+.mdeditor-toolbar .toolbar-seperator {
+  height: 19px;
+  width: 0;
+  border-left: #ccc 2px solid;
+  background: transparent;
+  margin: 0 3px;
+}
+.mdeditor-toolbar::-webkit-scrollbar {
+  height: 6px;
+  background: transparent;
+}
+.mdeditor-toolbar::-webkit-scrollbar-thumb {
+  background: #ccc;
+  background: linear-gradient(0deg, #ccc 0%, rgba(0, 0, 0, 0) 100%);
+}
+.forum {
+  /* Forum bubbles, post composer */
+  /* Forum bubble admin styling */
+}
+.forum .bubble .content,
+.forum .bubble .mdeditor-preview {
+  white-space: break-spaces;
+}
+.forum .bubble .content *,
+.forum .bubble .mdeditor-preview * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.forum .bubble .mdeditor-preview {
+  min-height: 32px;
+}
+.forum .bubble .mdeditor-preview * {
+  margin-top: 0;
+}
+.forum .bubble .mdeditor-preview .preview-empty {
+  color: #757575;
+}
+.forum .bubble .header ~ .mdeditor-toolbar {
+  margin-top: 5px;
+}
+.forum .bubble pre {
+  border: #ccc 2px solid;
+  background-color: transparent;
+  padding: 10px;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.forum .bubble hr {
+  height: 0;
+  border-width: 0;
+  border-top: 2px solid;
+  background-color: #ccc;
+  border-color: #ccc;
+}
+.forum .bubble a:link {
+  color: #0000EE;
+}
+.forum .bubble a:visited {
+  color: #551A8B;
+}
+.forum .bubble blockquote {
+  quotes: '>' '>';
+}
+.forum .bubble blockquote p {
+  display: inline;
+}
+.forum .bubble blockquote::before {
+  color: #ccc;
+  line-height: 0;
+  content: open-quote;
+}
+.forum .bubble p img {
+  max-width: 100%;
+  max-height: 300px;
+}
+.forum .approvable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble .content pre,
+.forum .deletable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble .content pre,
+.forum .bannable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble .content pre {
+  border: #ffda00 2px solid;
+}
+.forum .approvable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble .content hr,
+.forum .deletable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble .content hr,
+.forum .bannable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble .content hr {
+  background-color: #ffda00;
+  border-color: #ffda00;
+}
+.forum .approvable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble .content blockquote::before,
+.forum .deletable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble .content blockquote::before,
+.forum .bannable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble .content blockquote::before {
+  color: #ffda00;
+}
+.forum .deleted .bubble pre,
+.forum .deleted .bubble mark,
+.forum .deleted .bubble a:link,
+.forum .deleted .bubble a:visited {
+  opacity: 0.135;
+}
+.forum .deleted .bubble pre {
+  border-color: #000;
+}
+.forum .deleted .bubble hr {
+  background-color: #ddd;
+  border-color: #ddd;
+}
+.forum .deleted .bubble p img {
+  opacity: 0.3;
+}

@@ -1,0 +1,169 @@
+/* Markdown */
+@toolbar-height: 22px;
+@markdown-image-maxheight: 300px;
+@bubble-unmoderated: #ffda00;
+
+.mdeditor-toolbar {
+    display: flex;
+    height: @toolbar-height;
+    color: #757575;
+    border: inherit;
+    border-left: none;
+    border-right: none;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 5px;
+    overflow-y: hidden;
+    overflow-x: overlay;
+
+    .mdeditor-toolbar-tool {
+        border: transparent 2px solid;
+        transition-duration: 0.2s;
+        display: flex;
+        align-items: center;
+        min-width: 16px;
+        padding-left: 2px;
+        padding-right: 2px;
+        border-radius: 6px;
+        line-height: @toolbar-height;
+        height: 100%;
+        margin-right: 0 3px;
+        text-align: center;
+        user-select: none;
+        white-space: nowrap;
+
+        svg {
+            stroke-width: 0;
+            fill: #757575;
+            stroke: #757575;
+        } 
+
+        &.active svg {
+            fill: #000;
+            stroke: #000;
+        }
+
+        &:hover {
+            color: #000;
+            border: #ccc 2px solid;
+            background-color: #eee;
+        }
+
+        &:first-child {
+            margin: 0;
+            border-radius: 0 6px 6px 0;
+        }
+    }
+
+    .toolbar-seperator {
+        height: @toolbar-height - 3px;
+        width: 0;
+        border-left: #ccc 2px solid;
+        background: transparent;
+        margin: 0 3px;
+    }
+
+    &::-webkit-scrollbar {
+        height: 6px;
+        background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: #ccc;
+        background: linear-gradient(0deg, #ccc 0%, rgba(0, 0, 0, 0) 100%);
+    }
+}
+
+.forum {
+    /* Forum bubbles, post composer */
+    .bubble {
+        .content, .mdeditor-preview {
+            white-space: break-spaces;
+            * {
+                margin-top: 0;
+                margin-bottom: 0;
+            }
+        }
+        .mdeditor-preview {
+            min-height: 32px;
+            * {
+                margin-top: 0;
+            }
+            .preview-empty {
+                color: #757575;
+            }
+        }
+        .header ~ .mdeditor-toolbar {
+            margin-top: 5px;
+        }
+        pre {
+            border: #ccc 2px solid;
+            background-color: transparent;
+            padding: 10px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        hr {
+            height: 0;
+            border-width: 0;
+            border-top: 2px solid;
+            background-color: #ccc;
+            border-color: #ccc;
+        }
+        a:link {
+            color: #0000EE;
+        }
+        a:visited {
+            color: #551A8B;
+        }
+        blockquote {
+            quotes: '>' '>';
+
+            p {
+                display: inline;
+            }
+
+            &::before {
+                color: #ccc;
+                line-height: 0;
+                content: open-quote;
+            }
+        }
+        p img {
+            max-width: 100%;
+            max-height: @markdown-image-maxheight;
+        }
+    }
+    /* Forum bubble admin styling */
+    .approvable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble,
+    .deletable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble,
+    .bannable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble {
+        .content {
+            pre {
+                border: @bubble-unmoderated 2px solid;
+            }
+            hr {
+                background-color: @bubble-unmoderated;
+                border-color: @bubble-unmoderated;
+            }
+            blockquote::before {
+                color: @bubble-unmoderated;
+            }
+        }
+    }
+    .deleted .bubble {
+        pre, mark, a:link, a:visited {
+            opacity: 0.135;
+        }
+        pre {
+            border-color: #000;
+        }
+        hr {
+            background-color: #ddd;
+            border-color: #ddd;
+        }
+        p img {
+            opacity: 0.3;
+        }
+    }
+}

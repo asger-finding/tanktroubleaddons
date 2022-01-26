@@ -1,17 +1,20 @@
 # TankTroubleAddons
 
-TankTroubleAddons — the go-to extension for all your mayhem needs!
+Manifest v3 compatiable version of TankTroubleAddons, updated with TypeScript, sass and ES6 features.
 
-Git upload of TankTroubleAddons. Feel free to create a pull request on this project as I am no longer maintaining it.
+## TODO
 
-How to install:
+- Add TypeScript, sass, gulp
+- Work on hashes
+  - Create JSON file with keys matching the hashes of the script that the entry links to. Stop evaluation of script, inject custom synchronously
+- Add markdown for forum
+- Redo dark theme from the ground up in sass
 
-1. Clone repository or download as a zip
-2. Go to [chrome://extensions](chrome://extensions)
-3. Enable developer mode
-4. Press Load Unpacked
-5. Select the `src` folder
+## Checklist
 
-When updating content, to reload the extension, press the reload arrow. Before creating a pull request, please test everything thoroughly!
-
-Enjoy :)
+- [ ] Dark Theme
+- [ ] Forum Markdown
+- [ ] Round timer
+- [ ] Dark Theme
+- [ ] Dark Theme
+- [ ] Dark Theme

@@ -1,3 +1,11 @@
+interface Window {
+    t_url: Function;
+    opera: any;
+    opr: any;
+    safari: any;
+    InstallTrigger: any;
+}
+
 /**
  !! TEMPORARY SOLUTION !!
  This sucks, I know. However, MV3 has a bug where it doesn't inject module scripts at runtime correctly.
@@ -95,12 +103,12 @@ class ScriptHashes {
         '697ii87vo0r': 'classes/uiconstants.js'
     }
 
-    static get length() {
+    static get hashesLength() {
         return Object.keys(this.hashes).length;
     }
 }
 
-const Hasher = function (str, seed = 0) {
+const Hasher = function (str: string, seed: number = 0) {
     let h1 = 0xDeadBeef ^ seed,
         h2 = 0x41c6ce57 ^ seed;
     for (let i = 0, ch; i < str.length; i++) {
@@ -119,8 +127,6 @@ class Browser {
             return 'chrome';
         } else if (Browser.isSafari) {
             return 'safari';
-        } else if (Browser.isEdge) {
-            return 'edge';
         } else if (Browser.isFirefox) {
             return 'firefox';
         } else if (Browser.isOpera) {
@@ -134,16 +140,13 @@ class Browser {
         return !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
     }
     static get isSafari() {
-        return /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === '[object SafariRemoteNotification]'; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
-    }
-    static get isEdge() {
-        return typeof isIE !== 'undefined' && !!window.StyleMedia;
+        return typeof window.safari !== 'undefined';
     }
     static get isFirefox() {
-        return typeof InstallTrigger !== 'undefined';
+        return typeof window.InstallTrigger !== 'undefined';
     }
     static get isOpera() {
-        return (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+        return window.navigator.userAgent.includes('OPR/');
     }
 
     static get dark() {
@@ -252,35 +255,36 @@ const debugHashes = false;
 
 /** ---------- READ NOTE ABOVE ---------- **/
 
-const nodeData = document.querySelector('tanktroubleaddons'),
-extensionURL = nodeData.dataset.url;
+const nodeData = document.querySelector('tanktroubleaddons');
+if (nodeData instanceof HTMLElement) {
+    const extensionURL = nodeData.dataset.url;
 
-window.t_url = function(url) {
-    return extensionURL + url;
-}
-
-// Change the native eval function and generate a hash of the script being evaluated.
-const proxied = eval;
-const hashLength = ScriptHashes.length;
-let done =  0;
-window.eval = function(code) {
-    if (typeof code === 'string') {
-        const codeHash = Hasher(code),
-        match = ScriptHashes.hashes[codeHash],
-        colour = match ? '#C0FF33' : '#FA113D';
-
-        if (match) {
-            done++;
-            const script = document.createElement('script');
-            script.src = t_url('js/injects/' + match + '?=_' + (Math.floor(Math.random() * 10_000_000) + 10_000_000));
-            document.head.insertBefore(script, document.head.firstChild);
-        }
-
-        if (debugHashes && document.readyState === 'loading') {
-            Logger.detailedLog(code, `%c[ %c${ codeHash } %c] %c${ done }/${ hashLength }`, `color: ${ colour }`, `color: #fff; font-weight: bold;`, `color: ${ colour }`, `color: ${ match ? colour : '#fff' }`);
-        }
+    window.t_url = window.t_url || function(url) {
+        return extensionURL + url;
     }
-    return proxied.apply(this, arguments);
-}
 
-Logger.log('Hasher loaded.');
+    const proxied = eval;
+    const hashLength = ScriptHashes.hashesLength;
+    let done =  0;
+    window.eval = function(code) {
+        if (typeof code === 'string') {
+            const codeHash = Hasher(code),
+            match = ScriptHashes.hashes[codeHash],
+            colour = match ? '#C0FF33' : '#FA113D';
+
+            if (match) {
+                done++;
+                const script = document.createElement('script');
+                script.src = window.t_url('js/injects/' + match + '?=_' + (Math.floor(Math.random() * 10_000_000) + 10_000_000));
+                document.head.insertBefore(script, document.head.firstChild);
+            }
+
+            if (debugHashes && document.readyState === 'loading') {
+                Logger.detailedLog(code, `%c[ %c${ codeHash } %c] %c${ done }/${ hashLength }`, `color: ${ colour }`, `color: #fff; font-weight: bold;`, `color: ${ colour }`, `color: ${ match ? colour : '#fff' }`);
+            }
+        }
+        return proxied.apply(this, arguments);
+    }
+
+    Logger.log('Hasher loaded.');
+}

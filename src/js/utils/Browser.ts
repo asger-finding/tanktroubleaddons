@@ -4,8 +4,6 @@ export default class Browser {
             return 'chrome';
         } else if (Browser.isSafari) {
             return 'safari';
-        } else if (Browser.isEdge) {
-            return 'edge';
         } else if (Browser.isFirefox) {
             return 'firefox';
         } else if (Browser.isOpera) {
@@ -19,16 +17,13 @@ export default class Browser {
         return !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
     }
     static get isSafari() {
-        return /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === '[object SafariRemoteNotification]'; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
-    }
-    static get isEdge() {
-        return typeof isIE !== 'undefined' && !!window.StyleMedia;
+        return typeof window.safari !== 'undefined';
     }
     static get isFirefox() {
-        return typeof InstallTrigger !== 'undefined';
+        return typeof window.InstallTrigger !== 'undefined';
     }
     static get isOpera() {
-        return (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+        return window.navigator.userAgent.includes('OPR/');
     }
 
     static get dark() {

@@ -1,7 +1,7 @@
-import Browser from '/js/utils/Browser.js';
+import Browser from './Browser.js';
 
 export default class Logger {
-    static time(colour, ...args) {
+    static time(colour: string, ...args: string[]) {
         const date          = new Date();
         const styling       = args.splice(1);
         const hours         = (date.getHours() + '').padStart(2, '0');

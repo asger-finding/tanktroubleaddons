@@ -20,6 +20,7 @@
   "homepage": "https://github.com/CommanderAnime/TankTroubleAddons#readme",
   "devDependencies": {
     "@types/chrome": "^0.0.177",
+    "@types/jquery": "^3.5.13",
     "autoprefixer": "^10.4.2",
     "cssnano": "^5.0.16",
     "del": "^6.0.0",

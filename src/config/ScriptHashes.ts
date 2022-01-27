@@ -87,7 +87,7 @@ export default class ScriptHashes {
         '697ii87vo0r': 'classes/uiconstants.js',
     }
 
-    static get length() {
+    static get hashesLength() {
         return Object.keys(this.hashes).length;
     }
 }

@@ -4,9 +4,7 @@ Manifest v3 compatiable version of TankTroubleAddons, updated with TypeScript, s
 
 ## TODO
 
-- Add TypeScript, sass, gulp
-- Work on hashes
-  - Create JSON file with keys matching the hashes of the script that the entry links to. Stop evaluation of script, inject custom synchronously
+- Add TypeScript, SASS, gulp
 - Add markdown for forum
 - Redo dark theme from the ground up in sass
 
@@ -15,6 +13,4 @@ Manifest v3 compatiable version of TankTroubleAddons, updated with TypeScript, s
 - [ ] Dark Theme
 - [ ] Forum Markdown
 - [ ] Round timer
-- [ ] Dark Theme
-- [ ] Dark Theme
-- [ ] Dark Theme
+- [ ] All previous addons features

@@ -1,11 +1,11 @@
 /* Markdown */
-@toolbar-height: 22px;
-@markdown-image-maxheight: 300px;
-@bubble-unmoderated: #ffda00;
+$toolbar-height: 22px;
+$markdown-image-maxheight: 300px;
+$bubble-unmoderated: #ffda00;
 
 .mdeditor-toolbar {
     display: flex;
-    height: @toolbar-height;
+    height: $toolbar-height;
     color: #757575;
     border: inherit;
     border-left: none;
@@ -25,7 +25,7 @@
         padding-left: 2px;
         padding-right: 2px;
         border-radius: 6px;
-        line-height: @toolbar-height;
+        line-height: $toolbar-height;
         height: 100%;
         margin-right: 0 3px;
         text-align: center;
@@ -56,7 +56,7 @@
     }
 
     .toolbar-seperator {
-        height: @toolbar-height - 3px;
+        height: $toolbar-height - 3px;
         width: 0;
         border-left: #ccc 2px solid;
         background: transparent;
@@ -131,7 +131,7 @@
         }
         p img {
             max-width: 100%;
-            max-height: @markdown-image-maxheight;
+            max-height: $markdown-image-maxheight;
         }
     }
     /* Forum bubble admin styling */
@@ -140,14 +140,14 @@
     .bannable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble {
         .content {
             pre {
-                border: @bubble-unmoderated 2px solid;
+                border: $bubble-unmoderated 2px solid;
             }
             hr {
-                background-color: @bubble-unmoderated;
-                border-color: @bubble-unmoderated;
+                background-color: $bubble-unmoderated;
+                border-color: $bubble-unmoderated;
             }
             blockquote::before {
-                color: @bubble-unmoderated;
+                color: $bubble-unmoderated;
             }
         }
     }

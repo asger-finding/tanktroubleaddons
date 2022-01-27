@@ -4,8 +4,9 @@
   "description": "TankTroubleAddons — the go-to extension for all your mayhem needs!",
   "scripts": {
     "build:prod": "gulp --state='production'",
-    "build:watch": "gulp --state='watch'",
-    "build:dev": "gulp --state='development'"
+    "build:dev": "gulp --state='development'",
+    "watch": "gulp watch --state='watch'",
+    "clean": "gulp clean"
   },
   "repository": {
     "type": "git",

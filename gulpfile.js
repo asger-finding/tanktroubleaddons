@@ -1,9 +1,8 @@
-const { src, dest, task, watch, series} = require('gulp');
+const { src, dest, task, watch, series, parallel } = require('gulp');
 const argv         = require('yargs').argv;
 const package      = require('./package.json');
 const del          = require('del');
 const changed      = require('gulp-changed');
-const rename       = require('gulp-rename');
 const ts           = require('gulp-typescript');
 const terser       = require('gulp-terser');
 const sourcemaps   = require('gulp-sourcemaps');
@@ -65,14 +64,14 @@ function css() {
         cssnano()
     ];
     return src(paths.files.css)
-        .pipe(changed(state.dest))
+        .pipe(changed(state.dest + '/css'))
         .pipe(sass())
         .pipe(postCSS(state.rel ? releasePlugins : devPlugins))
         .pipe(dest(state.dest + '/css'));
 }
 
 function html() {
-    const source= src(paths.files.html)
+    const source = src(paths.files.html)
         .pipe(changed(state.dest));
         state.rel && source.pipe(htmlmin({ collapseWhitespace: true }))
 	return source.pipe(dest(state.dest));
@@ -80,7 +79,7 @@ function html() {
 
 function images() {
     const source = src(paths.files.images)
-        .pipe(changed(state.dest));
+        .pipe(changed(state.dest + '/assets'));
         state.rel && source.pipe(imagemin());
 	return source.pipe(dest(state.dest + '/assets'));	
 }
@@ -95,7 +94,7 @@ function json() {
 function manifest() {
     return src(paths.manifest)
         .pipe(changed(state.dest))
-        .pipe(yaml({ schema: 'DEFAULT_SAFE_SCHEMA' }))
+        .pipe(yaml({ schema: 'DEFAULT_FULL_SCHEMA' }))
         .pipe(dest(state.dest));       
 }
 
@@ -103,13 +102,17 @@ function clean() {
     return del([ dist, build ], { force: true });
 }
 
-task('clean', clean);
-task('build', series(scripts, css, html, images, json, manifest));
-task('watch', series('clean', 'build', function() {
+function fileWatch() {
     watch(paths.files.js, scripts);
     watch(paths.files.css, css);
     watch(paths.files.html, html);
     watch(paths.files.images, images);
     watch(paths.files.json, json);
-}));
+}
+
+task('clean', clean);
+task('build', parallel(scripts, css, html, images, json, manifest));
+task('watch', series('clean', 'build', fileWatch));
 exports.default = series('clean', 'build');
+exports.watch = series('clean', 'build', 'watch');
+exports.clean = clean;

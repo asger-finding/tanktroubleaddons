@@ -1,4 +1,4 @@
-const { src, dest, task, watch, series, parallel } = require('gulp');
+const { src, dest, task, watch: fileWatch, series, parallel } = require('gulp');
 const argv         = require('yargs').argv;
 const package      = require('./package.json');
 const del          = require('del');
@@ -56,17 +56,14 @@ function scripts() {
 }
 
 function css() {
-    const devPlugins = [
-        autoprefixer()
-    ];
-    const releasePlugins = [
-        ...devPlugins,
-        cssnano()
-    ];
+    const plugins = [
+        autoprefixer(),
+        ... state.rel ?  [ cssnano() ] : []
+    ]
     return src(paths.files.css)
         .pipe(changed(state.dest + '/css'))
         .pipe(sass())
-        .pipe(postCSS(state.rel ? releasePlugins : devPlugins))
+        .pipe(postCSS(plugins))
         .pipe(dest(state.dest + '/css'));
 }
 
@@ -102,17 +99,17 @@ function clean() {
     return del([ dist, build ], { force: true });
 }
 
-function fileWatch() {
-    watch(paths.files.js, scripts);
-    watch(paths.files.css, css);
-    watch(paths.files.html, html);
-    watch(paths.files.images, images);
-    watch(paths.files.json, json);
+function watch() {
+    fileWatch(paths.files.js, scripts);
+    fileWatch(paths.files.css, css);
+    fileWatch(paths.files.html, html);
+    fileWatch(paths.files.images, images);
+    fileWatch(paths.files.json, json);
 }
 
 task('clean', clean);
 task('build', parallel(scripts, css, html, images, json, manifest));
-task('watch', series('clean', 'build', fileWatch));
+task('watch', series('clean', 'build', watch));
 exports.default = series('clean', 'build');
 exports.watch = series('clean', 'build', 'watch');
 exports.clean = clean;

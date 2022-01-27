@@ -123,10 +123,12 @@ const Hasher = function (str: string, seed: number = 0) {
 
 class Browser {
     static get browser() {
-        if (Browser.isChrome) {
+        if (Browser.isAnyChromium && !Browser.isEdge && !Browser.isEdge) {
             return 'chrome';
         } else if (Browser.isSafari) {
             return 'safari';
+        } else if (Browser.isEdge) {
+            return 'edge';
         } else if (Browser.isFirefox) {
             return 'firefox';
         } else if (Browser.isOpera) {
@@ -136,11 +138,14 @@ class Browser {
         }
     }
 
-    static get isChrome() {
+    static get isAnyChromium() {
         return !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
     }
     static get isSafari() {
         return typeof window.safari !== 'undefined';
+    }
+    static get isEdge() {
+        return window.navigator.userAgent.includes('Edg/');
     }
     static get isFirefox() {
         return typeof window.InstallTrigger !== 'undefined';
@@ -211,7 +216,7 @@ class Browser {
                 this[Browser.browser].dark.splitter : '#FFFFFF';
         }
     }
-};
+}
 
 class Logger {
     static time(colour, ...args) {

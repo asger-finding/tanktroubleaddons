@@ -1,7 +1,17 @@
-# TankTroubleAddons 2
+# TankTroubleAddons v2
 
-TankTroubleAddons 2, a complete rewrite of the original addons compatiable with the obligatory migration to Manifest V3.
+TankTroubleAddons v2, a complete rewrite of the original addons compatiable with the obligatory migration to Manifest V3.
 Written in TypeScript and SASS, compiled with Gulp!
+
+## Minimum browser version
+
+| Browser  | Minimum |
+|----------|---------|
+| Chromium | 94      |
+| Safari   | 15      |
+| Edge     | 94      |
+| Firefox  | 94      |
+| Opera    | 79      |
 
 ## To-do's
 
@@ -18,15 +28,15 @@ Written in TypeScript and SASS, compiled with Gulp!
 
 ## Installing and running for development
 
-1. Clone/fork this repository.
-2. Make sure your Node version is >= 14 with `node -v` in your CLI!
-3. Run `npm install` to install the necessary dependencies.
-4. Running for development:
-   - `npm run build:dev` — Compile for development.
-   - `npm run build:watch` — Compile for development and watch for file changes in src.
-   - `npm run build:prod` — Compile and minify for a production build.
-   - `npm run clean` — Delete the build and distribution folders.
-5. Loading TankTroubleAddons in your browser
+1. Fork/clone this repository.
+2. Make sure your Node.js version is >= 16.xx, checking with `node -v` in your terminal!
+3. Run `npm install` to install the project's necessary dependencies.
+4. **Compiling for development**
+   - `npm run build:dev` — for development.
+   - `npm run build:watch` — for development and watch for file changes in src.
+   - `npm run build:prod` — and minify for a production build.
+   - `npm run clean` — delete the build and distribution folders.
+5. **Running TankTroubleAddons in your browser**
    - **(most) Chromium browsers**
      1. Go to [chrome://extensions/](chrome://extensions)
      2. Check `Developer mode`

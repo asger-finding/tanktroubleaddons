@@ -1,6 +1,6 @@
 name: __MSG_name__
 description: __MSG_description__
-version: 0.0.1
+version: __VERSION__
 default_locale: en
 author: Asger Finding
 manifest_version: 3

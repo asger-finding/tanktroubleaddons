@@ -46,7 +46,7 @@ const state = {
 }
 
 function scripts() {
-    let source = src(paths.files.js)
+    const source = src(paths.files.js)
         .pipe(changed(state.dest))
         .pipe(tsProject());
         state.rel && source.pipe(sourcemaps.init())
@@ -84,7 +84,7 @@ function images() {
 function json() {
     return src(paths.files.json)
         .pipe(changed(state.dest))
-		.pipe(jeditor(json=>{return json}, { beautify: !state.rel }))
+		.pipe(jeditor(json => {return json}, { beautify: !state.rel }))
         .pipe(dest(state.dest));
 }
 
@@ -92,7 +92,11 @@ function manifest() {
     return src(paths.manifest)
         .pipe(changed(state.dest))
         .pipe(yaml({ schema: 'DEFAULT_FULL_SCHEMA' }))
-        .pipe(dest(state.dest));       
+        .pipe(jeditor(json => {
+            json.version = package.version;
+            return json;
+        }, { beautify: !state.rel } ))
+        .pipe(dest(state.dest));
 }
 
 function clean() {

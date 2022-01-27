@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "allowJs": true,
+        "checkJs": false,
         "outDir": "./dist",
     },
     "include": [
@@ -8,6 +9,7 @@
     ],
     "exclude": [
         "./node_modules",
-        "./dist"
+        "./dist",
+        "./src/**/*.js"
     ]
 }

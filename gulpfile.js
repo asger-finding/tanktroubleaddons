@@ -1,6 +1,5 @@
 const { src, dest, task, watch, series} = require('gulp');
 const argv         = require('yargs').argv;
-const filesystem   = require('fs');
 const package      = require('./package.json');
 const del          = require('del');
 const changed      = require('gulp-changed');
@@ -14,33 +13,33 @@ const autoprefixer = require('autoprefixer');
 const cssnano      = require('cssnano');
 const htmlmin      = require('gulp-htmlmin');
 const imagemin     = require('gulp-imagemin');
-const jsoneditor   = require('gulp-json-editor');
+const jeditor      = require('gulp-json-editor');
+const yaml         = require('gulp-yaml');
 
 const tsProject = ts.createProject('./tsconfig.json');
-const origin = './src';
-const build = './build';
-const dist = './dist';
+const origin    = './src';
+const build     = './build';
+const dist      = './dist';
 const paths = {
-    manifest: `${origin}/manifest.json`,
+    manifest: `${origin}/manifest.yml`,
     files: {
-        js: `${origin}/**/*.@(js|ts)`, //`${origin}/*/{*.@(js|ts),!(injects)/**/*.@(js|ts)}`,
-        css : `${origin}/css/*.@(css|scss)`,
-        html: `${origin}/html/*.html`,
+        js:     `${origin}/**/*.@(js|ts)`,
+        css :   `${origin}/css/*.@(css|scss)`,
+        html:   `${origin}/html/*.html`,
         images: `${origin}/assets/@(images|svg)/*.@(png|jpg|jpeg|gif|svg)`,
-        json: `${origin}/**/*.json`,
-        //injects: `${origin}/js/injects/**/*.js`
+        json:   `${origin}/**/*.json`
     }
 }
-const states = {
-    DEFAULT: 'default',
-    DEV: 'dev',
-    DEBUG: 'debug',
-    RELEASE: 'release',
+const state = {
+    DEV:        'development',
+    WATCH:      'watch',
+    PRODUCTION: 'production',
+	DEFAULT:    'default',
     get current() {
         return argv.state || this[this.DEFAULT];
     },
     get rel() {
-        return this.current === this.RELEASE;
+		return this.current === this.PRODUCTION;
     },
 	get dest() {
 		return this.rel ? dist : build;
@@ -49,12 +48,12 @@ const states = {
 
 function scripts() {
     let source = src(paths.files.js)
-        .pipe(changed(states.dest))
+        .pipe(changed(state.dest))
         .pipe(tsProject());
-        states.rel && source.pipe(sourcemaps.init())
+        state.rel && source.pipe(sourcemaps.init())
             .pipe(terser())
             .pipe(sourcemaps.write('.'));
-    return source.pipe(dest(states.dest));
+    return source.pipe(dest(state.dest));
 }
 
 function css() {
@@ -66,40 +65,38 @@ function css() {
         cssnano()
     ];
     return src(paths.files.css)
-        .pipe(changed(states.dest))
+        .pipe(changed(state.dest))
         .pipe(sass())
-        .pipe(postCSS(states.rel ? releasePlugins : devPlugins))
-        .pipe(dest(states.dest + '/css'));
+        .pipe(postCSS(state.rel ? releasePlugins : devPlugins))
+        .pipe(dest(state.dest + '/css'));
 }
 
 function html() {
     const source= src(paths.files.html)
-        .pipe(changed(states.dest));
-        states.rel && source.pipe(htmlmin({ collapseWhitespace: true }))
-	return source.pipe(dest(states.dest));
+        .pipe(changed(state.dest));
+        state.rel && source.pipe(htmlmin({ collapseWhitespace: true }))
+	return source.pipe(dest(state.dest));
 }
 
 function images() {
     const source = src(paths.files.images)
-        .pipe(changed(states.dest));
-        states.rel && source.pipe(imagemin());
-	return source.pipe(dest(states.dest + '/assets'));	
+        .pipe(changed(state.dest));
+        state.rel && source.pipe(imagemin());
+	return source.pipe(dest(state.dest + '/assets'));	
 }
 
 function json() {
     return src(paths.files.json)
-        .pipe(changed(states.dest))
-        .pipe(dest(states.dest));
+        .pipe(changed(state.dest))
+		.pipe(jeditor(json=>{return json}, { beautify: !state.rel }))
+        .pipe(dest(state.dest));
 }
 
 function manifest() {
     return src(paths.manifest)
-        .pipe(changed(states.dest))
-        .pipe(jsoneditor(function(json) {
-            json.version = package.version;
-            return json;
-        }))
-        .pipe(dest(states.dest));       
+        .pipe(changed(state.dest))
+        .pipe(yaml({ schema: 'DEFAULT_SAFE_SCHEMA' }))
+        .pipe(dest(state.dest));       
 }
 
 function clean() {
@@ -115,5 +112,4 @@ task('watch', series('clean', 'build', function() {
     watch(paths.files.images, images);
     watch(paths.files.json, json);
 }));
-exports.clean = task('clean');
-exports.default = series(exports.clean, 'build');
+exports.default = series('clean', 'build');

@@ -7,7 +7,7 @@
         requestURI: location.pathname + location.search
     }, () => {
         // Do some stuff here?
-        const worked = QualityManager.getQuality.toString() === 'function() {\r\n        return QualityManager.quality;\r\n    }';
+        const worked = QualityManager._focusEventHandler.toString() === 'function(e,a,t){switch(a){case FocusManager.EVENTS.FOCUS:case FocusManager.EVENTS.BLUR:e.reset()}}';
         console.log(`IndexLoader done! Load was %c${ worked ? 'successful' : 'unsuccessful' }`, `color: ${ worked ? 'lime' : 'red' }; font-weight: bold;`);
         main();
 

@@ -27,7 +27,7 @@ See the table below for safe minimum requirements.
 - Compile extension for support on all major browsers.
 - Add to Chrome Webstore, Firefox, Safari and Opera
 
-### [Features checklist](/issues/1#issue-1117171565)
+### [Features checklist](issues/1#issue-1117171565)
 
 - [ ] Dark Theme
 - [ ] Forum Markdown

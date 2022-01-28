@@ -25,7 +25,7 @@ class GameLoader {
 							this.head.insertBefore(this.hasherScript, this.head.firstChild);
 	
 						} else if (node.parentElement?.tagName === 'BODY' && node.tagName === 'SCRIPT' && node.textContent.includes('content.php')) {
-							this.extensionData.dataset.loaderTextContent = node.textContent;
+							this.extensionData.dataset.loader = node.textContent;
 							Object.assign(node, {
 								'textContent': '',
 								'src': chrome.runtime.getURL('script/IndexLoader.js'),

@@ -4,7 +4,7 @@
  * Instead, we declare it as a redirect rule 
  */
 
-(() => {
+(function() {
 	const defaults = {
 		pluginName: 'sanitize',
 
@@ -89,7 +89,7 @@
 	$[defaults.pluginName] = sanitize;
 })();
 
-(() => {
+(function() {
 	const pluginName = 'snarkdown';
 	const tags = {
 		'': ['<em>', '</em>'],

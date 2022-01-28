@@ -280,7 +280,7 @@ if (nodeData instanceof HTMLElement) {
             if (match) {
                 done++;
                 const script = document.createElement('script');
-                script.src = window.t_url('js/injects/' + match + '?=_' + (Math.floor(Math.random() * 10_000_000) + 10_000_000));
+                script.src = window.t_url('script/injects/' + match + '?=_' + (Math.floor(Math.random() * 10_000_000) + 10_000_000));
                 document.head.insertBefore(script, document.head.firstChild);
             }
 

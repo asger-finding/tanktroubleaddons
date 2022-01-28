@@ -14,7 +14,7 @@ if (nodeData instanceof HTMLElement) {
     const proxied = eval;
     const hashLength = ScriptHashes.hashesLength;
     let done =  0;
-    window.eval = function(code: any) { /* Should be type string, but TankTrouble might throw some errors */
+    window.eval = function(code: any) { /* Should be type of string, but TankTrouble might throw some errors */
         if (typeof code === 'string') {
             const codeHash = Hasher(code),
             match = ScriptHashes.hashes[codeHash],
@@ -23,7 +23,7 @@ if (nodeData instanceof HTMLElement) {
             if (match) {
                 done++;
                 const script = document.createElement('script');
-                script.src = window.t_url('js/injects/' + match + '?=_' + (Math.floor(Math.random() * 10_000_000) + 10_000_000));
+                script.src = window.t_url('script/injects/' + match + '?=_' + (Math.floor(Math.random() * 10_000_000) + 10_000_000));
                 document.head.insertBefore(script, document.head.firstChild);
             }
 

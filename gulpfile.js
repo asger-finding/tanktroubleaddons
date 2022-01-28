@@ -22,7 +22,7 @@ const dist      = './dist';
 const paths = {
     manifest: `${origin}/manifest.yml`,
     files: {
-        js:     `${origin}/**/*.@(js|ts)`,
+        script: `${origin}/**/*.@(js|ts)`,
         css :   `${origin}/css/*.@(css|scss)`,
         html:   `${origin}/html/*.html`,
         images: `${origin}/assets/@(images|svg)/*.@(png|jpg|jpeg|gif|svg)`,
@@ -46,7 +46,7 @@ const state = {
 }
 
 function scripts() {
-    const source = src(paths.files.js)
+    const source = src(paths.files.script)
         .pipe(changed(state.dest))
         .pipe(tsProject());
         state.rel && source.pipe(sourcemaps.init())
@@ -104,7 +104,7 @@ function clean() {
 }
 
 function watch() {
-    fileWatch(paths.files.js, scripts);
+    fileWatch(paths.files.script, scripts);
     fileWatch(paths.files.css, css);
     fileWatch(paths.files.html, html);
     fileWatch(paths.files.images, images);

@@ -5,7 +5,7 @@ class GameLoader {
 
 	constructor() {
 		this.hasherScript = Object.assign(document.createElement('script'), {
-			'src': chrome.runtime.getURL('js/hasher.js'),
+			'src': chrome.runtime.getURL('script/hasher.js'),
 			'type': 'module'
 		});
 		this.extensionData = document.createElement('tanktroubleaddons');
@@ -28,7 +28,7 @@ class GameLoader {
 							this.extensionData.dataset.loaderTextContent = node.textContent;
 							Object.assign(node, {
 								'textContent': '',
-								'src': chrome.runtime.getURL('js/IndexLoader.js'),
+								'src': chrome.runtime.getURL('script/IndexLoader.js'),
 								'type': 'module'
 							});
 	

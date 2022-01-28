@@ -1,7 +1,7 @@
 [
     {
         "id": 1,
-        "action": { "type": "redirect", "redirect": { "extensionPath": "/js/injects/forum/forum.js" } },
+        "action": { "type": "redirect", "redirect": { "extensionPath": "/script/injects/forum/forum.js" } },
         "condition": {
           "urlFilter": "forum.js.*pagespeed.",
           "domains": ["tanktrouble.com"],

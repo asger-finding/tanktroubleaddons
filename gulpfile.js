@@ -1,4 +1,4 @@
-const { src, dest, task, watch: fileWatch, series, parallel } = require('gulp');
+const { src, dest, task, watch: _watch, series, parallel } = require('gulp');
 const argv         = require('yargs').argv;
 const package      = require('./package.json');
 const del          = require('del');
@@ -16,20 +16,19 @@ const imagemin     = require('gulp-imagemin');
 const jeditor      = require('gulp-json-editor');
 const yaml         = require('gulp-yaml');
 
-const tsProject = ts.createProject('./tsconfig.json');
 const origin    = './src';
-const build     = './build';
-const dist      = './dist';
 const paths = {
-    manifest_chrome: `${origin}/manifest_chrome.yml`,
-    manifest_firefox: `${origin}/manifest_firefox.yml`,
+    manifest_chrome: `${ origin }/manifest_chrome.yml`,
+    manifest_firefox: `${ origin }/manifest_firefox.yml`,
     files: {
-        script: `${origin}/**/*.@(js|ts)`,
-        css :   `${origin}/css/*.@(css|scss)`,
-        html:   `${origin}/html/*.html`,
-        images: `${origin}/assets/@(images|svg)/*.@(png|jpg|jpeg|gif|svg)`,
-        json:   `${origin}/**/*.json`
-    }
+        script: `${ origin }/**/*.@(js|ts)`,
+        css :   `${ origin }/css/*.@(css|scss)`,
+        html:   `${ origin }/html/*.html`,
+        images: `${ origin }/assets/@(images|svg)/*.@(png|jpg|jpeg|gif|svg)`,
+        json:   `${ origin }/**/*.json`
+    },
+    build: './build',
+    dist: './dist'
 }
 const state = {
     DEV:        'development',
@@ -43,9 +42,10 @@ const state = {
 		return this.current === this.PRODUCTION;
     },
 	get dest() {
-		return this.rel ? dist : build;
+		return this.rel ? paths.dist : paths.build;
 	}
 }
+const tsProject = ts.createProject('./tsconfig.json');
 
 function scripts() {
     const source = src(paths.files.script)
@@ -60,7 +60,9 @@ function scripts() {
 function css() {
     const plugins = [
         autoprefixer(),
-        ... state.rel ?  [ cssnano() ] : []
+        ... state.rel ? [
+            cssnano()
+        ] : []
     ]
     return src(paths.files.css)
         .pipe(changed(state.dest + '/css'))
@@ -103,20 +105,20 @@ function manifest() {
 }
 
 function clean() {
-    return del([ dist, build ], { force: true });
+    return del([ paths.dist, paths.build ], { force: true });
 }
 
 function watch() {
-    fileWatch(paths.files.script, scripts);
-    fileWatch(paths.files.css, css);
-    fileWatch(paths.files.html, html);
-    fileWatch(paths.files.images, images);
-    fileWatch(paths.files.json, json);
+    _watch(paths.files.script, scripts);
+    _watch(paths.files.css, css);
+    _watch(paths.files.html, html);
+    _watch(paths.files.images, images);
+    _watch(paths.files.json, json);
 }
 
 task('clean', clean);
 task('build', parallel(scripts, css, html, images, json, manifest));
 task('watch', series('clean', 'build', watch));
 exports.default = series('clean', 'build');
-exports.watch = series('clean', 'build', 'watch');
+exports.watch = series(exports.default, 'watch');
 exports.clean = clean;

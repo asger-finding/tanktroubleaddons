@@ -7,7 +7,7 @@
 [![Opera Addons](https://img.shields.io/badge/Opera-21262d.svg?&style=flat-square&logo=opera&logoColor=c9d1d9)]()
 
 TankTroubleAddons v2, a complete rewrite of the original addons compatiable with the obligatory migration to Manifest V3. (Thanks, Google!)\
-Written in TypeScript with a SASS preprocessor, compiled with Gulp.
+Written in TypeScript with a SASS preprocessor, compiled with gulp.
 
 ## Minimum browser version
 

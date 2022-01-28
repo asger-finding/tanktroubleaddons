@@ -3,6 +3,7 @@ const argv         = require('yargs').argv;
 const package      = require('./package.json');
 const del          = require('del');
 const changed      = require('gulp-changed');
+const rename       = require('gulp-rename');
 const ts           = require('gulp-typescript');
 const terser       = require('gulp-terser');
 const sourcemaps   = require('gulp-sourcemaps');
@@ -20,7 +21,8 @@ const origin    = './src';
 const build     = './build';
 const dist      = './dist';
 const paths = {
-    manifest: `${origin}/manifest.yml`,
+    manifest_chrome: `${origin}/manifest_chrome.yml`,
+    manifest_firefox: `${origin}/manifest_firefox.yml`,
     files: {
         script: `${origin}/**/*.@(js|ts)`,
         css :   `${origin}/css/*.@(css|scss)`,
@@ -89,13 +91,14 @@ function json() {
 }
 
 function manifest() {
-    return src(paths.manifest)
+    return src(paths.manifest_chrome)
         .pipe(changed(state.dest))
         .pipe(yaml({ schema: 'DEFAULT_FULL_SCHEMA' }))
         .pipe(jeditor(json => {
             json.version = package.version;
             return json;
         }, { beautify: !state.rel } ))
+        .pipe(rename('manifest.json'))
         .pipe(dest(state.dest));
 }
 

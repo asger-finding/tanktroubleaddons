@@ -1,24 +1,24 @@
 # TankTroubleAddons v2
 
-TankTroubleAddons v2, a complete rewrite of the original addons compatiable with the obligatory migration to Manifest V3.
-Written in TypeScript and SASS, compiled with Gulp!
+TankTroubleAddons v2, a complete rewrite of the original addons compatiable with the obligatory migration to Manifest V3. (Thanks, Google!)\
+Written in TypeScript with a SASS preprocessor, compiled with Gulp.
 
 ## Minimum browser version
 
-TankTroubleAddons compiles to ES2020 spec. The minimum browser version required to run this addons should be a 2020 release. See the table below for requirements.
+TankTroubleAddons compiles to ES2020 spec. The minimum browser version required to run this addons must be a ECMAScript 2020 release.\
+See the table below for safe minimum requirements.
 
-| Browser  | Minimum |
-|----------|---------|
-| Chromium | 84      |
-| Safari   | 14      |
-| Edge     | 84      |
-| Firefox  | 76      |
-| Opera    | 69      |
+| **Browser** | **Minimum** |
+|-------------|-------------|
+| Chromium    | 84          |
+| Safari      | 14          |
+| Edge        | 84          |
+| Firefox     | 76          |
+| Opera       | 69          |
 
 ## To-do's
 
-- Implement markdown in the forum
-- Recreate dark theme in SASS
+- Compile eextension for support on all major browsers.
 - Add to Chrome Webstore, Firefox, Safari and Opera
 
 ## Features checklist

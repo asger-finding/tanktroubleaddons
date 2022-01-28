@@ -1,3 +1,9 @@
+[![Chrome Web Store](https://img.shields.io/badge/Chrome-2b2b2b.svg?&style=for-the-badge&logo=google-chrome&logoColor=white)](https://chrome.google.com/webstore/detail/tanktroubleaddons/iaahklbbofakekcbhbjnpjbgaadhedhm)
+[![Apple App Store](https://img.shields.io/badge/Safari-2b2b2b.svg?&style=for-the-badge&logo=safari&logoColor=white)]()
+[![Edge Addons](https://img.shields.io/badge/Edge-2b2b2b.svg?&style=for-the-badge&logo=microsoft-edge&logoColor=white)]()
+[![Firefox Add-ons](https://img.shields.io/badge/Firefox-2b2b2b.svg?&style=for-the-badge&logo=firefox-browser&logoColor=white)]()
+[![Opera Addons](https://img.shields.io/badge/Opera-2b2b2b.svg?&style=for-the-badge&logo=opera&logoColor=white)]()
+
 # TankTroubleAddons v2
 
 TankTroubleAddons v2, a complete rewrite of the original addons compatiable with the obligatory migration to Manifest V3. (Thanks, Google!)\

@@ -1,8 +1,8 @@
-[![Chrome Web Store](https://img.shields.io/badge/Chrome-2b2b2b.svg?&style=for-the-badge&logo=google-chrome&logoColor=white)](https://chrome.google.com/webstore/detail/tanktroubleaddons/iaahklbbofakekcbhbjnpjbgaadhedhm)
-[![Apple App Store](https://img.shields.io/badge/Safari-2b2b2b.svg?&style=for-the-badge&logo=safari&logoColor=white)]()
-[![Edge Addons](https://img.shields.io/badge/Edge-2b2b2b.svg?&style=for-the-badge&logo=microsoft-edge&logoColor=white)]()
-[![Firefox Add-ons](https://img.shields.io/badge/Firefox-2b2b2b.svg?&style=for-the-badge&logo=firefox-browser&logoColor=white)]()
-[![Opera Addons](https://img.shields.io/badge/Opera-2b2b2b.svg?&style=for-the-badge&logo=opera&logoColor=white)]()
+[![Chrome Web Store](https://img.shields.io/badge/Chrome-21262d.svg?&style=for-the-badge&logo=google-chrome&logoColor=white)](https://chrome.google.com/webstore/detail/tanktroubleaddons/iaahklbbofakekcbhbjnpjbgaadhedhm)
+[![Apple App Store](https://img.shields.io/badge/Safari-21262d.svg?&style=for-the-badge&logo=safari&logoColor=white)]()
+[![Edge Addons](https://img.shields.io/badge/Edge-21262d.svg?&style=for-the-badge&logo=microsoft-edge&logoColor=white)]()
+[![Firefox Add-ons](https://img.shields.io/badge/Firefox-21262d.svg?&style=for-the-badge&logo=firefox-browser&logoColor=white)]()
+[![Opera Addons](https://img.shields.io/badge/Opera-21262d.svg?&style=for-the-badge&logo=opera&logoColor=white)]()
 
 # TankTroubleAddons v2
 

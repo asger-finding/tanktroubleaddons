@@ -52,7 +52,7 @@ See the table below for safe minimum requirements.
      3. Press the `Load Temporary Add-on...` button.
      4. Select your folder of need.
    - **Safari**
-     - See [this](https://stackoverflow.com/a/41543650/11452298), [this](https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension#3744467), or [this](https://youtu.be/ujjgm9CADmQ)!
+     - See [this](https://stackoverflow.com/a/41543650/11452298) or [this](https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension#3744467)!
    - **Opera**
      1. Go to [opera:extensions](opera:extensions)
      2. Check `Developer mode`

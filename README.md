@@ -5,13 +5,15 @@ Written in TypeScript and SASS, compiled with Gulp!
 
 ## Minimum browser version
 
+TankTroubleAddons compiles to ES2020 spec. The minimum browser version required to run this addons should be a 2020 release. See the table below for requirements.
+
 | Browser  | Minimum |
 |----------|---------|
-| Chromium | 94      |
-| Safari   | 15      |
-| Edge     | 94      |
-| Firefox  | 94      |
-| Opera    | 79      |
+| Chromium | 84      |
+| Safari   | 14      |
+| Edge     | 84      |
+| Firefox  | 76      |
+| Opera    | 69      |
 
 ## To-do's
 

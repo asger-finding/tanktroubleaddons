@@ -44,7 +44,7 @@ TankTrouble.ChatBox = {
         this.chatStatusNew = $("<img width='44' height='42' class='status button' src='" + g_url("assets/images/chat/newMessageMarker.png") + "' srcset='" + g_url("assets/images/chat/newMessageMarker@2x.png") + " 2x'/>");
         this.chatContent = $("<div class='content'></div>");
         this.chatForm = $("<form/>");
-        this.chatInput = $("<input disabled placeholder='Signal lost' maxlength='120'/>");
+        this.chatInput = $("<input disabled placeholder='Signal lost' maxlength='255'/>");
 
         this.chatForm.append(this.chatInput);
     

@@ -6,12 +6,12 @@
 [![Firefox Add-ons](https://img.shields.io/badge/Firefox-21262d.svg?&style=flat-square&logo=firefox-browser&logoColor=c9d1d9)]()
 [![Opera Addons](https://img.shields.io/badge/Opera-21262d.svg?&style=flat-square&logo=opera&logoColor=c9d1d9)]()-->
 
-TankTroubleAddons v2, a complete rewrite of the original addons compatiable with the obligatory migration to Manifest V3. (Thanks, Google!)\
+TankTroubleAddons v2, a complete rewrite of the original addons compatiable with the obligatory migration to Manifest V3. (Thanks, Google!)  
 Written in TypeScript with a SASS preprocessor, compiled with gulp.
 
 ## Minimum browser version
 
-TankTroubleAddons compiles to ES2020 spec. The minimum browser version required to run this addons must be a ECMAScript 2020 release.\
+TankTroubleAddons compiles to ES2020 spec. The minimum browser version required to run this addons must be a ECMAScript 2020 release.  
 See the table below for safe minimum requirements.
 
 | **Browser** | **Minimum** |
@@ -41,9 +41,9 @@ See the table below for safe minimum requirements.
    - `npm run clean` — delete the build and distribution folders
 5. **Running TankTroubleAddons in your browser**
    - Chromium browsers (Chrome, Edge, Opera)
-     1. Go to one of the following\
-       [chrome://extensions/](chrome://extensions) (Chrome)\
-       [edge://extensions/](edge://extensions/) (Microsoft Edge)\
+     1. Go to one of the following  
+       [chrome://extensions/](chrome://extensions) (Chrome)  
+       [edge://extensions/](edge://extensions/) (Microsoft Edge)  
        [opera:extensions](opera:extensions) (Opera)
      2. [x] Check on `Developer mode`
      3. Click on `Load unpacked`

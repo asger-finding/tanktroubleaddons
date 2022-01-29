@@ -1,5 +1,4 @@
 const { src, dest, task, watch: _watch, series, parallel } = require('gulp');
-const { TargetManager } = require('./utils/CompilationManagers.js');
 const yargs        = require('yargs');
 const package      = require('./package.json');
 const del          = require('del');
@@ -20,24 +19,30 @@ const yaml         = require('gulp-yaml');
 
 const origin    = './src';
 const paths = {
-    manifest_chromium: `${ origin }/manifest_chromium.yml`,
-    manifest_firefox: `${ origin }/manifest_firefox.yml`,
+    manifest: `${ origin }/manifest*.yml`,
+    redundancy: 'DELETEME',
     files: {
         script: `${ origin }/**/*.@(js|ts)`,
         css :   `${ origin }/css/*.@(css|scss)`,
         html:   `${ origin }/html/*.html`,
         images: `${ origin }/assets/@(images|svg)/*.@(png|jpg|jpeg|gif|svg)`,
-        json:   `${ origin }/**/*.json`
+        json:   `${ origin }/**/*.json`,
+        yaml:    `${ origin }/**/!(manifest)*.yml`
     },
     baseBuild: './build',
     baseDist: './dist',
     build: './build',
     dist: './dist',
-    browserTarget: 'chromium',
-    set target(tar) {
-        this.browserTarget = tar;
-        this.build = `${ paths.baseBuild }/${ tar }`;
-        this.dist = `${ paths.baseDist }/${ tar }`;
+    set target(target) {
+        this.browserTarget = target;
+        this.build = `${ this.baseBuild }/${ target }`;
+        this.dist = `${ this.baseDist }/${ target }`;
+    },
+    get redudancies() {
+        return [
+            `${ this.build }/**/${ this.redundancy }.*`,
+            `${ this.dist }/**/${ this.redundancy }.*`
+        ]
     }
 }
 const state = {
@@ -56,10 +61,24 @@ const state = {
 	}
 }
 const tsProject = ts.createProject('./tsconfig.json');
+paths.target = yargs.argv.target || 'chromium';
+
+function browserSpecificFiles(filename) {
+    const browsers = filename.split('_');
+    const name = browsers.shift();
+
+    const callback = {
+        basename: (browsers.includes(paths.browserTarget) || browsers.length === 0) ? name : paths.redundancy,
+        browsers: browsers
+    }
+    callback.use = !(callback.filename === paths.redundancy);
+    return callback;
+}
 
 function scripts() {
     const source = src(paths.files.script)
         .pipe(changed(state.dest))
+        .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
         .pipe(tsProject());
         state.rel && source.pipe(sourcemaps.init())
             .pipe(terser())
@@ -76,6 +95,7 @@ function css() {
     ]
     return src(paths.files.css)
         .pipe(changed(state.dest + '/css'))
+        .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
         .pipe(sass())
         .pipe(postCSS(plugins))
         .pipe(dest(state.dest + '/css'));
@@ -83,14 +103,16 @@ function css() {
 
 function html() {
     const source = src(paths.files.html)
-        .pipe(changed(state.dest));
+        .pipe(changed(state.dest))
+        .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ));
         state.rel && source.pipe(htmlmin({ collapseWhitespace: true }))
 	return source.pipe(dest(state.dest));
 }
 
 function images() {
     const source = src(paths.files.images)
-        .pipe(changed(state.dest + '/assets'));
+        .pipe(changed(state.dest + '/assets'))
+        .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ));
         state.rel && source.pipe(imagemin());
 	return source.pipe(dest(state.dest + '/assets'));	
 }
@@ -98,20 +120,25 @@ function images() {
 function json() {
     return src(paths.files.json)
         .pipe(changed(state.dest))
+        .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
 		.pipe(jeditor(json => {return json}, { beautify: !state.rel }))
         .pipe(dest(state.dest));
 }
 
 function manifest() {
-    return src(paths.manifest_chromium)
+    return src(paths.manifest)
         .pipe(changed(state.dest))
+        .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
         .pipe(yaml({ schema: 'DEFAULT_FULL_SCHEMA' }))
         .pipe(jeditor(json => {
             json.version = package.version;
             return json;
         }, { beautify: !state.rel } ))
-        .pipe(rename('manifest.json'))
         .pipe(dest(state.dest));
+}
+
+function removeRedundancies() {
+    return del(paths.redudancies, { force: true });
 }
 
 function clean() {
@@ -126,23 +153,12 @@ function watch() {
     _watch(paths.files.json, json);
 }
 
-/*
-async function compileForBrowsers() {
-    await clean();
-    
-    const browsers = yargs.argv.target.split(' ');
-    for (const index in browsers) {
-        paths.target = browsers[index];
-        await build();
-    }
-}
-*/
-
-async function build() {
-    return await series(clean, parallel(scripts, css, html, images, json, manifest))();
+async function announce() {
+    console.log('\x1b[35m%s\x1b[0m', `Building ${ state.current } version of ${ paths.browserTarget }`);
+    return;
 }
 
 exports.clean = task('clean', clean);;
-exports.build = task('build', build);
+exports.build = task('build', series(announce, 'clean', parallel(scripts, css, html, images, json, manifest), removeRedundancies));
 exports.watch = task('watch', series('clean', 'build', watch));
 exports.default = series('clean', 'build');

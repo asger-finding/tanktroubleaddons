@@ -3,9 +3,9 @@
   "version": "0.0.2",
   "description": "TankTroubleAddons — the go-to extension for all your mayhem needs!",
   "scripts": {
-    "build:prod": "gulp --state='production'",
-    "build:dev": "gulp --state='development'",
-    "watch": "gulp watch --state='watch'",
+    "build:prod": "gulp --state=production --target=chromium",
+    "build:dev": "gulp --state=development --target=chromium,firefox",
+    "watch": "gulp watch --state=watch",
     "clean": "gulp clean"
   },
   "repository": {
@@ -27,6 +27,7 @@
     "gulp": "^4.0.2",
     "gulp-changed": "^4.0.3",
     "gulp-htmlmin": "^5.0.1",
+    "gulp-ignore": "^3.0.0",
     "gulp-imagemin": "^7.1.0",
     "gulp-json-editor": "^2.5.6",
     "gulp-postcss": "^9.0.1",

@@ -1,8 +1,10 @@
 const { src, dest, task, watch: _watch, series, parallel } = require('gulp');
-const argv         = require('yargs').argv;
+const { TargetManager } = require('./utils/CompilationManagers.js');
+const yargs        = require('yargs');
 const package      = require('./package.json');
 const del          = require('del');
 const changed      = require('gulp-changed');
+const ignore       = require('gulp-ignore');
 const rename       = require('gulp-rename');
 const ts           = require('gulp-typescript');
 const terser       = require('gulp-terser');
@@ -18,7 +20,7 @@ const yaml         = require('gulp-yaml');
 
 const origin    = './src';
 const paths = {
-    manifest_chrome: `${ origin }/manifest_chrome.yml`,
+    manifest_chromium: `${ origin }/manifest_chromium.yml`,
     manifest_firefox: `${ origin }/manifest_firefox.yml`,
     files: {
         script: `${ origin }/**/*.@(js|ts)`,
@@ -27,8 +29,16 @@ const paths = {
         images: `${ origin }/assets/@(images|svg)/*.@(png|jpg|jpeg|gif|svg)`,
         json:   `${ origin }/**/*.json`
     },
+    baseBuild: './build',
+    baseDist: './dist',
     build: './build',
-    dist: './dist'
+    dist: './dist',
+    browserTarget: 'chromium',
+    set target(tar) {
+        this.browserTarget = tar;
+        this.build = `${ paths.baseBuild }/${ tar }`;
+        this.dist = `${ paths.baseDist }/${ tar }`;
+    }
 }
 const state = {
     DEV:        'development',
@@ -36,7 +46,7 @@ const state = {
     PRODUCTION: 'production',
 	DEFAULT:    'default',
     get current() {
-        return argv.state || this[this.DEFAULT];
+        return yargs.argv.state || this[this.DEFAULT];
     },
     get rel() {
 		return this.current === this.PRODUCTION;
@@ -93,7 +103,7 @@ function json() {
 }
 
 function manifest() {
-    return src(paths.manifest_chrome)
+    return src(paths.manifest_chromium)
         .pipe(changed(state.dest))
         .pipe(yaml({ schema: 'DEFAULT_FULL_SCHEMA' }))
         .pipe(jeditor(json => {
@@ -116,9 +126,23 @@ function watch() {
     _watch(paths.files.json, json);
 }
 
-task('clean', clean);
-task('build', parallel(scripts, css, html, images, json, manifest));
-task('watch', series('clean', 'build', watch));
+/*
+async function compileForBrowsers() {
+    await clean();
+    
+    const browsers = yargs.argv.target.split(' ');
+    for (const index in browsers) {
+        paths.target = browsers[index];
+        await build();
+    }
+}
+*/
+
+async function build() {
+    return await series(clean, parallel(scripts, css, html, images, json, manifest))();
+}
+
+exports.clean = task('clean', clean);;
+exports.build = task('build', build);
+exports.watch = task('watch', series('clean', 'build', watch));
 exports.default = series('clean', 'build');
-exports.watch = series(exports.default, 'watch');
-exports.clean = clean;

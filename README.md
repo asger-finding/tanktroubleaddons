@@ -1,10 +1,10 @@
 # **TankTroubleAddons v2**
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-21262d.svg?&style=flat-square&logo=google-chrome&logoColor=c9d1d9)](https://chrome.google.com/webstore/detail/tanktroubleaddons/iaahklbbofakekcbhbjnpjbgaadhedhm)
-[![Apple App Store](https://img.shields.io/badge/Safari-21262d.svg?&style=flat-square&logo=safari&logoColor=c9d1d9)]()
+<!--[![Apple App Store](https://img.shields.io/badge/Safari-21262d.svg?&style=flat-square&logo=safari&logoColor=c9d1d9)]()
 [![Edge Addons](https://img.shields.io/badge/Edge-21262d.svg?&style=flat-square&logo=microsoft-edge&logoColor=c9d1d9)]()
 [![Firefox Add-ons](https://img.shields.io/badge/Firefox-21262d.svg?&style=flat-square&logo=firefox-browser&logoColor=c9d1d9)]()
-[![Opera Addons](https://img.shields.io/badge/Opera-21262d.svg?&style=flat-square&logo=opera&logoColor=c9d1d9)]()
+[![Opera Addons](https://img.shields.io/badge/Opera-21262d.svg?&style=flat-square&logo=opera&logoColor=c9d1d9)]()-->
 
 TankTroubleAddons v2, a complete rewrite of the original addons compatiable with the obligatory migration to Manifest V3. (Thanks, Google!)\
 Written in TypeScript with a SASS preprocessor, compiled with gulp.

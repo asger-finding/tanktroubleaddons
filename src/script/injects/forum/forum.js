@@ -13,7 +13,7 @@
 			'p', 'a', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'strong', 'em', 'del',
 			'ins', 'mark', 'sup', 'sub', 'img', 'br', 'abbr', 'hr', 'dl', 'dt', 'dd', 'u'
 		],
-		contentTagWhitelist: [ ],
+		contentTagWhitelist: [],
 		attributeWhitelist:  [ 'align', 'color', 'controls', 'href', 'src', 'alt', 'style', 'target', 'title', 'type', 'llang' ],
 		cssWhitelist:        [ 'color', 'background-color', 'font-size', 'text-align', 'text-decoration', 'font-weight' ],
 		schemaWhiteList:     [ 'https:', 'data:' ],

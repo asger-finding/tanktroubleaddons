@@ -41,7 +41,10 @@ See the table below for safe minimum requirements.
    - `npm run clean` — delete the build and distribution folders
 5. **Running TankTroubleAddons in your browser**
    - Chromium browsers (Chrome, Edge, Opera)
-     1. Go to [chrome://extensions/](chrome://extensions) (Chrome) or [edge://extensions/](edge://extensions/) (MS Edge) or [opera:extensions](opera:extensions)! (Opera)
+     1. Go to one of the following\
+       [chrome://extensions/](chrome://extensions) (Chrome)\
+       [edge://extensions/](edge://extensions/) (Microsoft Edge)\
+       [opera:extensions](opera:extensions) (Opera)
      2. [x] Check on `Developer mode`
      3. Click on `Load unpacked`
      4. Select the `build` or `dist` folder depending on your needs.
@@ -50,7 +53,7 @@ See the table below for safe minimum requirements.
      1. Go to [about:debugging](about:debugging)
      2. Click `This Firefox`
      3. Press the `Load Temporary Add-on...` button.
-     4. Select manifest.json in your folder of need.
+     4. Select the manifest.json file in your folder of need.
    - **Safari**
      1. See [this](https://stackoverflow.com/a/41543650/11452298) or [this](https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension#3744467)!
 

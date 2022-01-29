@@ -40,30 +40,18 @@ See the table below for safe minimum requirements.
    - `npm run build:prod` — and minify for a production build
    - `npm run clean` — delete the build and distribution folders
 5. **Running TankTroubleAddons in your browser**
-   - **(most) Chromium browsers**
-     1. Go to [chrome://extensions/](chrome://extensions)
-     2. Check on `Developer mode`
+   - Chromium browsers (Chrome, Edge, Opera)
+     1. Go to [chrome://extensions/](chrome://extensions) (Chrome) or [edge://extensions/](edge://extensions/) (MS Edge) or [opera:extensions](opera:extensions)! (Opera)
+     2. [x] Check on `Developer mode`
      3. Click on `Load unpacked`
      4. Select the `build` or `dist` folder depending on your needs.
      5. To reload the extension, press the spinner icon to load all your changes!
-   - **Safari**
-     1. See [this](https://stackoverflow.com/a/41543650/11452298) or [this](https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension#3744467)!
    - **Firefox**
      1. Go to [about:debugging](about:debugging)
      2. Click `This Firefox`
      3. Press the `Load Temporary Add-on...` button.
      4. Select manifest.json in your folder of need.
-   - **Microsoft Edge**
-     1. Go to [edge://extensions/](edge://extensions/)
-     2. Check on `Developer mode`
-     3. Click on `Load unpacked`
-     4. Select the `build` or `dist` folder depending on your needs.
-     5. To reload the extension, press the spinner icon to load all your changes!
-   - **Opera**
-     1. Go to [opera:extensions](opera:extensions)
-     2. Check on `Developer mode`
-     3. Click on `Load unpacked`
-     4. Select your folder of need.
-     5. To reload the extension, press the spinner icon to load all your changes!
+   - **Safari**
+     1. See [this](https://stackoverflow.com/a/41543650/11452298) or [this](https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension#3744467)!
 
 Happy hacking!

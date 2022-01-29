@@ -3,11 +3,11 @@ const yargs        = require('yargs');
 const package      = require('./package.json');
 const del          = require('del');
 const changed      = require('gulp-changed');
-const ignore       = require('gulp-ignore');
+//const ignore       = require('gulp-ignore');
 const rename       = require('gulp-rename');
+const gulpif       = require('gulp-if');
 const ts           = require('gulp-typescript');
 const terser       = require('gulp-terser');
-const sourcemaps   = require('gulp-sourcemaps');
 const postCSS      = require('gulp-postcss');
 const sass         = require('gulp-sass')(require('sass'));
 const autoprefixer = require('autoprefixer');
@@ -53,11 +53,11 @@ const state = {
     get current() {
         return yargs.argv.state || this[this.DEFAULT];
     },
-    get rel() {
+    get prod() {
 		return this.current === this.PRODUCTION;
     },
 	get dest() {
-		return this.rel ? paths.dist : paths.build;
+		return this.prod ? paths.dist : paths.build;
 	}
 }
 const tsProject = ts.createProject('./tsconfig.json');
@@ -76,20 +76,18 @@ function browserSpecificFiles(filename) {
 }
 
 function scripts() {
-    const source = src(paths.files.script)
+    return src(paths.files.script)
         .pipe(changed(state.dest))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
-        .pipe(tsProject());
-        state.rel && source.pipe(sourcemaps.init())
-            .pipe(terser())
-            .pipe(sourcemaps.write('.'));
-    return source.pipe(dest(state.dest));
+        .pipe(tsProject())
+        .pipe(gulpif(state.prod, terser()))
+        .pipe(dest(state.dest));
 }
 
 function css() {
     const plugins = [
         autoprefixer(),
-        ... state.rel ? [
+        ... state.prod ? [
             cssnano()
         ] : []
     ]
@@ -102,26 +100,26 @@ function css() {
 }
 
 function html() {
-    const source = src(paths.files.html)
+    return src(paths.files.html)
         .pipe(changed(state.dest))
-        .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ));
-        state.rel && source.pipe(htmlmin({ collapseWhitespace: true }))
-	return source.pipe(dest(state.dest));
+        .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
+        .pipe(gulpif(state.prod, htmlmin({ collapseWhitespace: true })))
+	    .pipe(dest(state.dest));
 }
 
 function images() {
-    const source = src(paths.files.images)
+    return src(paths.files.images)
         .pipe(changed(state.dest + '/assets'))
-        .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ));
-        state.rel && source.pipe(imagemin());
-	return source.pipe(dest(state.dest + '/assets'));	
+        .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
+        .pipe(gulpif(state.prod, imagemin()))
+	    .pipe(dest(state.dest + '/assets'));
 }
 
 function json() {
     return src(paths.files.json)
         .pipe(changed(state.dest))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
-		.pipe(jeditor(json => {return json}, { beautify: !state.rel }))
+		.pipe(jeditor(json => {return json}, { beautify: !state.prod }))
         .pipe(dest(state.dest));
 }
 
@@ -133,7 +131,7 @@ function manifest() {
         .pipe(jeditor(json => {
             json.version = package.version;
             return json;
-        }, { beautify: !state.rel } ))
+        }, { beautify: !state.prod } ))
         .pipe(dest(state.dest));
 }
 
@@ -154,7 +152,7 @@ function watch() {
 }
 
 async function announce() {
-    console.log('\x1b[35m%s\x1b[0m', `Building ${ state.current } version of ${ paths.browserTarget }`);
+    console.log('\x1b[35m%s\x1b[0m', `Compiling ${ state.current } version for ${ paths.browserTarget }`);
     return;
 }
 

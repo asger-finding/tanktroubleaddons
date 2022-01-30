@@ -74,7 +74,7 @@ function browserSpecificFiles(filename) {
     return callback;
 }
 function capitalizeFirstLetter(string) {
-    return string.replace(/./, c => c.toUpperCase());
+    return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 function scripts() {

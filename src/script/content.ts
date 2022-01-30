@@ -6,8 +6,8 @@ class GameLoader {
 
 	constructor() {
 		this.hasherScript = document.createElement('script');
-		this.hasherScript.src = chrome.runtime.getURL('script/hasher.js');
-		this.hasherScript.type = 'module';
+		this.hasherScript.src = chrome.runtime.getURL('script/hasher-sync.js');
+		//this.hasherScript.type = 'module';
 
 		this.indexLoader = document.createElement('script');
 		this.indexLoader.src = chrome.runtime.getURL('script/IndexLoader.js');

@@ -10,7 +10,7 @@ export default class Logger {
         const milliseconds  = (date.getMilliseconds() + '');
         return [ (`%c${ hours }:${ minutes }:${ seconds }.${ milliseconds }`)
             .toString()
-            .padEnd(12, '0') + '%c ' + args.join(''),
+            .padEnd(14, '0') + '%c ' + args.join(''),
             'color: ' + colour, 'color: ' + Browser.devtools.font_default, ...styling ];
     }
 

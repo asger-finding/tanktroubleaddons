@@ -170,3 +170,14 @@ $bubble-unmoderated: #ffda00;
         }
     }
 }
+
+.virtualShop .buttonGroup .wallet button {
+    display: flex !important;
+    align-items: center;
+    flex-direction: row;
+
+    img {
+        height: 25px;
+        margin: 0 7px;
+    }
+}

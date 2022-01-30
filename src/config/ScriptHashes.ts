@@ -36,6 +36,7 @@ export default class ScriptHashes {
         '0fpg5uhiq8d': 'tanktrouble/controlsoverlay.js',
         '7dis0ah4fdg': 'tanktrouble/settingsbox.js',
         '3b70d6a5fnu': 'tanktrouble/chatbox.js',
+        '0nhlbb8q68p': 'tanktrouble/virtualshopoverlay.js',
     
         // Connection
         '56i8ao2nvf2': 'connection/ttclient.js',

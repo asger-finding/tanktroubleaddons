@@ -37,6 +37,7 @@ class ScriptHashes {
         '7dis0ah4fdg': 'tanktrouble/settingsbox.js',
         '3b70d6a5fnu': 'tanktrouble/chatbox.js',
         '0nhlbb8q68p': 'tanktrouble/virtualshopoverlay.js',
+        '48m8678bii0': 'tanktrouble/adminplayerlookupoverlay.js',
     
         // Connection
         '56i8ao2nvf2': 'connection/ttclient.js',

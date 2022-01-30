@@ -71,6 +71,9 @@ Game.UIBootState.methods({
         // Loading screen will have a white background.
         this.stage.backgroundColor = '#fff';
 
+        // Uncap framerate.
+        this.game.time.desiredFps = 9999;
+
         if (this.game.device.pixelRatio > 1.0) {
             // Set scale mode to user scale.
             this.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;

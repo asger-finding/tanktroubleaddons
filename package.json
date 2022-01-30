@@ -5,7 +5,11 @@
   "scripts": {
     "build:prod": "gulp --state=production --target=chromium && gulp --state=production --target=edge && gulp --state=production --target=firefox",
     "build:dev": "gulp --state=development --target=chromium && gulp --state=development --target=edge && gulp --state=development --target=firefox",
-    "watch": "gulp watch --state=watch",
+    "watch": "gulp watch --state=watch --target=chromium",
+    "watch --chrome": "gulp watch --state=watch --target=chromium",
+    "watch --chromium": "gulp watch --state=watch --target=chromium",
+    "watch --edge": "gulp watch --state=watch --target=edge",
+    "watch --firefox": "gulp watch --state=watch --target=firefox",
     "clean": "gulp clean"
   },
   "repository": {

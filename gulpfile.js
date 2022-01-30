@@ -143,6 +143,10 @@ function clean() {
     return del([ paths.dist, paths.build ], { force: true });
 }
 
+function cleanAll() {
+    return del([ paths.baseDist, paths.baseBuild ], { force: true });
+}
+
 function watch() {
     _watch(paths.files.script, scripts);
     _watch(paths.files.css, css);
@@ -156,7 +160,7 @@ async function announce() {
     return;
 }
 
-exports.clean = task('clean', clean);;
-exports.build = task('build', series(announce, 'clean', parallel(scripts, css, html, images, json, manifest), removeRedundancies));
-exports.watch = task('watch', series('clean', 'build', watch));
+exports.clean = task('clean', cleanAll);;
+exports.build = task('build', series(announce, clean, parallel(scripts, css, html, images, json, manifest), removeRedundancies));
+exports.watch = task('watch', series('build', watch));
 exports.default = series('clean', 'build');

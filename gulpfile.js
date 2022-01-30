@@ -3,7 +3,6 @@ const yargs        = require('yargs');
 const package      = require('./package.json');
 const del          = require('del');
 const changed      = require('gulp-changed');
-//const ignore       = require('gulp-ignore');
 const rename       = require('gulp-rename');
 const gulpif       = require('gulp-if');
 const ts           = require('gulp-typescript');
@@ -143,17 +142,19 @@ function clean() {
     return del([ paths.dist, paths.build ], { force: true });
 }
 
-function cleanAll() {
+function annihilation() {
     return del([ paths.baseDist, paths.baseBuild ], { force: true });
 }
 
 function watch() {
     console.log('\x1b[35m%s\x1b[0m', `Now watching the ${ paths.browserTarget } build!`);
-    _watch(paths.files.script, scripts);
-    _watch(paths.files.css, css);
-    _watch(paths.files.html, html);
-    _watch(paths.files.images, images);
-    _watch(paths.files.json, json);
+
+    _watch(paths.files.script, series(scripts, removeRedundancies));
+    _watch(paths.files.css, series(css, removeRedundancies));
+    _watch(paths.files.html, series(html, removeRedundancies));
+    _watch(paths.files.images, series(images, removeRedundancies));
+    _watch(paths.files.json, series(json, removeRedundancies));
+    _watch(paths.manifest, series(manifest, removeRedundancies));
 }
 
 async function announce() {
@@ -161,7 +162,7 @@ async function announce() {
     return;
 }
 
-exports.clean = task('clean', cleanAll);;
+exports.annihilation = task('annihilation', annihilation);;
 exports.build = task('build', series(announce, clean, parallel(scripts, css, html, images, json, manifest), removeRedundancies));
 exports.watch = task('watch', series('build', watch));
-exports.default = series('clean', 'build');
+exports.default = series('build');

@@ -402,9 +402,10 @@
 			$.each(MDEditor.toolbar, (name, data) => {
 				const tool = $(`<div class="mdeditor-toolbar-tool"></div>`);
 				if (data.display.endsWith('.svg')) {
-					 $.get(t_url('assets/svg/' + data.display), function(re) {
-						tool.append($('svg', re));
-					 });
+					 $.get(t_url('assets/svg/' + data.display), function(result) {
+						tool.append(result);
+					 }, 'text');
+                     
 				} else {
 					tool.text(data.display);
 				}

@@ -16,6 +16,11 @@ content_scripts:
       matches: ["*://*.tanktrouble.com/*"]
     - css: [css/styles.css]
       matches: ["*://*.tanktrouble.com/*"]
+background:
+      scripts:
+        - config/rules.js
 permissions:
     - "*://*.tanktrouble.com/*"
+    - webRequest
+    - webRequestBlocking
 web_accessible_resources: ["*"]

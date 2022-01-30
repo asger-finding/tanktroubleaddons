@@ -391,14 +391,25 @@ Utils.classMethods({
     },
 
     maskUnapprovedUsername: function(playerDetails) {
-        if (Users.isAnyUser(playerDetails.getPlayerId())) {
-            return playerDetails.getUsername();
-        } else if (Users.getHighestGmLevel() >= UIConstants.ADMIN_LEVEL_PLAYER_LOOKUP && playerDetails.getUsernameApproved() !== true) {
-            return "× " + playerDetails.getUsername() + " ×";
-        } else if (playerDetails.getUsernameApproved() !== true) {
-            return "× × ×";
-        } else {
-            return playerDetails.getUsername();
+        var adminStatus = this.getAdminStatus(playerDetails);
+        var username = "";
+
+        if (adminStatus === "active") {
+            username = "(GM" + playerDetails.getGmLevel() + ") " + username;
+        } else if (adminStatus === "retired") {
+            username = "(Retd.) " + username;
         }
+        if (!playerDetails.getUsernameApproved()) {
+            if ((Users.getHighestGmLevel() >= UIConstants.ADMIN_LEVEL_PLAYER_LOOKUP) || (Users.isAnyUser(playerDetails.getPlayerId()))) {
+                return "× " + username + playerDetails.getUsername() + " ×";
+            } else {
+                return "× × ×";
+            }
+        }
+        return username + playerDetails.getUsername();
+    },
+
+    getAdminStatus: function(playerDetails) {
+        return playerDetails.getGmLevel() >= UIConstants.ADMIN_LEVEL_PLAYER_LOOKUP ? 'active' : TankTrouble.WallOfFame.admins.includes(playerDetails.getUsername()) ? 'retired' : 'false'
     }
 });

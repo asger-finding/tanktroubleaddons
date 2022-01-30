@@ -71,16 +71,14 @@
 
 		options = { ...defaults, ...options };
 
-		const iframe = document.createElement('iframe');
-		iframe.sandbox = 'allow-same-origin allow-scripts';
-		iframe.style.display = 'none';
-		document.body.append(iframe);
+        const iframe = $(`<iframe sandbox="allow-same-origin allow-scripts" src="about:blank" style="display: none"></iframe>`);
+        $('body').append(iframe);
 
-		const iframedoc = iframe.contentDocument || iframe.contentWindow.document;
+		const iframedoc = iframe[0].contentDocument || iframe[0].contentWindow.document;
 		iframedoc.body.innerHTML = input;
 
 		const resultElement = makeSanitizedCopy(iframedoc.body, iframedoc);
-		document.body.removeChild(iframe);
+		document.body.removeChild(iframe[0]);
 
 		return resultElement.innerHTML
 			.replace(/<br[^>]*>(\S)/g, '<br>\n$1');
@@ -405,7 +403,6 @@
 					 $.get(t_url('assets/svg/' + data.display), function(result) {
 						tool.append(result);
 					 }, 'text');
-                     
 				} else {
 					tool.text(data.display);
 				}

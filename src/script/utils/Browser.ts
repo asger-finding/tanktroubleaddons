@@ -146,4 +146,4 @@ export default class Browser {
 	static get theme() {
 		return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 	}
-};
+}

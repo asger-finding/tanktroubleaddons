@@ -1,6 +1,3 @@
-interface Window {
-	QualityManager: any;
-}
 declare const main: Function;
 declare const load_red_infiltration: Function;
 

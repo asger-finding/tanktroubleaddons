@@ -35,4 +35,4 @@ export default class Logger {
         console.trace(trace);
         console.groupEnd();
     }
-};
+}

@@ -1,3 +1,9 @@
+declare global {
+	interface Window {
+		t_url: Function;
+	}
+}
+
 import ScriptHashes from '../config/ScriptHashes.js';
 import { debugHashes } from '../config/DeveloperConfig.js';
 import Hasher from './utils/HashAlgorithm.js';
@@ -7,7 +13,7 @@ const nodeData = document.querySelector('tanktroubleaddons');
 if (nodeData instanceof HTMLElement) {
 	const extensionURL = nodeData.dataset.url;
 
-	window.t_url = window.t_url || function(url: string) {
+	window.t_url = function(url: string) {
 		return extensionURL + url;
 	}
 
@@ -33,6 +39,5 @@ if (nodeData instanceof HTMLElement) {
 		}
 		return proxied.apply(this, arguments);
 	}
-
 	Logger.log('Hasher loaded.');
 }

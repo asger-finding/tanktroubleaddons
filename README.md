@@ -11,7 +11,7 @@ Written in TypeScript with a SASS preprocessor, compiled with gulp.
 
 ## Minimum browser version
 
-TankTroubleAddons compiles to ES2020 spec. The minimum browser version required to run this addons must be a ECMAScript 2020 release.  
+TankTroubleAddons compiles to ES2020 spec. The minimum browser version required to run this addons must support the ECMAScript 2020 specifications.
 See the table below for safe minimum requirements.
 
 | **Browser** | **Minimum** |

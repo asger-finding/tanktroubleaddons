@@ -6,7 +6,7 @@ TankTrouble.Statistics = {
         this.content = $("<div class='content'></div>");
         this.header = $("<div class='header'>Who has deployed?</div>");
         this.onlinePlayerCount = $("<div id='onlinePlayerCount'></div>");
-        this.onlineGameCount = $("<div></div>");
+        this.onlineGameCount = $("<div id='onlineGameCount'></div>");
         this.statsToggle = $("<div class='managedNavigation'></div>");
 
         this.content.append([this.header, this.onlinePlayerCount, this.onlineGameCount, this.statsToggle]);
@@ -14,7 +14,7 @@ TankTrouble.Statistics = {
 
         $("#secondaryContent").append(this.wrapper);
 
-        this.type = "global";
+        this.type = "server";
         this._switchStats();
         this._updateStatistics();
 

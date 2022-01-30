@@ -187,19 +187,12 @@ $bubble-unmoderated: #ffda00;
     /* TankTrouble's selectors override it with a solid colour */
     background: linear-gradient(to bottom,#eee,#ccc) !important;
 
-    .header {
-        font-family: TankTrouble;
-        margin: 0 0 2px 0;
-        padding: 3px 0 5px 0;
+    #onlinePlayerCount {
+        font-size: 40px;
+        font-weight: 600;
     }
-    .content {
-        * {
-            padding: 4px 0 2px 0;
-        }
-        #onlinePlayerCount {
-            font-size: 40px;
-            font-weight: 600;
-        }
+    #onlineGameCount {
+        margin-bottom: 1em;
     }
 }
 

@@ -201,6 +201,20 @@ Utils.classMethods({
         return container;
     },
 
+    addAddonsImageWithClasses: function(container, classes, src) {
+        var image = $("<img class='"+classes+"'/>");
+        image.attr("src", t_url(src));
+        // Generate srcset from src.
+        if (src.substring(src.length - 4) === ".png") {
+            var srcset = t_url(src.substring(0, src.length - 4) + "@2x.png") + " 2x";
+            image.attr("srcset", srcset);
+        }
+
+        container.append(image);
+
+        return container;
+    },
+
     updateTooltip: function(element, message) {
         if (message == "") {
             element.tooltipster('disable');

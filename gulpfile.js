@@ -148,6 +148,7 @@ function cleanAll() {
 }
 
 function watch() {
+    console.log('\x1b[35m%s\x1b[0m', `Now watching the ${ paths.browserTarget } build!`);
     _watch(paths.files.script, scripts);
     _watch(paths.files.css, css);
     _watch(paths.files.html, html);

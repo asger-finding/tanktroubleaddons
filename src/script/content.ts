@@ -5,17 +5,17 @@ class GameLoader {
 	head: HTMLHeadElement;
 
 	constructor() {
-		this.hasherScript = Object.assign(document.createElement('script'), {
-			'src': chrome.runtime.getURL('script/hasher.js'),
-			'type': 'module'
-		});
+		this.hasherScript = document.createElement('script');
+		this.hasherScript.src = chrome.runtime.getURL('script/hasher.js');
+		this.hasherScript.type = 'module';
+
+		this.indexLoader = document.createElement('script');
+		this.indexLoader.src = chrome.runtime.getURL('script/IndexLoader.js');
+		this.indexLoader.type = 'module';
+
 		this.extensionData = document.createElement('tanktroubleaddons');
 		this.extensionData.dataset.url = chrome.runtime.getURL('');
-		this.extensionData.dataset.theme = 'dark'; // Todo: Toggleable theme [standard, dark, something else?]
-		this.indexLoader = Object.assign(document.createElement('script'), {
-			'src': chrome.runtime.getURL('script/IndexLoader.js'),
-			'type': 'module'
-		});
+		this.extensionData.dataset.theme = 'dark';
 	}
 
 	observe() {

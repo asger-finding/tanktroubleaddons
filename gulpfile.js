@@ -73,6 +73,9 @@ function browserSpecificFiles(filename) {
     callback.use = !(callback.filename === paths.redundancy);
     return callback;
 }
+function capitalizeFirstLetter(string) {
+    return string.replace(/./, c => c.toUpperCase());
+}
 
 function scripts() {
     return src(paths.files.script)
@@ -147,7 +150,7 @@ function annihilation() {
 }
 
 function watch() {
-    console.log('\x1b[35m%s\x1b[0m', `Now watching the ${ paths.browserTarget } build!`);
+    console.log('\x1b[35m%s\x1b[0m', `Now watching the ${ capitalizeFirstLetter(paths.browserTarget) } build!`);
 
     _watch(paths.files.script, series(scripts, removeRedundancies));
     _watch(paths.files.css, series(css, removeRedundancies));
@@ -158,7 +161,7 @@ function watch() {
 }
 
 async function announce() {
-    console.log('\x1b[35m%s\x1b[0m', `Compiling ${ state.current } version for ${ paths.browserTarget }`);
+    console.log('\x1b[35m%s\x1b[0m', `Compiling ${ state.current } version for ${ capitalizeFirstLetter(paths.browserTarget) }`);
     return;
 }
 

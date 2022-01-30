@@ -23,6 +23,7 @@ class ScriptHashes {
                 '26fgvgmqejg': 'game/uiprojectileimage.js',
                 '4s1e60j5ip5': 'game/uitanksprite.js',
                 '79t0bcq6rh9': 'game/uitanknamegroup.js',
+                '4uah8gerp9k': 'game/uirubblegroup.js',
     
     // Garage
         '25ai7m0en1n': 'garage/uigarage.js',
@@ -38,6 +39,7 @@ class ScriptHashes {
         '3b70d6a5fnu': 'tanktrouble/chatbox.js',
         '0nhlbb8q68p': 'tanktrouble/virtualshopoverlay.js',
         '48m8678bii0': 'tanktrouble/adminplayerlookupoverlay.js',
+        '516f18jgeem': 'tanktrouble/statistics.js',
     
         // Connection
         '56i8ao2nvf2': 'connection/ttclient.js',
@@ -321,7 +323,7 @@ if (nodeData instanceof HTMLElement) {
 			}
 
 			if (debugHashes && document.readyState === 'loading') {
-				Logger.detailedLog(code, `%c[ %c${ codeHash } %c] %c${ done }/${ hashLength }`, `color: ${ colour }`, `color: #fff; font-weight: bold;`, `color: ${ colour }`, `color: ${ match ? colour : '#fff' }`);
+				Logger.log(`%c[ %c${ codeHash } %c] %c${ done }/${ hashLength }   ${code}`, `color: ${ colour }`, `color: #fff; font-weight: bold;`, `color: ${ colour }`, `color: ${ match ? colour : '#fff' }`);
 			}
 		}
 		return proxied.apply(this, arguments);

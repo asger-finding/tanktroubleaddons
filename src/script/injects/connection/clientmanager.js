@@ -220,6 +220,9 @@ ClientManager.classMethods({
                     Cookies.set('multiplayerserverid', serverId, {expires: 365});
                     ClientManager.multiplayerServerId = serverId;
 
+                    // Update statistics snippet.
+                    TankTrouble.Statistics._updateStatistics();
+
                     // Connect.
                     ClientManager.client.connect(ClientManager.availableServers[serverId].url);
                 } else {

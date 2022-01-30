@@ -1339,7 +1339,9 @@ Game.UIGameState.methods({
     },
 
     _addCameraShake: function(shake) {
-        this.cameraShake = Math.min(UIConstants.MAX_CAMERA_SHAKE, this.cameraShake + shake);
+        if (QualityManager.getQuality() !== QualityManager.QUALITY_SETTINGS.MINIMUM) {
+            this.cameraShake = Math.min(UIConstants.MAX_CAMERA_SHAKE, this.cameraShake + shake);
+        }
     },
 
     _fireWeapon: function(playerId) {

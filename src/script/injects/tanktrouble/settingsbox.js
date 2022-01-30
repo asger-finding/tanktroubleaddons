@@ -69,6 +69,7 @@ TankTrouble.SettingsBox = {
         this.settingsQualityOptions.push($("<option selected value='auto' data-imagesrc='" + g_url("assets/images/game/pingTimeNoConnection.png") + "' data-imagesrcset='" + g_url("assets/images/game/pingTimeNoConnection@2x.png") + " 2x' data-description=' (N/A fps)'>Auto</option>"));
         this.settingsQualityOptions.push($("<option value='high'>High</option>"));
         this.settingsQualityOptions.push($("<option value='low'>Low</option>"));
+        this.settingsQualityOptions.push($('<option value="minimum">Minimum</option>'));
 
         this.settingsBackground = $("<div class='boxbackground'></div>");
 

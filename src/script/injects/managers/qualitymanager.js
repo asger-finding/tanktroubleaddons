@@ -8,7 +8,8 @@ QualityManager.classFields({
     QUALITY_SETTINGS: {
         AUTO: "auto",
         HIGH: "high",
-        LOW: "low"
+        LOW: "low",
+        MINIMUM: "minimum"
     },
     QUALITY_PARAMETERS: {
         TANK_EXPLOSION_SMOKE_COUNT: "tank explosion smoke count",
@@ -70,6 +71,21 @@ QualityManager.classFields({
             "shield spark particles per emit": 1,
             "spawn zone inverse unstable particle probability": 0.9,
             "spawn zone num collapse particles": 20
+        },
+        "minimum": {
+            "tank explosion smoke count": 1,
+            "tank explosion fragment count": 0,
+            "missile launch smoke count": 0,
+            "missile smoke frequency": 360,                             // ms / particle
+            "crate land dust count": 0,
+            "aimer min segment length": 1.0,                            // m
+            "aimer off max segment length": 4.0,                        // m
+            "aimer on max segment length": 2.0,                         // m
+            "bullet puff count": 1,
+            "shield inverse bolt probability": 0.99,
+            "shield spark particles per emit": 0,
+            "spawn zone inverse unstable particle probability": 0.95,
+            "spawn zone num collapse particles": 5
         }
     },
     eventListeners: [],

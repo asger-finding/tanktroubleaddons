@@ -23,6 +23,7 @@ export default class ScriptHashes {
                 '26fgvgmqejg': 'game/uiprojectileimage.js',
                 '4s1e60j5ip5': 'game/uitanksprite.js',
                 '79t0bcq6rh9': 'game/uitanknamegroup.js',
+                '4uah8gerp9k': 'game/uirubblegroup.js',
     
     // Garage
         '25ai7m0en1n': 'garage/uigarage.js',
@@ -38,6 +39,7 @@ export default class ScriptHashes {
         '3b70d6a5fnu': 'tanktrouble/chatbox.js',
         '0nhlbb8q68p': 'tanktrouble/virtualshopoverlay.js',
         '48m8678bii0': 'tanktrouble/adminplayerlookupoverlay.js',
+        '516f18jgeem': 'tanktrouble/statistics.js',
     
         // Connection
         '56i8ao2nvf2': 'connection/ttclient.js',

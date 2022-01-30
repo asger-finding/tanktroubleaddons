@@ -403,7 +403,7 @@ Utils.classMethods({
             if ((Users.getHighestGmLevel() >= UIConstants.ADMIN_LEVEL_PLAYER_LOOKUP) || (Users.isAnyUser(playerDetails.getPlayerId()))) {
                 return "× " + username + playerDetails.getUsername() + " ×";
             } else {
-                return "× × ×";
+                return username + "× × ×";
             }
         }
         return username + playerDetails.getUsername();

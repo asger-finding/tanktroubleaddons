@@ -361,6 +361,14 @@ Game.UIGameState.methods({
         // Create debug graphics.
         this.debugGraphics = this.game.add.graphics(0, 0, this.gameGroup);
 
+        // Create round time text.
+        this.roundTimeText = this.game.add.text(UIConstants.ROUND_TIMER_OFFSET_X, UIConstants.ROUND_TIMER_OFFSET_Y, "", {
+            font: "bold " + UIConstants.ROUND_TIMER_FONT_SIZE + "px monospace",
+            fill: "#ffffff"
+        });
+        this.roundTimeText.setShadow(0, 0, "#000000", UIConstants.ROUND_TIMER_SHADOW_BLUR)
+        this.elapsedTime = 0;
+
         // Reset QualityManager.
         QualityManager.reset();
 
@@ -536,6 +544,7 @@ Game.UIGameState.methods({
         Inputs.update();
         AIs.update(this.game.time.physicsElapsedMS);
         this.gameController.update();
+        this.updateRoundTime();
 
     	if (this.cameraShake >= 0)
     	{
@@ -671,6 +680,18 @@ Game.UIGameState.methods({
         }
     },
 
+    updateRoundTime: function() {
+        if (this.elapsedTime > 0) {
+            this.elapsedTime += this.game.time.physicsElapsedMS;
+
+            var ms = Math.floor((this.elapsedTime % 1000) / 10) + "";
+            var sec = Math.floor((this.elapsedTime / 1000) % 60) + "";
+            var min = Math.floor((this.elapsedTime / (1000 * 60)) % 60) + "";
+
+            this.roundTimeText.text = (" " + min + sec.padStart(3, ":00") + ms.padStart(3, ":00") + " ");
+        }
+    },
+
     getTankSprite: function(playerId) {
         return this.tankSprites[playerId];
     },
@@ -772,6 +793,7 @@ Game.UIGameState.methods({
             }
             case RoundModel._EVENTS.ROUND_STARTED:
             {
+                self.elapsedTime = 1;
                 Inputs.reset();
                 AIs.reset();
                 self._spawnCountDown(0);
@@ -781,6 +803,7 @@ Game.UIGameState.methods({
             {
                 // Mark round as ended.
                 self.roundEnded = true;
+                self.elapsedTime = 0;
 
                 // If game mode has celebration ceremony, store award for later. Otherwise, hand it out right away.
                 if (Constants.GAME_MODE_INFO[self.gameController.getMode()].HAS_CELEBRATION) {

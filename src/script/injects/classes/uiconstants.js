@@ -254,6 +254,11 @@ UIConstants.classFields({
     FAVOURITE_ICON_WIDTH: 20,                   // px
     FAVOURITE_ICON_HEIGHT: 20,                  // px
 
+    ROUND_TIMER_FONT_SIZE: 15,                  // px
+    ROUND_TIMER_OFFSET_X: 15,                   // px
+    ROUND_TIMER_OFFSET_Y: -15,                  // px
+    ROUND_TIMER_SHADOW_BLUR: 3,                 // px
+
     LEAVE_GAME_BUTTON_WIDTH: 35,                // canvas px
     LEAVE_GAME_MESSAGE_FONT_SIZE: 16,           // canvas px
     LEAVE_GAME_MESSAGE_STROKE_WIDTH: 4,         // canvas px

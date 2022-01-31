@@ -1,4 +1,4 @@
-const { src, dest, task, watch: _watch, series, parallel } = require('gulp');
+const { src, dest, watch: _watch, series, parallel } = require('gulp');
 const yargs        = require('yargs');
 const package      = require('./package.json');
 const del          = require('del');
@@ -137,7 +137,7 @@ function manifest() {
         .pipe(dest(state.dest));
 }
 
-function removeRedundancies() {
+function sweep() {
     return del(paths.redudancies, { force: true });
 }
 
@@ -152,12 +152,12 @@ function annihilation() {
 function watch() {
     console.log('\x1b[35m%s\x1b[0m', `Now watching the ${ capitalizeFirstLetter(paths.browserTarget) } build!`);
 
-    _watch(paths.files.script, series(scripts, removeRedundancies));
-    _watch(paths.files.css, series(css, removeRedundancies));
-    _watch(paths.files.html, series(html, removeRedundancies));
-    _watch(paths.files.images, series(images, removeRedundancies));
-    _watch(paths.files.json, series(json, removeRedundancies));
-    _watch(paths.manifest, series(manifest, removeRedundancies));
+    _watch(paths.files.script, series(scripts, sweep));
+    _watch(paths.files.css, series(css, sweep));
+    _watch(paths.files.html, series(html, sweep));
+    _watch(paths.files.images, series(images, sweep));
+    _watch(paths.files.json, series(json, sweep));
+    _watch(paths.manifest, series(manifest, sweep));
 }
 
 async function announce() {
@@ -165,7 +165,7 @@ async function announce() {
     return;
 }
 
-exports.annihilation = task('annihilation', annihilation);;
-exports.build = task('build', series(announce, clean, parallel(scripts, css, html, images, json, manifest), removeRedundancies));
-exports.watch = task('watch', series('build', watch));
-exports.default = series('build');
+exports.annihilation = annihilation;
+exports.build = series(announce, clean, parallel(scripts, css, html, images, json, manifest), sweep);
+exports.watch = series(exports.build, watch);
+exports.default = exports.build

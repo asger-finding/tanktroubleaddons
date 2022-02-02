@@ -50,6 +50,7 @@ class ScriptHashes {
         '0qc0ij6acu8': 'garage/uinousersstate.js',
         '77crp2q4o86': 'garage/uiloadstate.js',
         '6853dai20r9': 'garage/uimainstate.js',
+		'56ftnvejp79': 'garage/garageoverlay.js',
     
     // TankTrouble Subclass
         '0fpg5uhiq8d': 'tanktrouble/controlsoverlay.js',

@@ -35,8 +35,8 @@ See the table below for safe minimum requirements.
 2. Make sure your Node.js version is >= 16.x, checking with `node -v` in your terminal!
 3. Navigate to your cloned repository, then run `npm install` to install the project's necessary dependencies.
 4. **Compiling for development**
-   - `npm run build:dev` — for development
-   - `npm run build:watch` — for development and watch for file changes in src
+   - `npm run build:dev` — compile dev extensions for all platforms.
+   - `npm run build:watch` — for development and watch for file changes in src. Append `:` + your browser to watch to the end to watch a specific platform.
    - `npm run build:prod` — and minify for a production build
    - `npm run clean` — delete the build and distribution folders
 5. **Running TankTroubleAddons in your browser**

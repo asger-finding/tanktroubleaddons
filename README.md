@@ -27,7 +27,7 @@ See the table below for safe minimum requirements.
 - Compile extension for support on all major browsers.
 - Add to Chrome Webstore, Firefox, Safari and Opera
 
-### [Features checklist](https://github.com/CommanderAnime/TankTroubleAddons/issues/1)
+[Features checklist](https://github.com/CommanderAnime/TankTroubleAddons/issues/1)
 
 ## Installing and running for development **(chromium-only)**
 
@@ -58,6 +58,21 @@ See the table below for safe minimum requirements.
      1. See [this](https://stackoverflow.com/a/41543650/11452298) or [this](https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension#3744467)!
 
 Happy hacking!
+
+## Useful tools for development
+
+Of course this all comes down to preference. I use Visual Studio Code on Windows with these useful extensions:
+
+- Beautify
+- Bracket Pair Colorizer 2
+- ESLint
+- GitHub Copilot (invite-only)
+- markdownlint
+- GitLens
+- Material Icon Theme
+- Tabnine AI Autocomplete ()
+- Visual Studio IntelliCode
+- YAML
 
 ### Final notes
 

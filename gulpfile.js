@@ -5,6 +5,7 @@ const del          = require('del');
 const changed      = require('gulp-changed');
 const rename       = require('gulp-rename');
 const gulpif       = require('gulp-if');
+const ignore       = require('gulp-ignore');
 const ts           = require('gulp-typescript');
 const terser       = require('gulp-terser');
 const postCSS      = require('gulp-postcss');
@@ -19,7 +20,7 @@ const yaml         = require('gulp-yaml');
 const origin    = './src';
 const paths = {
     manifest: `${ origin }/manifest*.yml`,
-    redundancy: 'DELETEME',
+    redundancy: '**/DELETEME.*',
     files: {
         script: `${ origin }/**/*.js`,
         typescript: `${ origin }/**/*.ts`,
@@ -37,12 +38,6 @@ const paths = {
         this.browserTarget = target;
         this.build = `${ this.baseBuild }/${ target }`;
         this.dist = `${ this.baseDist }/${ target }`;
-    },
-    get redudancies() {
-        return [
-            `${ this.build }/**/${ this.redundancy }.*`,
-            `${ this.dist }/**/${ this.redundancy }.*`
-        ]
     }
 }
 const state = {
@@ -81,6 +76,7 @@ function typescript() {
     return src(paths.files.typescript)
         .pipe(changed(state.dest))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
+        .pipe(ignore(paths.redundancy))
         .pipe(ts.createProject('./tsconfig.json')())
         .pipe(gulpif(state.prod, terser()))
         .pipe(dest(state.dest));
@@ -90,6 +86,7 @@ function scripts() {
     return src(paths.files.script)
         .pipe(changed(state.dest))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
+        .pipe(ignore(paths.redundancy))
         .pipe(gulpif(state.prod, ts.createProject('./tsconfig.json')()))
         .pipe(gulpif(state.prod, terser()))
         .pipe(dest(state.dest));
@@ -105,6 +102,7 @@ function css() {
     return src(paths.files.css)
         .pipe(changed(state.dest + '/css'))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
+        .pipe(ignore(paths.redundancy))
         .pipe(sass())
         .pipe(postCSS(plugins))
         .pipe(dest(state.dest + '/css'));
@@ -114,6 +112,7 @@ function html() {
     return src(paths.files.html)
         .pipe(changed(state.dest))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
+        .pipe(ignore(paths.redundancy))
         .pipe(gulpif(state.prod, htmlmin({ collapseWhitespace: true })))
 	    .pipe(dest(state.dest));
 }
@@ -122,6 +121,7 @@ function images() {
     return src(paths.files.images)
         .pipe(changed(state.dest + '/assets'))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
+        .pipe(ignore(paths.redundancy))
         .pipe(gulpif(state.prod, imagemin()))
 	    .pipe(dest(state.dest + '/assets'));
 }
@@ -130,6 +130,7 @@ function json() {
     return src(paths.files.json)
         .pipe(changed(state.dest))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
+        .pipe(ignore(paths.redundancy))
 		.pipe(jeditor(json => {return json}, { beautify: !state.prod }))
         .pipe(dest(state.dest));
 }
@@ -138,17 +139,13 @@ function manifest() {
     return src(paths.manifest)
         .pipe(changed(state.dest))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
+        .pipe(ignore(paths.redundancy))
         .pipe(yaml({ schema: 'DEFAULT_FULL_SCHEMA' }))
         .pipe(jeditor(json => {
             json.version = package.version;
             return json;
         }, { beautify: !state.prod } ))
         .pipe(dest(state.dest));
-}
-
-function sweep() {
-    // Sweep the target folder for intentionally redundant files. There is a better way to do this, and I'm not sure what it is.
-    return del(paths.redudancies, { force: true });
 }
 
 function clean() {
@@ -166,13 +163,13 @@ function annihilation() {
 function watch() {
     console.log('\x1b[35m%s\x1b[0m', `Now watching the ${ capitalizeFirstLetter(paths.browserTarget) } build!`);
 
-    _watch(paths.files.script, series(scripts, sweep));
-    _watch(paths.files.typescript, series(typescript, sweep));
-    _watch(paths.files.css, series(css, sweep));
-    _watch(paths.files.html, series(html, sweep));
-    _watch(paths.files.images, series(images, sweep));
-    _watch(paths.files.json, series(json, sweep));
-    _watch(paths.manifest, series(manifest, sweep));
+    _watch(paths.files.script, scripts);
+    _watch(paths.files.typescript, typescript);
+    _watch(paths.files.css, css);
+    _watch(paths.files.html, html);
+    _watch(paths.files.images, images);
+    _watch(paths.files.json, json);
+    _watch(paths.manifest, manifest);
 }
 
 async function announce() {
@@ -181,6 +178,6 @@ async function announce() {
 }
 
 exports.annihilation = annihilation;
-exports.build = series(announce, clean, parallel(scripts, typescript, css, html, images, json, manifest), sweep);
+exports.build = series(announce, clean, parallel(scripts, typescript, css, html, images, json, manifest));
 exports.watch = series(exports.build, watch);
 exports.default = exports.build

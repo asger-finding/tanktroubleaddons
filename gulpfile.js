@@ -60,7 +60,6 @@ const state = {
 		return this.prod ? paths.dist : paths.build;
 	}
 }
-const tsProject = ts.createProject('./tsconfig.json');
 paths.target = yargs.argv.target || 'chromium';
 
 function browserSpecificFiles(filename) {
@@ -82,7 +81,7 @@ function typescript() {
     return src(paths.files.typescript)
         .pipe(changed(state.dest))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
-        .pipe(tsProject())
+        .pipe(ts.createProject('./tsconfig.json')())
         .pipe(gulpif(state.prod, terser()))
         .pipe(dest(state.dest));
 }
@@ -91,6 +90,7 @@ function scripts() {
     return src(paths.files.script)
         .pipe(changed(state.dest))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
+        .pipe(gulpif(state.prod, ts.createProject('./tsconfig.json')()))
         .pipe(gulpif(state.prod, terser()))
         .pipe(dest(state.dest));
 }

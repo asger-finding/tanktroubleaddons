@@ -39,7 +39,7 @@ UIMissileImage.prototype.update = function()
         var tank = this.gameController.getTank(this.targetId);
         var maze = this.gameController.getMaze();
         if (projectile && tank && maze) {
-            this.targetTime += this.game.time.physicsElapsed;
+            this.targetTime += this.game.time.delta / 1000;
 
             var projectilePosition = {
                 x: Math.floor(projectile.getX() / Constants.MAZE_TILE_SIZE.m),

@@ -87,7 +87,7 @@ UITankSprite.prototype.update = function()
         this.smoothedRotation = (this.body.rotation * this.smoothing + tank.getRotation()) / (this.smoothing + 1);
 
         // Move the treads according to UIConstants that define forward/back animation speeds.
-        var deltaTime = this.game.time.physicsElapsedMS;
+        var deltaTime = this.game.time.delta;
         
         if (tank.getSpeed() > 0.0) {
             var ratio = tank.getSpeed() / Constants.TANK.FORWARD_SPEED.m;

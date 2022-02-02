@@ -21,7 +21,8 @@ const paths = {
     manifest: `${ origin }/manifest*.yml`,
     redundancy: 'DELETEME',
     files: {
-        script: `${ origin }/**/*.@(js|ts)`,
+        script: `${ origin }/**/*.js`,
+        typescript: `${ origin }/**/*.ts`,
         css :   `${ origin }/css/*.@(css|scss)`,
         html:   `${ origin }/html/*.html`,
         images: `${ origin }/assets/@(images|svg)/*.@(png|jpg|jpeg|gif|svg)`,
@@ -77,11 +78,19 @@ function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+function typescript() {
+    return src(paths.files.typescript)
+        .pipe(changed(state.dest))
+        .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
+        .pipe(tsProject())
+        .pipe(gulpif(state.prod, terser()))
+        .pipe(dest(state.dest));
+}
+
 function scripts() {
     return src(paths.files.script)
         .pipe(changed(state.dest))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
-        .pipe(tsProject())
         .pipe(gulpif(state.prod, terser()))
         .pipe(dest(state.dest));
 }
@@ -153,6 +162,7 @@ function watch() {
     console.log('\x1b[35m%s\x1b[0m', `Now watching the ${ capitalizeFirstLetter(paths.browserTarget) } build!`);
 
     _watch(paths.files.script, series(scripts, sweep));
+    _watch(paths.files.typescript, series(typescript, sweep));
     _watch(paths.files.css, series(css, sweep));
     _watch(paths.files.html, series(html, sweep));
     _watch(paths.files.images, series(images, sweep));
@@ -166,6 +176,6 @@ async function announce() {
 }
 
 exports.annihilation = annihilation;
-exports.build = series(announce, clean, parallel(scripts, css, html, images, json, manifest), sweep);
+exports.build = series(announce, clean, parallel(scripts, typescript, css, html, images, json, manifest), sweep);
 exports.watch = series(exports.build, watch);
 exports.default = exports.build

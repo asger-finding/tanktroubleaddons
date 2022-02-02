@@ -52,7 +52,7 @@ UITankNameGroup.prototype.update = function()
             this.x = this.parent.toLocal({x: this.game.width - UIConstants.TANK_NAME_MARGIN - halfWorldWidth, y: worldPosition.y}).x;
         }
 
-        this.timeAlive += this.game.time.physicsElapsed;
+        this.timeAlive += this.game.time.delta / 1000;
     
         if (!this.fading && this.timeAlive > UIConstants.TANK_NAME_DISPLAY_TIME) {
             // Start fading out.

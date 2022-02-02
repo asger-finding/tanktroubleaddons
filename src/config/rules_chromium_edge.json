@@ -7,5 +7,23 @@
           "domains": ["tanktrouble.com"],
           "resourceTypes": ["script"]
         }
+      },
+    {
+        "id": 2,
+        "action": { "type": "redirect", "redirect": { "extensionPath": "/script/injects/game/phaser.js" } },
+        "condition": {
+          "urlFilter": "phaser.min.js.*pagespeed.",
+          "domains": ["tanktrouble.com"],
+          "resourceTypes": ["script"]
+        }
+      },
+    {
+        "id": 3,
+        "action": { "type": "redirect", "redirect": { "extensionPath": "/script/injects/game/phaser-nineslice.js" } },
+        "condition": {
+          "urlFilter": "phaser-nineslice.min.js.*pagespeed.",
+          "domains": ["tanktrouble.com"],
+          "resourceTypes": ["script"]
+        }
       }
 ]

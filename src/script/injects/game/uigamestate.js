@@ -495,11 +495,11 @@ Game.UIGameState.methods({
     update: function() {
         // Handle online client specific things.
         if (Constants.getMode() == Constants.MODE_CLIENT_ONLINE) {
-            this.celebrationDuration += this.game.time.physicsElapsedMS;
+            this.celebrationDuration += this.game.time.delta;
 
             // Show round title if it has not been shown within delay, indicating that the player joined mid-round.
             if (!this.roundTitleShown && !this.roundEnded && this.maze) {
-                this.roundTitleDelayDuration += this.game.time.physicsElapsedMS;
+                this.roundTitleDelayDuration += this.game.time.delta;
                 if (this.roundTitleDelayDuration > UIConstants.WAITING_FOR_ROUND_TITLE_TIME) {
                     this._spawnRoundTitle(UIConstants.GAME_MODE_NAME_INFO[this.gameController.getMode()].NAME, this.gameController.getRanked());
                 }
@@ -507,7 +507,7 @@ Game.UIGameState.methods({
 
             // Clean up the maze if staying between rounds for too long, indicating that no other players are ready for battle.
             if (this.roundEnded && this.maze) {
-                this.betweenRoundsDuration += this.game.time.physicsElapsedMS;
+                this.betweenRoundsDuration += this.game.time.delta;
                 if (this.betweenRoundsDuration > UIConstants.WAITING_FOR_MAZE_REMOVAL_TIME) {
                     this._cleanUp();
                 }
@@ -517,7 +517,7 @@ Game.UIGameState.methods({
 
             // If no maze is showing for a while, show waiting icon.
             if (!this.maze && this.celebrationDuration > UIConstants.WAITING_FOR_CELEBRATION_TIME) {
-                this.waitingTime += this.game.time.physicsElapsedMS;
+                this.waitingTime += this.game.time.delta;
                 if (this.waitingTime >= UIConstants.WAITING_FOR_PLAYERS_DELAY_TIME && !this.waitingIconGroup.exists) {
                     // Clean up any potential celebrations.
                     this._cleanUp();
@@ -542,7 +542,7 @@ Game.UIGameState.methods({
 
         QualityManager.update();
         Inputs.update();
-        AIs.update(this.game.time.physicsElapsedMS);
+        AIs.update(this.game.time.delta);
         this.gameController.update();
         this.updateRoundTime();
 
@@ -682,7 +682,7 @@ Game.UIGameState.methods({
 
     updateRoundTime: function() {
         if (this.elapsedTime > 0) {
-            this.elapsedTime += this.game.time.physicsElapsedMS;
+            this.elapsedTime += this.game.time.delta;
 
             var ms = Math.floor((this.elapsedTime % 1000) / 10) + "";
             var sec = Math.floor((this.elapsedTime / 1000) % 60) + "";

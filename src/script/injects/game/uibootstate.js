@@ -72,7 +72,7 @@ Game.UIBootState.methods({
         this.stage.backgroundColor = '#fff';
 
         // Uncap framerate.
-        this.game.time.desiredFps = 240;
+        this.game.time.desiredFps = 1000;
 
         if (this.game.device.pixelRatio > 1.0) {
             // Set scale mode to user scale.

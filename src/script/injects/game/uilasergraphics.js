@@ -27,7 +27,7 @@ UILaserGraphics.prototype.update = function()
         return;
     }
 
-    this.timeAlive += this.game.time.physicsElapsed;
+    this.timeAlive += this.game.time.delta / 1000;
 
     if (this.retracting) {
         if (this.laserPositions.length == 0) {

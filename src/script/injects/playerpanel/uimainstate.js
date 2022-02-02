@@ -161,7 +161,7 @@ PlayerPanel.UIMainState.methods({
         this.updateScheduled = false;
 
         if (this.addingLocalPlayer) {
-            this.addingLocalPlayerDuration += this.game.time.physicsElapsedMS;
+            this.addingLocalPlayerDuration += this.game.time.delta;
             if (this.addingLocalPlayerDuration > UIConstants.ELEMENT_MOVE_TIME) {
                 this.addingLocalPlayerDuration = 0;
                 this.addingLocalPlayer = false;
@@ -187,7 +187,7 @@ PlayerPanel.UIMainState.methods({
         this.tankIconGroup.sort('y', Phaser.Group.SORT_ASCENDING);
 
         if (this.positionReliabilityDelay > 0) {
-            this.positionReliabilityDelay -= this.game.time.physicsElapsedMS;
+            this.positionReliabilityDelay -= this.game.time.delta;
         }
 
         // Refresh game scale to update bounding box information if the playerpanel was moved.

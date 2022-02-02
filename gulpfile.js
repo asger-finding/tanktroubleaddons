@@ -147,14 +147,19 @@ function manifest() {
 }
 
 function sweep() {
+    // Sweep the target folder for intentionally redundant files. There is a better way to do this, and I'm not sure what it is.
     return del(paths.redudancies, { force: true });
 }
 
 function clean() {
-    return del([ paths.dist, paths.build ], { force: true });
+    // Before building, clean up the the target folder for all previous files.
+    // This is only done when starting the build tasks. This should never be done in watch mode.
+    if (state.prod) return del([ paths.dist ], { force: true });
+    else return del([ paths.build ], { force: true });
 }
 
 function annihilation() {
+    // Nuke the build and distribution folders. Leave no trace.
     return del([ paths.baseDist, paths.baseBuild ], { force: true });
 }
 

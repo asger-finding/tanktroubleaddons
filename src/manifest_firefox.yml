@@ -11,10 +11,13 @@ content_scripts:
     - run_at: document_start
       js: [script/content.js]
       matches: ["*://*.tanktrouble.com/*"]
+
     - run_at: document_idle
       js: [script/after.js]
       matches: ["*://*.tanktrouble.com/*"]
-    - css: [css/styles.css]
+
+    - run_at: document_start
+      css: [css/styles.css]
       matches: ["*://*.tanktrouble.com/*"]
 background:
       scripts:
@@ -23,4 +26,5 @@ permissions:
     - "*://*.tanktrouble.com/*"
     - webRequest
     - webRequestBlocking
-web_accessible_resources: ["*"]
+web_accessible_resources:
+    - "*"

@@ -18,18 +18,20 @@ content_scripts:
     - run_at: document_start
       js: [script/content.js]
       matches: ["*://*.tanktrouble.com/*"]
+
     - run_at: document_idle
       js: [script/after.js]
       matches: ["*://*.tanktrouble.com/*"]
-    - css: [css/styles.css]
+
+    - run_at: document_start
+      css: [css/styles.css]
       matches: ["*://*.tanktrouble.com/*"]
 permissions:
     - declarativeNetRequest
     - declarativeNetRequestFeedback
     - tabs
     - scripting
-host_permissions:
-    - "*://*.tanktrouble.com/*"
+host_permissions: ["*://*.tanktrouble.com/*"]
 web_accessible_resources:
     - resources: ["*"]
       matches: ["*://*.tanktrouble.com/*"]

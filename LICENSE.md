@@ -1,4 +1,4 @@
-The MIT License (MIT)
+MIT License
 
 Copyright (c) 2019-2022 Asger Finding <asger.finding@gmail.com>
 

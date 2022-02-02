@@ -70,7 +70,6 @@ Of course this all comes down to preference. I use Visual Studio Code on Windows
 - markdownlint
 - GitLens
 - Material Icon Theme
-- Tabnine AI Autocomplete ()
 - Visual Studio IntelliCode
 - YAML
 

@@ -58,3 +58,10 @@ See the table below for safe minimum requirements.
      1. See [this](https://stackoverflow.com/a/41543650/11452298) or [this](https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension#3744467)!
 
 Happy hacking!
+
+### Final notes
+
+Thanks to samme from the Phaser project for helping me sort out my stupid-bugs.  
+Thank you to the folks on Discord for helping me out with ideas and suggestions, and voting on my polls 😘  
+A heartfelt thanks goes out to the entire community who has supported TankTroubleAddons and my work for multiple years now. Were it not for the overwhelming encoragement from all you guys, I would've quit the project long, long ago.  
+I couldn't ask for a better community. This game has become a huge part of my life and has helped shape my roadmap for the future. For the many years, thank you. May there be many more years to come.

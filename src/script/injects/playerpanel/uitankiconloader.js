@@ -1,4 +1,4 @@
-const UITankIconLoader = Classy.newClass().name("UITankIconLoader");
+var UITankIconLoader = Classy.newClass().name("UITankIconLoader");
 
 UITankIconLoader.fields({
     

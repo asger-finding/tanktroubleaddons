@@ -1,4 +1,4 @@
-const PremiumManager = Classy.newClass();
+var PremiumManager = Classy.newClass();
 
 PremiumManager.classFields({
     hasPremium: false

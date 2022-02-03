@@ -25,7 +25,7 @@ if (typeof require === 'function') {
     var CollectibleState = require('./collectiblestate');
 }
 
-const RoundController = Classy.newClass();
+var RoundController = Classy.newClass();
 
 RoundController.fields({
     model: null,

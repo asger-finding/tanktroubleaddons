@@ -1,4 +1,4 @@
-const Utils = Classy.newClass();
+var Utils = Classy.newClass();
 
 Utils.classFields({
     svgMeasurementContainer: null,

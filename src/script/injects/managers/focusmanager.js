@@ -1,4 +1,4 @@
-const FocusManager = Classy.newClass();
+var FocusManager = Classy.newClass();
 
 FocusManager.classFields({
     focused: true,

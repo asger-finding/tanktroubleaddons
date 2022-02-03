@@ -9,7 +9,7 @@ Box2D.Common.b2Settings.b2_maxTranslation = 8.0;//4.0;
 Box2D.Common.b2Settings.b2_maxTranslationSquared = 64.0;//16.0;
 Box2D.Common.b2Settings.b2_velocityThreshold = 0.0;
 
-const B2DUtils = Classy.newClass().name('B2DUtils');
+var B2DUtils = Classy.newClass().name('B2DUtils');
 
 B2DUtils.fields({
 

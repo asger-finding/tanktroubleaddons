@@ -102,7 +102,7 @@ if (typeof require === 'function') {
     var PlayerUpdate = require('./playerupdate');
 }
 
-const TTClient = Classy.newClass().name('TTClient');
+var TTClient = Classy.newClass().name('TTClient');
 
 TTClient.classFields({
     log: null

@@ -7,7 +7,7 @@ if (typeof require === 'function') {
 	var Log = require('./log');
 	var jKstra = require('jkstra');
 }
-const Maze = Classy.newClass();
+var Maze = Classy.newClass();
 
 /*
  * Datastructures:

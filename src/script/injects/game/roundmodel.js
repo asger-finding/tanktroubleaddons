@@ -27,7 +27,7 @@ if (typeof require === 'function') {
 }
 
 
-const RoundModel = Classy.newClass();
+var RoundModel = Classy.newClass();
 
 
 /*

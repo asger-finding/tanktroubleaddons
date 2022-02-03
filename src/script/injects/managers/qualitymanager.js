@@ -1,4 +1,4 @@
-const QualityManager = Classy.newClass();
+var QualityManager = Classy.newClass();
 
 QualityManager.classFields({
     quality: null,

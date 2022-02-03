@@ -1,4 +1,4 @@
-const Inputs = Classy.newClass();
+var Inputs = Classy.newClass();
 
 Inputs.classFields({
     inputManagers: [],

@@ -6,7 +6,7 @@ if (typeof require === 'function') {
     var MathUtils = require('./mathutils');
 }
 
-const AIUtils = Classy.newClass();
+var AIUtils = Classy.newClass();
 
 AIUtils.classMethods({
     checkProtected: function(tankId, gameController) {

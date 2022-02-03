@@ -1,4 +1,4 @@
-const OverlayManager = Classy.newClass();
+var OverlayManager = Classy.newClass();
 
 OverlayManager.classFields({
     initialOverlayParams: {},

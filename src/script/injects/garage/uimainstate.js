@@ -1,4 +1,4 @@
-const Garage = Garage || {};
+var Garage = Garage || {};
 
 Garage.UIMainState = Classy.newClass();
 

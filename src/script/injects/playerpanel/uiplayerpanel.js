@@ -1,4 +1,4 @@
-const UIPlayerPanel = Classy.newClass();
+var UIPlayerPanel = Classy.newClass();
 
 UIPlayerPanel.classFields({
     phaserInstance: null,

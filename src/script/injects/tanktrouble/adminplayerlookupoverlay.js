@@ -1,4 +1,4 @@
-const TankTrouble = TankTrouble || {};
+var TankTrouble = TankTrouble || {};
 
 TankTrouble.AdminPlayerLookupOverlay = {
 

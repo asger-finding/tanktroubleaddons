@@ -3,7 +3,7 @@ if (typeof require === 'function') {
     var PlayerState = require('./playerstate');
 }
 
-const GameState = Classy.newClass().name('GameState');
+var GameState = Classy.newClass().name('GameState');
 
 GameState.constructor(function() {
 

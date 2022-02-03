@@ -1,4 +1,4 @@
-const UIConstants = Classy.newClass();
+var UIConstants = Classy.newClass();
 
 UIConstants.classFields({
     SCORE_CATEGORIES: {

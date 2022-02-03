@@ -1,4 +1,4 @@
-const PlayerPanel = PlayerPanel || {};
+var PlayerPanel = PlayerPanel || {};
 
 PlayerPanel.UIPreloadState = Classy.newClass();
 

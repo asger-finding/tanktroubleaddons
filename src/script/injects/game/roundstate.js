@@ -9,7 +9,7 @@ if (typeof require === 'function') {
     var ZoneState = require('./zonestate');
 }
 
-RoundState = Classy.newClass().name('RoundState');
+var RoundState = Classy.newClass().name('RoundState');
 
 RoundState.constructor(function() {
 });

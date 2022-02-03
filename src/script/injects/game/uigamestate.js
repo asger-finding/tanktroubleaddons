@@ -1,4 +1,4 @@
-const Game = Game || {};
+var Game = Game || {};
 
 Game.UIGameState = Classy.newClass();
 

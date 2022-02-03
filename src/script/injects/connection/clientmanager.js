@@ -1,4 +1,4 @@
-const ClientManager = Classy.newClass();
+var ClientManager = Classy.newClass();
 
 ClientManager.classFields({
     client: null,

@@ -1,4 +1,4 @@
-const Content = Classy.newClass().name('Content');
+var Content = Classy.newClass().name('Content');
 
 Content.classFields({
     activeTab: null

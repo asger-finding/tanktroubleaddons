@@ -1,4 +1,4 @@
-const Users = Classy.newClass();
+var Users = Classy.newClass();
 
 Users.classFields({
     authenticatedUsers: {},

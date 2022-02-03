@@ -148,11 +148,11 @@
 				// escaped
 			}
 			// Code/Indent blocks:
-			else if ((t = (token[3] || token[4])) !== null) {
+			else if ((t = (token[3] || token[4]))) {
 				chunk = '<pre><code' + (token[2] ? ` llang="${token[2].toLowerCase()}"` : '') + '>' + outdent(encodeAttr(t).replace(/^\n+|\n+$/g, '')) + '</code></pre>';
 			}
 			// > Quotes, -* lists:
-			else if ((t = token[6] !== null)) {
+			else if ((t = token[6])) {
 				if (t.match(/\./)) {
 					token[5] = token[5].replace(/^\d+/gm, '');
 				}
@@ -512,7 +512,7 @@
 	};
 })(jQuery);
 
-const ForumModel = Classy.newClass().name('ForumModel');
+var ForumModel = Classy.newClass().name('ForumModel');
 
 ForumModel.constructor(function() {});
 
@@ -1321,7 +1321,7 @@ ForumModel.methods({
     }
 });
 
-const ForumView = Classy.newClass().name('ForumView');
+var ForumView = Classy.newClass().name('ForumView');
 ForumView.constructor(function(model) {
 
     // Store model reference
@@ -2380,7 +2380,7 @@ ForumView.methods({
     }
 });
 
-const Forum = Classy.newClass().name('Forum');
+var Forum = Classy.newClass().name('Forum');
 
 Forum.fields({
     model: null,

@@ -3,7 +3,7 @@ if (typeof require === 'function') {
     var Constants = require('./constants');
 }
 
-const MazeThemeManager = Classy.newClass();
+var MazeThemeManager = Classy.newClass();
 
 MazeThemeManager.classFields({
     preparedThemes: {}

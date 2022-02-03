@@ -1,4 +1,4 @@
-const UIGarage = Classy.newClass();
+var UIGarage = Classy.newClass();
 
 UIGarage.classFields({
     phaserInstance: null 

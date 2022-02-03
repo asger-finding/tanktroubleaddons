@@ -1,4 +1,4 @@
-const UIUtils = Classy.newClass();
+var UIUtils = Classy.newClass();
 
 UIUtils.classFields({
     wallCollisionGroup: null,

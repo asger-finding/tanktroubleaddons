@@ -26,7 +26,7 @@ AIs.classMethods({
         Backend.getInstance().getAIs(
             function (result) {
                 if (Array.isArray(result)) {
-                    for(var i = 0; i < result.length; ++i) {
+                    for(let i = 0; i < result.length; ++i) {
                         AIs.ais[result[i].playerId] = result[i].config;
                     }
                     AIs.initialized = true;
@@ -59,15 +59,15 @@ AIs.classMethods({
     getAvailableAIId: function(gameId, difficulty) {
         // FIXME Look for difficulty.
         // Find available AI.
-        var aiIds = Object.keys(AIs.ais);
+        const aiIds = Object.keys(AIs.ais);
 
         if (AIs.aisInUse[gameId] === undefined) {
             return aiIds[0];
         }
 
-        for (var i = 0; i < aiIds.length; ++i) {
-            var inUse = false;
-            for (var j = 0; j < AIs.aisInUse[gameId].length; ++j) {
+        for (let i = 0; i < aiIds.length; ++i) {
+            let inUse = false;
+            for (let j = 0; j < AIs.aisInUse[gameId].length; ++j) {
                 if (AIs.aisInUse[gameId][j] === aiIds[i]) {
                     inUse = true;
                     break;
@@ -83,7 +83,7 @@ AIs.classMethods({
 
     // Assumes that isReady has been called to verify that AIs have been fetched from the backend.
     getAllAIIds: function() {
-        var aiIds = Object.keys(AIs.ais);
+        const aiIds = Object.keys(AIs.ais);
         return aiIds;
     },
 
@@ -94,10 +94,10 @@ AIs.classMethods({
         }
 
         // Find all unavailable AIs.
-        var unavilableAIIds = [];
-        var aiIds = Object.keys(AIs.ais);
-        for (var i = 0; i < aiIds.length; ++i) {
-            for (var j = 0; j < AIs.aisInUse[gameId].length; ++j) {
+        const unavilableAIIds = [];
+        const aiIds = Object.keys(AIs.ais);
+        for (let i = 0; i < aiIds.length; ++i) {
+            for (let j = 0; j < AIs.aisInUse[gameId].length; ++j) {
                 if (AIs.aisInUse[gameId][j] === aiIds[i]) {
                     unavilableAIIds.push(aiIds[i]);
                     break;
@@ -109,7 +109,7 @@ AIs.classMethods({
 
     // Assumes that isReady has been called to verify that AIs have been fetched from the backend.
     addAIManager: function(gameController, aiId) {
-        var aiConfig = AIs.ais[aiId];
+        const aiConfig = AIs.ais[aiId];
         AIs.aiManagers.push(AIManager.create(aiId, aiConfig, gameController));
         if (AIs.aisInUse[gameController.getId()] === undefined) {
             AIs.aisInUse[gameController.getId()] = [];
@@ -121,8 +121,8 @@ AIs.classMethods({
     
     removeAIManager: function(gameId, aiId) {
 
-        for (var i = 0; i < AIs.aiManagers.length; ++i) {
-            var aiManager = AIs.aiManagers[i];
+        for (let i = 0; i < AIs.aiManagers.length; ++i) {
+            const aiManager = AIs.aiManagers[i];
             if (aiManager.getAIId() == aiId && aiManager.getGameId() == gameId) {
                 aiManager.shutdown();
                 AIs.aiManagers.splice(i, 1);
@@ -130,7 +130,7 @@ AIs.classMethods({
             }
         }
 
-        for (var i = 0; i < AIs.aisInUse[gameId].length; ++i) {
+        for (let i = 0; i < AIs.aisInUse[gameId].length; ++i) {
             if (AIs.aisInUse[gameId][i] === aiId) {
                 AIs.aisInUse[gameId].splice(i, 1);
                 break;
@@ -143,20 +143,20 @@ AIs.classMethods({
     },
 
     removeAllAIManagers: function() {
-        for (var i = 0; i < AIs.aiManagers.length; ++i) {
-            var aiManager = AIs.aiManagers[i];
+        for (let i = 0; i < AIs.aiManagers.length; ++i) {
+            const aiManager = AIs.aiManagers[i];
             AIs.removeAIManager(aiManager.getGameId(), aiManager.getAIId());
         }
     },
     
     update: function(deltaTime) {
-        for (var i = 0; i < AIs.aiManagers.length; ++i) {
+        for (let i = 0; i < AIs.aiManagers.length; ++i) {
             AIs.aiManagers[i].update(deltaTime);
         }
     },
 
     reset: function() {
-        for (var i = 0; i < AIs.aiManagers.length; ++i) {
+        for (let i = 0; i < AIs.aiManagers.length; ++i) {
             AIs.aiManagers[i].reset();
         }
     }

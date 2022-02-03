@@ -1,4 +1,4 @@
-var Users = Classy.newClass();
+const Users = Classy.newClass();
 
 Users.classFields({
     authenticatedUsers: {},
@@ -24,7 +24,7 @@ Users.classMethods({
     },
 
     removeEventListener: function(callback, context) {
-        for (var i=0;i<Users.eventListeners.length;i++) {
+        for (let i = 0;i<Users.eventListeners.length;i++) {
             if (Users.eventListeners[i].cb===callback && Users.eventListeners[i].ctxt===context) {
                 // Remove single entry from array, and return immediately
                 // as continuing iteration is unsafe, as the underlying array
@@ -37,8 +37,8 @@ Users.classMethods({
 
     loadAuthenticatedUsers: function() {
         if (typeof g_users === "object") {
-            var playerIds = Object.keys(g_users);
-            for (var i=0; i<playerIds.length; i++) {
+            const playerIds = Object.keys(g_users);
+            for (let i = 0; i<playerIds.length; i++) {
                 Users.addAuthenticatedUser(playerIds[i], g_users[playerIds[i]].multiplayerToken);
             }
         }
@@ -46,8 +46,8 @@ Users.classMethods({
 
     loadGuestUsers: function() {
         if (typeof g_guests === "object") {
-            var playerIds = Object.keys(g_guests);
-            for (var i=0; i<playerIds.length; i++) {
+            const playerIds = Object.keys(g_guests);
+            for (let i = 0; i<playerIds.length; i++) {
                 Users.addGuestUser(playerIds[i], g_guests[playerIds[i]].multiplayerToken);
             }
         }
@@ -89,7 +89,7 @@ Users.classMethods({
     },
 
     addGuestUsers: function(playerIds, multiplayerTokens) {
-        for (var i = 0; i < playerIds.length; ++i) {
+        for (let i = 0; i < playerIds.length; ++i) {
             Users.guestUsers[playerIds[i]] = multiplayerTokens[i];
         }
         Users._notifyEventListeners(Users.EVENTS.GUESTS_ADDED, playerIds);
@@ -101,14 +101,14 @@ Users.classMethods({
     },
 
     signUpGuestUser: function(playerId) {
-        var multiplayerToken = Users.guestUsers[playerId];
+        const multiplayerToken = Users.guestUsers[playerId];
         delete Users.guestUsers[playerId];
         Users.authenticatedUsers[playerId] = multiplayerToken;
         Users._notifyEventListeners(Users.EVENTS.GUEST_SIGNED_UP, playerId);
     },
 
     updateUser: function(playerId, iconChanged, usernameChanged) {
-        var change = {playerId: playerId, iconChanged: iconChanged, usernameChanged: usernameChanged};
+        const change = {playerId: playerId, iconChanged: iconChanged, usernameChanged: usernameChanged};
         Users._notifyEventListeners(Users.EVENTS.PLAYER_UPDATED, change);
     },
 
@@ -121,8 +121,8 @@ Users.classMethods({
     },
 
     getAuthenticatedMultiplayerTokens: function(playerIds) {
-        var tokens = [];
-        for (var i = 0; i < playerIds.length; ++i) {
+        const tokens = [];
+        for (let i = 0; i < playerIds.length; ++i) {
             tokens.push(Users.authenticatedUsers[playerIds[i]]);
         }
 
@@ -130,7 +130,7 @@ Users.classMethods({
     },
 
     isAuthenticatedUser: function(playerId) {
-        return Users.authenticatedUsers.hasOwnProperty(playerId);
+		return Object.prototype.hasOwnProperty.call(Users.authenticatedUsers, playerId);
     },
 
     getGuestPlayerIds: function() {
@@ -146,9 +146,9 @@ Users.classMethods({
     },
 
     hasAdminRole: function(role) {
-        for(var i = 0; i < Users.adminRoles.length; ++i) {
-            var userAdminRoles = Users.adminRoles[i];
-            for(var j = 0; j < userAdminRoles.roles.length; ++j) {
+        for(let i = 0; i < Users.adminRoles.length; ++i) {
+            const userAdminRoles = Users.adminRoles[i];
+            for(let j = 0; j < userAdminRoles.roles.length; ++j) {
                 if (userAdminRoles.roles[j] === role) {
                     return true;
                 }
@@ -159,10 +159,10 @@ Users.classMethods({
     },
 
     hasSpecificUserAdminRole: function(playerId, role) {
-        for(var i = 0; i < Users.adminRoles.length; ++i) {
-            var userAdminRoles = Users.adminRoles[i];
+        for(let i = 0; i < Users.adminRoles.length; ++i) {
+            const userAdminRoles = Users.adminRoles[i];
             if (userAdminRoles.playerId === playerId) {
-                for(var j = 0; j < userAdminRoles.roles.length; ++j) {
+                for(let j = 0; j < userAdminRoles.roles.length; ++j) {
                     if (userAdminRoles.roles[j] === role) {
                         return true;
                     }
@@ -174,9 +174,9 @@ Users.classMethods({
     },
 
     getAdminUserForRole: function(role) {
-        for(var i = 0; i < Users.adminRoles.length; ++i) {
-            var userAdminRoles = Users.adminRoles[i];
-            for(var j = 0; j < userAdminRoles.roles.length; ++j) {
+        for(let i = 0; i < Users.adminRoles.length; ++i) {
+            const userAdminRoles = Users.adminRoles[i];
+            for(let j = 0; j < userAdminRoles.roles.length; ++j) {
                 if (userAdminRoles.roles[j] === role) {
                     return userAdminRoles.playerId;
                 }
@@ -191,8 +191,8 @@ Users.classMethods({
     },
 
     getGuestMultiplayerTokens: function(playerIds) {
-        var tokens = [];
-        for (var i = 0; i < playerIds.length; ++i) {
+        const tokens = [];
+        for (let i = 0; i < playerIds.length; ++i) {
             tokens.push(Users.guestUsers[playerIds[i]]);
         }
 
@@ -200,7 +200,7 @@ Users.classMethods({
     },
 
     isGuestUser: function(playerId) {
-        return Users.guestUsers.hasOwnProperty(playerId);
+		return Object.prototype.hasOwnProperty.call(Users.guestUsers, playerId);
     },
 
     isAnyUser: function(playerId) {
@@ -216,13 +216,13 @@ Users.classMethods({
         Users.highestGmLevel = null;
         Users.adminRoles = null;
 
-        var playerIds = Users.getAuthenticatedPlayerIds();
-        var numDetailsResponses = 0;
-        var numExpectedDetailsResponses = playerIds.length;
-        var highestGmPlayerId = "";
-        var highestGmLevel = null;
+        const playerIds = Users.getAuthenticatedPlayerIds();
+        let numDetailsResponses = 0;
+        const numExpectedDetailsResponses = playerIds.length;
+        let highestGmPlayerId = "";
+        let highestGmLevel = null;
 
-        for (var i = 0; i < playerIds.length; ++i) {
+        for (let i = 0; i < playerIds.length; ++i) {
             Backend.getInstance().getPlayerDetails(
                 function(result) {
                     if (typeof(result) == "object") {
@@ -262,7 +262,7 @@ Users.classMethods({
     },
 
     _notifyEventListeners: function(evt, data) {
-        for (var i=0;i<Users.eventListeners.length;i++) {
+        for (let i = 0;i<Users.eventListeners.length;i++) {
             Users.eventListeners[i].cb(Users.eventListeners[i].ctxt, evt, data);
         }
     },

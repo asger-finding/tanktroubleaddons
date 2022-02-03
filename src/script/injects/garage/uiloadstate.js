@@ -1,4 +1,4 @@
-var Garage = Garage || {};
+const Garage = Garage || {};
 
 Garage.UILoadState = Classy.newClass();
 
@@ -44,39 +44,39 @@ Garage.UILoadState.methods({
         // Clear map from player id to garage content.
         this.playerIdToGarageContent = {};
 
-        var self = this;
+        const self = this;
 
         this.load.onLoadComplete.addOnce(
             function() {
                 // FIXME Move this computation into update and do one accessory per frame if it becomes too sluggish.
-                var welderSpotsBitmapData = this.game.make.bitmapData(UIConstants.TANK_ICON_WIDTH_LARGE, UIConstants.TANK_ICON_HEIGHT_LARGE);
-                var welderSpotsCellCountX = Math.floor(welderSpotsBitmapData.width / UIConstants.WELDER_SAMPLE_CELL_SIZE);
-                var welderSpotsCellCountY = Math.floor(welderSpotsBitmapData.height / UIConstants.WELDER_SAMPLE_CELL_SIZE);
+                const welderSpotsBitmapData = this.game.make.bitmapData(UIConstants.TANK_ICON_WIDTH_LARGE, UIConstants.TANK_ICON_HEIGHT_LARGE);
+                const welderSpotsCellCountX = Math.floor(welderSpotsBitmapData.width / UIConstants.WELDER_SAMPLE_CELL_SIZE);
+                const welderSpotsCellCountY = Math.floor(welderSpotsBitmapData.height / UIConstants.WELDER_SAMPLE_CELL_SIZE);
 
-                for (var playerId in this.playerIdToGarageContent) {
-                    var content = this.playerIdToGarageContent[playerId];
+                for (const playerId in this.playerIdToGarageContent) {
+                    const content = this.playerIdToGarageContent[playerId];
 
-                    for (var i = 0; i < content.boxes.length; ++i) {
-                        var box = content.boxes[i];
-                        for (var j = 0; j < box.accessories.length; ++j) {
-                            var accessory = box.accessories[j];
+                    for (let i = 0; i < content.boxes.length; ++i) {
+                        const box = content.boxes[i];
+                        for (let j = 0; j < box.accessories.length; ++j) {
+                            const accessory = box.accessories[j];
                             if (!this.accessoryToWelderPoints[accessory.type+accessory.value]) {
                                 this.accessoryToWelderPoints[accessory.type+accessory.value] = [];
 
-                                var image = this.game.cache.getImage(accessory.type+accessory.value+'preprocess');
+                                const image = this.game.cache.getImage(accessory.type+accessory.value+'preprocess');
                                 welderSpotsBitmapData.clear();
                                 welderSpotsBitmapData.draw(image, 0, 0);
                                 welderSpotsBitmapData.update();
 
-                                for (var x = 0; x < welderSpotsCellCountX; ++x) {
-                                    for (var y = 0; y < welderSpotsCellCountY; ++y) {
-                                        var sampleX = Math.floor((x + 0.5) * UIConstants.WELDER_SAMPLE_CELL_SIZE + (Math.random() * 2.0 - 1.0) * UIConstants.WELDER_SAMPLE_JITTER_SIZE);
-                                        var sampleY = Math.floor((y + 0.5) * UIConstants.WELDER_SAMPLE_CELL_SIZE + (Math.random() * 2.0 - 1.0) * UIConstants.WELDER_SAMPLE_JITTER_SIZE);
+                                for (let x = 0; x < welderSpotsCellCountX; ++x) {
+                                    for (let y = 0; y < welderSpotsCellCountY; ++y) {
+                                        const sampleX = Math.floor((x + 0.5) * UIConstants.WELDER_SAMPLE_CELL_SIZE + (Math.random() * 2.0 - 1.0) * UIConstants.WELDER_SAMPLE_JITTER_SIZE);
+                                        const sampleY = Math.floor((y + 0.5) * UIConstants.WELDER_SAMPLE_CELL_SIZE + (Math.random() * 2.0 - 1.0) * UIConstants.WELDER_SAMPLE_JITTER_SIZE);
 
-                                        var sample = welderSpotsBitmapData.getPixel32(sampleX, sampleY);
+                                        const sample = welderSpotsBitmapData.getPixel32(sampleX, sampleY);
 
                                         if ((sample >> 24) & 0xff > 0) {
-                                            var point = {x: sampleX / UIConstants.TANK_ICON_WIDTH_LARGE - 0.5,
+                                            const point = {x: sampleX / UIConstants.TANK_ICON_WIDTH_LARGE - 0.5,
                                                          y: sampleY / UIConstants.TANK_ICON_HEIGHT_LARGE - 0.5}
                                             this.accessoryToWelderPoints[accessory.type+accessory.value].push(point);
                                         }
@@ -92,7 +92,7 @@ Garage.UILoadState.methods({
             this
         );
 
-        var playerIds = [];
+        let playerIds = [];
         // If a player id was specified, only load that player.
         // Otherwise, for each user, queue up loading of the garage content.
         if (this.playerId !== null) {
@@ -101,16 +101,16 @@ Garage.UILoadState.methods({
             playerIds = Users.getAllPlayerIds();
         }
 
-        var numGarageContentResponses = 0;
-        var numExpectedGarageContentResponses = playerIds.length;
-        for (var i = 0; i < playerIds.length; ++i) {
+        let numGarageContentResponses = 0;
+        const numExpectedGarageContentResponses = playerIds.length;
+        for (let i = 0; i < playerIds.length; ++i) {
             Backend.getInstance().getGarageContent(
                 function(result) {
                     // Store resulting content in map.
                     self.playerIdToGarageContent[result.playerId] = result;
 
-                    for (var j = 0; j < result.boxes.length; ++j) {
-                        var box = result.boxes[j];
+                    for (let j = 0; j < result.boxes.length; ++j) {
+                        const box = result.boxes[j];
 
                         // Queue up box icon assets.
                         if (!self.itemAlreadyQueuedForLoad['box'+box.id]) {
@@ -122,8 +122,8 @@ Garage.UILoadState.methods({
                             }
                         }
 
-                        for (var k = 0; k < box.accessories.length; ++k) {
-                            var accessory = box.accessories[k];
+                        for (let k = 0; k < box.accessories.length; ++k) {
+                            const accessory = box.accessories[k];
                             // Queue up accessory icon assets.
                             if (!self.itemAlreadyQueuedForLoad[accessory.type+accessory.value]) {
                                 self.itemAlreadyQueuedForLoad[accessory.type+accessory.value] = true;
@@ -141,11 +141,11 @@ Garage.UILoadState.methods({
                             }
                         }
 
-                        for (var k = 0; k < box.sprayCans.length; ++k) {
-                            var sprayCan = box.sprayCans[k];
+                        for (let k = 0; k < box.sprayCans.length; ++k) {
+                            const sprayCan = box.sprayCans[k];
                             if (sprayCan.colour.type == 'image') {
                                 // Queue up image colours.
-                                var colourValue = sprayCan.colour.imageValue;
+                                const colourValue = sprayCan.colour.imageValue;
                                 if (!self.itemAlreadyQueuedForLoad['colour'+colourValue]) {
                                     self.itemAlreadyQueuedForLoad['colour'+colourValue] = true;
                                     if (self.game.device.pixelRatio > 1) {

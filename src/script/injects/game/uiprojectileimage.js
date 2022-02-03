@@ -24,7 +24,7 @@ UIProjectileImage.prototype.update = function()
     }
 
     // Update position from game model.
-    var projectile = this.gameController.getProjectile(this.projectileId);
+    const projectile = this.gameController.getProjectile(this.projectileId);
     if (projectile)
     {
         this.x = UIUtils.mpx(projectile.getX());

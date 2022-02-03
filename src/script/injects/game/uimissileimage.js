@@ -35,21 +35,21 @@ UIMissileImage.prototype.update = function()
 
     // Play targeting sound depending on distance to target.
     if (this.targetId !== null) {
-        var projectile = this.gameController.getProjectile(this.projectileId);
-        var tank = this.gameController.getTank(this.targetId);
-        var maze = this.gameController.getMaze();
+        const projectile = this.gameController.getProjectile(this.projectileId);
+        const tank = this.gameController.getTank(this.targetId);
+        const maze = this.gameController.getMaze();
         if (projectile && tank && maze) {
             this.targetTime += this.game.time.delta / 1000;
 
-            var projectilePosition = {
+            const projectilePosition = {
                 x: Math.floor(projectile.getX() / Constants.MAZE_TILE_SIZE.m),
                 y: Math.floor(projectile.getY() / Constants.MAZE_TILE_SIZE.m)
             };
-            var tankPosition = {
+            const tankPosition = {
                 x: Math.floor(tank.getX() / Constants.MAZE_TILE_SIZE.m),
                 y: Math.floor(tank.getY() / Constants.MAZE_TILE_SIZE.m)
             };
-            var distanceToTarget = maze.getDistanceBetweenPositions(projectilePosition, tankPosition);
+            const distanceToTarget = maze.getDistanceBetweenPositions(projectilePosition, tankPosition);
             if (distanceToTarget !== false) {
                 if (this.targetTime > (distanceToTarget + 1) * UIConstants.MISSILE_TARGETING_SOUND_INTERVAL_PER_TILE) {
                     this.targetTime = 0;
@@ -60,7 +60,7 @@ UIMissileImage.prototype.update = function()
     }
 
     // Update position and rotation from game model.
-    var projectile = this.gameController.getProjectile(this.projectileId);
+    const projectile = this.gameController.getProjectile(this.projectileId);
     if (projectile)
     {
         this.x = UIUtils.mpx(projectile.getX());
@@ -80,7 +80,7 @@ UIMissileImage.prototype.updateTarget = function(playerId) {
 
     if (playerId !== null) {
         // Send request for player details.
-        var self = this;
+        const self = this;
         Backend.getInstance().getPlayerDetails(
             function(result) {
                 if (typeof(result) == "object") {
@@ -119,7 +119,7 @@ UIMissileImage.prototype.spawn = function(x, y, projectileId, playerId, frameNam
     this.targetTime = 0;
 
     // Send request for player details.
-    var self = this;
+    const self = this;
     Backend.getInstance().getPlayerDetails(
         function(result) {
             if (typeof(result) == "object") {

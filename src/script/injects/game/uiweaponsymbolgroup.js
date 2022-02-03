@@ -12,8 +12,8 @@ UIWeaponSymbolGroup = function(game, gameController)
     this.weaponIconGroup = this.game.add.group(this);
 
     // Add pool of weapon icons
-    for (var i = 0; i < Constants.MAX_WEAPON_QUEUE + 1; ++i) {
-        var weaponIcon = this.weaponIconGroup.add(new UIWeaponIconImage(game));
+    for (let i = 0; i < Constants.MAX_WEAPON_QUEUE + 1; ++i) {
+        this.weaponIconGroup.add(new UIWeaponIconImage(game));
     }
 
     // State.
@@ -45,7 +45,7 @@ UIWeaponSymbolGroup.prototype.update = function()
         return;
     }
 
-    var tank = this.gameController.getTank(this.playerId);
+    const tank = this.gameController.getTank(this.playerId);
     if (tank) {
         this.x = UIUtils.mpx(tank.getX());
         this.y = UIUtils.mpx(tank.getY()) + Constants.TANK.HEIGHT.px * 1.3;
@@ -66,7 +66,7 @@ UIWeaponSymbolGroup.prototype.postUpdate = function() {
 
 UIWeaponSymbolGroup.prototype.spawn = function(playerId)
 {
-    var tank = this.gameController.getTank(playerId);
+    const tank = this.gameController.getTank(playerId);
     if (tank)
     {
         if (this.removeTimeout) {
@@ -77,7 +77,7 @@ UIWeaponSymbolGroup.prototype.spawn = function(playerId)
         // Revive and place the group.
         this.exists = true;
         this.visible = true;
-        var position = {x: UIUtils.mpx(tank.getX()), y: UIUtils.mpx(tank.getY())};
+        const position = {x: UIUtils.mpx(tank.getX()), y: UIUtils.mpx(tank.getY())};
         this.position.set(position.x, position.y + Constants.TANK.HEIGHT.px * 1.3);
     }
     
@@ -92,7 +92,7 @@ UIWeaponSymbolGroup.prototype.spawn = function(playerId)
 
 UIWeaponSymbolGroup.prototype.refresh = function() 
 {
-    var tank = this.gameController.getTank(this.playerId);
+    const tank = this.gameController.getTank(this.playerId);
     if (tank)
     {
         // Update weapons stack.
@@ -105,9 +105,9 @@ UIWeaponSymbolGroup.prototype.refresh = function()
 UIWeaponSymbolGroup.prototype._updateUI = function()
 {
     // Remove icons that should no longer show.
-    for (var weaponIconId in this.weaponIcons) {
-        var weaponIconStillNeeded = false;
-        for (var i = 0; i < this.weapons.length; ++i) {
+    for (const weaponIconId in this.weaponIcons) {
+        let weaponIconStillNeeded = false;
+        for (let i = 0; i < this.weapons.length; ++i) {
             if (weaponIconId == this.weapons[i].getId()) {
                 weaponIconStillNeeded = true;
                 break;
@@ -121,22 +121,22 @@ UIWeaponSymbolGroup.prototype._updateUI = function()
     }
     
     // Update existing icons and show new ones.
-    var totalWidth = 0.0;
+    let totalWidth = 0.0;
     // Compute total width of all icons.
-    for (var i = this.weapons.length - 1; i >= 0; --i) {
+    for (let i = this.weapons.length - 1; i >= 0; --i) {
         totalWidth += UIConstants.WEAPON_ICON_WIDTH * (UIConstants.WEAPON_ICON_MAX_SCALE - i * UIConstants.WEAPON_ICON_SCALE_STEP);
     }
     
     // Set scale and position to first icon.
-    var scale = UIConstants.WEAPON_ICON_MAX_SCALE - (this.weapons.length - 1) * UIConstants.WEAPON_ICON_SCALE_STEP;
-    var x = -totalWidth * 0.5 + 0.5 * scale * UIConstants.WEAPON_ICON_WIDTH;
-    for (var i = 0; i < this.weapons.length; ++i) {
+    let scale = UIConstants.WEAPON_ICON_MAX_SCALE - (this.weapons.length - 1) * UIConstants.WEAPON_ICON_SCALE_STEP;
+    let x = -totalWidth * 0.5 + 0.5 * scale * UIConstants.WEAPON_ICON_WIDTH;
+    for (let i = 0; i < this.weapons.length; ++i) {
         
         if (this.weapons[i].getId() in this.weaponIcons) {
             //Update weapon icon sprite.
             this.weaponIcons[this.weapons[i].getId()].refresh(x, scale);
         } else {
-            var weaponIcon = this.weaponIconGroup.getFirstExists(false);
+            const weaponIcon = this.weaponIconGroup.getFirstExists(false);
             if (weaponIcon) {
                 this.weaponIcons[this.weapons[i].getId()] = weaponIcon;
                 weaponIcon.spawn(x, 0, scale, this.weapons[i].getType());
@@ -156,7 +156,7 @@ UIWeaponSymbolGroup.prototype.remove = function()
 {
     this.exists = false;
 
-    var self = this;
+    const self = this;
     this.removeTimeout = setTimeout(function() {
         self.visible = false;
     }, UIConstants.ELEMENT_GLIDE_OUT_TIME);

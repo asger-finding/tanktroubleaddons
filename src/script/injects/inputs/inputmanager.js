@@ -1,4 +1,4 @@
-var InputManager = Classy.newClass();
+const InputManager = Classy.newClass();
 
 InputManager.fields({
     playerId: null,
@@ -23,7 +23,7 @@ InputManager.constructor(function(playerId) {
 
 InputManager.methods({
     update: function() {
-        var game = GameManager.getGame();
+        const game = GameManager.getGame();
 
         if (game && game.input.keyboard.downDuration(InputManager.chatKey, 16)) {
             TankTrouble.ChatBox.open();

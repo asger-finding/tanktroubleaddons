@@ -56,9 +56,6 @@ const state = {
 	}
 }
 paths.target = yargs.argv.target || 'chromium';
-const tsProject = ts.createProject('./tsconfig.json');
-const jsProject = ts.createProject('./tsconfig.json');
-
 
 function browserSpecificFiles(filename) {
     const browsers = filename.split('_');
@@ -79,7 +76,7 @@ function typescript() {
         .pipe(changed(state.dest))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
         .pipe(ignore(paths.redundancy))
-        .pipe(tsProject())
+        .pipe(ts.createProject('./tsconfig.json')())
         .pipe(gulpif(state.prod, terser()))
         .pipe(dest(state.dest));
 }
@@ -89,7 +86,7 @@ function scripts() {
         .pipe(changed(state.dest))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
         .pipe(ignore(paths.redundancy))
-        .pipe(gulpif(state.prod, jsProject()))
+        .pipe(gulpif(state.prod, ts.createProject('./tsconfig.json')()))
         .pipe(gulpif(state.prod, terser()))
         .pipe(dest(state.dest));
 }
@@ -116,7 +113,7 @@ function html() {
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
         .pipe(ignore(paths.redundancy))
         .pipe(gulpif(state.prod, htmlmin({ collapseWhitespace: true })))
-	    .pipe(dest(state.dest));
+		.pipe(dest(state.dest));
 }
 
 function images() {
@@ -125,7 +122,7 @@ function images() {
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
         .pipe(ignore(paths.redundancy))
         .pipe(gulpif(state.prod, imagemin()))
-	    .pipe(dest(state.dest + '/assets'));
+		.pipe(dest(state.dest + '/assets'));
 }
 
 function json() {

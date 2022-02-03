@@ -1,4 +1,4 @@
-var UITankIcon = Classy.newClass().name("UITankIcon");
+const UITankIcon = Classy.newClass().name("UITankIcon");
 
 UITankIcon.classFields({
     compositedBuffer: $("<canvas></canvas>")[0],
@@ -13,13 +13,13 @@ UITankIcon.classMethods({
             function(result) {
                 if (typeof(result) == "object") {
 
-                    var turretColour = result.getTurretColour();
-                    var treadColour = result.getTreadColour();
-                    var baseColour = result.getBaseColour();
-                    var turretAccessory = result.getTurretAccessory();
-                    var barrelAccessory = result.getBarrelAccessory();
-                    var frontAccessory = result.getFrontAccessory();
-                    var backAccessory = result.getBackAccessory();
+                    const turretColour = result.getTurretColour();
+                    const treadColour = result.getTreadColour();
+                    const baseColour = result.getBaseColour();
+                    const turretAccessory = result.getTurretAccessory();
+                    const barrelAccessory = result.getBarrelAccessory();
+                    const frontAccessory = result.getFrontAccessory();
+                    const backAccessory = result.getBackAccessory();
                     
                     if (!turretColour || !treadColour || !baseColour || !turretAccessory || !barrelAccessory || !frontAccessory || !backAccessory) {
                         return;
@@ -52,7 +52,7 @@ UITankIcon.classMethods({
     loadTankIcon: function(canvas, size, turretColour, treadColour, baseColour,
         turretAccessory, barrelAccessory, frontAccessory, backAccessory, treadAccessory, backgroundAccessory, badge,
         onReady, context) {
-            var loader = UITankIconLoader.create(canvas, size);
+            const loader = UITankIconLoader.create(canvas, size);
             
             loader.queueColour(UIConstants.TANK_ICON_TINT_PARTS.TURRET, turretColour);
             loader.queueColour(UIConstants.TANK_ICON_TINT_PARTS.TREAD, treadColour);
@@ -75,7 +75,7 @@ UITankIcon.classMethods({
         turretShade, barrelShade, leftTreadShade, rightTreadShade, baseShade,
         turretAccessory, barrelAccessory, frontAccessory, backAccessory, treadAccessory, backgroundAccessory, badge) {
         
-        var context = canvas.getContext( "2d" );
+        const context = canvas.getContext( "2d" );
 
         // setup offscreen buffer for composited tank
         if (canvas.width != this.compositedBuffer.width || canvas.height != this.compositedBuffer.height)
@@ -84,7 +84,7 @@ UITankIcon.classMethods({
             this.compositedBuffer.height = canvas.height;
         }
 
-        var compositedContext = this.compositedBuffer.getContext('2d');
+        const compositedContext = this.compositedBuffer.getContext('2d');
         compositedContext.clearRect(0, 0, canvas.width, canvas.height);
 
         // setup offscreen buffer for tinted components.
@@ -93,7 +93,7 @@ UITankIcon.classMethods({
             this.tintedBuffer.width = canvas.width;
             this.tintedBuffer.height = canvas.height;
         }
-        var tintedContext = this.tintedBuffer.getContext('2d');
+        const tintedContext = this.tintedBuffer.getContext('2d');
         tintedContext.clearRect(0, 0, canvas.width, canvas.height);
 
         // Composite back accessory into buffer.
@@ -221,7 +221,7 @@ UITankIcon.classMethods({
             this.outlineBuffer.width = canvas.width;
             this.outlineBuffer.height = canvas.height;
         }
-        var outlineContext = this.outlineBuffer.getContext('2d');
+        const outlineContext = this.outlineBuffer.getContext('2d');
 
         outlineContext.globalCompositeOperation = "copy";
         outlineContext.fillStyle = "rgba(0,0,0, 0.8)";
@@ -230,8 +230,8 @@ UITankIcon.classMethods({
         outlineContext.globalCompositeOperation = "destination-atop";
         outlineContext.drawImage(this.compositedBuffer, 0, 0);
         
-        var width = UIConstants.TANK_ICON_OUTLINE_WIDTH;
-        var diagWidth = Math.sqrt((width * width) / 2.0);
+        const width = UIConstants.TANK_ICON_OUTLINE_WIDTH;
+        const diagWidth = Math.sqrt((width * width) / 2.0);
         
         context.drawImage(this.outlineBuffer, -width, 0);
         context.drawImage(this.outlineBuffer, -diagWidth, -diagWidth);

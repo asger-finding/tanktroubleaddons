@@ -12,14 +12,14 @@
  *   AUTHENTICATED: "authenticated"
  * }
  *
- * Listeners are notified of state changes, errors as well as various events
+ * Listeners are notified of state changes, errors as well as constious events
  * of general interest, such as:
  * - The list of available games has been updated
  *
  * The TTClient class is used like this (please note parameters accepted by
  * callback functions):
  *
- * var c = TTClient.create('ws://localhost:12345/');
+ * const c = TTClient.create('ws://localhost:12345/');
  * c.addErrorListener(function(error, message) { ... });
  * c.addStateChangeListener(function(oldState, newState, data, message) { ... });
  * c.addEventListener(function(event, data) { ... });
@@ -102,7 +102,7 @@ if (typeof require === 'function') {
     var PlayerUpdate = require('./playerupdate');
 }
 
-var TTClient = Classy.newClass().name('TTClient');
+const TTClient = Classy.newClass().name('TTClient');
 
 TTClient.classFields({
     log: null
@@ -165,7 +165,7 @@ TTClient.methods({
             case TTClient.STATES.AUTHENTICATED:
             {
                 this.lastPingTime = new Date();
-                var pm = PingMessage.create();
+                const pm = PingMessage.create();
                 this._send(pm);
                 break;
             }
@@ -185,7 +185,7 @@ TTClient.methods({
             {
                 this.playerIdAuthenticationState[playerId] = TTClient.PLAYER_STATES.AUTHENTICATING;
 
-                var msg = AuthenticateMessage.create();
+                const msg = AuthenticateMessage.create();
                 msg.setTokens([token]);
                 msg.setPlayerIds([playerId]);
                 this._send(msg);
@@ -198,7 +198,7 @@ TTClient.methods({
     },
 
     addUsers: function(playerIds, tokens) {
-        for (var i = 0; i < playerIds.length; ++i) {
+        for (let i = 0; i < playerIds.length; ++i) {
             this.playerIds.push(playerIds[i]);
             this.tokens.push(tokens[i]);
             this.playerIdAuthenticationState[playerIds[i]] = TTClient.PLAYER_STATES.NOT_AUTHENTICATED;
@@ -209,11 +209,11 @@ TTClient.methods({
             case TTClient.STATES.HANDSHAKED:
             case TTClient.STATES.AUTHENTICATED:
             {
-                for (var i = 0; i < playerIds.length; ++i) {
+                for (let i = 0; i < playerIds.length; ++i) {
                     this.playerIdAuthenticationState[playerIds[i]] = TTClient.PLAYER_STATES.AUTHENTICATING;
                 }
 
-                var msg = AuthenticateMessage.create();
+                const msg = AuthenticateMessage.create();
                 msg.setTokens(tokens);
                 msg.setPlayerIds(playerIds);
                 this._send(msg);
@@ -226,7 +226,7 @@ TTClient.methods({
     },
 
     removeUser: function(playerId) {
-        for (var i=0;i<this.authenticatedPlayerIds.length;i++) {
+        for (let i = 0;i<this.authenticatedPlayerIds.length;i++) {
             if (this.authenticatedPlayerIds[i]===playerId) {
                 // Remove single entry from array, and return immediately
                 // as continuing iteration is unsafe, as the underlying array
@@ -234,14 +234,14 @@ TTClient.methods({
                 this.authenticatedPlayerIds.splice(i, 1);
 
                 // If already authenticated, send deauthentication message with user.
-                var msg = DeauthenticateMessage.create();
+                const msg = DeauthenticateMessage.create();
                 msg.setPlayerIds([playerId]);
                 this._send(msg);
 
                 break;
             }
         }
-        for (var i=0;i<this.playerIds.length;i++) {
+        for (let i = 0;i<this.playerIds.length;i++) {
             if (this.playerIds[i]===playerId) {
                 // Remove single entry from array, and return immediately
                 // as continuing iteration is unsafe, as the underlying array
@@ -264,7 +264,7 @@ TTClient.methods({
 
     replaceUser: function(playerIdToReplace, playerId, token) {
         // Most of the content of removeUser EXCEPT leaving the game if no players are left.
-        for (var i=0;i<this.authenticatedPlayerIds.length;i++) {
+        for (let i = 0;i<this.authenticatedPlayerIds.length;i++) {
             if (this.authenticatedPlayerIds[i]===playerIdToReplace) {
                 // Remove single entry from array, and return immediately
                 // as continuing iteration is unsafe, as the underlying array
@@ -272,14 +272,14 @@ TTClient.methods({
                 this.authenticatedPlayerIds.splice(i, 1);
 
                 // If already authenticated, send deauthentication message with user.
-                var msg = DeauthenticateMessage.create();
+                const msg = DeauthenticateMessage.create();
                 msg.setPlayerIds([playerIdToReplace]);
                 this._send(msg);
 
                 break;
             }
         }
-        for (var i=0;i<this.playerIds.length;i++) {
+        for (let i = 0;i<this.playerIds.length;i++) {
             if (this.playerIds[i]===playerIdToReplace) {
                 // Remove single entry from array, and return immediately
                 // as continuing iteration is unsafe, as the underlying array
@@ -300,7 +300,7 @@ TTClient.methods({
     updateUser: function(playerId, iconChanged, usernameChanged) {
         // If authenticated, send update player info message with user.
         if (this.playerIdAuthenticationState[playerId] === TTClient.PLAYER_STATES.AUTHENTICATED) {
-            var msg = PlayerUpdatedMessage.create();
+            const msg = PlayerUpdatedMessage.create();
             msg.setPlayerId(playerId);
             msg.setIconChanged(iconChanged);
             msg.setUsernameChanged(usernameChanged);
@@ -322,7 +322,7 @@ TTClient.methods({
     },
 
     connect: function(socketUrl) {
-        var client = this;
+        const client = this;
         this.socketUrl = socketUrl;
         this.socket = new WebSocket(this.socketUrl);
         this.socket.binaryType = "arraybuffer";
@@ -337,7 +337,7 @@ TTClient.methods({
                 client.rxCount += event.data.length;
             }*/
             //client.log.debug("RX bytes: " + client.rxCount);
-            var msg = MessageParser.parse(event.data);
+            const msg = MessageParser.parse(event.data);
             if (msg === false) {
                 client.log.error("Failed to parse data as message:" + event.data);
                 return;
@@ -365,25 +365,25 @@ TTClient.methods({
                 }
                 case GlobalChatMessage.typeId:
                 {
-                    var globalChatPost = ChatPost.create(msg.getFrom(), null, msg.getMessage(), msg.getChatMessageId(), msg.getSendReceipt());
+                    const globalChatPost = ChatPost.create(msg.getFrom(), null, msg.getMessage(), msg.getChatMessageId(), msg.getSendReceipt());
                     client._notifyEventListeners(TTClient.EVENTS.GLOBAL_CHAT_POSTED, globalChatPost);
                     return;
                 }
                 case ChatMessage.typeId:
                 {
-                    var chatPost = ChatPost.create(msg.getFrom(), null, msg.getMessage(), msg.getChatMessageId(), msg.getSendReceipt());
+                    const chatPost = ChatPost.create(msg.getFrom(), null, msg.getMessage(), msg.getChatMessageId(), msg.getSendReceipt());
                     client._notifyEventListeners(TTClient.EVENTS.CHAT_POSTED, chatPost);
                     return;
                 }
                 case UserChatMessage.typeId:
                 {
-                    var userChatPost = ChatPost.create(msg.getFrom(), msg.getTo(), msg.getMessage(), msg.getChatMessageId(), msg.getSendReceipt());
+                    const userChatPost = ChatPost.create(msg.getFrom(), msg.getTo(), msg.getMessage(), msg.getChatMessageId(), msg.getSendReceipt());
                     client._notifyEventListeners(TTClient.EVENTS.USER_CHAT_POSTED, userChatPost);
                     return;
                 }
                 case SystemChatMessage.typeId:
                 {
-                    var systemChatPost = SystemChatPost.create(msg.getInvolvedPlayerIds(), msg.getMessage(), msg.getSendReceipt());
+                    const systemChatPost = SystemChatPost.create(msg.getInvolvedPlayerIds(), msg.getMessage(), msg.getSendReceipt());
                     client._notifyEventListeners(TTClient.EVENTS.SYSTEM_CHAT_POSTED, systemChatPost);
                     return;
                 }
@@ -392,9 +392,9 @@ TTClient.methods({
                     if (msg.getResult()===true) {
                         // Result data should be an array of json structures representing valid stub
                         // games
-                        var resultData = msg.getResultData();
+                        const resultData = msg.getResultData();
                         client.games = [];
-                        for (var i = 0; i < resultData.length; i++) {
+                        for (let i = 0; i < resultData.length; i++) {
                             // Attempt to instantiate Game objects from JSON data provided
                             client.games.push(GameState.withObject(resultData[i]));
                         }
@@ -429,9 +429,9 @@ TTClient.methods({
                 }
                 case PlayersBannedMessage.typeId:
                 {
-                    var playerIds = msg.getPlayerIds();
+                    const playerIds = msg.getPlayerIds();
                     // Invalidate the temp ban cache of banned players.
-                    for (var i = 0; i < playerIds.length; ++i) {
+                    for (let i = 0; i < playerIds.length; ++i) {
                         client.tempBanValidityCache.invalidate(playerIds[i]);
                     }
                     // Tell any listeners that players were banned.
@@ -440,9 +440,9 @@ TTClient.methods({
                 }
                 case PlayersUnbannedMessage.typeId:
                 {
-                    var playerIds = msg.getPlayerIds();
+                    const playerIds = msg.getPlayerIds();
                     // Invalidate the temp ban cache of banned players.
-                    for (var i = 0; i < playerIds.length; ++i) {
+                    for (let i = 0; i < playerIds.length; ++i) {
                         client.tempBanValidityCache.invalidate(playerIds[i]);
                     }
                     // Tell any listeners that players were banned.
@@ -462,7 +462,7 @@ TTClient.methods({
                         client.garageContentCache.invalidate(msg.getPlayerId());
                     }
                     // Tell any listeners that player was updated.
-                    var playerUpdate = PlayerUpdate.create(msg.getPlayerId(), msg.getIconChanged(), msg.getUsernameChanged());
+                    const playerUpdate = PlayerUpdate.create(msg.getPlayerId(), msg.getIconChanged(), msg.getUsernameChanged());
                     client._notifyEventListeners(TTClient.EVENTS.PLAYER_UPDATED, playerUpdate);
                     return;
                 }
@@ -477,7 +477,7 @@ TTClient.methods({
                     // Invalidate the currency of the player.
                     client.currencyCache.invalidate(msg.getPlayerId());
                     // Tell any listeners that an achievement was unlocked.
-                    var achievementUnlock = AchievementUnlock.create(msg.getPlayerId(), msg.getAchievementId());
+                    const achievementUnlock = AchievementUnlock.create(msg.getPlayerId(), msg.getAchievementId());
                     client._notifyEventListeners(TTClient.EVENTS.ACHIEVEMENT_UNLOCKED, achievementUnlock);
                     return;
                 }
@@ -520,11 +520,11 @@ TTClient.methods({
 
                                 // Send an authenticate message if someone is already logged in.
                                 if (client.playerIds.length > 0) {
-                                    for (var i = 0; i < client.playerIds.length; ++i) {
+                                    for (let i = 0; i < client.playerIds.length; ++i) {
                                         client.playerIdAuthenticationState[client.playerIds[i]] = TTClient.PLAYER_STATES.AUTHENTICATING;
                                     }
 
-                                    var msg = AuthenticateMessage.create();
+                                    const msg = AuthenticateMessage.create();
                                     msg.setTokens(client.tokens);
                                     msg.setPlayerIds(client.playerIds);
                                     client._send(msg);
@@ -532,7 +532,7 @@ TTClient.methods({
                                     client._notifyEventListeners(TTClient.EVENTS.PLAYERS_AUTHENTICATING, client.playerIds);
                                 }
                             } else {
-                                var shutdown = Shutdown.create(msg.getMessage(), msg.getResultData());
+                                const shutdown = Shutdown.create(msg.getMessage(), msg.getResultData());
 
                                 client._notifyEventListeners(TTClient.EVENTS.SHUTDOWN, shutdown);
                                 // Removed since a failure to handshake will be handled by shutting the client down.
@@ -557,11 +557,11 @@ TTClient.methods({
                                 // AuthenticateResultMessage contains player details as payload data
                                 // so we retrieve that here, and store player details for the authenticated
                                 // player in the player details cache
-                                var playerDetailsObjects = msg.getResultData();
-                                var playerIds = [];
+                                const playerDetailsObjects = msg.getResultData();
+                                const playerIds = [];
 
-                                for (var i = 0; i < playerDetailsObjects.length; ++i) {
-                                    var playerDetails = PlayerDetails.withObject(playerDetailsObjects[i]);
+                                for (let i = 0; i < playerDetailsObjects.length; ++i) {
+                                    const playerDetails = PlayerDetails.withObject(playerDetailsObjects[i]);
                                     client.playerDetailsCache.set(
                                         playerDetails.getPlayerId(),
                                         playerDetails
@@ -609,11 +609,11 @@ TTClient.methods({
                                 // AuthenticateResultMessage contains player details as payload data
                                 // so we retrieve that here, and store player details for the authenticated
                                 // player in the player details cache
-                                var playerDetailsObjects = msg.getResultData();
-                                var playerIds = [];
+                                const playerDetailsObjects = msg.getResultData();
+                                const playerIds = [];
 
-                                for (var i = 0; i < playerDetailsObjects.length; ++i) {
-                                    var playerDetails = PlayerDetails.withObject(playerDetailsObjects[i]);
+                                for (let i = 0; i < playerDetailsObjects.length; ++i) {
+                                    const playerDetails = PlayerDetails.withObject(playerDetailsObjects[i]);
                                     client.playerDetailsCache.set(
                                         playerDetails.getPlayerId(),
                                         playerDetails
@@ -627,7 +627,7 @@ TTClient.methods({
                                 }
 
                                 if (client.currentGameId) {
-                                    var msg = JoinGameMessage.create();
+                                    const msg = JoinGameMessage.create();
                                     msg.setGameId(client.currentGameId);
                                     msg.setPlayerIds(playerIds);
                                     client._send(msg);
@@ -705,10 +705,10 @@ TTClient.methods({
                         {
                             if (msg.getResult()===true) {
                                 // Result data should be a json structure representing maze
-                                var resultData = msg.getResultData();
-                                var maze = Maze.withObject(resultData);
+                                const resultData = msg.getResultData();
+                                const maze = Maze.withObject(resultData);
 
-                                var gameController = client.gameManager.getGameController();
+                                const gameController = client.gameManager.getGameController();
                                 if (gameController) {
                                     gameController.setMaze(maze);
                                 }
@@ -731,7 +731,7 @@ TTClient.methods({
                                 client.focusManager.showMessageInTitle("Go!");
                             }
 
-                            var gameController = client.gameManager.getGameController();
+                            const gameController = client.gameManager.getGameController();
                             if (gameController) {
                                 gameController.startRound();
                             }
@@ -739,7 +739,7 @@ TTClient.methods({
                         }
                         case CelebrationStartedMessage.typeId:
                         {
-                            var gameController = client.gameManager.getGameController();
+                            const gameController = client.gameManager.getGameController();
                             if (gameController) {
                                 gameController.startCelebration();
                             }
@@ -747,7 +747,7 @@ TTClient.methods({
                         }
                         case CountDownMessage.typeId:
                         {
-                            var gameController = client.gameManager.getGameController();
+                            const gameController = client.gameManager.getGameController();
                             if (gameController) {
                                 gameController.countDown(msg.getValue());
                             }
@@ -775,7 +775,7 @@ TTClient.methods({
                         }
                         case ProjectileTimeoutMessage.typeId:
                         {
-                            var gameController = client.gameManager.getGameController();
+                            const gameController = client.gameManager.getGameController();
                             if (gameController) {
                                 gameController.timeoutProjectile(msg.getProjectileId());
                             }
@@ -783,7 +783,7 @@ TTClient.methods({
                         }
                         case ProjectileDestroyedMessage.typeId:
                         {
-                            var gameController = client.gameManager.getGameController();
+                            const gameController = client.gameManager.getGameController();
                             if (gameController) {
                                 gameController.destroyProjectile(msg.getProjectileId());
                             }
@@ -833,7 +833,7 @@ TTClient.methods({
         this.socket.onerror = function(event) {
             client._stopPinging();
 
-            for (var i = 0; i < client.playerIds.length; ++i) {
+            for (let i = 0; i < client.playerIds.length; ++i) {
                 client.playerIdAuthenticationState[client.playerIds[i]] = TTClient.PLAYER_STATES.NOT_AUTHENTICATED;
             }
             client.authenticatedPlayerIds = [];
@@ -844,7 +844,7 @@ TTClient.methods({
         this.socket.onclose = function(event) {
             client._stopPinging();
 
-            for (var i = 0; i < client.playerIds.length; ++i) {
+            for (let i = 0; i < client.playerIds.length; ++i) {
                 client.playerIdAuthenticationState[client.playerIds[i]] = TTClient.PLAYER_STATES.NOT_AUTHENTICATED;
             }
             client.authenticatedPlayerIds = [];
@@ -863,7 +863,7 @@ TTClient.methods({
             client._setState(TTClient.STATES.CONNECTED);
 
             // Send handshake message.
-            var msg = HandshakeMessage.create();
+            const msg = HandshakeMessage.create();
             msg.setClientId(client.id);
             msg.setVersion(client.version);
             client._send(msg);
@@ -875,7 +875,7 @@ TTClient.methods({
     _startPinging: function() {
         // Set a timer to measure ping times at regular intervals
         if (!this.pingInterval) {
-            var self = this;
+            const self = this;
             this.pingInterval = setInterval(
                 function() {
                     self.ping()
@@ -904,7 +904,7 @@ TTClient.methods({
     _endGame: function() {
         this._clearGame();
 
-        var gameController = this.gameManager.getGameController();
+        const gameController = this.gameManager.getGameController();
         if (gameController) {
             gameController.endGame();
         }
@@ -918,25 +918,25 @@ TTClient.methods({
             return;
         }
 
-        var oldState = this.state;
+        const oldState = this.state;
         this.state = newState;
         this._notifyStateChangeListeners(oldState, this.state, data, msg);
     },
 
     _notifyStateChangeListeners: function(oldState, newState, data, msg) {
-        for (var i=0;i<this.stateChangeListeners.length;i++) {
+        for (let i = 0;i<this.stateChangeListeners.length;i++) {
             this.stateChangeListeners[i].cb(this.stateChangeListeners[i].ctxt, oldState, newState, data, msg);
         }
     },
 
     _notifyErrorListeners: function(error, msg) {
-        for (var i=0;i<this.errorListeners.length;i++) {
+        for (let i = 0;i<this.errorListeners.length;i++) {
             this.errorListeners[i].cb(this.errorListeners[i].ctxt, error, msg);
         }
     },
 
     _notifyEventListeners: function(evt, data) {
-        for (var i=0;i<this.eventListeners.length;i++) {
+        for (let i = 0;i<this.eventListeners.length;i++) {
             this.eventListeners[i].cb(this.eventListeners[i].ctxt, evt, data);
         }
     },
@@ -946,7 +946,7 @@ TTClient.methods({
     },
 
     removeErrorListener: function(callback, context) {
-        for (var i=0;i<this.errorListeners.length;i++) {
+        for (let i = 0;i<this.errorListeners.length;i++) {
             if (this.errorListeners[i].cb===callback && this.errorListeners[i].ctxt===context) {
                 // Remove single entry from array, and return immediately
                 // as continuing iteration is unsafe, as the underlying array
@@ -961,7 +961,7 @@ TTClient.methods({
     },
 
     removeEventListener: function(callback, context) {
-        for (var i=0;i<this.eventListeners.length;i++) {
+        for (let i = 0;i<this.eventListeners.length;i++) {
             if (this.eventListeners[i].cb===callback && this.eventListeners[i].ctxt===context) {
                 // Remove single entry from array, and return immediately
                 // as continuing iteration is unsafe, as the underlying array
@@ -977,7 +977,7 @@ TTClient.methods({
     },
 
     removeStateChangeListener: function(callback, context) {
-        for (var i=0;i<this.stateChangeListeners.length;i++) {
+        for (let i = 0;i<this.stateChangeListeners.length;i++) {
             if (this.stateChangeListeners[i].cb===callback && this.stateChangeListeners[i].ctxt===context) {
                 // Remove single entry from array, and return immediately
                 // as continuing iteration is unsafe, as the underlying array
@@ -996,32 +996,32 @@ TTClient.methods({
     },
 
     _tankStateMessageHandler: function(msg) {
-        var ts = msg.getTankState();
+        const ts = msg.getTankState();
 
-        var gameController = this.gameManager.getGameController();
+        const gameController = this.gameManager.getGameController();
         if (gameController) {
             gameController.setTankState(ts)
         }
     },
     
     _roundStateMessageHandler: function(msg) {
-        var rs = msg.getRoundState();
+        const rs = msg.getRoundState();
         if (rs.getWeaponStates().length > 0) {
             this.expandedRoundState = rs;
         }
         this.roundState = rs;
 
-        var gameController = this.gameManager.getGameController();
+        const gameController = this.gameManager.getGameController();
         if (gameController) {
             gameController.setRoundState(rs);
         }
     },
 
     _gameStateMessageHandler: function(msg) {
-        var gs = msg.getGameState();
+        const gs = msg.getGameState();
         this.gameState = gs;
 
-        var gameController = this.gameManager.getGameController();
+        const gameController = this.gameManager.getGameController();
         if (gameController) {
             gameController.setGameState(gs);
         }
@@ -1033,27 +1033,27 @@ TTClient.methods({
             this.playerDetailsCache.invalidate(msg.getKillerPlayerId());
         }
 
-        var kill = Kill.create(msg.getVictimPlayerId(), msg.getKillerPlayerId(), msg.getExperience(), msg.getDeadlyId(), msg.getDeadlyType());
+        const kill = Kill.create(msg.getVictimPlayerId(), msg.getKillerPlayerId(), msg.getExperience(), msg.getDeadlyId(), msg.getDeadlyType());
 
-        var gameController = this.gameManager.getGameController();
+        const gameController = this.gameManager.getGameController();
         if (gameController) {
             gameController.killTank(kill);
         }
     },
 
     _tankDestroyedMessageHandler: function(msg) {
-        var playerId = msg.getPlayerId();
+        const playerId = msg.getPlayerId();
 
-        var gameController = this.gameManager.getGameController();
+        const gameController = this.gameManager.getGameController();
         if (gameController) {
             gameController.destroyTank(playerId);
         }
     },
 
     _collectibleDestroyedMessageHandler: function(msg) {
-        var gameController = this.gameManager.getGameController();
+        const gameController = this.gameManager.getGameController();
         if (gameController) {
-            var collectible = gameController.getCollectible(msg.getCollectibleId());
+            const collectible = gameController.getCollectible(msg.getCollectibleId());
             if (collectible) {
                 if (collectible.getType() === Constants.COLLECTIBLE_TYPES.GOLD || collectible.getType() === Constants.COLLECTIBLE_TYPES.DIAMOND) {
                     // Invalidate the involved player's currency.
@@ -1064,7 +1064,7 @@ TTClient.methods({
                 }
             }
 
-            var pickup = Pickup.create(msg.getPlayerId(), msg.getCollectibleId());
+            const pickup = Pickup.create(msg.getPlayerId(), msg.getCollectibleId());
 
             gameController.destroyCollectible(pickup);
         }
@@ -1072,36 +1072,36 @@ TTClient.methods({
     },
 
     _weaponDestroyedMessageHandler: function(msg) {
-        var weaponDeactivation = WeaponDeactivation.create(msg.getWeaponId(), msg.getPlayerId());
+        const weaponDeactivation = WeaponDeactivation.create(msg.getWeaponId(), msg.getPlayerId());
 
-        var gameController = this.gameManager.getGameController();
+        const gameController = this.gameManager.getGameController();
         if (gameController) {
             gameController.destroyWeapon(weaponDeactivation);
         }
     },
 
     _upgradeDestroyedMessageHandler: function(msg) {
-        var upgradeUpdate = UpgradeUpdate.create(msg.getUpgradeId(), msg.getPlayerId());
+        const upgradeUpdate = UpgradeUpdate.create(msg.getUpgradeId(), msg.getPlayerId());
 
-        var gameController = this.gameManager.getGameController();
+        const gameController = this.gameManager.getGameController();
         if (gameController) {
             gameController.destroyUpgrade(upgradeUpdate);
         }
     },
 
     _counterDestroyedMessageHandler: function(msg) {
-        var counterId = msg.getCounterId();
+        const counterId = msg.getCounterId();
 
-        var gameController = this.gameManager.getGameController();
+        const gameController = this.gameManager.getGameController();
         if (gameController) {
             gameController.destroyCounter(counterId);
         }
     },
 
     _zoneDestroyedMessageHandler: function(msg) {
-        var zoneId = msg.getZoneId();
+        const zoneId = msg.getZoneId();
 
-        var gameController = this.gameManager.getGameController();
+        const gameController = this.gameManager.getGameController();
         if (gameController) {
             gameController.destroyZone(zoneId);
         }
@@ -1113,7 +1113,7 @@ TTClient.methods({
             this.focusManager.showMessageInTitle("Ready!");
         }
 
-        var gameController = this.gameManager.getGameController();
+        const gameController = this.gameManager.getGameController();
         if (gameController) {
             gameController.createRound(msg.getRanked());
         }
@@ -1122,9 +1122,9 @@ TTClient.methods({
     },
 
     _roundEndedMessageHandler: function(msg) {
-        var goldAmount = msg.getVictoryGoldAmountPerWinner();
-        for (var i = 0; i < msg.getWinnerPlayerIds().length; ++i) {
-            var playerId = msg.getWinnerPlayerIds()[i];
+        const goldAmount = msg.getVictoryGoldAmountPerWinner();
+        for (let i = 0; i < msg.getWinnerPlayerIds().length; ++i) {
+            const playerId = msg.getWinnerPlayerIds()[i];
 
             // Invalidate the winning player's details.
             this.playerDetailsCache.invalidate(playerId);
@@ -1138,8 +1138,8 @@ TTClient.methods({
             }
         }
 
-        for (var i = 0; i < msg.getRankChanges().length; ++i) {
-            var rankChange = msg.getRankChanges()[i];
+        for (let i = 0; i < msg.getRankChanges().length; ++i) {
+            const rankChange = msg.getRankChanges()[i];
 
             // Invalidate the ranked player's details.
             this.playerDetailsCache.invalidate(rankChange.playerId);
@@ -1154,33 +1154,33 @@ TTClient.methods({
             this.focusManager.clearTitle();
         }
 
-        var victoryAward = VictoryAward.create(msg.getWinnerPlayerIds(), msg.getVictoryExperiencePerWinner(), msg.getVictoryGoldAmountPerWinner(), msg.getRankChanges());
+        const victoryAward = VictoryAward.create(msg.getWinnerPlayerIds(), msg.getVictoryExperiencePerWinner(), msg.getVictoryGoldAmountPerWinner(), msg.getRankChanges());
 
-        var gameController = this.gameManager.getGameController();
+        const gameController = this.gameManager.getGameController();
         if (gameController) {
             gameController.endRound(victoryAward);
         }
     },
 
     _stakesMessageHandler: function(msg) {
-        var gameController = this.gameManager.getGameController();
+        const gameController = this.gameManager.getGameController();
         if (gameController) {
             gameController.setStakes(msg.getStakes());
         }
     },
     
     _playerKickedMessageHandler: function(msg) {
-        var playerKick = PlayerKick.create([msg.getPlayerId()], msg.getReason());
+        const playerKick = PlayerKick.create([msg.getPlayerId()], msg.getReason());
         this._notifyEventListeners(TTClient.EVENTS.PLAYERS_KICKED, playerKick);
     },
     
     _kickAllUsers: function() {
-        var playerKick = PlayerKick.create(this.playerIds, true, false, "All players were kicked due to an unexpected error");
+        const playerKick = PlayerKick.create(this.playerIds, true, false, "All players were kicked due to an unexpected error");
         this._notifyEventListeners(TTClient.EVENTS.PLAYERS_KICKED, playerKick);
     },
 
     _shutdownMessageHandler: function(msg) {
-        var shutdown = Shutdown.create(msg.getReason(), false);
+        const shutdown = Shutdown.create(msg.getReason(), false);
         this._notifyEventListeners(TTClient.EVENTS.SHUTDOWN, shutdown);
     },
 
@@ -1194,7 +1194,7 @@ TTClient.methods({
         }
         //this.log.debug("Sending message " + message.pack());
         try {
-            var packedMessage = message.pack();
+            const packedMessage = message.pack();
 
             return this.socket.send(packedMessage);
         } catch (e) {
@@ -1205,27 +1205,27 @@ TTClient.methods({
     },
 
     chatActivity: function() {
-        var msg = ChatActivityMessage.create();
+        const msg = ChatActivityMessage.create();
         msg.setPlayerIds(this.authenticatedPlayerIds);
         this._send(msg);
     },
 
     globalChat: function(message) {
-        var msg = GlobalChatMessage.create();
+        const msg = GlobalChatMessage.create();
         msg.setFrom(this.authenticatedPlayerIds);
         msg.setMessage(message);
         this._send(msg);
     },
 
     chat: function(message) {
-        var msg = ChatMessage.create();
+        const msg = ChatMessage.create();
         msg.setFrom(this.authenticatedPlayerIds);
         msg.setMessage(message);
         this._send(msg);
     },
 
     userChat: function(recipientPlayerIds, message) {
-        var msg = UserChatMessage.create();
+        const msg = UserChatMessage.create();
         msg.setTo(recipientPlayerIds);
         msg.setFrom(this.authenticatedPlayerIds);
         msg.setMessage(message);
@@ -1233,21 +1233,21 @@ TTClient.methods({
     },
     
     reportChat: function(chatMessageId) {
-        var msg = ReportChatMessage.create();
+        const msg = ReportChatMessage.create();
         msg.setReporters(this.authenticatedPlayerIds);
         msg.setChatMessageId(chatMessageId);
         this._send(msg);
     },
     
     undoChatReport: function(chatMessageId) {
-        var msg = UndoChatReportMessage.create();
+        const msg = UndoChatReportMessage.create();
         msg.setReporters(this.authenticatedPlayerIds);
         msg.setChatMessageId(chatMessageId);
         this._send(msg);
     },
     
     updateGameList: function() {
-        var listGamesMsg = ListGamesMessage.create();
+        const listGamesMsg = ListGamesMessage.create();
         this._send(listGamesMsg);
     },
 
@@ -1256,30 +1256,30 @@ TTClient.methods({
     },
 
     joinGame: function(gameId) {
-        var msg = JoinGameMessage.create();
+        const msg = JoinGameMessage.create();
         msg.setGameId(gameId);
         msg.setPlayerIds(this.authenticatedPlayerIds);
         this._send(msg);
     },
     
     leaveGame: function(force) {
-        var msg = LeaveGameMessage.create();
+        const msg = LeaveGameMessage.create();
         msg.setForce(force);
         this._send(msg);
     },
 
     cancelLeaveGame: function() {
-        var msg = CancelLeaveGameMessage.create();
+        const msg = CancelLeaveGameMessage.create();
         this._send(msg);
     },
 
     requestMaze: function() {
-        var msg = RequestMazeMessage.create();
+        const msg = RequestMazeMessage.create();
         this._send(msg);
     },
 
     createGame: function(ranked, gameMode) {
-        var msg = CreateGameMessage.create();
+        const msg = CreateGameMessage.create();
         msg.setRanked(ranked);
         msg.setGameMode(gameMode);
         this._send(msg);
@@ -1322,7 +1322,7 @@ TTClient.methods({
 
     setTankState: function(tankState) {
         if (this.currentGameId) {
-            var tankStateMsg = TankStateMessage.create();
+            const tankStateMsg = TankStateMessage.create();
             tankStateMsg.setTankState(tankState);
             this._send(tankStateMsg);
         } else {

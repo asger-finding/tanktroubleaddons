@@ -1,4 +1,4 @@
-var TankTrouble = TankTrouble || {};
+const TankTrouble = TankTrouble || {};
 
 TankTrouble.VirtualShopOverlay = {
     wrapper: null,
@@ -54,7 +54,7 @@ TankTrouble.VirtualShopOverlay = {
     },
 
     removeEventListener: function(callback, context) {
-        for (var i=0;i<this.eventListeners.length;i++) {
+        for (let i = 0;i<this.eventListeners.length;i++) {
             if (this.eventListeners[i].cb===callback && this.eventListeners[i].ctxt===context) {
                 // Remove single entry from array, and return immediately
                 // as continuing iteration is unsafe, as the underlying array
@@ -85,7 +85,7 @@ TankTrouble.VirtualShopOverlay = {
         this.itemList.hide();
         this.itemList.empty();
 
-        var self = this;
+        const self = this;
 
         Backend.getInstance().getVirtualShopItems(
             function(result) {
@@ -96,7 +96,7 @@ TankTrouble.VirtualShopOverlay = {
                     Backend.getInstance().getCurrency(
                         function(res) {
                             if (typeof res == 'object') {
-                                var button = self.wallet.find("button");
+                                const button = self.wallet.find("button");
                                 button.empty();
 
                                 Utils.addImageWithClasses(button, "", "assets/images/virtualShop/gold.png");
@@ -187,11 +187,11 @@ TankTrouble.VirtualShopOverlay = {
         this.itemList.hide();
         this.itemList.empty();
 
-        var promoted = [];
-        var passed = [];
+        const promoted = [];
+        const passed = [];
 
-        for (var i = 0; i < this.shopItems.length; ++i) {
-            var filterPassed = true;
+        for (let i = 0; i < this.shopItems.length; ++i) {
+            let filterPassed = true;
 
             if (filter == 0) {
                 // Special - everything that is not always available.
@@ -229,7 +229,7 @@ TankTrouble.VirtualShopOverlay = {
     },
 
     _notifyEventListeners: function(evt, data) {
-        for (var i = 0; i < this.eventListeners.length; i++) {
+        for (let i = 0; i < this.eventListeners.length; i++) {
             this.eventListeners[i].cb(this.eventListeners[i].ctxt, evt, data);
         }
     }

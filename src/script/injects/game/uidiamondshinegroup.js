@@ -39,16 +39,16 @@ UIDiamondShineGroup.prototype.update = function()
     this.animationTime += this.game.time.delta / 1000;
 
     // Animate glow.
-    var glowScaleAnimationValue = (Math.cos(this.animationTime * 2.0 * Math.PI) / UIConstants.DIAMOND_GLOW_SCALE_CYCLE_SPEED) * 0.25 + 1.25;
+    const glowScaleAnimationValue = (Math.cos(this.animationTime * 2.0 * Math.PI) / UIConstants.DIAMOND_GLOW_SCALE_CYCLE_SPEED) * 0.25 + 1.25;
     this.glowImage.scale.setTo(glowScaleAnimationValue, glowScaleAnimationValue);
 
     // Animate rays.
     this.firstRayImage.rotation += UIConstants.DIAMOND_FIRST_RAY_ROTATION_SPEED * this.game.time.delta / 1000;
     this.secondRayImage.rotation += UIConstants.DIAMOND_SECOND_RAY_ROTATION_SPEED * this.game.time.delta / 1000;
 
-    var firstRayAlphaAnimationTime = this.animationTime * 2.0 * Math.PI;
+    const firstRayAlphaAnimationTime = this.animationTime * 2.0 * Math.PI;
     this.firstRayImage.alpha = Math.cos(firstRayAlphaAnimationTime / UIConstants.DIAMOND_FIRST_RAY_OPACITY_CYCLE_SPEED) * 0.4 + 0.6;
-    var secondRayAlphaAnimationTime = ((this.animationTime + UIConstants.DIAMOND_SECOND_RAY_OPACITY_CYCLE_PHASE) * 2.0 * Math.PI);
+    const secondRayAlphaAnimationTime = ((this.animationTime + UIConstants.DIAMOND_SECOND_RAY_OPACITY_CYCLE_PHASE) * 2.0 * Math.PI);
     this.secondRayImage.alpha = Math.cos(secondRayAlphaAnimationTime / UIConstants.DIAMOND_SECOND_RAY_OPACITY_CYCLE_SPEED) * 0.4 + 0.6;
 };
 

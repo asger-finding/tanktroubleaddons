@@ -1,7 +1,7 @@
 //FIXME See if this can be ported to Classy.
 UIExplosionFragmentSprite = function(game)
 {
-    var randomFragmentIndex = Math.floor(Math.random() * 10);
+    const randomFragmentIndex = Math.floor(Math.random() * 10);
 
     // Call super.
     Phaser.Sprite.call(this, game, 0, 0, 'game', 'fragment' + randomFragmentIndex);
@@ -66,7 +66,7 @@ UIExplosionFragmentSprite.prototype.spawn = function(x, y, playerId)
     this.playerId = playerId;
     
     // Send request for player details.
-    var self = this;
+    const self = this;
     Backend.getInstance().getPlayerDetails(
         function(result) {
             if (typeof(result) == "object") {
@@ -89,10 +89,10 @@ UIExplosionFragmentSprite.prototype.spawn = function(x, y, playerId)
     );
     
     // Determine a random direction for the fragment.
-    var speed = UIConstants.EXPLOSION_FRAGMENT_MIN_SPEED + Math.random() * (UIConstants.EXPLOSION_FRAGMENT_MAX_SPEED - UIConstants.EXPLOSION_FRAGMENT_MIN_SPEED);
-    var direction = Math.random() * Math.PI * 2.0;
-    var speedX = Math.cos(direction) * speed;
-    var speedY = Math.sin(direction) * speed;
+    const speed = UIConstants.EXPLOSION_FRAGMENT_MIN_SPEED + Math.random() * (UIConstants.EXPLOSION_FRAGMENT_MAX_SPEED - UIConstants.EXPLOSION_FRAGMENT_MIN_SPEED);
+    const direction = Math.random() * Math.PI * 2.0;
+    const speedX = Math.cos(direction) * speed;
+    const speedY = Math.sin(direction) * speed;
     
     x += Math.cos(direction) * (Math.random() * Constants.TANK.WIDTH.px/4.0 + Constants.TANK.WIDTH.px/4.0);
     y += Math.sin(direction) * (Math.random() * Constants.TANK.WIDTH.px/4.0 + Constants.TANK.WIDTH.px/4.0);

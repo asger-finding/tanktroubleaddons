@@ -50,7 +50,7 @@ UILaserGraphics.prototype.update = function()
     
     if (this.expanding) {
         // Add position from game model.
-        var laser = this.gameController.getProjectile(this.laserId);
+        const laser = this.gameController.getProjectile(this.laserId);
         if (laser)
         {
             this.laserPositions.push({x: UIUtils.mpx(laser.getX()), y: UIUtils.mpx(laser.getY()), updatePoint: true})
@@ -64,7 +64,7 @@ UILaserGraphics.prototype.update = function()
     
     if (this.laserPositions.length >= 2) {
         this.moveTo(this.laserPositions[0].x, this.laserPositions[0].y);
-        for (var i = 1; i < this.laserPositions.length; ++i) {
+        for (let i = 1; i < this.laserPositions.length; ++i) {
             this.lineTo(this.laserPositions[i].x, this.laserPositions[i].y);
         }
     }
@@ -81,7 +81,7 @@ UILaserGraphics.prototype.spawn = function(x, y, laserId, playerId)
     
     // Reset state.
     this.laserPositions = [];
-    var tank = this.gameController.getTank(this.playerId);
+    const tank = this.gameController.getTank(this.playerId);
     if (tank) {
         this.laserPositions.push({x: UIUtils.mpx(tank.getX()), y: UIUtils.mpx(tank.getY()), updatePoint: false});
     }
@@ -92,7 +92,7 @@ UILaserGraphics.prototype.spawn = function(x, y, laserId, playerId)
     this.timeAlive = 0.0;
 
     // Send request for player details.
-    var self = this;
+    const self = this;
     Backend.getInstance().getPlayerDetails(
         function(result) {
             if (typeof(result) == "object") {

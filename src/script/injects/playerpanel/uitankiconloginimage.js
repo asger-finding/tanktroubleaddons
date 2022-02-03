@@ -42,8 +42,8 @@ UITankIconLoginImage = function(game, size)
         
         },
         function(self) {
-            var gameBounds = self.game.scale.bounds;
-            var position = self.toGlobal(new Phaser.Point(0, 0));
+            const gameBounds = self.game.scale.bounds;
+            const position = self.toGlobal(new Phaser.Point(0, 0));
             // Scale from game canvas position to pixel position.
             Phaser.Point.divide(position, self.game.scale.scaleFactor, position);
             TankTrouble.AddUserBox.show(gameBounds.x + position.x, gameBounds.y + position.y, "top", Math.abs(self.iconHeight) / self.game.scale.scaleFactor.y * 0.25);
@@ -82,7 +82,7 @@ UITankIconLoginImage.prototype.spawn = function(x, y, targetScale)
         this.removeTween = null;
     }
     
-    var delay = 50 + Math.random() * 200;
+    const delay = 50 + Math.random() * 200;
 
     this.spawnTween = this.game.add.tween(this.scale).to({x: this.targetScale, y: this.targetScale}, UIConstants.ELEMENT_POP_IN_TIME, Phaser.Easing.Back.Out, true, delay);
 }

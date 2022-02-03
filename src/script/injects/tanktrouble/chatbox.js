@@ -1,4 +1,4 @@
-var TankTrouble = TankTrouble || {};
+const TankTrouble = TankTrouble || {};
 
 TankTrouble.ChatBox = {
     // jQuery objects.
@@ -63,7 +63,7 @@ TankTrouble.ChatBox = {
     
         $("body").append(this.chat);
     
-        var self = this;
+        const self = this;
     
         this.chatForm.submit(function(event) {
             self.sendChat();
@@ -177,7 +177,7 @@ TankTrouble.ChatBox = {
     },
 
     removeEventListener: function(callback, context) {
-        for (var i=0;i<this.eventListeners.length;i++) {
+        for (let i = 0;i<this.eventListeners.length;i++) {
             if (this.eventListeners[i].cb===callback && this.eventListeners[i].ctxt===context) {
                 // Remove single entry from array, and return immediately
                 // as continuing iteration is unsafe, as the underlying array
@@ -206,7 +206,7 @@ TankTrouble.ChatBox = {
             this.chatStatusNew.hide("scale", 50);
             
             // Wait until chat body has started fading in to render messages and remove messages that are too far down the list.
-            var self = this;
+            const self = this;
             this.updateChatTimeout = setTimeout(function() {self._refreshChat(false);}, 300);
         }
     },
@@ -239,7 +239,7 @@ TankTrouble.ChatBox = {
             return;
         }
 
-        var self = this;
+        const self = this;
 
         // Get username from player details.
         Backend.getInstance().getPlayerDetails(
@@ -268,19 +268,19 @@ TankTrouble.ChatBox = {
     addSystemMessage: function(playerIds, message) {
         if (playerIds.length > 0) {
             // Look up usernames from player ids.
-            var numDetailsResponses = 0;
-            var numExpectedDetailsResponses = playerIds.length;
-            var usernameMap = {};
-            for (var i = 0; i < playerIds.length; ++i) {
+            let numDetailsResponses = 0;
+            const numExpectedDetailsResponses = playerIds.length;
+            const usernameMap = {};
+            for (let i = 0; i < playerIds.length; ++i) {
                 usernameMap[playerIds[i]] = "<ERROR>";
             }
 
-            var self = this;
-            for (var i = 0; i < playerIds.length; ++i) {
+            const self = this;
+            for (let i = 0; i < playerIds.length; ++i) {
                 Backend.getInstance().getPlayerDetails(
                     function(result) {
                         if (typeof(result) == "object") {
-                            var username = Utils.maskUnapprovedUsername(result);
+                            const username = Utils.maskUnapprovedUsername(result);
                             usernameMap[result.getPlayerId()] = username;
                         }
                     }, 
@@ -308,22 +308,20 @@ TankTrouble.ChatBox = {
 
     addGlobalChatMessage: function(from, message, chatMessageId) {
         // Look up usernames from player ids.
-        var playerIds = from;
 
         this._lookUpUsernamesAndAddChatMessage(from, null, false, "#68c5ff", "#333333", message, chatMessageId);
     },
     
     addChatMessage: function(from, message, chatMessageId) {
         // Look up usernames from player ids.
-        var playerIds = from;
 
         this._lookUpUsernamesAndAddChatMessage(from, null, false, "#000000", "#ffffff", message, chatMessageId);
     },
     
     addUserChatMessage: function(from, to, message, chatMessageId) {
         // Check if one of the senders is a local player. If so, we also need to get the recipients usernames.
-        var addRecipients = false;
-        for (var i = 0; i < from.length; ++i) {
+        let addRecipients = false;
+        for (let i = 0; i < from.length; ++i) {
             if (Users.isAnyUser(from[i])) {
                 addRecipients = true;
             }
@@ -337,24 +335,24 @@ TankTrouble.ChatBox = {
             return;
         }
 
-        var message = this._parseChat();
+        const message = this._parseChat();
 
         // Look up player ids from usernames.
         if (this.ignoreeUsernames.length > 0) {
-            var usernames = this.ignoreeUsernames;
-            var numUsernameResponses = 0;
-            var numExpectedUsernameResponses = this.ignoreeUsernames.length;
-            var adminPlayerIds = [];
-            var playerIdsIgnoringThemselves = [];
-            var newlyChangedIgnoreePlayerIds = [];
-            var playerIdMap = {};
-            for (var i = 0; i < usernames.length; ++i) {
+            const usernames = this.ignoreeUsernames;
+            let numUsernameResponses = 0;
+            const numExpectedUsernameResponses = this.ignoreeUsernames.length;
+            const adminPlayerIds = [];
+            const playerIdsIgnoringThemselves = [];
+            const newlyChangedIgnoreePlayerIds = [];
+            const playerIdMap = {};
+            for (let i = 0; i < usernames.length; ++i) {
                 playerIdMap[usernames[i]] = null;
             }
 
-            var self = this;
-            var correctlyCasedUsernames = [];
-            for (var i = 0; i < usernames.length; ++i) {
+            const self = this;
+            const correctlyCasedUsernames = [];
+            for (let i = 0; i < usernames.length; ++i) {
                 Backend.getInstance().getPlayerDetailsByUsername(
                     function (result) {
                         if (typeof(result) == "object") {
@@ -380,7 +378,7 @@ TankTrouble.ChatBox = {
                         // If we have them all, collect any player ids found and send chat message.
                         if (numUsernameResponses == numExpectedUsernameResponses) {
                             // Since the usernames typed in might be wrongly cased, we use the "normalized" usernames that get back from the backend.
-                            for (var j = 0; j < correctlyCasedUsernames.length; ++j) {
+                            for (let j = 0; j < correctlyCasedUsernames.length; ++j) {
                                 if (playerIdMap[correctlyCasedUsernames[j]]) {
                                     if (self.addingToIgnoreList) {
                                         if (self.ignoredPlayerIds.indexOf(playerIdMap[correctlyCasedUsernames[j]]) == -1) {
@@ -424,18 +422,18 @@ TankTrouble.ChatBox = {
                 );
             }
         } else if (this.recipientUsernames.length > 0) {
-            var usernames = this.recipientUsernames;
-            var numUsernameResponses = 0;
-            var numExpectedUsernameResponses = this.recipientUsernames.length;
-            var playerIdsTalkingToThemselves = [];
-            var playerIdMap = {};
-            for (var i = 0; i < usernames.length; ++i) {
+            const usernames = this.recipientUsernames;
+            let numUsernameResponses = 0;
+            const numExpectedUsernameResponses = this.recipientUsernames.length;
+            const playerIdsTalkingToThemselves = [];
+            const playerIdMap = {};
+            for (let i = 0; i < usernames.length; ++i) {
                 playerIdMap[usernames[i]] = null;
             }
 
-            var self = this;
-            var correctlyCasedUsernames = [];
-            for (var i = 0; i < usernames.length; ++i) {
+            const self = this;
+            const correctlyCasedUsernames = [];
+            for (let i = 0; i < usernames.length; ++i) {
                 Backend.getInstance().getPlayerDetailsByUsername(
                     function(result) {
                         if (typeof(result) == "object") {
@@ -457,7 +455,7 @@ TankTrouble.ChatBox = {
                         // If we have them all, collect any player ids found and send chat message.
                         if (numUsernameResponses == numExpectedUsernameResponses) {
                             // Since the usernames typed in might be wrongly cased, we use the "normalized" usernames that get back from the backend.
-                            for (var j = 0; j < correctlyCasedUsernames.length; ++j) {
+                            for (let j = 0; j < correctlyCasedUsernames.length; ++j) {
                                 if (playerIdMap[correctlyCasedUsernames[j]]) {
                                     if (self.recipientPlayerIds.indexOf(playerIdMap[correctlyCasedUsernames[j]]) == -1) {
                                         self.recipientPlayerIds.push(playerIdMap[correctlyCasedUsernames[j]]);
@@ -518,7 +516,7 @@ TankTrouble.ChatBox = {
 
         this.chat.removeClass("global user");
 
-        var message = this.chatInput.val().trim();
+        const message = this.chatInput.val().trim();
         // First check if global message.
         if (message.charAt(0) === '#') {
             this.globalMessage = true;
@@ -536,9 +534,9 @@ TankTrouble.ChatBox = {
         } else if ((message.substr(0, 2) === "/i" || message.substr(0, 2) === "/u") && message.length > 2) {
             // Add or remove players to ignore list.
             this.addingToIgnoreList = (message.substr(0, 2) === "/i");
-            var tokens = message.substr(2).split(' ');
-            for (var i = 0; i < tokens.length; ++i) {
-                var ignoree = tokens[i];
+            const tokens = message.substr(2).split(' ');
+            for (let i = 0; i < tokens.length; ++i) {
+                const ignoree = tokens[i];
                 if (ignoree !== "" && $.inArray(ignoree, this.ignoreeUsernames) == -1) {
                     this.ignoreeUsernames.push(ignoree);
                 }
@@ -547,13 +545,13 @@ TankTrouble.ChatBox = {
             return "";
         } else {
             // Try to parse recipient tokens.
-            var tokens = message.split(' ');
+            const tokens = message.split(' ');
         
-            var i = 0;
+            let i = 0;
             for (; i < tokens.length; ++i) {
-                var firstChar = tokens[i].charAt(0);
+                const firstChar = tokens[i].charAt(0);
                 if (firstChar === "@") {
-                    var recipient = tokens[i].substr(1);
+                    const recipient = tokens[i].substr(1);
                     if (recipient !== "" && $.inArray(recipient, this.recipientUsernames) == -1) {
                         this.recipientUsernames.push(recipient);
                     }
@@ -571,25 +569,25 @@ TankTrouble.ChatBox = {
     
     _lookUpUsernamesAndAddChatMessage: function(from, to, addRecipients, textColor, strokeColor, message, chatMessageId) {
         // Determine which player ids to look up usernames for.
-        var playerIds = from;
+        let playerIds = from;
         if (addRecipients) {
             playerIds = playerIds.concat(to);
         }
         
-        var numDetailsResponses = 0;
-        var numExpectedDetailsResponses = playerIds.length;
+        let numDetailsResponses = 0;
+        const numExpectedDetailsResponses = playerIds.length;
 
-        var usernameMap = {};
-        for (var i = 0; i < playerIds.length; ++i) {
+        const usernameMap = {};
+        for (let i = 0; i < playerIds.length; ++i) {
             usernameMap[playerIds[i]] = "<ERROR>";
         }
         
-        var self = this;
-        for (var i = 0; i < playerIds.length; ++i) {
+        const self = this;
+        for (let i = 0; i < playerIds.length; ++i) {
             Backend.getInstance().getPlayerDetails(
                 function(result) {
                     if (typeof(result) == "object") {
-                        var username = Utils.maskUnapprovedUsername(result);
+                        const username = Utils.maskUnapprovedUsername(result);
                         usernameMap[result.getPlayerId()] = username;
                     }
                 }, 
@@ -626,7 +624,7 @@ TankTrouble.ChatBox = {
         if (this.chat.hasClass("open")) {
             this._renderSystemMessage(involvedPlayerIds, involvedUsernameMap, message, true, true);
             // Wait until inserted message is full height to remove messages.
-            var self = this;
+            const self = this;
             setTimeout(function() {
                 self._updateChat(false);
             }, 200);
@@ -662,7 +660,7 @@ TankTrouble.ChatBox = {
         if (this.chat.hasClass("open")) {
             this._renderChatMessage(from, to, usernameMap, addRecipients, textColor, strokeColor, message, chatMessageId, false, true, true);
             // Wait until inserted message is full height to remove messages.
-            var self = this;
+            const self = this;
             setTimeout(function() {
                 self._updateChat(false);
             }, 200);
@@ -672,9 +670,9 @@ TankTrouble.ChatBox = {
     },
     
     _addChatLink: function(message, svg, playerId, username) {
-        var self = this;
+        const self = this;
         // Use [class=X] selector rather than .X to make it work in IE11 and Edge, which do not support getElementsByClassName on svg elements.
-        var chatUser = $("[class="+playerId + "-messageUsername]", svg.root());
+        const chatUser = $("[class="+playerId + "-messageUsername]", svg.root());
         chatUser.click(function(event) {
             if (!self.chatInput.prop("disabled")) {
                 self.addRecipient(playerId);
@@ -689,26 +687,26 @@ TankTrouble.ChatBox = {
     },
     
     _renderSystemMessage: function(involvedPlayerIds, involvedUsernameMap, message, animateHeight, animateFadeIn) {
-        var systemMessage = $("<div class='chatMessage'></div>");
+        const systemMessage = $("<div class='chatMessage'></div>");
 
         systemMessage.svg({settings: {width: 0, height: 0}});
-        var systemSvg = systemMessage.svg("get");
-        var wordX = 1;
-        var wordY = 12;
-        var svgWidth = 1;
-        var svgHeight = wordY + 5;
+        const systemSvg = systemMessage.svg("get");
+        let wordX = 1;
+        let wordY = 12;
+        let svgWidth = 1;
+        let svgHeight = wordY + 5;
         
-        var involvedPlayerIdCounter = 0;
+        let involvedPlayerIdCounter = 0;
 
-        var words = message.split(' ');
+        const words = message.split(' ');
 
-        for (var i = 0; i < words.length; ++i) {
-            var wordWidth;
+        for (let i = 0; i < words.length; ++i) {
+            let wordWidth;
             
             if (involvedPlayerIds !== undefined && words[i] == "@") {
                 // If the word is the involved users marker, insert individual username markers and connecting words.
-                var newWords = [];
-                for (var j = 0; j < involvedPlayerIds.length; ++j) {
+                const newWords = [];
+                for (let j = 0; j < involvedPlayerIds.length; ++j) {
                     newWords.push("*");
                     if (j == involvedPlayerIds.length - 2) {
                         newWords.push("__");
@@ -726,7 +724,7 @@ TankTrouble.ChatBox = {
                 
                 continue;
             } else if (involvedPlayerIds !== undefined && words[i] == "*") {
-                var playerId = involvedPlayerIds[involvedPlayerIdCounter];
+                const playerId = involvedPlayerIds[involvedPlayerIdCounter];
                 // If the word is the individual username marker, insert username and do not append a space.
                 wordWidth = Utils.measureSVGText(involvedUsernameMap[playerId], {fontFamily: 'Arial', fontWeight: 'bold', fontSize: 12});
 
@@ -742,8 +740,8 @@ TankTrouble.ChatBox = {
                 ++involvedPlayerIdCounter;
             } else if (involvedPlayerIds !== undefined && words[i].charAt(0) == '[') {
                 // If the word is the plurality marker, select the correct word based on the number of involved users and append a space.
-                var pluralityVariations = words[i].split('|');
-                var word = "";
+                const pluralityVariations = words[i].split('|');
+                let word = "";
                 if (involvedPlayerIds.length == 1) {
                     word = pluralityVariations[0].substring(1);
                 } else {
@@ -800,8 +798,8 @@ TankTrouble.ChatBox = {
         systemSvg.configure({width: svgWidth, height: svgHeight});
 
         if (involvedPlayerIds !== undefined) {
-            for (var i = 0; i < involvedPlayerIds.length; ++i) {
-                var involvedPlayerId = involvedPlayerIds[i];
+            for (let i = 0; i < involvedPlayerIds.length; ++i) {
+                const involvedPlayerId = involvedPlayerIds[i];
                 if (!Users.isAnyUser(involvedPlayerId)) {
                     this._addChatLink(systemMessage, systemSvg, involvedPlayerId, involvedUsernameMap[involvedPlayerId]);
                 }
@@ -829,18 +827,18 @@ TankTrouble.ChatBox = {
     },
     
     _renderChatMessage: function(from, to, usernameMap, addRecipients, textColor, strokeColor, message, chatMessageId, reported, animateHeight, animateFadeIn) {
-        var chatMessage = $("<div class='chatMessage message-"+chatMessageId+"'></div>");
+        const chatMessage = $("<div class='chatMessage message-"+chatMessageId+"'></div>");
 
         chatMessage.svg({settings: {width: 0, height: 0}});
-        var chatSvg = chatMessage.svg("get");
-        var wordX = 1;
-        var wordY = 12;
-        var svgWidth = 1;
-        var svgHeight = wordY + 5;
+        const chatSvg = chatMessage.svg("get");
+        let wordX = 1;
+        let wordY = 12;
+        let svgWidth = 1;
+        let svgHeight = wordY + 5;
 
-        for (var i = 0; i < from.length; ++i) {
-            var fromUser = from[i];
-            var word = usernameMap[fromUser];
+        for (let i = 0; i < from.length; ++i) {
+            const fromUser = from[i];
+            let word = usernameMap[fromUser];
             if (i < from.length - 1) {
                 word += ",";
             } else {
@@ -848,7 +846,7 @@ TankTrouble.ChatBox = {
             }
 
             // Measure the username and a comma, colon or at.
-            var wordWidth = Utils.measureSVGText(word, {fontFamily: 'Arial', fontWeight: 'bold', fontSize: 12});
+            let wordWidth = Utils.measureSVGText(word, {fontFamily: 'Arial', fontWeight: 'bold', fontSize: 12});
 
             if (wordX + wordWidth > this.chatBody.width()) {
                 wordX = 1;
@@ -866,8 +864,8 @@ TankTrouble.ChatBox = {
         }
                 
         if (addRecipients) {
-            for (var i = 0; i < to.length; ++i) {
-                var word = usernameMap[to[i]];
+            for (let i = 0; i < to.length; ++i) {
+                let word = usernameMap[to[i]];
                 if (i < to.length - 1) {
                     word += ",";
                 } else {
@@ -875,7 +873,7 @@ TankTrouble.ChatBox = {
                 }
 
                 // Measure the username and a comma or colon.
-                var wordWidth = Utils.measureSVGText(word, {fontFamily: 'Arial', fontWeight: 'bold', fontSize: 12});
+                const wordWidth = Utils.measureSVGText(word, {fontFamily: 'Arial', fontWeight: 'bold', fontSize: 12});
 
                 if (wordX + wordWidth > this.chatBody.width()) {
                     wordX = 1;
@@ -893,14 +891,14 @@ TankTrouble.ChatBox = {
             }
         }
         
-        var words = message.split(' ');
-        for (var i = 0; i < words.length; ++i) {
-            var wordWidth = Utils.measureSVGText(words[i], {fontFamily: 'Arial', fontWeight: 'bold', fontSize: 12});
+        const words = message.split(' ');
+        for (let i = 0; i < words.length; ++i) {
+            let wordWidth = Utils.measureSVGText(words[i], {fontFamily: 'Arial', fontWeight: 'bold', fontSize: 12});
             
             // First check if word is too long to fit on one line.
             if (wordWidth > this.chatBody.width()) {
                 // Split word. Always peel off at least one character (the +1).
-                var fract = Math.floor((this.chatBody.width() - wordX) / wordWidth * words[i].length + 1);
+                const fract = Math.floor((this.chatBody.width() - wordX) / wordWidth * words[i].length + 1);
                 words.splice(i+1, 0, words[i].substr(fract));
                 words[i] = words[i].substr(0, fract);
                 
@@ -944,19 +942,10 @@ TankTrouble.ChatBox = {
             this._updatePlayerDetails(to);
         }        
 
-        var self = this;
-
-        var prettyUsernames = "";
-        var foundForeignUser = false;
-        for (var i = 0; i < from.length; ++i) {
-            var fromUser = from[i];
+        let foundForeignUser = false;
+        for (let i = 0; i < from.length; ++i) {
+            const fromUser = from[i];
             if (!Users.isAnyUser(fromUser)) {
-                prettyUsernames += usernameMap[fromUser];
-                if (i == from.length - 2) {
-                    prettyUsernames += " and ";
-                } else if (i < from.length - 2) {
-                    prettyUsernames += ", ";
-                }
                 foundForeignUser = true;
                 
                 this._addChatLink(chatMessage, chatSvg, fromUser, usernameMap[fromUser]);
@@ -965,7 +954,7 @@ TankTrouble.ChatBox = {
         
         if (foundForeignUser) {
 
-            var chatMessageWhistle = $("<img class='whistle' src='" + g_url("assets/images/chat/report.png") + "' srcset='" + g_url("assets/images/chat/report@2x.png") + " 2x' title=''/>");
+            const chatMessageWhistle = $("<img class='whistle' src='" + g_url("assets/images/chat/report.png") + "' srcset='" + g_url("assets/images/chat/report@2x.png") + " 2x' title=''/>");
 
             chatMessageWhistle.css('left', wordX+'px');
             chatMessageWhistle.hide();
@@ -991,7 +980,7 @@ TankTrouble.ChatBox = {
         
         // Render all items again.
         if (animate) {
-            var self = this;
+            const self = this;
             setTimeout(function() {
                 self._renderAllMessages(true);
                 self._updateChat(false);
@@ -1003,8 +992,8 @@ TankTrouble.ChatBox = {
     },
     
     _renderAllMessages: function(animateFadeIn) {
-        for (var i = 0; i < this.messages.length; ++i) {
-            var message = this.messages[i];
+        for (let i = 0; i < this.messages.length; ++i) {
+            const message = this.messages[i];
             if (message.type == "chat") {
                 this._renderChatMessage(message.from, message.to, message.usernameMap, message.addRecipients,
                     message.textColor, message.strokeColor, message.message, message.chatMessageId, message.reported, false, animateFadeIn);
@@ -1029,7 +1018,7 @@ TankTrouble.ChatBox = {
     
     _updateChat: function(instantlyRemoveOldMessages) {
         // Do an each on the children and if their position is larger than the height of the body, fade them out.
-        var bodyHeight = this.chatBody.height();
+        const bodyHeight = this.chatBody.height();
         this.chatBody.find("div.chatMessage").each(function(index) {
             if ($(this).position().top + $(this).height() > bodyHeight) {
                 if (instantlyRemoveOldMessages) {
@@ -1071,11 +1060,11 @@ TankTrouble.ChatBox = {
     },
     
     _updatePlayerDetails: function(playerIds) {
-        for (var i = 0; i < playerIds.length; ++i) {
+        for (let i = 0; i < playerIds.length; ++i) {
             Backend.getInstance().getPlayerDetails(
                 function(result) {
                     if (typeof(result) == "object") {
-                        var baseColour = result.getBaseColour().numericValue;
+                        let baseColour = result.getBaseColour().numericValue;
                         // Reformat strings to be edible for canvas operations.
                         baseColour = baseColour.substr(2);
                         baseColour = "#" + new Array(6 - baseColour.length + 1).join("0") + baseColour;
@@ -1083,14 +1072,14 @@ TankTrouble.ChatBox = {
                         $("."+result.getPlayerId()+"-messageUsername").attr("fill", baseColour);
 
                         // Check if colour is so bright that we want a dark stroke.
-                        var baseRed = parseInt(baseColour.substr(1, 2), 16);
-                        var baseGreen = parseInt(baseColour.substr(3, 2), 16);
-                        var baseBlue = parseInt(baseColour.substr(5, 2), 16);
+                        const baseRed = parseInt(baseColour.substr(1, 2), 16);
+                        const baseGreen = parseInt(baseColour.substr(3, 2), 16);
+                        const baseBlue = parseInt(baseColour.substr(5, 2), 16);
 
-                        var brightness = 0.299 * baseRed + 0.587 * baseGreen + 0.114 * baseBlue;
+                        const brightness = 0.299 * baseRed + 0.587 * baseGreen + 0.114 * baseBlue;
                         //0.2126 * Math.pow(baseRed/255.0, 2.2) + 0.7152 * Math.pow(baseGreen/255.0, 2.2) + 0.0722 * Math.pow(baseBlue/255.0, 2.2);
             
-                        var strokeColour = "#ffffff";
+                        let strokeColour = "#ffffff";
 
                         if (brightness >= 145.0) {
                             strokeColour = "#333333";
@@ -1112,8 +1101,8 @@ TankTrouble.ChatBox = {
     },
 
     _updateMessageReported: function(chatMessageId, reported) {
-        for (var i = 0; i < this.messages.length; ++i) {
-            var message = this.messages[i];
+        for (let i = 0; i < this.messages.length; ++i) {
+            const message = this.messages[i];
             if (message.type == "chat" && message.chatMessageId == chatMessageId) {
                 message.reported = reported;
                 break;
@@ -1122,21 +1111,21 @@ TankTrouble.ChatBox = {
     },
 
     _updateWhistle: function(chatMessageId, reported) {
-        var chatMessage = $(".chatMessage.message-"+chatMessageId);
+        const chatMessage = $(".chatMessage.message-"+chatMessageId);
         
         if (chatMessage.length == 0) {
             return;
         }
 
-        var whistle = chatMessage.find(".whistle");
+        const whistle = chatMessage.find(".whistle");
 
         // Populate pretty usernames string.
-        var prettyUsernames = "";
-        for (var i = 0; i < this.messages.length; ++i) {
-            var message = this.messages[i];
+        let prettyUsernames = "";
+        for (let i = 0; i < this.messages.length; ++i) {
+            const message = this.messages[i];
             if (message.type == "chat" && message.chatMessageId == chatMessageId) {
-                for (var j = 0; j < message.from.length; ++j) {
-                    var fromUser = message.from[j];
+                for (let j = 0; j < message.from.length; ++j) {
+                    const fromUser = message.from[j];
                     if (!Users.isAnyUser(fromUser)) {
                         prettyUsernames += message.usernameMap[fromUser];
                         if (j == message.from.length - 2) {
@@ -1150,7 +1139,7 @@ TankTrouble.ChatBox = {
             }
         }
         
-        var self = this;
+        const self = this;
         
         if (reported) {
             whistle.on("click", function(event) {
@@ -1201,7 +1190,7 @@ TankTrouble.ChatBox = {
     },
 
     _notifyEventListeners: function(evt, data) {
-        for (var i=0;i<this.eventListeners.length;i++) {
+        for (let i = 0;i<this.eventListeners.length;i++) {
             this.eventListeners[i].cb(this.eventListeners[i].ctxt, evt, data);
         }
     },
@@ -1228,8 +1217,8 @@ TankTrouble.ChatBox = {
                 self.addUserChatMessage(data.getFrom(), data.getTo(), data.getMessage(), data.getChatMessageId());
 
                 // Store latest private message sender if it came from someone else.
-                var fromLocal = false;
-                for (var i = 0; i < data.getFrom().length; ++i) {
+                let fromLocal = false;
+                for (let i = 0; i < data.getFrom().length; ++i) {
                     if (Users.isAnyUser(data.getFrom()[i])) {
                         fromLocal = true;
                     }
@@ -1314,7 +1303,7 @@ TankTrouble.ChatBox = {
     },
 
     _updateStatusMessageAndAvailability: function(systemMessageText, guestPlayerIds) {
-        var playerIds = Users.getAllPlayerIds();
+        const playerIds = Users.getAllPlayerIds();
         if (playerIds.length == 0) {
             this.chatInput.attr("placeholder", "Join to transmit");
             this.chatInput.val("");
@@ -1324,9 +1313,9 @@ TankTrouble.ChatBox = {
                 this.addSystemMessage([], systemMessageText);
             }
         } else {
-            var authenticatedPlayerIds = Users.getAuthenticatedPlayerIds();
+            const authenticatedPlayerIds = Users.getAuthenticatedPlayerIds();
             if (authenticatedPlayerIds.length > 0) {
-                var mpAuthenticatedPlayerIds = ClientManager.getClient().getAuthenticatedPlayerIds();
+                const mpAuthenticatedPlayerIds = ClientManager.getClient().getAuthenticatedPlayerIds();
                 // Only enable input if there are any authenticated players also authenticated on the mp server.
                 if (mpAuthenticatedPlayerIds.length > 0 && ArrayUtils.containsSome(mpAuthenticatedPlayerIds, authenticatedPlayerIds)) {
                     this.chatInput.attr("placeholder", "Message");
@@ -1354,11 +1343,11 @@ TankTrouble.ChatBox = {
 
     _updateInputBackground: function(animate) {
         if (animate) {
-            var self = this;
+            const self = this;
 
             if (this.chat.hasClass('send')) {
-                var backgroundColour = "#ffffff";
-                var stripeColour = "#cccccc";
+                let backgroundColour = "#ffffff";
+                let stripeColour = "#cccccc";
 
                 if (this.chat.hasClass('global')) {
                     backgroundColour = "#68c5ff";
@@ -1368,13 +1357,13 @@ TankTrouble.ChatBox = {
                     stripeColour = "#ffffff";
                 }
                 this.chatForm.stop(true).delay(500).animate({stripeValue: 100}, {duration: 100, step: function(value) {
-                    var b = (1 - value / 100) * 10;
+                    const b = (1 - value / 100) * 10;
                     self.chatForm.css("background", "repeating-linear-gradient(53deg, " + stripeColour + " 0, " + stripeColour + " " + (10-b) + "px, " + backgroundColour + " " + (10-b) + "px, " + backgroundColour + " " + (30+b) + "px, " + stripeColour + " " + (30+b) + "px, " + stripeColour + " 40px");
                 }});
             } else {
-                var backgroundColour = "#ffffff";
-                var stripeColour = "#cccccc";
-                var valueScale = 1;
+                let backgroundColour = "#ffffff";
+                let stripeColour = "#cccccc";
+                let valueScale = 1;
 
                 if (this.chat.hasClass('global')) {
                     backgroundColour = "#68c5ff";
@@ -1387,7 +1376,7 @@ TankTrouble.ChatBox = {
                 }
 
                 this.chatForm.stop(true).animate({stripeValue: 0}, {duration: 100, step: function(value) {
-                    var b = (1 - value / 100) * 10 * valueScale;
+                    const b = (1 - value / 100) * 10 * valueScale;
                     self.chatForm.css("background", "repeating-linear-gradient(53deg, " + stripeColour + " 0, " + stripeColour + " " + (10-b) + "px, " + backgroundColour + " " + (10-b) + "px, " + backgroundColour + " " + (30+b) + "px, " + stripeColour + " " + (30+b) + "px, " + stripeColour + " 40px");
                 }, complete: function() {
                     self.chatForm.removeAttr("style");
@@ -1404,11 +1393,11 @@ TankTrouble.ChatBox = {
     },
 
     _removeLocalPlayersFromIgnored: function() {
-        var removedLocalPlayerIds = [];
+        const removedLocalPlayerIds = [];
 
         this.ignoredPlayerIds = this.ignoredPlayerIds.filter(
             function(item) {
-                var localPlayer = Users.getAllPlayerIds().indexOf(item) >= 0;
+                const localPlayer = Users.getAllPlayerIds().indexOf(item) >= 0;
                 if (localPlayer) {
                     removedLocalPlayerIds.push(item);
                 }
@@ -1445,7 +1434,7 @@ TankTrouble.ChatBox = {
                 if (oldState === TTClient.STATES.CONNECTED) {
                     self.chatStatus.attr("src", g_url("assets/images/chat/chat.png"));
                     self.chatStatus.attr("srcset", g_url("assets/images/chat/chat@2x.png") + " 2x");
-                    var guestPlayerIds = Users.getGuestPlayerIds();
+                    const guestPlayerIds = Users.getGuestPlayerIds();
                     self._updateStatusMessageAndAvailability("Welcome to TankTrouble Comms § § ", guestPlayerIds);
                 }
 

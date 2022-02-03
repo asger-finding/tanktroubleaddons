@@ -6,13 +6,13 @@ if (typeof require === 'function') {
     var MathUtils = require('./mathutils');
 }
 
-var AIUtils = Classy.newClass();
+const AIUtils = Classy.newClass();
 
 AIUtils.classMethods({
     checkProtected: function(tankId, gameController) {
         // FIXME Check when adding upgrade or weapon.
-        var spawnShieldUpgrade = gameController.getUpgradeByPlayerIdAndType(tankId, Constants.UPGRADE_TYPES.SPAWN_SHIELD);
-        var shieldUpgrade = gameController.getUpgradeByPlayerIdAndType(tankId, Constants.UPGRADE_TYPES.SHIELD);
+        const spawnShieldUpgrade = gameController.getUpgradeByPlayerIdAndType(tankId, Constants.UPGRADE_TYPES.SPAWN_SHIELD);
+        const shieldUpgrade = gameController.getUpgradeByPlayerIdAndType(tankId, Constants.UPGRADE_TYPES.SHIELD);
 
         if ((spawnShieldUpgrade && !spawnShieldUpgrade.getField("weakened")) ||
             (shieldUpgrade && !shieldUpgrade.getField("weakened"))) {
@@ -23,7 +23,7 @@ AIUtils.classMethods({
 
     // Returns dodge info object containing closestId (string), closestDistance (float), closestPosition ({x,y}), closestDirection ({x,y}) and closestTime (float)
     checkProjectilePathForDodging: function(tank, path, projectile, b2dWorld, scaryProjectileDistanceSquared) {
-        var projectileSpeed = projectile.getB2DBody().GetLinearVelocity().Length();
+        const projectileSpeed = projectile.getB2DBody().GetLinearVelocity().Length();
         return this._checkPathForDodging(tank, path, projectileSpeed, projectile.getId(), b2dWorld, scaryProjectileDistanceSquared);
     },
 
@@ -34,37 +34,37 @@ AIUtils.classMethods({
 
     // Returns dodge info object containing closestId (string), closestDistance (float), closestPosition ({x,y}), closestDirection ({x,y}) and closestTime (float)
     _checkPathForDodging: function(tank, path, speed, id, b2dWorld, scaryDistanceSquared) {
-        var closestDistanceSquared = Number.MAX_VALUE;
-        var closestPosition = {x: 0, y: 0};
-        var closestDirection = {x: 0, y: 0};
-        var closestTime = Number.MAX_VALUE;
-        var closestId = "";
+        let closestDistanceSquared = Number.MAX_VALUE;
+        let closestPosition = {x: 0, y: 0};
+        let closestDirection = {x: 0, y: 0};
+        let closestTime = Number.MAX_VALUE;
+        let closestId = "";
 
-        var tankPosition = {x: tank.getX(), y: tank.getY()};
-        var previousTime = 0;
-        for (var i = 0; i < path.length - 1; ++i) {
+        const tankPosition = {x: tank.getX(), y: tank.getY()};
+        let previousTime = 0;
+        for (let i = 0; i < path.length - 1; ++i) {
             // For each segment of path, find closest point.
-            var segmentStartX = path[i].x;
-            var segmentStartY = path[i].y;
-            var segmentEndX = path[i + 1].x;
-            var segmentEndY = path[i + 1].y;
-            var diffSegmentX = segmentEndX - segmentStartX;
-            var diffSegmentY = segmentEndY - segmentStartY;
-            var diffSegmentLength = Math.sqrt(diffSegmentX * diffSegmentX + diffSegmentY * diffSegmentY);
+            const segmentStartX = path[i].x;
+            const segmentStartY = path[i].y;
+            const segmentEndX = path[i + 1].x;
+            const segmentEndY = path[i + 1].y;
+            let diffSegmentX = segmentEndX - segmentStartX;
+            let diffSegmentY = segmentEndY - segmentStartY;
+            const diffSegmentLength = Math.sqrt(diffSegmentX * diffSegmentX + diffSegmentY * diffSegmentY);
             // Normalize segment length to be able to use t directly as a time measure.
-            var segmentTime = diffSegmentLength / speed;
+            const segmentTime = diffSegmentLength / speed;
             diffSegmentX /= segmentTime;
             diffSegmentY /= segmentTime;
-            var diffTankX = tankPosition.x - segmentStartX;
-            var diffTankY = tankPosition.y - segmentStartY;
-            var t = (diffTankX * diffSegmentX + diffTankY * diffSegmentY) / (speed * speed);
+            const diffTankX = tankPosition.x - segmentStartX;
+            const diffTankY = tankPosition.y - segmentStartY;
+            let t = (diffTankX * diffSegmentX + diffTankY * diffSegmentY) / (speed * speed);
             if (t >= 0) { // Ignore if closest in the past.
                 // Clamp the closest point to be the bounce. Add a small margin to ensure following collision test does not fail.
                 t = Math.min(Math.max(t, Constants.PATH_MIN_STEP_LENGTH), segmentTime - Constants.PATH_MIN_STEP_LENGTH);
-                var position = {x: segmentStartX + t * diffSegmentX, y: segmentStartY + t * diffSegmentY};
+                const position = {x: segmentStartX + t * diffSegmentX, y: segmentStartY + t * diffSegmentY};
                 // Check if closest point is blocked by maze.
                 if (!B2DUtils.checkLineForMazeCollision(b2dWorld, position, tankPosition)) {
-                    var distanceSquared = (tankPosition.x - position.x) * (tankPosition.x - position.x) + (tankPosition.y - position.y) * (tankPosition.y - position.y);
+                    const distanceSquared = (tankPosition.x - position.x) * (tankPosition.x - position.x) + (tankPosition.y - position.y) * (tankPosition.y - position.y);
                     if (distanceSquared < closestDistanceSquared) {
                         closestDistanceSquared = distanceSquared;
                         closestPosition = position;
@@ -89,7 +89,7 @@ AIUtils.classMethods({
     // Returns firing info object containing result (AIUtils._FIRING_RESULTS), target (Tank object), closestDistance (float), pathLength (float) and direction ({x,y})
     checkFiringPath: function(tank, tanks, gameController, angle, bounces, maxLength, weaponType) {
 
-        var pathInfo = B2DUtils.calculateFiringPath(gameController.getB2DWorld(), tank, angle, bounces, maxLength, true);
+        const pathInfo = B2DUtils.calculateFiringPath(gameController.getB2DWorld(), tank, angle, bounces, maxLength, true);
 
         // Unless firing the laser, first check if first segment of multi-segment firing path is too short increasing the chance we might hit ourselves.
         // FIXME Check when adding weapon.
@@ -102,7 +102,7 @@ AIUtils.classMethods({
         // First check if there is a hit.
         if (pathInfo.hit) {
             // FIXME Treat team mates as suicide or similar!
-            var result = AIUtils._FIRING_RESULTS.HIT;
+            let result = AIUtils._FIRING_RESULTS.HIT;
             if (pathInfo.hit === tank) {
                 result = AIUtils._FIRING_RESULTS.SUICIDE;
             }
@@ -110,40 +110,40 @@ AIUtils.classMethods({
             return {result: result, target: pathInfo.hit, closestDistance: 0, pathLength: pathInfo.length, direction: pathInfo.direction};
         } else {
             // Find the closest distance to another tank.
-            var closestDistanceSquared = Number.MAX_VALUE;
-            var closestPathLength = maxLength;
-            var result = AIUtils._FIRING_RESULTS.MISS;
-            var target = null;
-            var currentPathLength = 0;
+            let closestDistanceSquared = Number.MAX_VALUE;
+            let closestPathLength = maxLength;
+            let result = AIUtils._FIRING_RESULTS.MISS;
+            let target = null;
+            let currentPathLength = 0;
 
-            for (var i = 0; i < pathInfo.path.length - 1; ++i) {
+            for (let i = 0; i < pathInfo.path.length - 1; ++i) {
                 // For each segment of projectile path, find closest points.
-                var segmentStartX = pathInfo.path[i].x;
-                var segmentStartY = pathInfo.path[i].y;
-                var segmentEndX = pathInfo.path[i + 1].x;
-                var segmentEndY = pathInfo.path[i + 1].y;
-                var diffSegmentX = segmentEndX - segmentStartX;
-                var diffSegmentY = segmentEndY - segmentStartY;
-                var diffSegmentLength = Math.sqrt(diffSegmentX * diffSegmentX + diffSegmentY * diffSegmentY);
+                const segmentStartX = pathInfo.path[i].x;
+                const segmentStartY = pathInfo.path[i].y;
+                const segmentEndX = pathInfo.path[i + 1].x;
+                const segmentEndY = pathInfo.path[i + 1].y;
+                let diffSegmentX = segmentEndX - segmentStartX;
+                let diffSegmentY = segmentEndY - segmentStartY;
+                const diffSegmentLength = Math.sqrt(diffSegmentX * diffSegmentX + diffSegmentY * diffSegmentY);
                 diffSegmentX /= diffSegmentLength;
                 diffSegmentY /= diffSegmentLength;
-                for (var tankId in tanks) {
+                for (const tankId in tanks) {
                     if (tankId !== tank.getPlayerId()) {
                         // Ignore tanks with a shield.
                         if (AIUtils.checkProtected(tankId, gameController)) {
                             continue;
                         }
                         // FIXME Do not consider team mates!
-                        var tankPosition = {x: tanks[tankId].getX(), y: tanks[tankId].getY()};
-                        var diffTankX = tankPosition.x - segmentStartX;
-                        var diffTankY = tankPosition.y - segmentStartY;
-                        var t = (diffTankX * diffSegmentX + diffTankY * diffSegmentY);
+                        const tankPosition = {x: tanks[tankId].getX(), y: tanks[tankId].getY()};
+                        const diffTankX = tankPosition.x - segmentStartX;
+                        const diffTankY = tankPosition.y - segmentStartY;
+                        let t = (diffTankX * diffSegmentX + diffTankY * diffSegmentY);
                         // Clamp the closest point to be on the segment. Add a small margin to ensure following collision test does not fail.
                         t = Math.min(Math.max(t, Constants.PATH_MIN_STEP_LENGTH), diffSegmentLength-Constants.PATH_MIN_STEP_LENGTH);
-                        var position = {x: segmentStartX + t * diffSegmentX, y: segmentStartY + t * diffSegmentY};
+                        const position = {x: segmentStartX + t * diffSegmentX, y: segmentStartY + t * diffSegmentY};
                         // Check if closest point is blocked by maze.
                         if (!B2DUtils.checkLineForMazeCollision(gameController.getB2DWorld(), position, tankPosition)) {
-                            var distanceSquared = (tankPosition.x - position.x) * (tankPosition.x - position.x) + (tankPosition.y - position.y) * (tankPosition.y - position.y);
+                            const distanceSquared = (tankPosition.x - position.x) * (tankPosition.x - position.x) + (tankPosition.y - position.y) * (tankPosition.y - position.y);
                             if (distanceSquared < closestDistanceSquared) {
                                 result = AIUtils._FIRING_RESULTS.NEAR;
                                 closestDistanceSquared = distanceSquared;
@@ -162,17 +162,17 @@ AIUtils.classMethods({
     },
 
     getActionsToFollowPath: function(path, tile, driveToTileActionType, driveToPositionActionType, dexterity) {
-        var result = [];
-        for (var i = 0; i < path.length; ++i) {
-            var imprecision = MathUtils.randomAroundZero(MathUtils.linearInterpolation(Constants.AI.MAX_ROTATION_IMPRECISION, 0, dexterity));
+        const result = [];
+        for (let i = 0; i < path.length; ++i) {
+            const imprecision = MathUtils.randomAroundZero(MathUtils.linearInterpolation(Constants.AI.MAX_ROTATION_IMPRECISION, 0, dexterity));
             result.push({type: driveToTileActionType, position: path[i], canReverse: path.length <= Constants.AI.MAX_PATH_LENGTH_TO_REVERSE, imprecision: imprecision});
         }
         if (tile) {
-            var position = {
+            const position = {
                 x: (tile.x + 0.5) * Constants.MAZE_TILE_SIZE.m,
                 y: (tile.y + 0.5) * Constants.MAZE_TILE_SIZE.m
             };
-            var imprecision = MathUtils.randomAroundZero(MathUtils.linearInterpolation(Constants.AI.MAX_ROTATION_IMPRECISION, 0, dexterity));
+            const imprecision = MathUtils.randomAroundZero(MathUtils.linearInterpolation(Constants.AI.MAX_ROTATION_IMPRECISION, 0, dexterity));
             result.push({type: driveToPositionActionType, position: position, canReverse: path.length <= Constants.AI.MAX_PATH_LENGTH_TO_REVERSE, imprecision: imprecision});
         }
 
@@ -180,24 +180,24 @@ AIUtils.classMethods({
     },
 
     getInputToDriveToPosition: function(tank, targetPosition, canReverse, angleImprecision) {
-        var forwardState = false;
-        var backState = false;
-        var leftState = false;
-        var rightState = false;
-        var fireState = false;
+        let forwardState = false;
+        let backState = false;
+        let leftState = false;
+        let rightState = false;
+        let fireState = false;
 
 
         // FIXME This code is more or less duplicated in MouseInputManager.js
 
         // Rotate direction into tank's local space.
-        var relativeToTank = B2DUtils.toLocalSpace(tank.getB2DBody(), targetPosition);
+        const relativeToTank = B2DUtils.toLocalSpace(tank.getB2DBody(), targetPosition);
 
-        var magnitude = relativeToTank.Length();
-        var angle = Math.atan2(relativeToTank.y, relativeToTank.x);
+        const magnitude = relativeToTank.Length();
+        let angle = Math.atan2(relativeToTank.y, relativeToTank.x);
 
         angle += angleImprecision;
 
-        var goInReverse = false;
+        let goInReverse = false;
 
         // Normally it would be < 0.0, but the tank graphics is rotated 90 degrees CCW
         if (angle > Math.PI * 0.5 + Constants.AI.ROTATION_DEAD_ANGLE || angle < -Math.PI * 0.5 - Constants.AI.ROTATION_DEAD_ANGLE) {
@@ -245,14 +245,14 @@ AIUtils.classMethods({
     },
 
     getInputToTurnToDirection: function(tank, direction, angleImprecision) {
-        var forwardState = false;
-        var backState = false;
-        var leftState = false;
-        var rightState = false;
-        var fireState = false;
+        let forwardState = false;
+        let backState = false;
+        let leftState = false;
+        let rightState = false;
+        let fireState = false;
 
-        var relativeToTank = B2DUtils.directionToLocalSpace(tank.getB2DBody(), direction);
-        var angle = Math.atan2(relativeToTank.y, relativeToTank.x);
+        const relativeToTank = B2DUtils.directionToLocalSpace(tank.getB2DBody(), direction);
+        let angle = Math.atan2(relativeToTank.y, relativeToTank.x);
 
         angle += angleImprecision;
 
@@ -273,11 +273,11 @@ AIUtils.classMethods({
     },
 
     getInputToFire: function(tank, delay) {
-        var forwardState = false;
-        var backState = false;
-        var leftState = false;
-        var rightState = false;
-        var fireState = delay <= 0;
+        const forwardState = false;
+        const backState = false;
+        const leftState = false;
+        const rightState = false;
+        const fireState = delay <= 0;
 
         return InputState.withState(tank.getPlayerId(), forwardState, backState, leftState, rightState, fireState);
     }

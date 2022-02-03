@@ -108,7 +108,7 @@
 	}
 
 	function parse(md) {
-		let tokenizer = /((?:^|\r?\n+)(?:\r?\n---+|\* \*(?: \*)+)\r?\n)|(?:^``` *(\w*)\r?\n([\s\S]*?)\r?\n```$)|((?:(?:^|\r?\n+)(?:\t|  {2,}).+)+\r?\n*)|((?:(?:^|\r?\n)([>*+-]|\d+\.)\s+.*)+)|(?:!\[([^\]]*?)\]\(([^)]+?)\))|(\[)|(\](?:\(([^)]+?)\))?)|(?:(?:^|\r?\n+)([^\s].*)\r?\n(-{3,}|={3,})(?:\r?\n+|$))|(?:(?:^|\r?\n+)(#{1,6})\s*(.+)(?:\r?\n+|$))|(?:`([^`].*?)`)|(  \r?\n\r?\n*|\r?\n{2,}|(?<=\W|^|$)(?<![_*])__|__(?=\W|^|$)(?![_*])|(?<=\W|^|$)(?<![_*])\*\*|\*\*(?=\W|^|$)(?!\*\*|[_*])|(?<=\W|^|$)(?<![_*])[_*]|[_*](?=\W|^|$)(?![_*])|~~)|(?:<([^>]+?)>)|<[^>]+>/gm,
+		let tokenizer = /((?:^|\r?\n+)(?:\r?\n---+|\* \*(?: \*)+)\r?\n)|(?:^``` *(\w*)\r?\n([\s\S]*?)\r?\n```$)|((?:(?:^|\r?\n+)(?:\t|  {2,}).+)+\r?\n*)|((?:(?:^|\r?\n)([>*+-]|\d+\.)\s+.*)+)|(?:!\[([^\]]*?)\]\(([^)]+?)\))|(\[)|(\](?:\(([^)]+?)\))?)|(?:(?:^|\r?\n+)([^\s].*)\r?\n(-{3,}|={3,})(?:\r?\n+|$))|(?:(?:^|\r?\n+)(#{1,6})\s*(.+)(?:\r?\n+|$))|(?:`([^`].*?)`)|( {2}\r?\n\r?\n*|\r?\n{2,}|(?<=\W|^|$)(?<![_*])__|__(?=\W|^|$)(?![_*])|(?<=\W|^|$)(?<![_*])\*\*|\*\*(?=\W|^|$)(?!\*\*|[_*])|(?<=\W|^|$)(?<![_*])[_*]|[_*](?=\W|^|$)(?![_*])|~~)|(?:<([^>]+?)>)|<[^>]+>/gm,
 			context   = [],
 			out       = '',
 			links     = {},
@@ -148,11 +148,11 @@
 				// escaped
 			}
 			// Code/Indent blocks:
-			else if (t = (token[3] || token[4])) {
+			else if ((t = (token[3] || token[4])) !== null) {
 				chunk = '<pre><code' + (token[2] ? ` llang="${token[2].toLowerCase()}"` : '') + '>' + outdent(encodeAttr(t).replace(/^\n+|\n+$/g, '')) + '</code></pre>';
 			}
 			// > Quotes, -* lists:
-			else if (t = token[6]) {
+			else if ((t = token[6] !== null)) {
 				if (t.match(/\./)) {
 					token[5] = token[5].replace(/^\d+/gm, '');
 				}
@@ -247,11 +247,11 @@
 			// JavaScript
 			generic: {
 				comment:   { re: /(\/\/.*|\/\*([\s\S]*?)\*\/)/g, style: 'comment' },
-				string:    { re: /((\'.*?\')|(\`.*?\`)|(\".*?\"))/g, style: 'string' },
-				numbers:   { re: /(\-?(\d+|\d+\.\d+|\.\d+))/g, style: 'number' },
-				regex:     { re: /([^\/]\/[^\/].+\/(g|i|m)*)/g, style: 'number' },
-				keywords:  { re: /(?:\b)(break|case|catch|class|continue|const|constructor|debugger|default|delete|do|else|export|extends|false|finally|for|from|function|get|if|import|in|instanceof|let|new|null|return|set|super|switch|symbol|this|throw|true|try|typeof|undefined|var|void|while|with|yield|async|await|of)(?:\b)/gi, style: 'keyword' },
-				operators: { re: /(\+|\-|\!|\/|\*|\%|\=|\&lt;|\&gt;|\||\?|\.)/g, style: 'operators' },
+				string:    { re: /(('.*?')|(`.*?`)|(".*?"))/g, style: 'string' },
+				numbers:   { re: /(-?(\d+|\d+\.\d+|\.\d+))/g, style: 'number' },
+				regex:     { re: /([^/]\/[^/].+\/(g|i|m)*)/g, style: 'number' },
+				keywords:  { re: /(?:\b)(do|if|for|let|new|try|var|case|else|with|await|break|catch|class|const|super|throw|while|yield|delete|export|import|return|switch|default|extends|finally|continue|debugger|function|arguments|constructor|false|from|get|in|instanceof|null|set|symbol|this|true|typeof|undefined|void|async|of)(?:\b)/gi, style: 'keyword' },
+				operators: { re: /(\+|-|!|\/|\*|%|=|&lt;|&gt;|\||\?|\.)/g, style: 'operators' },
 				brackets:  { re: /(\{|\}|\(|\))/g, style: 'brackets' }
 			},
 			get js() { return this.generic; },
@@ -259,18 +259,18 @@
 			// CSS
 			css: {
 				comment:   { re: /(\/\/.*|\/\*([\s\S]*?)\*\/)/g, style: 'comment' },
-				string:    { re: /((\'.*?\')|(\`.*?\`)|(\".*?\"))/g, style: 'string' },
-				numbers:   { re: /((\-?(\d+|\d+\.\d+|\.\d+)(\%|px|em|pt|in)?)|\#[0-9a-fA-F]{3}[0-9a-fA-F]{3})/g, style: 'number' },
-				keywords:  { re: /(\@\w+|\:?\:\w+|[a-z\-]+\:)/g, style: 'keyword' },
+				string:    { re: /(('.*?')|(`.*?`)|(".*?"))/g, style: 'string' },
+				numbers:   { re: /((-?(\d+|\d+\.\d+|\.\d+)(%|px|em|pt|in)?)|#[0-9a-fA-F]{3}[0-9a-fA-F]{3})/g, style: 'number' },
+				keywords:  { re: /(@\w+|:?:\w+|[a-z-]+:)/g, style: 'keyword' },
 				brackets:  { re: /(\{|\}|\(|\))/g, style: 'brackets' }
 			},
 			// HTML
 			html: {
-				comment:   { re: /(\&lt\;\!\-\-([\s\S]*?)\-\-\&gt\;)/g, style: 'comment' },
-				tag:       { re: /(\&lt\;\/?\w(.|\n)*?\/?\&gt\;)/g, style: 'keyword', embed: ['string'] },
-				string:    { re: /((\'.*?\')|(\`.*?\`)|(\".*?\"))/g, style: 'string' },
-				css:       { re: /(?:\&lt;style.*?\&gt;)([\s\S]+?)(?:\&lt;\/style\&gt;)/gi, language: 'css'},
-				script:    { re: /(?:\&lt;script.*?\&gt;)([\s\S]+?)(?:\&lt;\/script\&gt;)/gi, language: 'js'}
+				comment:   { re: /(&lt;!--([\s\S]*?)--&gt;)/g, style: 'comment' },
+				tag:       { re: /(&lt;\/?\w(.|\n)*?\/?&gt;)/g, style: 'keyword', embed: ['string'] },
+				string:    { re: /(('.*?')|(`.*?`)|(".*?"))/g, style: 'string' },
+				css:       { re: /(?:&lt;style.*?&gt;)([\s\S]+?)(?:&lt;\/style&gt;)/gi, language: 'css'},
+				script:    { re: /(?:&lt;script.*?&gt;)([\s\S]+?)(?:&lt;\/script&gt;)/gi, language: 'js'}
 			}
 		}
 
@@ -400,9 +400,9 @@
 			$.each(MDEditor.toolbar, (name, data) => {
 				const tool = $(`<div class="mdeditor-toolbar-tool"></div>`);
 				if (data.display.endsWith('.svg')) {
-					 $.get(t_url('assets/svg/' + data.display), function(result) {
+					$.get(t_url('assets/svg/' + data.display), function(result) {
 						tool.append(result);
-					 }, 'text');
+					}, 'text');
 				} else {
 					tool.text(data.display);
 				}
@@ -512,7 +512,7 @@
 	};
 })(jQuery);
 
-var ForumModel = Classy.newClass().name('ForumModel');
+const ForumModel = Classy.newClass().name('ForumModel');
 
 ForumModel.constructor(function() {});
 
@@ -577,73 +577,73 @@ ForumModel.methods({
     },
 
     notifyThreadListChangeListenersReplyUpdated: function(reply) {
-        for (var i=0;i<this.replyListChangeListeners.length;i++) {
+        for (let i = 0;i<this.replyListChangeListeners.length;i++) {
             this.replyListChangeListeners[i].replyUpdated(reply);
         }
     },
 
     notifyThreadListChangeListenersThreadListChanged: function(animate) {
-        for (var i=0;i<this.threadListChangeListeners.length;i++) {
+        for (let i = 0;i<this.threadListChangeListeners.length;i++) {
             this.threadListChangeListeners[i].threadListChanged(this.currentThreads, animate);
         }
     },
 
     notifyThreadListChangeListenersThreadUpdated: function(thread) {
-        for (var i=0;i<this.threadListChangeListeners.length;i++) {
+        for (let i = 0;i<this.threadListChangeListeners.length;i++) {
             this.threadListChangeListeners[i].threadUpdated(thread);
         }
     },
 
     notifyThreadListChangeListenersThreadSelected: function(threadId) {
-        for (var i=0;i<this.threadListChangeListeners.length;i++) {
+        for (let i = 0;i<this.threadListChangeListeners.length;i++) {
             this.threadListChangeListeners[i].threadSelected(threadId);
         }
     },
 
     notifyThreadListChangeListenersThreadDeselected: function() {
-        for (var i=0;i<this.threadListChangeListeners.length;i++) {
+        for (let i = 0;i<this.threadListChangeListeners.length;i++) {
             this.threadListChangeListeners[i].threadDeselected();
         }
     },
 
     notifyThreadListChangeListenersThreadEditStarted: function(threadId) {
-        for (var i=0;i<this.threadListChangeListeners.length;i++) {
+        for (let i = 0;i<this.threadListChangeListeners.length;i++) {
             this.threadListChangeListeners[i].threadEditStarted(threadId);
         }
     },
 
     notifyThreadListChangeListenersThreadEditFinished: function(thread) {
-        for (var i=0;i<this.threadListChangeListeners.length;i++) {
+        for (let i = 0;i<this.threadListChangeListeners.length;i++) {
             this.threadListChangeListeners[i].threadEditFinished(thread);
         }
     },
 
     notifyThreadListChangeListenersThreadEditCancelled: function() {
-        for (var i=0;i<this.threadListChangeListeners.length;i++) {
+        for (let i = 0;i<this.threadListChangeListeners.length;i++) {
             this.threadListChangeListeners[i].threadEditCancelled();
         }
     },
 
     notifyReplyListChangeListenersReplyListChanged: function(animate) {
-        for (var i=0;i<this.replyListChangeListeners.length;i++) {
+        for (let i = 0;i<this.replyListChangeListeners.length;i++) {
             this.replyListChangeListeners[i].replyListChanged(this.currentReplies, animate);
         }
     },
 
     notifyReplyListChangeListenersReplyEditStarted: function(replyId) {
-        for (var i=0;i<this.replyListChangeListeners.length;i++) {
+        for (let i = 0;i<this.replyListChangeListeners.length;i++) {
             this.replyListChangeListeners[i].replyEditStarted(replyId);
         }
     },
 
     notifyReplyListChangeListenersReplyEditFinished: function(reply) {
-        for (var i=0;i<this.replyListChangeListeners.length;i++) {
+        for (let i = 0;i<this.replyListChangeListeners.length;i++) {
             this.replyListChangeListeners[i].replyEditFinished(reply);
         }
     },
 
     notifyReplyListChangeListenersReplyEditCancelled: function() {
-        for (var i=0;i<this.replyListChangeListeners.length;i++) {
+        for (let i = 0;i<this.replyListChangeListeners.length;i++) {
             this.replyListChangeListeners[i].replyEditCancelled();
         }
     },
@@ -663,11 +663,11 @@ ForumModel.methods({
         this.threadBeingEdited = null;
 
         // Remove threads that are no longer present.
-        for (var i=0;i<this.currentThreads.length;i++) {
-            var thread = this.currentThreads[i];
-            var foundThread = false;
-            for (var j=0;j<newThreads.length;j++) {
-                var t = newThreads[j];
+        for (let i = 0;i<this.currentThreads.length;i++) {
+            const thread = this.currentThreads[i];
+            let foundThread = false;
+            for (let j = 0;j<newThreads.length;j++) {
+                const t = newThreads[j];
                 if (t.id==thread.id) {
                     foundThread = true;
                     break;
@@ -681,10 +681,10 @@ ForumModel.methods({
 
         // Remove threads that are already showing if they are in fact older.
         // If the new thread is older than what is already present, then remove the new thread in preparation for the merging step.
-        for (var i=0;i<newThreads.length;i++) {
-            var thread = newThreads[i];
-            for (var j = 0; j < this.currentThreads.length; j++) {
-                var t = this.currentThreads[j];
+        for (let i = 0;i<newThreads.length;i++) {
+            const thread = newThreads[i];
+            for (let j = 0; j < this.currentThreads.length; j++) {
+                const t = this.currentThreads[j];
                 if (t.id==thread.id) {
                     if (t.time < thread.time) {
                         this.currentThreads.splice(j, 1);
@@ -699,11 +699,11 @@ ForumModel.methods({
         }
 
         // Merge new threads into existing threads.
-        for (var i=0;i<newThreads.length;i++) {
-            var thread = newThreads[i];
-            var inserted = false;
-            for (var j=this.currentThreads.length-1;j>=0;j--) {
-                var t = this.currentThreads[j];
+        for (let i = 0;i<newThreads.length;i++) {
+            const thread = newThreads[i];
+            let inserted = false;
+            for (let j=this.currentThreads.length-1;j>=0;j--) {
+                const t = this.currentThreads[j];
                 if (t.pinned > thread.pinned || t.latestPost>=thread.latestPost) {
                     this.currentThreads.splice(j+1, 0, thread);
                     inserted = true;
@@ -727,7 +727,7 @@ ForumModel.methods({
         this.currentThreadWindowMinPinned = Number.POSITIVE_INFINITY;
         this.currentThreadWindowMaxPinned = Number.NEGATIVE_INFINITY;
 
-        for (var i=0;i<this.currentThreads.length;i++) {
+        for (let i = 0;i<this.currentThreads.length;i++) {
             if ((
                     this.currentThreads[i].pinned==this.currentThreadWindowMaxPinned &&
                     this.currentThreads[i].latestPost>this.currentThreadWindowMaxTime
@@ -756,11 +756,11 @@ ForumModel.methods({
         this.replyBeingEdited = null;
 
         // Remove replies that are no longer present.
-        for (var i=0;i<this.currentReplies.length;i++) {
-            var reply = this.currentReplies[i];
-            var foundReply = false;
-            for (var j=0;j<newReplies.length;j++) {
-                var r = newReplies[j];
+        for (let i = 0;i<this.currentReplies.length;i++) {
+            const reply = this.currentReplies[i];
+            let foundReply = false;
+            for (let j = 0;j<newReplies.length;j++) {
+                const r = newReplies[j];
                 if (r.id==reply.id) {
                     foundReply = true;
                     break;
@@ -774,10 +774,10 @@ ForumModel.methods({
 
         // Remove replies that are already showing if they are in fact older.
         // If the new reply is older than what is already present, then remove the new reply in preparation for the merging step.
-        for (var i=0;i<newReplies.length;i++) {
-            var reply = newReplies[i];
-            for (var j = 0; j < this.currentReplies.length; j++) {
-                var r = this.currentReplies[j];
+        for (let i = 0;i<newReplies.length;i++) {
+            const reply = newReplies[i];
+            for (let j = 0; j < this.currentReplies.length; j++) {
+                const r = this.currentReplies[j];
                 if (r.id==reply.id) {
                     if (r.time < reply.time) {
                         this.currentReplies.splice(j, 1);
@@ -792,11 +792,11 @@ ForumModel.methods({
         }
 
         // Merge new replies into existing replies.
-        for (var i=0;i<newReplies.length;i++) {
-            var reply = newReplies[i];
-            var inserted = false;
-            for (var j=this.currentReplies.length-1;j>=0;j--) {
-                var r = this.currentReplies[j];
+        for (let i = 0;i<newReplies.length;i++) {
+            const reply = newReplies[i];
+            let inserted = false;
+            for (let j=this.currentReplies.length-1;j>=0;j--) {
+                const r = this.currentReplies[j];
                 if (r.id<reply.id) {
                     this.currentReplies.splice(j+1, 0, reply);
                     inserted = true;
@@ -817,7 +817,7 @@ ForumModel.methods({
             this.currentReplyWindowOldestId = Number.POSITIVE_INFINITY;
             this.currentReplyWindowNewestId = Number.NEGATIVE_INFINITY;
 
-            for (var i=0;i<this.currentReplies.length;i++) {
+            for (let i = 0;i<this.currentReplies.length;i++) {
                 if (this.currentReplies[i].created>this.currentReplyWindowNewestId) {
                     this.currentReplyWindowNewestId = this.currentReplies[i].id;
                 }
@@ -832,7 +832,7 @@ ForumModel.methods({
     },
 
     getThreadById: function(threadId) {
-        for (var i=0;i<this.currentThreads.length;i++) {
+        for (let i = 0;i<this.currentThreads.length;i++) {
             if (this.currentThreads[i].id==threadId) {
                 return this.currentThreads[i];
             }
@@ -844,7 +844,7 @@ ForumModel.methods({
     },
 
     getReplyById: function(replyId) {
-        for (var i=0;i<this.currentReplies.length;i++) {
+        for (let i = 0;i<this.currentReplies.length;i++) {
             if (this.currentReplies[i].id==replyId) {
                 return this.currentReplies[i];
             }
@@ -942,8 +942,8 @@ ForumModel.methods({
      */
     updateThread: function(thread) {
         if (this.currentThreads.length > 0) {
-            for (var j=0;j<this.currentThreads.length;j++) {
-                var t = this.currentThreads[j];
+            for (let j = 0;j<this.currentThreads.length;j++) {
+                const t = this.currentThreads[j];
                 if (t.id==thread.id) {
                     if (t.time < thread.time) {
                         this.currentThreads.splice(j, 1, thread);
@@ -956,7 +956,7 @@ ForumModel.methods({
                 }
             }
         } else if (this.selectedThread) {
-            var t = this.selectedThread;
+            const t = this.selectedThread;
             if (t.id==thread.id) {
                 if (t.time < thread.time) {
                     this.selectedThread = thread;
@@ -976,8 +976,8 @@ ForumModel.methods({
      * @param reply
      */
     updateReply: function(reply) {
-        for (var j=0;j<this.currentReplies.length;j++) {
-            var r = this.currentReplies[j];
+        for (let j = 0;j<this.currentReplies.length;j++) {
+            const r = this.currentReplies[j];
             if (r.id==reply.id) {
                 if (r.time < reply.time) {
                     this.currentReplies.splice(j, 1, reply);
@@ -991,7 +991,7 @@ ForumModel.methods({
     },
 
     loadNewestReplies: function(threadId) {
-        var self = this;
+        const self = this;
         Backend.getInstance().getForumReplies(
             function (res) {
                 if (res.result.result) {
@@ -999,7 +999,7 @@ ForumModel.methods({
                     self.selectedThreadReplyCount = res.result.data.count;
                     self.selectedThreadReplyOffset = res.result.data.offset;
                     self.trackingNewestReplies = res.result.data.offset >= res.result.data.count - self.replyRequestSize;
-                    var newReplies = res.result.data.replies;
+                    const newReplies = res.result.data.replies;
                     self.mergeLoadedReplies(newReplies, false);
                 } else {
                     // Handle messages.
@@ -1021,7 +1021,7 @@ ForumModel.methods({
     },
 
     loadOldestReplies: function(threadId) {
-        var self = this;
+        const self = this;
         Backend.getInstance().getForumReplies(
             function (res) {
                 if (res.result.result) {
@@ -1029,7 +1029,7 @@ ForumModel.methods({
                     self.selectedThreadReplyCount = res.result.data.count;
                     self.selectedThreadReplyOffset = res.result.data.offset;
                     self.trackingNewestReplies = res.result.data.offset >= res.result.data.count - self.replyRequestSize;
-                    var newReplies = res.result.data.replies;
+                    const newReplies = res.result.data.replies;
                     self.mergeLoadedReplies(newReplies, false);
                 } else {
                     // Handle messages.
@@ -1049,7 +1049,7 @@ ForumModel.methods({
     },
 
     loadNewerReplies: function(threadId, offset) {
-        var self = this;
+        const self = this;
         Backend.getInstance().getForumReplies(
             function (res) {
                 if (res.result.result) {
@@ -1062,7 +1062,7 @@ ForumModel.methods({
                     self.selectedThreadReplyCount = res.result.data.count;
                     self.selectedThreadReplyOffset = res.result.data.offset;
                     self.trackingNewestReplies = res.result.data.offset >= res.result.data.count - self.replyRequestSize;
-                    var newReplies = res.result.data.replies;
+                    const newReplies = res.result.data.replies;
                     self.mergeLoadedReplies(newReplies, false);
                 } else {
                     // Handle messages.
@@ -1082,7 +1082,7 @@ ForumModel.methods({
     },
 
     loadOlderReplies: function(threadId, offset) {
-        var self = this;
+        const self = this;
         Backend.getInstance().getForumReplies(
             function (res) {
                 if (res.result.result) {
@@ -1095,7 +1095,7 @@ ForumModel.methods({
                     self.selectedThreadReplyCount = res.result.data.count;
                     self.selectedThreadReplyOffset = res.result.data.offset;
                     self.trackingNewestReplies = res.result.data.offset >= res.result.data.count - self.replyRequestSize;
-                    var newReplies = res.result.data.replies;
+                    const newReplies = res.result.data.replies;
                     self.mergeLoadedReplies(newReplies, false);
                 } else {
                     // Handle messages.
@@ -1115,7 +1115,7 @@ ForumModel.methods({
     },
 
     refreshReplies: function(threadId) {
-        var self = this;
+        const self = this;
         Backend.getInstance().getForumReplies(
             function (res) {
                 // Ignore refresh if we have stopped synchronizing.
@@ -1128,7 +1128,7 @@ ForumModel.methods({
                     self.selectedThreadReplyCount = res.result.data.count;
                     self.selectedThreadReplyOffset = res.result.data.offset;
                     self.trackingNewestReplies = res.result.data.offset >= res.result.data.count - self.replyRequestSize;
-                    var newReplies = res.result.data.replies;
+                    const newReplies = res.result.data.replies;
                     self.mergeLoadedReplies(newReplies, true);
                 } else {
                     // Handle messages.
@@ -1149,7 +1149,7 @@ ForumModel.methods({
     },
 
     loadRepliesById: function(threadId, replyId) {
-        var self = this;
+        const self = this;
         Backend.getInstance().getForumReplies(
             function (res) {
                 if (res.result.result) {
@@ -1162,7 +1162,7 @@ ForumModel.methods({
                     self.selectedThreadReplyCount = res.result.data.count;
                     self.selectedThreadReplyOffset = res.result.data.offset;
                     self.trackingNewestReplies = res.result.data.offset >= res.result.data.count - self.replyRequestSize;
-                    var newReplies = res.result.data.replies;
+                    const newReplies = res.result.data.replies;
                     self.mergeLoadedReplies(newReplies, false);
                 } else {
                     // Handle messages.
@@ -1182,7 +1182,7 @@ ForumModel.methods({
     },
 
     loadNewestThreads: function() {
-        var self = this;
+        const self = this;
         Backend.getInstance().getForumThreads(
             function(res) {
                 if (res.result.result) {
@@ -1190,7 +1190,7 @@ ForumModel.methods({
                     self.threadCount = res.result.data.count;
                     self.threadOffset = res.result.data.offset;
                     self.trackingNewestThreads = res.result.data.offset == res.result.data.count;
-                    var newThreads = res.result.data.threads;
+                    const newThreads = res.result.data.threads;
                     self.mergeLoadedThreads(newThreads, false);
                 } else {
                     // Handle messages.
@@ -1209,7 +1209,7 @@ ForumModel.methods({
     },
 
     loadNewerThreads: function(offset) {
-        var self = this;
+        const self = this;
         Backend.getInstance().getForumThreads(
             function(res) {
                 if (res.result.result) {
@@ -1222,7 +1222,7 @@ ForumModel.methods({
                     self.threadCount = res.result.data.count;
                     self.threadOffset = res.result.data.offset;
                     self.trackingNewestThreads = res.result.data.offset == res.result.data.count;
-                    var newThreads = res.result.data.threads;
+                    const newThreads = res.result.data.threads;
                     self.mergeLoadedThreads(newThreads, false);
                 } else {
                     // Handle messages.
@@ -1240,7 +1240,7 @@ ForumModel.methods({
     },
 
     loadOlderThreads: function(offset) {
-        var self = this;
+        const self = this;
         Backend.getInstance().getForumThreads(
             function(res) {
                 if (res.result.result) {
@@ -1248,7 +1248,7 @@ ForumModel.methods({
                     self.threadCount = res.result.data.count;
                     self.threadOffset = res.result.data.offset;
                     self.trackingNewestThreads = res.result.data.offset == res.result.data.count;
-                    var newThreads = res.result.data.threads;
+                    const newThreads = res.result.data.threads;
                     self.mergeLoadedThreads(newThreads, false);
                 } else {
                     // Handle messages.
@@ -1266,7 +1266,7 @@ ForumModel.methods({
     },
 
     refreshThreads: function() {
-        var self = this;
+        const self = this;
         Backend.getInstance().getForumThreads(
             function(res) {
                 // Ignore refresh if we have stopped synchronizing.
@@ -1279,7 +1279,7 @@ ForumModel.methods({
                     self.threadCount = res.result.data.count;
                     self.threadOffset = res.result.data.offset;
                     self.trackingNewestThreads = res.result.data.offset == res.result.data.count;
-                    var newThreads = res.result.data.threads;
+                    const newThreads = res.result.data.threads;
                     self.mergeLoadedThreads(newThreads, true);
                 } else {
                     // Handle messages.
@@ -1298,7 +1298,7 @@ ForumModel.methods({
     },
 
     loadThreadsById: function(threadId) {
-        var self = this;
+        const self = this;
         Backend.getInstance().getForumThreadsById(
             function(res) {
                 if (res.result.result) {
@@ -1306,7 +1306,7 @@ ForumModel.methods({
                     self.threadCount = res.result.data.count;
                     self.threadOffset = res.result.data.offset;
                     self.trackingNewestThreads = res.result.data.offset == res.result.data.count;
-                    var newThreads = res.result.data.threads;
+                    const newThreads = res.result.data.threads;
                     self.mergeLoadedThreads(newThreads, false);
                 } else {
                     // Handle messages.
@@ -1321,7 +1321,7 @@ ForumModel.methods({
     }
 });
 
-var ForumView = Classy.newClass().name('ForumView');
+const ForumView = Classy.newClass().name('ForumView');
 ForumView.constructor(function(model) {
 
     // Store model reference
@@ -1389,14 +1389,14 @@ ForumView.methods({
     },
 
     threadUpdated: function(thread) {
-        var existingThread = $('#thread-' + thread.id);
-        var t = existingThread.data();
+        const existingThread = $('#thread-' + thread.id);
+        const t = existingThread.data();
         if (t && thread.id == t.id) {
             Forum.log.debug("VIEW THREAD UPDATE SINGLE");
-            var threadHtml = $(thread.html.threadlist);
-            var newHeader = threadHtml.find("div.header"); // div is necessary to avoid selecting input field.
-            var newContent = $('<div class="content"></div>').append($.snarkdown(thread.message))
-            var newDetails = threadHtml.find(".details");
+            const threadHtml = $(thread.html.threadlist);
+            const newHeader = threadHtml.find("div.header"); // div is necessary to avoid selecting input field.
+            const newContent = $('<div class="content"></div>').append($.snarkdown(thread.message))
+            const newDetails = threadHtml.find(".details");
             existingThread.find("div.header").replaceWith(newHeader); // div is necessary to avoid selecting input field.
             existingThread.find(".content").replaceWith(newContent);
             existingThread.find(".details").replaceWith(newDetails);
@@ -1421,13 +1421,13 @@ ForumView.methods({
     },
 
     replyUpdated: function(reply) {
-        var existingReply = $('#reply-' + reply.id);
-        var r = existingReply.data();
+        const existingReply = $('#reply-' + reply.id);
+        const r = existingReply.data();
         if (r && reply.id == r.id) {
             Forum.log.debug("VIEW REPLY UPDATE SINGLE");
-            var replyHtml = $(reply.html.replylist);
-            var newContent = $('<div class="content"></div>').append($.snarkdown(reply.message));
-            var newDetails = replyHtml.find(".details");
+            const replyHtml = $(reply.html.replylist);
+            const newContent = $('<div class="content"></div>').append($.snarkdown(reply.message));
+            const newDetails = replyHtml.find(".details");
             existingReply.find(".content").replaceWith(newContent);
             existingReply.find(".details").replaceWith(newDetails);
             existingReply.removeClass("banned deleted approved moderatable approvable deletable bannable editable likable liked").addClass(replyHtml.attr('class'));
@@ -1443,16 +1443,16 @@ ForumView.methods({
 
     removeEditingFromAll: function() {
         // Remove editing capabilities on all other threads and replies.
-        var allThreads = $('.forum .thread');
+        const allThreads = $('.forum .thread');
         allThreads.removeClass("editing");
         Utils.removeAutomaticTextAreaResize(allThreads.find(".edit textarea"));
-        var allReplies = $('.forum .reply');
+        const allReplies = $('.forum .reply');
         allReplies.removeClass("editing");
         Utils.removeAutomaticTextAreaResize(allReplies.find(".edit textarea"));
     },
 
     threadEditStarted: function(threadId) {
-        var thread = this.model.getThreadBeingEdited();
+        const thread = this.model.getThreadBeingEdited();
     
         // Remove editing capabilities on all other threads and replies.
         this.removeEditingFromAll();
@@ -1460,9 +1460,9 @@ ForumView.methods({
         Forum.getInstance().updateComposeAndStatus(true, false);
     
         // Add editing capability to thread.
-        var editingThread = $("#thread-"+threadId);
-        var editingInput = editingThread.find(".edit input");
-        var editingTextArea = editingThread.find(".edit textarea");
+        const editingThread = $("#thread-"+threadId);
+        const editingInput = editingThread.find(".edit input");
+        const editingTextArea = editingThread.find(".edit textarea");
         editingThread.addClass("editing");
         Utils.addAutomaticTextAreaResize(editingTextArea);
         editingTextArea.mdeditor();
@@ -1491,7 +1491,7 @@ ForumView.methods({
     },
 
     replyEditStarted: function(replyId) {
-        var reply = this.model.getReplyBeingEdited();
+        const reply = this.model.getReplyBeingEdited();
 
         // Remove editing capabilities on all other threads and replies.
         this.removeEditingFromAll();
@@ -1499,8 +1499,8 @@ ForumView.methods({
         Forum.getInstance().updateComposeAndStatus(true, false);
 
         // Add editing capability to reply.
-        var editingReply = $("#reply-"+replyId);
-        var editingTextArea = editingReply.find(".edit textarea");
+        const editingReply = $("#reply-"+replyId);
+        const editingTextArea = editingReply.find(".edit textarea");
         editingReply.addClass("editing");
         Utils.addAutomaticTextAreaResize(editingTextArea);
         editingTextArea.mdeditor();
@@ -1528,16 +1528,15 @@ ForumView.methods({
 
     mergeReply: function(reply, i, animate) {
         // Loop over divs displaying replies
-        var inserted = false;
-        var self = this;
+        let inserted = false;
         $('.forum .reply').each(function() {
-            var r = $(this).data();
+            const r = $(this).data();
             if (reply.id == r.id) {
                 Forum.log.debug("VIEW REPLY UPDATE");
                 // reply is already stored here, so update it.
-                var replyHtml = $(reply.html.replylist);
-                var newContent = $('<div class="content"></div>').append($.snarkdown(reply.message));
-                var newDetails = replyHtml.find(".details");
+                const replyHtml = $(reply.html.replylist);
+                const newContent = $('<div class="content"></div>').append($.snarkdown(reply.message));
+                const newDetails = replyHtml.find(".details");
                 $(this).find(".content").replaceWith(newContent);
                 $(this).find(".details").replaceWith(newDetails);
                 $(this).removeClass("banned deleted approved moderatable approvable deletable bannable editable likable liked").addClass(replyHtml.attr('class'));
@@ -1548,10 +1547,10 @@ ForumView.methods({
             } else if (reply.id < r.id) {
                 Forum.log.debug("VIEW REPLY MERGE");
                 // reply is not stored here, so insert it.
-                var atLeft = (Forum.getInstance().getSelectedThreadReplyOffset() + i) % 2 == 1;
+                const atLeft = (Forum.getInstance().getSelectedThreadReplyOffset() + i) % 2 == 1;
 
-                var replyHtml = $(reply.html.replylist);
-                var newContent = $('<div class="content"></div>').append($.snarkdown(reply.message));
+                const replyHtml = $(reply.html.replylist);
+                const newContent = $('<div class="content"></div>').append($.snarkdown(reply.message));
                 replyHtml.find('.content').replaceWith(newContent);
                 replyHtml.addClass(atLeft ? "left" : "right");
                 if (animate) {
@@ -1576,8 +1575,8 @@ ForumView.methods({
         if (!inserted) {
             Forum.log.debug("VIEW REPLY BOTTOM");
             // reply is not stored here, so insert it.
-            var previousReply = $('.forum .reply').last();
-            var atLeft = false;
+            const previousReply = $('.forum .reply').last();
+            let atLeft = false;
             // If there is a previous reply, place the new reply opposite of it.
             if (previousReply.length > 0) {
                 Forum.log.debug("RELATIVE PLACEMENT");
@@ -1586,8 +1585,8 @@ ForumView.methods({
                 Forum.log.debug("ABSOLUTE PLACEMENT");
                 atLeft = (Forum.getInstance().getSelectedThreadReplyOffset() + i) % 2 == 1;
             }
-            var replyHtml = $(reply.html.replylist);
-            var newContent = $('<div class="content"></div>').append($.snarkdown(reply.message));
+            const replyHtml = $(reply.html.replylist);
+            const newContent = $('<div class="content"></div>').append($.snarkdown(reply.message));
             replyHtml.find('.content').replaceWith(newContent);
             replyHtml.addClass(atLeft ? "left" : "right");
             if (animate) {
@@ -1609,18 +1608,18 @@ ForumView.methods({
     mergeThread: function(thread, animate) {
         // Loop over divs displaying thread headers
         // ordered by pinned, descending and latestPost, descending
-        var inserted = false;
+        let inserted = false;
 
-        var self = this;
+        const self = this;
         $('.forum .thread').each(function() {
-            var t = $(this).data();
+            const t = $(this).data();
             if (thread.pinned > t.pinned || (thread.pinned >= t.pinned && thread.latestPost >= t.latestPost)) {
                 // We are at the spot where thread should be placed
                 if (thread.id == t.id) {
                     // thread is already stored here, so update it.
-                    var threadHtml = $(thread.html.threadlist);
-                    var newContent = $('<div class="content"></div>').append($.snarkdown(thread.message));
-                    var newDetails = threadHtml.find(".details");
+                    const threadHtml = $(thread.html.threadlist);
+                    const newContent = $('<div class="content"></div>').append($.snarkdown(thread.message));
+                    const newDetails = threadHtml.find(".details");
                     $(this).find(".content").replaceWith(newContent);
                     $(this).find(".details").replaceWith(newDetails);
                     $(this).removeClass().addClass(threadHtml.attr('class'));
@@ -1634,8 +1633,8 @@ ForumView.methods({
                     self.updateModerationTooltip($(this));
                 } else {
                     // thread is not stored here, so insert it.
-                    var threadHtml = $(thread.html.threadlist);
-                    var newContent = $('<div class="content"></div>').append($.snarkdown(thread.message));
+                    const threadHtml = $(thread.html.threadlist);
+                    const newContent = $('<div class="content"></div>').append($.snarkdown(thread.message));
                     threadHtml.find('.content').replaceWith(newContent);
                     threadHtml.insertBefore($(this));
                     threadHtml.data(thread).find('.bubble').click(function() { Forum.getInstance().selectThread(thread.id) });
@@ -1643,7 +1642,7 @@ ForumView.methods({
                     self.updateSingleBubbleAndActionWidth(threadHtml);
 
                     // Make the content ellipsized.
-                    var content = threadHtml.find(".content");
+                    const content = threadHtml.find(".content");
                     content.dotdotdot({watch: 'window', height: 50});
 
                     self.updateModerationTooltip(threadHtml);
@@ -1661,8 +1660,8 @@ ForumView.methods({
         // We didn't find a place to put thread, so simply put it in
         // the threadsContainer at the bottom.
         if (!inserted) {
-            var threadHtml = $(thread.html.threadlist);
-            var newContent = $('<div class="content"></div>').append($.snarkdown(thread.message));
+            const threadHtml = $(thread.html.threadlist);
+            const newContent = $('<div class="content"></div>').append($.snarkdown(thread.message));
             threadHtml.find('.content').replaceWith(newContent);
             threadHtml.appendTo('#threadsContainer');
             threadHtml.data(thread).find('.bubble').click(function() { Forum.getInstance().selectThread(thread.id) });
@@ -1670,7 +1669,7 @@ ForumView.methods({
             this.updateSingleBubbleAndActionWidth(threadHtml);
 
             // Make the content ellipsized.
-            var content = threadHtml.find(".content");
+            const content = threadHtml.find(".content");
             content.dotdotdot({watch: 'window', height: 50});
 
             this.updateModerationTooltip(threadHtml);
@@ -1686,10 +1685,10 @@ ForumView.methods({
 
     // pageFunctions: object containing functions for loading newer, older, newest and oldest.
     updatePaginator: function(paginator, currentPage, pageCount, pageFunctions, showOldestPage, showPageNumbers, hideBackButton, animate) {
-        var currentPages = paginator.find('.page');
-        var currentOtherPages = paginator.find('.other .page');
+        let currentPages = paginator.find('.page');
+        const currentOtherPages = paginator.find('.other .page');
 
-        var ellipses = paginator.find('.ellipsis');
+        const ellipses = paginator.find('.ellipsis');
 
         // If there only one page, remove all pages and ellipses.
         if (pageCount <= 1) {
@@ -1712,7 +1711,7 @@ ForumView.methods({
             });
 
             if (hideBackButton) {
-                var back = paginator.find('.back');
+                const back = paginator.find('.back');
                 if (animate) {
                     back.find('img:visible').animate({width: 0, height: 0}, UIConstants.ELEMENT_MOVE_TIME);
                     back.animate({opacity: 0}, UIConstants.ELEMENT_MOVE_TIME);
@@ -1726,7 +1725,7 @@ ForumView.methods({
 
         // Show back button.
         if (hideBackButton) {
-            var back = paginator.find('.back');
+            const back = paginator.find('.back');
             if (animate) {
                 back.find('img:visible').animate({width: UIConstants.FORUM_BACK_BUTTON_WIDTH, height: UIConstants.FORUM_PAGE_BUTTON_HEIGHT, bottom: 0}, UIConstants.ELEMENT_MOVE_TIME);
                 back.show().animate({opacity: 1}, UIConstants.ELEMENT_MOVE_TIME);
@@ -1747,7 +1746,7 @@ ForumView.methods({
                 return;
             }
 
-            var p = $(this).data();
+            const p = $(this).data();
             if (p.number < pageCount - 1 && Math.abs(p.number - currentPage) <= UIConstants.FORUM_MAX_PAGES_AROUND_CURRENT) {
                 return;
             }
@@ -1761,20 +1760,20 @@ ForumView.methods({
         });
 
         // Then, add pages that are needed but not already present.
-        for (var i=UIConstants.FORUM_MAX_PAGES_AROUND_CURRENT; i>=-UIConstants.FORUM_MAX_PAGES_AROUND_CURRENT; i--) {
-            var pageFound = false;
+        for (let i = UIConstants.FORUM_MAX_PAGES_AROUND_CURRENT; i>=-UIConstants.FORUM_MAX_PAGES_AROUND_CURRENT; i--) {
+            let pageFound = false;
             currentOtherPages.each(function() {
-                var p = $(this).data();
+                const p = $(this).data();
                 if (p.number == currentPage+i) {
                     pageFound = true;
                     return false;
                 }
             });
             if (!pageFound) {
-                var pageNumber = currentPage+i;
+                const pageNumber = currentPage+i;
                 if (pageNumber > 0 && pageNumber < pageCount - 1) {
-                    var newPage = $("<div class='button page' title='Show page "+(pageNumber+1)+"'></div>");
-                    var randomImage = Math.floor(Math.random() * UIConstants.FORUM_PAGE_BUTTON_WIDTHS.length);
+                    const newPage = $("<div class='button page' title='Show page "+(pageNumber+1)+"'></div>");
+                    const randomImage = Math.floor(Math.random() * UIConstants.FORUM_PAGE_BUTTON_WIDTHS.length);
                     Utils.addImageWithClasses(newPage, "standard", "assets/images/forum/page" + randomImage + ".png");
                     Utils.addImageWithClasses(newPage, "active", "assets/images/forum/page" + randomImage + "Active.png");
                     Utils.addImageWithClasses(newPage, "selected", "assets/images/forum/page" + randomImage + "Selected.png");
@@ -1784,9 +1783,9 @@ ForumView.methods({
 
                     newPage.data({number: pageNumber});
 
-                    var inserted = false;
+                    let inserted = false;
                     paginator.find('.other .page').each(function() {
-                        var p = $(this).data();
+                        const p = $(this).data();
                         if (p.number > pageNumber) {
                             newPage.insertBefore($(this));
                             inserted = true;
@@ -1808,10 +1807,10 @@ ForumView.methods({
             }
         }
 
-        var oldestPage = paginator.find('.oldest .page');
+        const oldestPage = paginator.find('.oldest .page');
         if (showOldestPage) {
             if (oldestPage.length == 0) {
-                var newPage = $("<div class='button page oldest' title='Show "+(showPageNumbers?"page 1":"first")+"'></div>");
+                const newPage = $("<div class='button page oldest' title='Show "+(showPageNumbers?"page 1":"first")+"'></div>");
                 Utils.addImageWithClasses(newPage, "standard", "assets/images/forum/pageOldest.png");
                 Utils.addImageWithClasses(newPage, "active", "assets/images/forum/pageOldestActive.png");
                 Utils.addImageWithClasses(newPage, "selected", "assets/images/forum/pageOldestSelected.png");
@@ -1842,9 +1841,9 @@ ForumView.methods({
                 oldestPage.remove();
             }
         }
-        var newestPage = paginator.find('.newest .page');
+        const newestPage = paginator.find('.newest .page');
         if (newestPage.length == 0) {
-            var newPage = $("<div class='button page newest' title='Show newest'></div>");
+            const newPage = $("<div class='button page newest' title='Show newest'></div>");
             Utils.addImageWithClasses(newPage, "standard", "assets/images/forum/pageNewest.png");
             Utils.addImageWithClasses(newPage, "active", "assets/images/forum/pageNewestActive.png");
             Utils.addImageWithClasses(newPage, "selected", "assets/images/forum/pageNewestSelected.png");
@@ -1911,7 +1910,7 @@ ForumView.methods({
 
         // Finally, update existing pages (onmouseup function, highlights, etc.).
         currentPages.each(function() {
-            var p = $(this).data();
+            const p = $(this).data();
 
             // Update number of newest page.
             if ($(this).hasClass("newest")) {
@@ -1933,7 +1932,7 @@ ForumView.methods({
             // Update onmouseup function and tooltip.
             $(this).off("mouseup");
             if (p.number != currentPage) {
-                var offset = Math.abs(p.number - currentPage) - 1;
+                const offset = Math.abs(p.number - currentPage) - 1;
                 $(this).tooltipster('enable');
                 if (p.number < currentPage) {
                     if (!showPageNumbers) {
@@ -1965,16 +1964,16 @@ ForumView.methods({
             Forum.getInstance().stopSynchronization(!this.suppressNextUpdateAnimation);
         }
 
-        var thread = this.model.getSelectedThread();
+        const thread = this.model.getSelectedThread();
         // Display main thread object
-        var threadData = $('#repliesThreadData');
-        var threadHtml = $(thread.html.threadlist);
-        var existingThread = $('#thread-'+thread.id);
-        var parsedContent = $('<div class="content"></div>').append($.snarkdown(thread.message));
-        var t = existingThread.data();
+        const threadData = $('#repliesThreadData');
+        const threadHtml = $(thread.html.threadlist);
+        const existingThread = $('#thread-'+thread.id);
+        const parsedContent = $('<div class="content"></div>').append($.snarkdown(thread.message));
+        const t = existingThread.data();
         if (t && t.id == thread.id) {
             // thread is already showing, so update it.
-            var newDetails = threadHtml.find(".details");
+            const newDetails = threadHtml.find(".details");
             existingThread.find(".content").replaceWith(parsedContent);
             existingThread.find(".details").replaceWith(newDetails);
             existingThread.removeClass().addClass(threadHtml.attr('class'));
@@ -1989,12 +1988,12 @@ ForumView.methods({
         // Make sure it is not selectable
         $('#thread-'+thread.id).removeClass("selectable");
 
-        for (var i=0;i<replyList.length;i++) {
+        for (let i = 0;i<replyList.length;i++) {
             this.mergeReply(replyList[i], i, animate);
         }
         // Remove displayed replies not in replyList.
         $('.forum .reply[id]').each(function() {
-            var r = $(this).data();
+            const r = $(this).data();
             for (i=0;i<replyList.length;i++) {
                 if (replyList[i].id==r.id) {
                     // Found matching element
@@ -2013,11 +2012,11 @@ ForumView.methods({
 
         // Construct paginator stuff
         // Calculate number of pages at current page size
-        var pageCount = Math.ceil(
+        const pageCount = Math.ceil(
             this.model.getSelectedThreadReplyCount()/this.model.getReplyRequestSize()
         );
 
-        var currentPage = Math.floor(
+        const currentPage = Math.floor(
             pageCount - (this.model.getSelectedThreadReplyCount() - this.model.getSelectedThreadReplyOffset())/this.model.getReplyRequestSize()
         );
 
@@ -2036,7 +2035,7 @@ ForumView.methods({
 
         Forum.log.debug('Pushing reply list length '+ replyList.length);
 
-        var data = {
+        const data = {
             threadId: this.model.getSelectedThread().id,
             id: this.model.getCurrentReplyWindowOldestId()
         };
@@ -2059,12 +2058,12 @@ ForumView.methods({
             Forum.getInstance().stopSynchronization(!this.suppressNextUpdateAnimation);
         }
 
-        for (var i=0;i<threadList.length;i++) {
+        for (let i = 0;i<threadList.length;i++) {
             this.mergeThread(threadList[i], animate);
         }
         // Remove displayed threads not in threadList or outdated.
         $('.forum .thread[id]').each(function() {
-            var t = $(this).data();
+            const t = $(this).data();
             for (i=0;i<threadList.length;i++) {
                 if (threadList[i].id==t.id) {
                     // Found matching element so now check that it is up to date.
@@ -2084,11 +2083,11 @@ ForumView.methods({
 
         // Construct paginator stuff
         // Calculate number of pages at current page size
-        var pageCount = Math.ceil(
+        const pageCount = Math.ceil(
             this.model.getThreadCount()/this.model.getThreadRequestSize()
         );
 
-        var currentPage = Math.floor(
+        const currentPage = Math.floor(
             pageCount - (this.model.getThreadCount() - this.model.getThreadOffset())/this.model.getThreadRequestSize() - 1
         );
 
@@ -2107,7 +2106,7 @@ ForumView.methods({
 
         Forum.log.debug('Pushing thread list length '+ threadList.length);
 
-        var data = {
+        const data = {
             id: this.model.getCurrentThreadWindowNewestThreadId()
         }
         Content.updateTab('forum', '/forum?id='+data.id, data, this.replaceNextHistory);
@@ -2127,7 +2126,7 @@ ForumView.methods({
         this.setSuppressNextUpdateAnimation();
         $('#repliesWrapper .compose textarea').val("");
         $('#repliesWrapper .compose textarea').trigger('input');
-        var threadId = this.model.getCurrentThreadWindowNewestThreadId();
+        const threadId = this.model.getCurrentThreadWindowNewestThreadId();
         if (threadId == 0) {
             this.model.loadNewestThreads();
         } else {
@@ -2164,18 +2163,18 @@ ForumView.methods({
     },
 
     updateSynchronizationInfo: function(animate) {
-        var showInfo = Forum.getInstance().isSynchronizing();
+        const showInfo = Forum.getInstance().isSynchronizing();
 
         if (showInfo) {
             // Update message.
-            var synchText = Forum.getInstance().getSynchronizationText();
+            const synchText = Forum.getInstance().getSynchronizationText();
             $("#threadsWrapper .synchronization").text("Updating " + synchText);
             $("#repliesWrapper .synchronization").text("Updating " + synchText);
 
 
             if (!this.synchronizationInfoShowing) {
                 if (animate) {
-                    var targetHeight = $("#threadsWrapper .synchronization").stop(true).removeAttr('style').height();
+                    let targetHeight = $("#threadsWrapper .synchronization").stop(true).removeAttr('style').height();
                     $("#threadsWrapper .synchronization").css({height: 0, opacity: 0, marginTop: 0});
                     $("#threadsWrapper .synchronization").animate({height: targetHeight, marginTop: 10}, 300).animate({opacity: 1.0}, 300, function() { $(this).removeAttr('style');});
                     targetHeight = $("#repliesWrapper .synchronization").stop(true).removeAttr('style').height();
@@ -2205,13 +2204,13 @@ ForumView.methods({
     },
 
     updateComposeAndStatus: function(eligibleUsernameMap, animate) {
-        var playerIds = Users.getAuthenticatedPlayerIds();
+        const playerIds = Users.getAuthenticatedPlayerIds();
 
         // Find first eligible player present. If none, store number of unverified or temp banned players present.
-        var eligibleUsername = "";
-        var unverifiedCount = 0;
-        var tempBannedCount = 0;
-        for (var i = 0; i < playerIds.length; ++i) {
+        let eligibleUsername = "";
+        let unverifiedCount = 0;
+        let tempBannedCount = 0;
+        for (let i = 0; i < playerIds.length; ++i) {
             if (eligibleUsernameMap[playerIds[i]].eligible && eligibleUsername == "") {
                 eligibleUsername = eligibleUsernameMap[playerIds[i]].username;
             }
@@ -2223,7 +2222,7 @@ ForumView.methods({
             }
         }
 
-        var showCompose = playerIds.length > 0 && eligibleUsername != "" && !Forum.getInstance().isEditing() && Forum.getInstance().isSynchronizing() && Forum.getInstance().isCooledDown();
+        const showCompose = playerIds.length > 0 && eligibleUsername != "" && !Forum.getInstance().isEditing() && Forum.getInstance().isSynchronizing() && Forum.getInstance().isCooledDown();
 
         if (showCompose) {
             // Update details.
@@ -2234,7 +2233,7 @@ ForumView.methods({
             }
             if (!this.composeShowing) {
                 if (animate) {
-                    var targetHeight = $("#threadsWrapper .compose").stop(true).removeAttr('style').height();
+                    let targetHeight = $("#threadsWrapper .compose").stop(true).removeAttr('style').height();
                     $("#threadsWrapper .compose").css({height: 0, opacity: 0, marginTop: 0});
                     $("#threadsWrapper .compose").delay(300).animate({height: targetHeight, marginTop: 10}, 300).animate({opacity: 1.0}, 300, function() { $(this).removeAttr('style');});
                     targetHeight = $("#repliesWrapper .compose").stop(true).removeAttr('style').height();
@@ -2278,7 +2277,7 @@ ForumView.methods({
                 $("#threadsWrapper .status").text("Go to the newest threads to start a thread");
                 $("#repliesWrapper .status").text("Go to the newest page to reply");
             } else if (!Forum.getInstance().isCooledDown()) {
-                var cooldownText = Forum.getInstance().getCooldownText();
+                const cooldownText = Forum.getInstance().getCooldownText();
                 $("#threadsWrapper .status").text("Wait " + cooldownText + " to start a new thread");
                 $("#repliesWrapper .status").text("Wait " + cooldownText + " to reply again");
             }
@@ -2297,7 +2296,7 @@ ForumView.methods({
             if (!this.statusShowing) {
                 // Show message.
                 if (animate) {
-                    var targetHeight = $("#threadsWrapper .status").removeAttr('style').height();
+                    let targetHeight = $("#threadsWrapper .status").removeAttr('style').height();
                     $("#threadsWrapper .status").css({height: 0, opacity: 0, marginTop: 0});
                     $("#threadsWrapper .status").delay(300).animate({height: targetHeight, marginTop: 10}, 300).animate({opacity: 1.0}, 300, function() { $(this).removeAttr('style');});
                     targetHeight = $("#repliesWrapper .status").removeAttr('style').height();
@@ -2314,7 +2313,7 @@ ForumView.methods({
     },
 
     updateBubbleAndActionWidths: function() {
-        var self = this;
+        const self = this;
         $('.forum .thread').each(function() {
             self.updateSingleBubbleAndActionWidth($(this));
         });
@@ -2325,13 +2324,13 @@ ForumView.methods({
     },
 
     updateSingleBubbleAndActionWidth: function(threadOrReply) {
-        var actionCount = threadOrReply.find(".action:visible").length;
+        const actionCount = threadOrReply.find(".action:visible").length;
         threadOrReply.find(".container").removeClass("actionCount0 actionCount1 actionCount2 actionCount3 actionCount4 actionCount5 actionCount6 actionCount7").addClass("actionCount"+actionCount);
         threadOrReply.find(".actions").removeClass("actionCount0 actionCount1 actionCount2 actionCount3 actionCount4 actionCount5 actionCount6 actionCount7").addClass("actionCount"+actionCount);
     },
 
     updateModerationTooltips: function() {
-        var self = this;
+        const self = this;
         $('.forum .thread').each(function() {
             self.updateModerationTooltip($(this));
         });
@@ -2342,11 +2341,11 @@ ForumView.methods({
     },
 
     updateModerationTooltip: function(threadOrReply) {
-        var data = threadOrReply.data();
+        const data = threadOrReply.data();
 
-        var hasBeenModerated = data.approved || data.deleted || data.banned || data.pinned || data.locked;
+        const hasBeenModerated = data.approved || data.deleted || data.banned || data.pinned || data.locked;
 
-        var actions = threadOrReply.find(".moderatorActions");
+        const actions = threadOrReply.find(".moderatorActions");
 
         if (threadOrReply.hasClass("moderatable")) {
 
@@ -2381,7 +2380,7 @@ ForumView.methods({
     }
 });
 
-var Forum = Classy.newClass().name('Forum');
+const Forum = Classy.newClass().name('Forum');
 
 Forum.fields({
     model: null,
@@ -2538,7 +2537,7 @@ Forum.methods({
 
     selectThread: function(threadId) {
         // Cancel selection of thread being edited.
-        var threadBeingEdited = this.model.getThreadBeingEdited();
+        const threadBeingEdited = this.model.getThreadBeingEdited();
         if (threadBeingEdited != null && threadBeingEdited.id == threadId) {
             return;
         }
@@ -2592,7 +2591,7 @@ Forum.methods({
     },
 
     checkCooldown: function(refreshTempBanValidities) {
-        var playerIds = Users.getAuthenticatedPlayerIds();
+        const playerIds = Users.getAuthenticatedPlayerIds();
 
         if (playerIds.length == 0) {
             return;
@@ -2602,15 +2601,14 @@ Forum.methods({
             Caches.getTempBanValidityCache().invalidateAll();
         }
 
-        var self = this;
-        var numResponses = 0;
-        var numExpectedResponses = playerIds.length + 1;
-        var time = Math.floor(new Date().getTime() / 1000);
-        var eligibleUsernameMap = {};
-        for (var i = 0; i < playerIds.length; ++i) {
+        let numResponses = 0;
+        const numExpectedResponses = playerIds.length + 1;
+        const time = Math.floor(new Date().getTime() / 1000);
+        const eligibleUsernameMap = {};
+        for (let i = 0; i < playerIds.length; ++i) {
             eligibleUsernameMap[playerIds[i]] = {eligible: true, cooldown: 0};
         }
-        for (var i = 0; i < playerIds.length; ++i) {
+        for (let i = 0; i < playerIds.length; ++i) {
             Backend.getInstance().getPlayerDetails(
                 function(result) {
                     if (typeof(result) == "object") {
@@ -2633,8 +2631,8 @@ Forum.methods({
                     if (numResponses == numExpectedResponses) {
                         // FIXME Collect this in separate method for reuse.
                         // Find minimum eligible cooldown.
-                        var cooldown = Number.MAX_VALUE;
-                        for (var playerId in eligibleUsernameMap) {
+                        let cooldown = Number.MAX_VALUE;
+                        for (const playerId in eligibleUsernameMap) {
                             if (eligibleUsernameMap[playerId].eligible) {
                                 cooldown = Math.min(cooldown, eligibleUsernameMap[playerId].cooldown);
                             }
@@ -2652,7 +2650,7 @@ Forum.methods({
         Backend.getInstance().getNewestTempBanValidities(
             function(result) {
                 if (typeof(result) == "object") {
-                    for (var playerId in result) {
+                    for (const playerId in result) {
                         if (result[playerId] > time) {
                             eligibleUsernameMap[playerId].eligible = false;
                         }
@@ -2669,8 +2667,8 @@ Forum.methods({
                 if (numResponses == numExpectedResponses) {
                     // FIXME Collect this in separate method for reuse.
                     // Find minimum eligible cooldown.
-                    var cooldown = Number.MAX_VALUE;
-                    for (var playerId in eligibleUsernameMap) {
+                    let cooldown = Number.MAX_VALUE;
+                     for (playerId in eligibleUsernameMap) {
                         if (eligibleUsernameMap[playerId].eligible) {
                             cooldown = Math.min(cooldown, eligibleUsernameMap[playerId].cooldown);
                         }
@@ -2689,7 +2687,7 @@ Forum.methods({
     },
 
     updateComposeAndStatus: function(animate, refreshTempBanValidities) {
-        var playerIds = Users.getAuthenticatedPlayerIds();
+        const playerIds = Users.getAuthenticatedPlayerIds();
 
         // Update compose fields.
         if (playerIds.length == 0) {
@@ -2701,15 +2699,15 @@ Forum.methods({
             Caches.getTempBanValidityCache().invalidateAll();
         }
 
-        var self = this;
-        var numResponses = 0;
-        var time = Math.floor(new Date().getTime() / 1000);
-        var numExpectedResponses = playerIds.length + 1;
-        var eligibleUsernameMap = {};
-        for (var i = 0; i < playerIds.length; ++i) {
+        const self = this;
+        let numResponses = 0;
+        const time = Math.floor(new Date().getTime() / 1000);
+        const numExpectedResponses = playerIds.length + 1;
+        const eligibleUsernameMap = {};
+        for (let i = 0; i < playerIds.length; ++i) {
             eligibleUsernameMap[playerIds[i]] = {eligible: true, unverified: false, tempBanned: false, onCoolDown: false, username: ""};
         }
-        for (var i = 0; i < playerIds.length; ++i) {
+        for (let i = 0; i < playerIds.length; ++i) {
             Backend.getInstance().getPlayerDetails(
                 function(result) {
                     if (typeof(result) == "object") {
@@ -2744,7 +2742,7 @@ Forum.methods({
         Backend.getInstance().getNewestTempBanValidities(
             function(result) {
                 if (typeof(result) == "object") {
-                    for (var playerId in result) {
+                    for (const playerId in result) {
                         if (result[playerId] > time) {
                             eligibleUsernameMap[playerId].eligible = false;
                             eligibleUsernameMap[playerId].tempBanned = true;
@@ -2769,7 +2767,7 @@ Forum.methods({
     },
 
     updateContent: function() {
-        var playerIds = Users.getAuthenticatedPlayerIds();
+        const playerIds = Users.getAuthenticatedPlayerIds();
 
         this.updateEditing(playerIds);
 
@@ -2801,10 +2799,10 @@ Forum.methods({
 
     updateEditing: function(playerIds) {
         // Check if any editing should be cancelled due to the last author having logged out.
-        var thread = this.model.getThreadBeingEdited();
+        const thread = this.model.getThreadBeingEdited();
         if (thread) {
-            var cancelEdit = true;
-            for (var i = 0; i < playerIds.length; ++i) {
+            let cancelEdit = true;
+            for (let i = 0; i < playerIds.length; ++i) {
                 if (playerIds[i] == thread.creator ||
                     playerIds[i] == thread.coCreator1 ||
                     playerIds[i] == thread.coCreator2) {
@@ -2819,10 +2817,10 @@ Forum.methods({
             }
         }
 
-        var reply = this.model.getReplyBeingEdited();
+        const reply = this.model.getReplyBeingEdited();
         if (reply) {
-            var cancelEdit = true;
-            for (var i = 0; i < playerIds.length; ++i) {
+            let cancelEdit = true;
+            for (let i = 0; i < playerIds.length; ++i) {
                 if (playerIds[i] == reply.creator ||
                     playerIds[i] == reply.coCreator1 ||
                     playerIds[i] == reply.coCreator2) {
@@ -2917,7 +2915,7 @@ Forum.methods({
     },
 
     getSynchronizationText: function() {
-        var result = "";
+        let result = "";
         if (this.synchronizationCountdown > 0) {
             result = "in " + this.synchronizationCountdown + " second" + (this.synchronizationCountdown == 1 ? "" : "s");
         } else {
@@ -2970,7 +2968,7 @@ Forum.methods({
     },
 
     getCooldownText: function() {
-        var result = this.cooldown + " second" + (this.cooldown == 1 ? "" : "s");
+        const result = this.cooldown + " second" + (this.cooldown == 1 ? "" : "s");
         return result;
     },
 
@@ -2979,12 +2977,12 @@ Forum.methods({
     },
 
     editForumReply: function() {
-        var self = this;
+        const self = this;
 
-        var threadId = this.model.getSelectedThread().id;
-        var replyId = this.model.getReplyBeingEdited().id;
+        const threadId = this.model.getSelectedThread().id;
+        const replyId = this.model.getReplyBeingEdited().id;
         // FIXME Supply the message to the function to decrease coupling.
-        var message = $('.reply .edit:visible textarea').val().trim();
+        const message = $('.reply .edit:visible textarea').val().trim();
         // Don't perform input validation on the client,
         // to avoid inconsistencies between server and client
         // validation
@@ -3008,12 +3006,12 @@ Forum.methods({
     },
 
     editForumThread: function() {
-        var self = this;
+        const self = this;
 
-        var threadId = this.model.getThreadBeingEdited().id;
+        const threadId = this.model.getThreadBeingEdited().id;
         // FIXME Supply the header and message to the function to decrease coupling.
-        var header = $('.thread .edit:visible input').val().trim();
-        var message = $('.thread .edit:visible textarea').val().trim();
+        const header = $('.thread .edit:visible input').val().trim();
+        const message = $('.thread .edit:visible textarea').val().trim();
         // Don't perform input validation on the client,
         // to avoid inconsistencies between server and client
         // validation
@@ -3040,9 +3038,9 @@ Forum.methods({
     },
 
     createForumReply: function() {
-        var threadId = this.model.getSelectedThread().id;
+        const threadId = this.model.getSelectedThread().id;
         // FIXME Supply the message to the function to decrease coupling.
-        var message = $('#repliesWrapper .compose textarea').val().trim();
+        const message = $('#repliesWrapper .compose textarea').val().trim();
         $('#createReplyButton').prop("disabled", true);
         // Don't perform input validation on the client,
         // to avoid inconsistencies between server and client
@@ -3073,13 +3071,12 @@ Forum.methods({
          * @type {string}
          */
          // FIXME Supply the header and message to the function to decrease coupling.
-        var header = $('#threadsWrapper .compose input').val().trim();
-        var message = $('#threadsWrapper .compose textarea').val().trim();
+        const header = $('#threadsWrapper .compose input').val().trim();
+        const message = $('#threadsWrapper .compose textarea').val().trim();
         $('#createThreadButton').prop("disabled", true);
         // Don't perform input validation on the client,
         // to avoid inconsistencies between server and client
         // validation
-        var self = this;
         Backend.getInstance().createForumThread(
             function(result) {
                 if (typeof(result) == "number") {
@@ -3105,9 +3102,9 @@ Forum.methods({
 
     toggleThreadLike: function(threadId) {
         // Obtain current like state.
-        var liked = $("#thread-" +threadId).hasClass("liked");
+        const liked = $("#thread-" +threadId).hasClass("liked");
 
-        var self = this;
+        const self = this;
         Backend.getInstance().setForumThreadLiked(
             function (res) {
                 // FIXME Handle error messages
@@ -3128,9 +3125,9 @@ Forum.methods({
 
     toggleReplyLike: function(threadId, replyId) {
         // Obtain current like state.
-        var liked = $("#reply-" +replyId).hasClass("liked");
+        const liked = $("#reply-" +replyId).hasClass("liked");
 
-        var self = this;
+        const self = this;
         Backend.getInstance().setForumReplyLiked(
             function (res) {
                 // FIXME Handle error messages
@@ -3151,7 +3148,7 @@ Forum.methods({
     },
 
     setForumThreadApproved: function(threadId, value) {
-        var self = this;
+        const self = this;
         Backend.getInstance().setForumThreadApproved(
             function (res) {
                 // FIXME Handle error messages
@@ -3171,7 +3168,7 @@ Forum.methods({
     },
 
     setForumThreadLocked: function(threadId, value) {
-        var self = this;
+        const self = this;
         Backend.getInstance().setForumThreadLocked(
             function (res) {
                 // FIXME Handle error messages
@@ -3191,7 +3188,7 @@ Forum.methods({
     },
 
     setForumThreadPinned: function(threadId, value) {
-        var self = this;
+        const self = this;
         Backend.getInstance().setForumThreadPinned(
             function (res) {
                 // FIXME Handle error messages
@@ -3211,7 +3208,7 @@ Forum.methods({
     },
 
     setForumThreadDeleted: function(threadId, value) {
-        var self = this;
+        const self = this;
         Backend.getInstance().setForumThreadDeleted(
             function (res) {
                 // FIXME Handle error messages
@@ -3231,7 +3228,7 @@ Forum.methods({
     },
 
     setForumThreadBanned: function(threadId, value) {
-        var self = this;
+        const self = this;
         Backend.getInstance().setForumThreadBanned(
             function (res) {
                 // FIXME Handle error messages
@@ -3251,7 +3248,7 @@ Forum.methods({
     },
 
     setForumReplyApproved: function(threadId, replyId, value) {
-        var self = this;
+        const self = this;
         Backend.getInstance().setForumReplyApproved(
             function (res) {
                 // FIXME Handle error messages
@@ -3272,7 +3269,7 @@ Forum.methods({
     },
 
     setForumReplyDeleted: function(threadId, replyId, value) {
-        var self = this;
+        const self = this;
         Backend.getInstance().setForumReplyDeleted(
             function (res) {
                 // FIXME Handle error messages
@@ -3293,7 +3290,7 @@ Forum.methods({
     },
 
     setForumReplyBanned: function(threadId, replyId, value) {
-        var self = this;
+        const self = this;
         Backend.getInstance().setForumReplyBanned(
             function (res) {
                 // FIXME Handle error messages

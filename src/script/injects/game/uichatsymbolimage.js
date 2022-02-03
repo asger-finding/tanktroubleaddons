@@ -33,7 +33,7 @@ UIChatSymbolImage.prototype.update = function()
         return;
     }
 
-    var tank = this.gameController.getTank(this.playerId);
+    const tank = this.gameController.getTank(this.playerId);
     if (tank)
     {
         if (!this.removeTween && (tank.getSpeed() != 0 || tank.getRotationSpeed() != 0)) {
@@ -53,11 +53,11 @@ UIChatSymbolImage.prototype.update = function()
 
 UIChatSymbolImage.prototype.spawn = function(playerId)
 {
-    var tank = this.gameController.getTank(playerId);
+    const tank = this.gameController.getTank(playerId);
     if (tank)
     {
         // Revive and place the sprite.
-        var position = {x: UIUtils.mpx(tank.getX()), y: UIUtils.mpx(tank.getY())};
+        const position = {x: UIUtils.mpx(tank.getX()), y: UIUtils.mpx(tank.getY())};
         this.reset(position.x + Constants.TANK.HEIGHT.px * 0.5, position.y - Constants.TANK.HEIGHT.px * 0.5);
         this.scale.set(0.0, 0.0); 
 
@@ -79,7 +79,7 @@ UIChatSymbolImage.prototype.spawn = function(playerId)
 
 UIChatSymbolImage.prototype.refresh = function() 
 {
-    var tank = this.gameController.getTank(this.playerId);
+    const tank = this.gameController.getTank(this.playerId);
     if (tank)
     {
         // Reset time alive.

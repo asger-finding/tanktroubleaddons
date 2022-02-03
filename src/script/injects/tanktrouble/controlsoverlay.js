@@ -1,4 +1,4 @@
-var TankTrouble = TankTrouble || {};
+const TankTrouble = TankTrouble || {};
 
 TankTrouble.ControlsOverlay = {
     // jQuery objects.
@@ -34,9 +34,9 @@ TankTrouble.ControlsOverlay = {
         this.controlsForm = $("<form></form>");
         this.controlsOptionsDiv = $("<div class='options'></div>");
 
-        var inputSetIds = Inputs.getAllInputSetIds();
-        for (var i = 0; i < inputSetIds.length; ++i) {
-            var controlsOptionDiv = $("<div class='option'></div>");
+        const inputSetIds = Inputs.getAllInputSetIds();
+        for (let i = 0; i < inputSetIds.length; ++i) {
+            const controlsOptionDiv = $("<div class='option'></div>");
 
             Utils.addImageWithClasses(controlsOptionDiv, "standard", "assets/images/inputs/" + inputSetIds[i] + ".png");
             Utils.addImageWithClasses(controlsOptionDiv, "down", "assets/images/inputs/" + inputSetIds[i] + "Down.png");
@@ -55,11 +55,9 @@ TankTrouble.ControlsOverlay = {
         this.controlsWrapper.append(this.controlsIcon);
         this.controlsWrapper.append(this.controlsForm);
 
-        var self = this;
-
         // Add click event handlers to all control options.
-        var controlOptionIds = Object.keys(this.controlsOptions);
-        for (var i = 0; i < controlOptionIds.length; ++i) {
+        const controlOptionIds = Object.keys(this.controlsOptions);
+        for (let i = 0; i < controlOptionIds.length; ++i) {
             // Solution with closure and anonymous function. More compact, but is it less readable?
 /*            (function(controlOptionId) {
                 self.controlsOptions[controlOptionId].on("click", function(event) {
@@ -120,8 +118,8 @@ TankTrouble.ControlsOverlay = {
         this._updateOptions();
 
         // Add keyboard shortcuts.
-        var controlOptionIds = Object.keys(this.controlsOptions);
-        for (var i = 0; i < controlOptionIds.length; ++i) {
+        const controlOptionIds = Object.keys(this.controlsOptions);
+        for (let i = 0; i < controlOptionIds.length; ++i) {
             this._addOptionShortcut(controlOptionIds[i]);
         }
 
@@ -136,7 +134,7 @@ TankTrouble.ControlsOverlay = {
                 self.controlsIcon.show();
             }, this);
 
-        var self = this;
+        const self = this;
 
         // Animate options.
         this.animationInterval = setInterval(
@@ -200,7 +198,7 @@ TankTrouble.ControlsOverlay = {
     },
 
     _addOptionClick: function(controlOptionId) {
-        var self = this;
+        const self = this;
         this.controlsOptions[controlOptionId].on("mouseup", function(event) {
             if (!$(this).hasClass("disabled")) {
                 // Check if user has been signed out while choosing. Can happen when mp servers detect authentication problems.
@@ -221,10 +219,10 @@ TankTrouble.ControlsOverlay = {
     },
 
     _addOptionShortcut: function(controlOptionId) {
-        var self = this;
+        const self = this;
         // Add keyboard shortcut to keyboard type inputs.
         if (Inputs.getInputSetType(controlOptionId) == "keyboard") {
-            var fireKey = Inputs.getFireKey(controlOptionId);
+            const fireKey = Inputs.getFireKey(controlOptionId);
             $(document).on("keyup.controls", function(event) {
                 if (!self.controlsOptions[controlOptionId].hasClass("disabled")) {
                     if (event.which == fireKey) {
@@ -260,7 +258,7 @@ TankTrouble.ControlsOverlay = {
     },
 
     _updateHeadline: function() {
-        var headline = "";
+        let headline = "";
         if (this.count !== null) {
             headline += "Player " + this.count + ":<br/>";
         }
@@ -274,32 +272,32 @@ TankTrouble.ControlsOverlay = {
 
     _updateOptions: function() {
         // Reset classes.
-        var controlOptionIds = Object.keys(this.controlsOptions);
-        for (var i = 0; i < controlOptionIds.length; ++i) {
+        const controlOptionIds = Object.keys(this.controlsOptions);
+        for (let i = 0; i < controlOptionIds.length; ++i) {
             this.controlsOptions[controlOptionIds[i]].removeClass("selected disabled");
         }
 
 /*        // Reset tooltips
-        for (var i = 0; i < this.controlsOptions.length; ++i) {
+        for (let i = 0; i < this.controlsOptions.length; ++i) {
 
         }*/
 
         // Set currently assigned controls as selected.
-        var selectedInputSetId = Inputs.getAssignedInputSetId(this.playerId);
+        const selectedInputSetId = Inputs.getAssignedInputSetId(this.playerId);
         if (selectedInputSetId !== undefined) {
             this.controlsOptions[selectedInputSetId].addClass("selected");
         }
 
         // Disable unavailable controls.
-        var unavailableInputSetIds = Inputs.getUnavailableInputSetIds();
-        for (var i = 0; i < unavailableInputSetIds.length; ++i) {
+        const unavailableInputSetIds = Inputs.getUnavailableInputSetIds();
+        for (let i = 0; i < unavailableInputSetIds.length; ++i) {
             this.controlsOptions[unavailableInputSetIds[i]].addClass("disabled");
         }
     },
 
     _animateOptions: function() {
-        var controlOptionIds = Object.keys(this.controlsOptions);
-        for (var i = 0; i < controlOptionIds.length; ++i) {
+        const controlOptionIds = Object.keys(this.controlsOptions);
+        for (let i = 0; i < controlOptionIds.length; ++i) {
             this.controlsOptions[controlOptionIds[i]].toggleClass("down");
         }
     },

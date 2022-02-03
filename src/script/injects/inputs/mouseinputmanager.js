@@ -1,4 +1,4 @@
-var MouseInputManager = InputManager.subclass();
+const MouseInputManager = InputManager.subclass();
 
 MouseInputManager.fields({
     mouseX: 0,
@@ -44,35 +44,35 @@ MouseInputManager.methods({
     update: function() {
         this._super();
 
-        var game = GameManager.getGame();
+        const game = GameManager.getGame();
 
         if (game) {
-            var forwardState = false;
-            var backState = false;
-            var leftState = false;
-            var rightState = false;
-            var fireState = false;
+            let forwardState = false;
+            let backState = false;
+            let leftState = false;
+            let rightState = false;
+            let fireState = false;
             
-            var gameBounds = game.scale.bounds;
-            var gameScale = game.scale.scaleFactor;
+            const gameBounds = game.scale.bounds;
+            const gameScale = game.scale.scaleFactor;
 
             this.mouseX = (MouseInputManager.mousePageX - gameBounds.x) * gameScale.x;
             this.mouseY = (MouseInputManager.mousePageY - gameBounds.y) * gameScale.y;
 
             if (game.input.enabled && MouseInputManager.mouseActivated) {
                 if (game.state.getCurrentState().getTankSprite) {
-                    var tankSprite = game.state.getCurrentState().getTankSprite(this.playerId);
+                    const tankSprite = game.state.getCurrentState().getTankSprite(this.playerId);
                 
                     if (tankSprite) {
                         // FIXME This code is more or less duplicated in AI.js
 
-                        var relativeToTank = tankSprite.toLocal(new Phaser.Point(this.mouseX, this.mouseY));
+                        const relativeToTank = tankSprite.toLocal(new Phaser.Point(this.mouseX, this.mouseY));
                     
-                        var magnitude = relativeToTank.getMagnitude();
-                        var angle = Phaser.Math.angleBetween(0, 0, relativeToTank.x, relativeToTank.y);
+                        const magnitude = relativeToTank.getMagnitude();
+                        const angle = Phaser.Math.angleBetween(0, 0, relativeToTank.x, relativeToTank.y);
 
-                        var canReverse = magnitude < UIConstants.MOUSE_INPUT.MAX_REVERSE_DISTANCE / UIConstants.GAME_ASSET_SCALE;
-                        var goInReverse = false;
+                        const canReverse = magnitude < UIConstants.MOUSE_INPUT.MAX_REVERSE_DISTANCE / UIConstants.GAME_ASSET_SCALE;
+                        let goInReverse = false;
                     
                         // Normally it would be < 0.0, but the tank graphics is rotated 90 degrees CCW
                         if (angle > Math.PI * 0.5 + UIConstants.MOUSE_INPUT.ROTATION_DEAD_ANGLE || angle < -Math.PI * 0.5 - UIConstants.MOUSE_INPUT.ROTATION_DEAD_ANGLE) {
@@ -122,17 +122,17 @@ MouseInputManager.methods({
                 fireState = MouseInputManager.mouseDown || game.input.mousePointer.leftButton.isDown;
             }
 
-            var stateChanged = false;
+            let stateChanged = false;
             stateChanged |= this.storedStates["forward"] !== forwardState;
             stateChanged |= this.storedStates["back"] !== backState;
             stateChanged |= this.storedStates["left"] !== leftState;
             stateChanged |= this.storedStates["right"] !== rightState;
             stateChanged |= this.storedStates["fire"] !== fireState;
 
-            var gameController = GameManager.getGameController();
+            const gameController = GameManager.getGameController();
 
             if (stateChanged && gameController) {
-                var inputState = InputState.withState(this.playerId, forwardState, backState, leftState, rightState, fireState);
+                const inputState = InputState.withState(this.playerId, forwardState, backState, leftState, rightState, fireState);
                 gameController.setInputState(inputState);
             }
 

@@ -2,7 +2,7 @@ if (typeof require === 'function') {
     var Classy = require('./classy');
 }
 
-var TankState = Classy.newClass().name('TankState');
+const TankState = Classy.newClass().name('TankState');
 
 TankState.fields({
     data: {} // Store in an object for fast JSON serialization

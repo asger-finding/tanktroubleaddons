@@ -56,7 +56,7 @@ UITankAvatarGroup.prototype.spawn = function(x, y, playerId, animate, targetScal
 
     // Create avatar.
     if (AIs.isReady() && AIs.isAI(this.playerId)) {
-        var ai = AIs.getAI(this.playerId);
+        const ai = AIs.getAI(this.playerId);
         this.name = ai.name;
         switch(this.name) {
             case "Laika":
@@ -77,7 +77,7 @@ UITankAvatarGroup.prototype.spawn = function(x, y, playerId, animate, targetScal
         this.avatarSpine.idle();
     }
 
-    var delay = 50 + Math.random() * 200;
+    const delay = 50 + Math.random() * 200;
 
     if (this.removeTween) {
         this.removeTween.stop();

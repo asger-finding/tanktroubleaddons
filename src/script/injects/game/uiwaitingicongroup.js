@@ -48,8 +48,8 @@ UIWaitingIconGroup.prototype.update = function()
         this.lastDotUpdateTime = this.currentTime;
     }
     
-    var dotsString = "";
-    for (var i = 0; i < this.numDots; ++i) {
+    let dotsString = "";
+    for (let i = 0; i < this.numDots; ++i) {
         dotsString += ".";
     }
 

@@ -1,4 +1,4 @@
-var PremiumManager = Classy.newClass();
+const PremiumManager = Classy.newClass();
 
 PremiumManager.classFields({
     hasPremium: false
@@ -22,16 +22,16 @@ PremiumManager.classMethods({
     },
 
     _checkForPremium: function() {
-        var playerIds = Users.getAuthenticatedPlayerIds();
-        var numDetailsResponses = 0;
-        var numExpectedDetailsResponses = playerIds.length;
-        var hasPremium = false;
+        const playerIds = Users.getAuthenticatedPlayerIds();
+        let numDetailsResponses = 0;
+        const numExpectedDetailsResponses = playerIds.length;
+        let hasPremium = false;
 
         if (playerIds.length == 0) {
             PremiumManager._updatePremium(hasPremium);
         }
 
-        for (var i = 0; i < playerIds.length; ++i) {
+        for (let i = 0; i < playerIds.length; ++i) {
             Backend.getInstance().getPlayerDetails(
                 function(result) {
                     if (typeof(result) == "object") {

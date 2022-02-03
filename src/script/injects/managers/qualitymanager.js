@@ -1,4 +1,4 @@
-var QualityManager = Classy.newClass();
+const QualityManager = Classy.newClass();
 
 QualityManager.classFields({
     quality: null,
@@ -101,7 +101,7 @@ QualityManager.classMethods({
     },
     
     removeEventListener: function(callback, context) {
-        for (var i=0;i<QualityManager.eventListeners.length;i++) {
+        for (let i = 0;i<QualityManager.eventListeners.length;i++) {
             if (QualityManager.eventListeners[i].cb===callback && QualityManager.eventListeners[i].ctxt===context) {
                 // Remove single entry from array, and return immediately
                 // as continuing iteration is unsafe, as the underlying array
@@ -144,9 +144,9 @@ QualityManager.classMethods({
 
     update: function() {
         if (QualityManager.quality === QualityManager.QUALITY_SETTINGS.AUTO) {
-            var time = Date.now();
+            const time = Date.now();
             if (QualityManager.fpsTime > 0) {
-                var currentFps = 1000.0 / (time - QualityManager.fpsTime);
+                const currentFps = 1000.0 / (time - QualityManager.fpsTime);
                 QualityManager.avgFps *= (1.0 - UIConstants.SETTINGS_QUALITY_FPS_AVG_WEIGHT);
                 QualityManager.avgFps += currentFps * UIConstants.SETTINGS_QUALITY_FPS_AVG_WEIGHT;
                 QualityManager.numFpsSamples++;
@@ -185,7 +185,7 @@ QualityManager.classMethods({
     },
 
     _notifyEventListeners: function(evt, data) {
-        for (var i=0;i<QualityManager.eventListeners.length;i++) {
+        for (let i = 0;i<QualityManager.eventListeners.length;i++) {
             QualityManager.eventListeners[i].cb(QualityManager.eventListeners[i].ctxt, evt, data);
         }
     }

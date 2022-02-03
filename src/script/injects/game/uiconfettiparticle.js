@@ -5,8 +5,8 @@ UIConfettiParticle = function(game, x, y)
     Phaser.Particle.call(this, game, x, y, 'celebration');
 
     // Setup animation.
-    var randomConfettiIndex = Math.floor(Math.random() * 3);
-    var prefix = 'confetti' + randomConfettiIndex + '-';
+    const randomConfettiIndex = Math.floor(Math.random() * 3);
+    const prefix = 'confetti' + randomConfettiIndex + '-';
     this.animations.add('rotate', Phaser.Animation.generateFrameNames(prefix, 0, 4).concat(Phaser.Animation.generateFrameNames(prefix, 3, 1)), 24, true);
     this.animations.add('land', [prefix + 3], 24, false);
 

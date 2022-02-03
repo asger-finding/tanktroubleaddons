@@ -1,4 +1,4 @@
-var ClientManager = Classy.newClass();
+const ClientManager = Classy.newClass();
 
 ClientManager.classFields({
     client: null,
@@ -14,10 +14,10 @@ ClientManager.classFields({
 ClientManager.classMethods({
     loadAvailableServers: function() {
         if (typeof g_mpServers === "object") {
-            var serverIds = g_mpServers["id"];
-            var serverNames = g_mpServers["name"];
-            var serverUrls = g_mpServers["url"];
-            for (var i = 0; i < serverIds.length; ++i) {
+            const serverIds = g_mpServers["id"];
+            const serverNames = g_mpServers["name"];
+            const serverUrls = g_mpServers["url"];
+            for (let i = 0; i < serverIds.length; ++i) {
                 ClientManager.availableServers[serverIds[i]] = {name: serverNames[i], url: serverUrls[i], latency: undefined};
             }
         }
@@ -46,10 +46,10 @@ ClientManager.classMethods({
             Caches.getUnseenAchievementsCache()
         );
 
-        var playerIds = Users.getAuthenticatedPlayerIds();
+        let playerIds = Users.getAuthenticatedPlayerIds();
         ClientManager.client.addUsers(playerIds, Users.getAuthenticatedMultiplayerTokens(playerIds));
 
-        var playerIds = Users.getGuestPlayerIds();
+        playerIds = Users.getGuestPlayerIds();
         ClientManager.client.addUsers(playerIds, Users.getGuestMultiplayerTokens(playerIds));
 
         if (ClientManager.multiplayerServerId) {
@@ -126,10 +126,10 @@ ClientManager.classMethods({
      * @param cb A function which accepts 6 parameters (result, serverId, latency, gameCount, playerCount, message).
      */
     getAvailableServerStats: function(cb) {
-        var serverIds = Object.keys(ClientManager.availableServers);
+        const serverIds = Object.keys(ClientManager.availableServers);
         // Generate a socket for each available server
         ClientManager.log.debug("Updating latencies");
-        for (var i=0;i<serverIds.length;i++) {
+        for (let i = 0;i<serverIds.length;i++) {
             ClientManager._getSelectedServerStats(serverIds[i], cb);
         }
     },
@@ -153,7 +153,7 @@ ClientManager.classMethods({
     _getSelectedServerStats: function(serverId, cb) {
         // Create a local scope for operating on serverId
         (function(serverId) {
-            var availableServer = ClientManager.availableServers[serverId];
+            const availableServer = ClientManager.availableServers[serverId];
 
             if (!availableServer) {
                 cb(false, serverId);
@@ -162,11 +162,11 @@ ClientManager.classMethods({
             ClientManager.log.debug("Updating latency for " + serverId);
 
             // Create a new socket
-            var socket = new WebSocket(availableServer.url);
-            var pingTime = undefined;
+            const socket = new WebSocket(availableServer.url);
+            let pingTime = undefined;
 
             socket.onopen = function(event) {
-                var msg = PingMessage.create();
+                const msg = PingMessage.create();
                 ClientManager.log.debug("Latency checking socket connected " + serverId);
                 try {
                     socket.send(msg.pack());
@@ -183,16 +183,16 @@ ClientManager.classMethods({
             };
 
             socket.onmessage = function(event) {
-                var msg = MessageParser.parse(event.data);
+                const msg = MessageParser.parse(event.data);
                 if (!msg) {
                     socket.close();
 
                     cb(false, serverId, undefined, undefined, undefined, 'Failed to parse message received on latency connection');
                 } else if (msg.getTypeId() === PongMessage.typeId) {
-                    var pongTime = new Date();
+                    const pongTime = new Date();
                     socket.close();
 
-                    var latency = pongTime - pingTime;
+                    const latency = pongTime - pingTime;
                     ClientManager.availableServers[serverId].latency = latency;
 
                     ClientManager.log.debug('Latency ' + serverId + ': ' + latency);
@@ -245,13 +245,13 @@ ClientManager.classMethods({
     _findAndConnectToBestAvailableServer: function() {
         ClientManager.log.debug("Find and connect to best available server initiated");
 
-        var numAvailableServers = Object.keys(ClientManager.availableServers).length;
-        var numServerResponses = 0;
-        var numServersRunning = 0;
-        var leastLatencyServerId = "";
-        var leastLatency = 1000000;
-        var leastLatencyWithPlayersServerId = "";
-        var leastLatencyWithPlayers = 1000000;
+        const numAvailableServers = Object.keys(ClientManager.availableServers).length;
+        let numServerResponses = 0;
+        let numServersRunning = 0;
+        let leastLatencyServerId = "";
+        let leastLatency = 1000000;
+        let leastLatencyWithPlayersServerId = "";
+        let leastLatencyWithPlayers = 1000000;
 
         // Otherwise try all available servers.
         ClientManager.getAvailableServerStats(function(success, serverId, latency, gameCount, playerCount, message) {
@@ -290,7 +290,7 @@ ClientManager.classMethods({
                         // If at least one server is running, connect to the lobby of the server with least latency.
                         // Connect to a server with players if latency is not significantly poorer than the one potentially without.
 
-                        var bestServerId = leastLatencyServerId;
+                        let bestServerId = leastLatencyServerId;
 
                         if (leastLatencyWithPlayers < leastLatency + Constants.CLIENT.MAX_LATENCY_DIFFERENCE_TO_ACCEPT_FOR_POPULATED_SERVER) {
                             bestServerId = leastLatencyWithPlayersServerId;
@@ -326,7 +326,7 @@ ClientManager.classMethods({
     _sendMessageToServer: function(serverId, msg, timeout) {
         // Create a local scope for operating on serverId
         (function(serverId) {
-            var availableServer = ClientManager.availableServers[serverId];
+            const availableServer = ClientManager.availableServers[serverId];
 
             if (!availableServer) {
                 return;
@@ -334,7 +334,7 @@ ClientManager.classMethods({
             ClientManager.log.debug("Sending message " + msg + " to " + serverId);
 
             // Create a new socket
-            var socket = new WebSocket(availableServer.url);
+            const socket = new WebSocket(availableServer.url);
 
             socket.onopen = function(event) {
                 try {
@@ -350,9 +350,9 @@ ClientManager.classMethods({
     },
 
     broadcastUpdateUserByAdmin: function(adminId, playerId, iconChanged, usernameChanged, contentChanged) {
-        var adminToken = Users.getAuthenticatedMultiplayerToken(adminId);
+        const adminToken = Users.getAuthenticatedMultiplayerToken(adminId);
 
-        var msg = PlayerUpdatedByAdminMessage.create();
+        const msg = PlayerUpdatedByAdminMessage.create();
         msg.setAdminId(adminId);
         msg.setToken(adminToken);
         msg.setPlayerId(playerId);
@@ -360,58 +360,58 @@ ClientManager.classMethods({
         msg.setUsernameChanged(usernameChanged);
         msg.setContentChanged(contentChanged);
 
-        var serverIds = Object.keys(ClientManager.availableServers);
+        const serverIds = Object.keys(ClientManager.availableServers);
         // Generate a socket for each available server
         ClientManager.log.debug("Broadcasting update user by admin");
-        for (var i=0;i<serverIds.length;i++) {
+        for (let i = 0;i<serverIds.length;i++) {
             ClientManager._sendMessageToServer(serverIds[i], msg, 1000);
         }
     },
 
     broadcastContentUpdated: function(adminId, virtualShopChanged) {
-        var adminToken = Users.getAuthenticatedMultiplayerToken(adminId);
+        const adminToken = Users.getAuthenticatedMultiplayerToken(adminId);
 
-        var msg = ContentUpdatedMessage.create();
+        const msg = ContentUpdatedMessage.create();
         msg.setAdminId(adminId);
         msg.setToken(adminToken);
         msg.setVirtualShopChanged(virtualShopChanged);
 
-        var serverIds = Object.keys(ClientManager.availableServers);
+        const serverIds = Object.keys(ClientManager.availableServers);
         // Generate a socket for each available server
         ClientManager.log.debug("Broadcasting update content");
-        for (var i=0;i<serverIds.length;i++) {
+        for (let i = 0;i<serverIds.length;i++) {
             ClientManager._sendMessageToServer(serverIds[i], msg, 1000);
         }
     },
 
     broadcastPlayersBanned: function(adminId, playerIds) {
-        var adminToken = Users.getAuthenticatedMultiplayerToken(adminId);
+        const adminToken = Users.getAuthenticatedMultiplayerToken(adminId);
 
-        var msg = PlayersBannedMessage.create();
+        const msg = PlayersBannedMessage.create();
         msg.setAdminId(adminId);
         msg.setToken(adminToken);
         msg.setPlayerIds(playerIds);
 
-        var serverIds = Object.keys(ClientManager.availableServers);
+        const serverIds = Object.keys(ClientManager.availableServers);
         // Generate a socket for each available server
         ClientManager.log.debug("Broadcasting players banned");
-        for (var i=0;i<serverIds.length;i++) {
+        for (let i = 0;i<serverIds.length;i++) {
             ClientManager._sendMessageToServer(serverIds[i], msg, 1000);
         }
     },
 
     broadcastPlayersUnbanned: function(adminId, playerIds) {
-        var adminToken = Users.getAuthenticatedMultiplayerToken(adminId);
+        const adminToken = Users.getAuthenticatedMultiplayerToken(adminId);
 
-        var msg = PlayersUnbannedMessage.create();
+        const msg = PlayersUnbannedMessage.create();
         msg.setAdminId(adminId);
         msg.setToken(adminToken);
         msg.setPlayerIds(playerIds);
 
-        var serverIds = Object.keys(ClientManager.availableServers);
+        const serverIds = Object.keys(ClientManager.availableServers);
         // Generate a socket for each available server
         ClientManager.log.debug("Broadcasting players unbanned");
-        for (var i=0;i<serverIds.length;i++) {
+        for (let i = 0;i<serverIds.length;i++) {
             ClientManager._sendMessageToServer(serverIds[i], msg, 1000);
         }
     },
@@ -553,8 +553,8 @@ ClientManager.classMethods({
     _clientEventHandler: function(self, evt, data) {
         switch(evt) {
             case TTClient.EVENTS.PLAYERS_KICKED: {
-                var playerIds = data.getPlayerIds();
-                for (var i = 0; i < playerIds.length; ++i) {
+                const playerIds = data.getPlayerIds();
+                for (let i = 0; i < playerIds.length; ++i) {
                     if (Users.isAuthenticatedUser(playerIds[i])) {
                         // Submit deauthenticate request.
                         Backend.getInstance().deauthenticate(

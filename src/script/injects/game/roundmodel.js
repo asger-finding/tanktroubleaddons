@@ -1,7 +1,7 @@
 if (typeof require === 'function') {
     var Classy = require('./classy');
     var Log = require('./log');
-    var IdGenerator = require('./idgenerator');
+    //var IdGenerator = require('./idgenerator');
     var B2DUtils = require('./b2dutils');
     var Constants = require('./constants');
     var Tank = require('./tank');
@@ -27,7 +27,7 @@ if (typeof require === 'function') {
 }
 
 
-var RoundModel = Classy.newClass();
+const RoundModel = Classy.newClass();
 
 
 /*
@@ -150,7 +150,7 @@ RoundModel.constructor(function(controllerId, b2dworld) {
     this.log = Log.create('RoundModel' + controllerId);
     this.b2dworld = b2dworld;
     this.b2dworld.SetContactListener(this);
-    for (var collectibleType in Constants.COLLECTIBLE_TYPES) {
+    for (const collectibleType in Constants.COLLECTIBLE_TYPES) {
         this.collectibleCounts[Constants.COLLECTIBLE_TYPES[collectibleType]] = 0;
     }
 });
@@ -187,10 +187,10 @@ RoundModel.methods({
             return;
         }
         
-        var data = B2DUtils.getContactData(b2dcontact);
+        const data = B2DUtils.getContactData(b2dcontact);
 
         // Collect collision event for later dispatch, AFTER the entire physics step has been completed.
-        var collisionEvent = {};
+        const collisionEvent = {};
         
         switch(data.contactBits)
         {
@@ -315,18 +315,18 @@ RoundModel.methods({
 
             this.punishablePlayerIds.push(playerId);
 
-            var projectileIds = [];
+            const projectileIds = [];
 
             // Find all the projectiles of this tank and remove them, too.
-            for (var projectile in this.projectiles) {
+            for (const projectile in this.projectiles) {
                 if (this.projectiles[projectile].getPlayerId() == playerId) {
-                    var projectileId = this.projectiles[projectile].getId();
+                    const projectileId = this.projectiles[projectile].getId();
                     this.destroyedProjectileIds.push(projectileId);
                     projectileIds.push(projectileId);
                 }
             }
 
-            var chickenOut = ChickenOut.create(playerId, projectileIds);
+            const chickenOut = ChickenOut.create(playerId, projectileIds);
             this._notifyEventListeners(RoundModel._EVENTS.TANK_CHICKENED_OUT, chickenOut);
         } else {
             this.log.error("Attempt to remove tank with id " + playerId + " from round, but tank is not currently in this round");
@@ -339,8 +339,8 @@ RoundModel.methods({
 
         if (!(projectileState.getId() in this.projectiles)) {
 
-            var projectile;
-            var b2dBody;
+            let projectile;
+            let b2dBody;
             switch(projectileState.getType()) {
                 case Constants.WEAPON_TYPES.BULLET:
                 {
@@ -394,8 +394,8 @@ RoundModel.methods({
 
         if (!(collectibleState.getId() in this.collectibles)) {
 
-            var collectible = Collectible.create(collectibleState);
-            var b2dBody;
+            const collectible = Collectible.create(collectibleState);
+            let b2dBody;
             switch (collectibleState.getType()) {
                 case Constants.COLLECTIBLE_TYPES.CRATE_LASER:
                 case Constants.COLLECTIBLE_TYPES.CRATE_DOUBLE_BARREL:
@@ -440,13 +440,13 @@ RoundModel.methods({
         this.cachedRoundState = null;
 
         if (!(tankState.getPlayerId() in this.tanks)) {
-            var tank = Tank.create(tankState, this);
+            const tank = Tank.create(tankState, this);
             this.tanks[tankState.getPlayerId()] = tank;
             this.playerIdDefaultWeaponId[tankState.getPlayerId()] = null;
             this.playerIdOtherWeaponIds[tankState.getPlayerId()] = [];
             this.playerIdUpgradeIds[tankState.getPlayerId()] = [];
             this._updateModifiers(tankState.getPlayerId()); // Update map from tank to modifiers.
-            var b2dBody = B2DUtils.createTankBody(this.b2dworld, tank);
+            const b2dBody = B2DUtils.createTankBody(this.b2dworld, tank);
             tank.setB2DBody(b2dBody);
             this._notifyEventListeners(RoundModel._EVENTS.TANK_CREATED, tank);
         } else {
@@ -459,7 +459,7 @@ RoundModel.methods({
         this.cachedRoundState = null;
 
         if (!(weaponState.getId() in this.weapons)) {
-            var weapon;
+            let weapon;
             switch(weaponState.getType()) {
                 case Constants.WEAPON_TYPES.BULLET:
                 {
@@ -498,8 +498,8 @@ RoundModel.methods({
             }
 
             // Update tank's body.
-            var newWeapon = this.getActiveWeapon(weaponState.getPlayerId());
-            var tank = this.tanks[weaponState.getPlayerId()];
+            const newWeapon = this.getActiveWeapon(weaponState.getPlayerId());
+            const tank = this.tanks[weaponState.getPlayerId()];
             if (newWeapon && tank) {
                 B2DUtils.updateTankBodyTurret(tank.getB2DBody(), tank, newWeapon);
             }
@@ -518,7 +518,7 @@ RoundModel.methods({
 
         if (!(upgradeState.getId() in this.upgrades)) {
 
-            var upgrade;
+            let upgrade;
             switch (upgradeState.getType()) {
                 case Constants.UPGRADE_TYPES.LASER_AIMER:
                 {
@@ -556,7 +556,7 @@ RoundModel.methods({
             this._updateModifiers(upgradeState.getPlayerId());
 
             // Update tank's body.
-            var tank = this.tanks[upgradeState.getPlayerId()];
+            const tank = this.tanks[upgradeState.getPlayerId()];
             if (tank) {
                 B2DUtils.addTankBodyUpgrade(tank.getB2DBody(), upgrade);
             }
@@ -574,7 +574,7 @@ RoundModel.methods({
         this.cachedRoundState = null;
 
         if (!(counterState.getId() in this.counters)) {
-            var counter;
+            let counter;
             switch (counterState.getType()) {
                 case Constants.COUNTER_TYPES.TIMER_COUNTDOWN:
                 {
@@ -603,8 +603,8 @@ RoundModel.methods({
         this.cachedRoundState = null;
 
         if (!(zoneState.getId() in this.zones)) {
-            var zone;
-            var b2dBody = null;
+            let zone;
+            let b2dBody = null;
             switch (zoneState.getType()) {
                 case Constants.ZONE_TYPES.SPAWN:
                 {
@@ -641,39 +641,39 @@ RoundModel.methods({
             }
         }
 
-        var rs = RoundState.create();
-        var tankStates = [];
-        var projectileStates = [];
-        var collectibleStates = [];
-        var playerIds = Object.keys(this.tanks);
-        for (var i=0;i<playerIds.length;i++) {
-            var playerId = playerIds[i];
+        const rs = RoundState.create();
+        const tankStates = [];
+        const projectileStates = [];
+        const collectibleStates = [];
+        const playerIds = Object.keys(this.tanks);
+        for (let i = 0;i<playerIds.length;i++) {
+            const playerId = playerIds[i];
             if (this.destroyedPlayerIds.indexOf(playerId) >= 0) {
                 continue;
             }
-            var tank = this.tanks[playerId];
+            const tank = this.tanks[playerId];
             tankStates.push(tank.getTankState());
         }
         rs.setTankStates(tankStates);
 
-        var projectileIds = Object.keys(this.projectiles);
-        for (var i=0;i<projectileIds.length;i++) {
-            var projectileId = projectileIds[i];
+        const projectileIds = Object.keys(this.projectiles);
+        for (let i = 0;i<projectileIds.length;i++) {
+            const projectileId = projectileIds[i];
             if (this.destroyedProjectileIds.indexOf(projectileId) >= 0) {
                 continue;
             }
-            var projectile = this.projectiles[projectileId];
+            const projectile = this.projectiles[projectileId];
             projectileStates.push(projectile.getProjectileState());
         }
         rs.setProjectileStates(projectileStates);
 
-        var collectibleIds = Object.keys(this.collectibles);
-        for (var i=0;i<collectibleIds.length;i++) {
-            var collectibleId = collectibleIds[i];
+        const collectibleIds = Object.keys(this.collectibles);
+        for (let i = 0;i<collectibleIds.length;i++) {
+            const collectibleId = collectibleIds[i];
             if (this.destroyedCollectibleIds.indexOf(collectibleId) >= 0) {
                 continue;
             }
-            var collectible = this.collectibles[collectibleId];
+            const collectible = this.collectibles[collectibleId];
             collectibleStates.push(collectible.getCollectibleState());
         }
         rs.setCollectibleStates(collectibleStates);
@@ -688,41 +688,41 @@ RoundModel.methods({
     },
 
     _getExpandedRoundState: function(rs) {
-        var weaponStates = [];
-        var weaponIds = Object.keys(this.weapons);
-        for (var i=0;i<weaponIds.length;i++) {
-            var weaponId = weaponIds[i];
-            var weapon = this.weapons[weaponId];
+        const weaponStates = [];
+        const weaponIds = Object.keys(this.weapons);
+        for (let i = 0;i<weaponIds.length;i++) {
+            const weaponId = weaponIds[i];
+            const weapon = this.weapons[weaponId];
             weaponStates.push(weapon.getWeaponState());
         }
         rs.setWeaponStates(weaponStates);
 
-        var upgradeStates = [];
-        var upgradeIds = Object.keys(this.upgrades);
-        for (var i=0;i<upgradeIds.length;i++) {
-            var upgradeId = upgradeIds[i];
-            var upgrade = this.upgrades[upgradeId];
+        const upgradeStates = [];
+        const upgradeIds = Object.keys(this.upgrades);
+        for (let i = 0;i<upgradeIds.length;i++) {
+            const upgradeId = upgradeIds[i];
+            const upgrade = this.upgrades[upgradeId];
             upgradeStates.push(upgrade.getUpgradeState());
         }
         rs.setUpgradeStates(upgradeStates);
 
-        var counterStates = [];
-        var counterIds = Object.keys(this.counters);
-        for (var i=0;i<counterIds.length;++i) {
-            var counterId = counterIds[i];
-            var counter = this.counters[counterId];
+        const counterStates = [];
+        const counterIds = Object.keys(this.counters);
+        for (let i = 0;i<counterIds.length;++i) {
+            const counterId = counterIds[i];
+            const counter = this.counters[counterId];
             counterStates.push(counter.getCounterState());
         }
         rs.setCounterStates(counterStates);
 
-        var zoneStates = [];
-        var zoneIds = Object.keys(this.zones);
-        for (var i=0;i<zoneIds.length;++i) {
-            var zoneId = zoneIds[i];
+        const zoneStates = [];
+        const zoneIds = Object.keys(this.zones);
+        for (let i = 0;i<zoneIds.length;++i) {
+            const zoneId = zoneIds[i];
             if (this.destroyedZoneIds.indexOf(zoneId) >= 0) {
                 continue;
             }
-            var zone = this.zones[zoneId];
+            const zone = this.zones[zoneId];
             zoneStates.push(zone.getZoneState());
         }
         rs.setZoneStates(zoneStates);
@@ -745,8 +745,8 @@ RoundModel.methods({
     },
 
     getCrateCount: function() {
-        var sum = 0;
-        for (var i = 0; i < Constants.COLLECTIBLE_TYPES.CRATE_COUNT; ++i) {
+        let sum = 0;
+        for (let i = 0; i < Constants.COLLECTIBLE_TYPES.CRATE_COUNT; ++i) {
             sum += this.collectibleCounts[i];
         }
 
@@ -807,7 +807,7 @@ RoundModel.methods({
     },
     
     getActiveWeapon: function(playerId) {
-        var otherWeaponIds = this.playerIdOtherWeaponIds[playerId];
+        const otherWeaponIds = this.playerIdOtherWeaponIds[playerId];
         if (!otherWeaponIds || otherWeaponIds.length == 0) {
             return this.getDefaultWeapon(playerId);
         } else {
@@ -816,10 +816,10 @@ RoundModel.methods({
     },
     
     getQueuedWeapons: function(playerId) {
-        var otherWeaponIds = this.playerIdOtherWeaponIds[playerId];
-        var result = [];
+        const otherWeaponIds = this.playerIdOtherWeaponIds[playerId];
+        const result = [];
         if (otherWeaponIds) {
-            for (var i = 0; i < otherWeaponIds.length - 1; ++i) {
+            for (let i = 0; i < otherWeaponIds.length - 1; ++i) {
                 result.push(this.weapons[otherWeaponIds[i]]);
             }
         }
@@ -828,7 +828,7 @@ RoundModel.methods({
     },
     
     getDefaultWeapon: function(playerId) {
-        var weaponId = this.playerIdDefaultWeaponId[playerId];
+        const weaponId = this.playerIdDefaultWeaponId[playerId];
         if (weaponId) {
             return this.weapons[weaponId];
         } else {
@@ -846,7 +846,7 @@ RoundModel.methods({
 
     getUpgradeByPlayerIdAndType: function(playerId, type) {
         for(upgradeId in this.upgrades) {
-            var upgrade = this.upgrades[upgradeId];
+            const upgrade = this.upgrades[upgradeId];
             if (upgrade.getPlayerId() === playerId && upgrade.getType() === type) {
                 return upgrade;
             }
@@ -872,12 +872,12 @@ RoundModel.methods({
     },
 
     destroyProjectile: function(projectileId) {
-        var projectile = this.projectiles[projectileId];
+        const projectile = this.projectiles[projectileId];
         if (projectile) {
             // Invalidate cached round state.
             this.cachedRoundState = null;
 
-            var defaultWeapon = this.getDefaultWeapon(projectile.getPlayerId());
+            const defaultWeapon = this.getDefaultWeapon(projectile.getPlayerId());
             if (defaultWeapon && defaultWeapon.getType() === projectile.getType()) {
                 defaultWeapon.reload(projectile);
             }
@@ -887,12 +887,12 @@ RoundModel.methods({
     },
 
     timeoutProjectile: function(projectileId) {
-        var projectile = this.projectiles[projectileId];
+        const projectile = this.projectiles[projectileId];
         if (projectile) {
             // Invalidate cached round state.
             this.cachedRoundState = null;
 
-            var defaultWeapon = this.getDefaultWeapon(projectile.getPlayerId());
+            const defaultWeapon = this.getDefaultWeapon(projectile.getPlayerId());
             if (defaultWeapon && defaultWeapon.getType() === projectile.getType()) {
                 defaultWeapon.reload(projectile);
             }
@@ -902,7 +902,7 @@ RoundModel.methods({
     },
 
     destroyCollectible: function(pickup) {
-        var collectible = this.collectibles[pickup.getCollectibleId()];
+        const collectible = this.collectibles[pickup.getCollectibleId()];
         if (collectible) {
             // Invalidate cached round state.
             this.cachedRoundState = null;
@@ -914,10 +914,10 @@ RoundModel.methods({
     },
 
     updateWeapon: function(playerId, weaponId) {
-        var weapon = this.weapons[weaponId];
+        const weapon = this.weapons[weaponId];
         if (weapon) {
             // Update tank's body.
-            var tank = this.tanks[playerId];
+            const tank = this.tanks[playerId];
             if (tank) {
                 B2DUtils.updateTankBodyTurret(tank.getB2DBody(), tank, weapon);
             }
@@ -925,21 +925,21 @@ RoundModel.methods({
     },
 
     destroyWeapon: function(weaponDeactivation) {
-        var weaponId = weaponDeactivation.getWeaponId();
-        var playerId = weaponDeactivation.getPlayerId();
-        var weapon = this.weapons[weaponId];
+        const weaponId = weaponDeactivation.getWeaponId();
+        const playerId = weaponDeactivation.getPlayerId();
+        const weapon = this.weapons[weaponId];
         if (weapon) {
             // Invalidate cached round state.
             this.cachedRoundState = null;
 
             delete this.weapons[weaponId];
 
-            var defaultWeaponId = this.playerIdDefaultWeaponId[playerId];
+            const defaultWeaponId = this.playerIdDefaultWeaponId[playerId];
             if (defaultWeaponId === weaponId) {
                 this.playerIdDefaultWeaponId[playerId] = null;
             } else {
-                var otherWeaponIds = this.playerIdOtherWeaponIds[playerId];
-                for (var i = 0; i < otherWeaponIds.length; ++i) {
+                const otherWeaponIds = this.playerIdOtherWeaponIds[playerId];
+                for (let i = 0; i < otherWeaponIds.length; ++i) {
                     if (otherWeaponIds[i] === weaponId) {
                         otherWeaponIds.splice(i, 1);
                         break;
@@ -948,8 +948,8 @@ RoundModel.methods({
             }
             
             // Update tank's body.
-            var newWeapon = this.getActiveWeapon(playerId);
-            var tank = this.tanks[playerId];
+            const newWeapon = this.getActiveWeapon(playerId);
+            const tank = this.tanks[playerId];
             if (newWeapon && tank) {
                 B2DUtils.updateTankBodyTurret(tank.getB2DBody(), tank, newWeapon);
             }
@@ -959,17 +959,17 @@ RoundModel.methods({
     },
 
     destroyUpgrade: function(upgradeUpdate) {
-        var upgradeId = upgradeUpdate.getUpgradeId();
-        var playerId = upgradeUpdate.getPlayerId();
-        var upgrade = this.upgrades[upgradeId];
+        const upgradeId = upgradeUpdate.getUpgradeId();
+        const playerId = upgradeUpdate.getPlayerId();
+        const upgrade = this.upgrades[upgradeId];
         if (upgrade) {
             // Invalidate cached round state.
             this.cachedRoundState = null;
 
             delete this.upgrades[upgradeId];
 
-            var upgradeIds = this.playerIdUpgradeIds[playerId];
-            for (var i = 0; i < upgradeIds.length; ++i) {
+            const upgradeIds = this.playerIdUpgradeIds[playerId];
+            for (let i = 0; i < upgradeIds.length; ++i) {
                 if (upgradeIds[i] === upgradeId) {
                     upgradeIds.splice(i, 1);
                     break;
@@ -980,7 +980,7 @@ RoundModel.methods({
             this._updateModifiers(playerId);
 
             // Update tank's body.
-            var tank = this.tanks[playerId];
+            const tank = this.tanks[playerId];
             if (tank) {
                 B2DUtils.removeTankBodyUpgrade(tank.getB2DBody(), upgrade.getType());
             }
@@ -990,7 +990,7 @@ RoundModel.methods({
     },
 
     destroyCounter: function(counterId) {
-        var counter = this.counters[counterId];
+        const counter = this.counters[counterId];
         if (counter) {
             // Invalidate cached round state.
             this.cachedRoundState = null;
@@ -1002,7 +1002,7 @@ RoundModel.methods({
     },
 
     destroyZone: function(zoneId) {
-        var zone = this.zones[zoneId];
+        const zone = this.zones[zoneId];
         if (zone) {
             // Invalidate cached round state.
             this.cachedRoundState = null;
@@ -1026,34 +1026,34 @@ RoundModel.methods({
         this._removeDestroyed();
         
         // Iterate over all elements and call update
-        for (var tank in this.tanks) {
+        for (const tank in this.tanks) {
             this.tanks[tank].update(deltaTime);
         }
-        for (var projectile in this.projectiles) {
+        for (const projectile in this.projectiles) {
             this.projectiles[projectile].update(deltaTime);
         }
-        for (var collectible in this.collectibles) {
+        for (const collectible in this.collectibles) {
             this.collectibles[collectible].update(deltaTime);
         }
-        for (var weapon in this.weapons) {
+        for (const weapon in this.weapons) {
             this.weapons[weapon].update(deltaTime);
         }
-        for (var upgrade in this.upgrades) {
+        for (const upgrade in this.upgrades) {
             this.upgrades[upgrade].update(deltaTime);
         }
-        for (var counter in this.counters) {
+        for (const counter in this.counters) {
             this.counters[counter].update(deltaTime);
         }
-        for (var zone in this.zones) {
+        for (const zone in this.zones) {
             this.zones[zone].update(deltaTime);
         }
     },
 
     _filterAndDispatchCollisionEvents: function() {
-        var dispatchedCollisionEvents = [];
+        const dispatchedCollisionEvents = [];
         
-        for (var i = 0; i < this.collisionEvents.length; ++i) {
-            var event = this.collisionEvents[i];
+        for (let i = 0; i < this.collisionEvents.length; ++i) {
+            const event = this.collisionEvents[i];
             
             // Make sure to filter duplicate collision events:
             // - filter so that a tank can only be involved in one event of each type per step.
@@ -1066,9 +1066,9 @@ RoundModel.methods({
             //      - do this by only checking type and zone properties of event data, and ignoring tankA, tankB and maze properties.
             // - filter so that a projectile can only be involved in one event of each type per step (except projectile-maze and projectile-shield collisions).
             //      - do this by only checking type and projectile properties of event data, and ignoring tankA, tankB and maze properties.
-            var eventAlreadyDispatched = false;
-            for (var j = 0; j < dispatchedCollisionEvents.length; ++j) {
-                var dispatchedEvent = dispatchedCollisionEvents[j];
+            let eventAlreadyDispatched = false;
+            for (let j = 0; j < dispatchedCollisionEvents.length; ++j) {
+                const dispatchedEvent = dispatchedCollisionEvents[j];
                 if (event.collisionType === dispatchedEvent.collisionType &&
                     ((event.data.tankA !== undefined && event.data.tankA === dispatchedEvent.data.tankA) ||
                      (event.data.collectible !== undefined && event.data.collectible === dispatchedEvent.data.collectible) ||
@@ -1091,21 +1091,21 @@ RoundModel.methods({
 
     _removeDestroyed: function() {
         // Clean this.tanks, this.projectiles, this.collectibles and remove b2d bodies
-        for (var i = 0; i < this.destroyedPlayerIds.length; ++i) {
-            var tank = this.tanks[this.destroyedPlayerIds[i]];
+        for (let i = 0; i < this.destroyedPlayerIds.length; ++i) {
+            const tank = this.tanks[this.destroyedPlayerIds[i]];
             if (tank) {
                 this.b2dworld.DestroyBody(tank.getB2DBody());
                 delete this.tanks[this.destroyedPlayerIds[i]];
 
                 delete this.weapons[this.playerIdDefaultWeaponId[this.destroyedPlayerIds[i]]];
-                for (var j = 0; j < this.playerIdOtherWeaponIds[this.destroyedPlayerIds[i]].length; ++j) {
+                for (let j = 0; j < this.playerIdOtherWeaponIds[this.destroyedPlayerIds[i]].length; ++j) {
                     delete this.weapons[this.playerIdOtherWeaponIds[this.destroyedPlayerIds[i]][j]];
                 }
 
                 delete this.playerIdDefaultWeaponId[this.destroyedPlayerIds[i]];
                 delete this.playerIdOtherWeaponIds[this.destroyedPlayerIds[i]];
 
-                for (var j = 0; j < this.playerIdUpgradeIds[this.destroyedPlayerIds[i]].length; ++j) {
+                for (let j = 0; j < this.playerIdUpgradeIds[this.destroyedPlayerIds[i]].length; ++j) {
                     delete this.upgrades[this.playerIdUpgradeIds[this.destroyedPlayerIds[i]][j]];
                 }
 
@@ -1121,8 +1121,8 @@ RoundModel.methods({
         }
         this.destroyedPlayerIds = [];
 
-        for (var i = 0; i < this.destroyedProjectileIds.length; ++i) {
-            var projectile = this.projectiles[this.destroyedProjectileIds[i]];
+        for (let i = 0; i < this.destroyedProjectileIds.length; ++i) {
+            const projectile = this.projectiles[this.destroyedProjectileIds[i]];
             if (projectile) {
                 this.b2dworld.DestroyBody(projectile.getB2DBody());
                 delete this.projectiles[this.destroyedProjectileIds[i]];
@@ -1135,8 +1135,8 @@ RoundModel.methods({
         }
         this.destroyedProjectileIds = [];
 
-        for (var i = 0; i < this.destroyedCollectibleIds.length; ++i) {
-            var collectible = this.collectibles[this.destroyedCollectibleIds[i]];
+        for (let i = 0; i < this.destroyedCollectibleIds.length; ++i) {
+            const collectible = this.collectibles[this.destroyedCollectibleIds[i]];
             if (collectible) {
                 this.b2dworld.DestroyBody(collectible.getB2DBody());
                 delete this.collectibles[this.destroyedCollectibleIds[i]];
@@ -1149,8 +1149,8 @@ RoundModel.methods({
         }
         this.destroyedCollectibleIds = [];
 
-        for (var i = 0; i < this.destroyedZoneIds.length; ++i) {
-            var zone = this.zones[this.destroyedZoneIds[i]];
+        for (let i = 0; i < this.destroyedZoneIds.length; ++i) {
+            const zone = this.zones[this.destroyedZoneIds[i]];
             if (zone) {
                 this.b2dworld.DestroyBody(zone.getB2DBody());
                 delete this.zones[this.destroyedZoneIds[i]];
@@ -1170,7 +1170,7 @@ RoundModel.methods({
     },
 
     removeEventListener: function(callback, context) {
-        for (var i=0;i<this.eventListeners.length;i++) {
+        for (let i = 0;i<this.eventListeners.length;i++) {
             if (this.eventListeners[i].cb===callback && this.eventListeners[i].ctxt===context) {
                 this.eventListeners.splice(i, 1);
                 return;
@@ -1179,7 +1179,7 @@ RoundModel.methods({
     },
 
     _notifyEventListeners: function(evt, data) {
-        for (var i=0;i<this.eventListeners.length;i++) {
+        for (let i = 0;i<this.eventListeners.length;i++) {
             try {
                 this.eventListeners[i].cb(this.eventListeners[i].ctxt, this.eventListeners[i].gameId, evt, data);
             } catch (err) {
@@ -1251,8 +1251,8 @@ RoundModel.methods({
     },
 
     getStake: function(playerId) {
-        for (var i = 0; i < this.stakes.length; ++i) {
-            var stake = this.stakes[i];
+        for (let i = 0; i < this.stakes.length; ++i) {
+            const stake = this.stakes[i];
             if (stake.playerId == playerId) {
                 return stake;
             }
@@ -1266,29 +1266,29 @@ RoundModel.methods({
             return [];
         }
 
-        var changes = {};
-        var rankBeforeChanges = {};
+        const changes = {};
+        const rankBeforeChanges = {};
 
         // Get the rank changes. If there are any winners, share the total stakes among them.
         // If there are no winners, only take the stakes of the punishable players.
         if (winnerPlayerIds.length > 0) {
-            var totalStakes = 0;
-            for (var i = 0; i < this.stakes.length; ++i) {
-                var stake = this.stakes[i];
+            let totalStakes = 0;
+            for (let i = 0; i < this.stakes.length; ++i) {
+                const stake = this.stakes[i];
                 changes[stake.playerId] = -stake.value;
                 rankBeforeChanges[stake.playerId] = stake.rank;
                 totalStakes += stake.value;
             }
 
-            var stakesPerWinner = Math.ceil(totalStakes / winnerPlayerIds.length);
+            const stakesPerWinner = Math.ceil(totalStakes / winnerPlayerIds.length);
 
-            for (var i = 0; i < winnerPlayerIds.length; ++i) {
+            for (let i = 0; i < winnerPlayerIds.length; ++i) {
                 changes[winnerPlayerIds[i]] += stakesPerWinner;
             }
         } else {
-            for (var i = 0; i < this.stakes.length; ++i) {
-                var stake = this.stakes[i];
-                for (var j = 0; j < this.punishablePlayerIds.length; ++j) {
+            for (let i = 0; i < this.stakes.length; ++i) {
+                const stake = this.stakes[i];
+                for (let j = 0; j < this.punishablePlayerIds.length; ++j) {
                     if (stake.playerId == this.punishablePlayerIds[j]) {
                         changes[stake.playerId] = -stake.value;
                         rankBeforeChanges[stake.playerId] = stake.rank;
@@ -1299,8 +1299,8 @@ RoundModel.methods({
             }
         }
         // Convert from object to array.
-        var changesArray = [];
-        for (var playerId in changes) {
+        const changesArray = [];
+        for (const playerId in changes) {
             changesArray.push({playerId: playerId, rank: rankBeforeChanges[playerId], change: changes[playerId]});
         }
 
@@ -1316,16 +1316,16 @@ RoundModel.methods({
     },
 
     _updateModifiers: function(playerId) {
-        var newModifiers = {};
+        const newModifiers = {};
 
-        for (var modifierType in Constants.MODIFIER_TYPES) {
-            var modifier = Constants.MODIFIER_TYPES[modifierType];
+        for (const modifierType in Constants.MODIFIER_TYPES) {
+            const modifier = Constants.MODIFIER_TYPES[modifierType];
             newModifiers[modifier] = Constants.MODIFIER_INFO[modifier].DEFAULT;
         }
 
-        var upgradeIds = this.playerIdUpgradeIds[playerId];
-        for (var i = 0; i < upgradeIds.length; ++i) {
-            var upgrade = this.upgrades[upgradeIds[i]];
+        const upgradeIds = this.playerIdUpgradeIds[playerId];
+        for (let i = 0; i < upgradeIds.length; ++i) {
+            const upgrade = this.upgrades[upgradeIds[i]];
             switch(upgrade.getType()) {
                 case Constants.UPGRADE_TYPES.SPEED_BOOST:
                 {

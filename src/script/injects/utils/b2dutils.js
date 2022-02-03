@@ -9,7 +9,7 @@ Box2D.Common.b2Settings.b2_maxTranslation = 8.0;//4.0;
 Box2D.Common.b2Settings.b2_maxTranslationSquared = 64.0;//16.0;
 Box2D.Common.b2Settings.b2_velocityThreshold = 0.0;
 
-var B2DUtils = Classy.newClass().name('B2DUtils');
+const B2DUtils = Classy.newClass().name('B2DUtils');
 
 B2DUtils.fields({
 
@@ -22,28 +22,28 @@ B2DUtils.classFields({
 B2DUtils.classMethods({
     createMaze: function(b2dworld, maze) {
         // Setup helper array which is used to determine if colliders have already been created for a given maze tile.
-        var tiles = maze.getTiles();
+        const tiles = maze.getTiles();
     
-        var tempArray = new Array(tiles.length);
-        for (var i = 0; i < tiles.length; ++i)
+        const tempArray = new Array(tiles.length);
+        for (let i = 0; i < tiles.length; ++i)
         {
             tempArray[i] = new Array(tiles[0].length);
-            for (var j = 0; j < tiles[0].length; ++j)
+            for (let j = 0; j < tiles[0].length; ++j)
             {
                 tempArray[i][j] = {topWallColliderCreated: false, leftWallColliderCreated: false};
             }
         }
     
         // Create collision bodies.
-        for (var i = 0; i < tiles.length; ++i)
+        for (let i = 0; i < tiles.length; ++i)
         {
-            for (var j = 0; j < tiles[0].length; ++j)
+            for (let j = 0; j < tiles[0].length; ++j)
             {
                 // Top wall.
                 if (tiles[i][j][1] == 1 && !tempArray[i][j].topWallColliderCreated)
                 {
                     // The points containing the collider geometry (must be convex).
-                    var points = new Array();
+                    const points = [];
 
                     // First, check for how the starting end of the collider should be.
                     if (j-1 < 0 || tiles[i][j-1][2] == 1)
@@ -68,7 +68,7 @@ B2DUtils.classMethods({
                     }
 
                     // Then, step along to the right until finding the other end of the collider.
-                    var iStep = i;
+                    let iStep = i;
                     while (iStep < tiles.length)
                     {
                         if (tiles[iStep][j][1] == 1)
@@ -104,7 +104,7 @@ B2DUtils.classMethods({
                         points[points.length] = j * Constants.MAZE_TILE_SIZE.m - Constants.MAZE_WALL_WIDTH.m/2.0;
                     }
 
-                    var wallVertices = [
+                    const wallVertices = [
                         Box2D.Common.Math.b2Vec2.Make(points[6], points[7]),
                         Box2D.Common.Math.b2Vec2.Make(points[4], points[5]),
                         Box2D.Common.Math.b2Vec2.Make(points[2], points[3]),
@@ -118,7 +118,7 @@ B2DUtils.classMethods({
                 if (tiles[i][j][2] == 1 && !tempArray[i][j].leftWallColliderCreated)
                 {
                     // The points containing the collider geometry (must be convex).
-                    var points = new Array();
+                    const points = [];
 
                     // First, check for how the starting end of the collider should be.
                     if (i-1 < 0 || tiles[i-1][j][1] == 1)
@@ -143,7 +143,7 @@ B2DUtils.classMethods({
                     }
 
                     // Then, step along down until finding the other end of the collider.
-                    var jStep = j;
+                    let jStep = j;
                     while (jStep < tiles[0].length)
                     {
                         if (tiles[i][jStep][2] == 1)
@@ -179,7 +179,7 @@ B2DUtils.classMethods({
                         points[points.length] = jStep * Constants.MAZE_TILE_SIZE.m + Constants.MAZE_WALL_WIDTH.m/2.0;
                     }
 
-                    var wallVertices = [
+                    const wallVertices = [
                         Box2D.Common.Math.b2Vec2.Make(points[0], points[1]),
                         Box2D.Common.Math.b2Vec2.Make(points[2], points[3]),
                         Box2D.Common.Math.b2Vec2.Make(points[4], points[5]),
@@ -190,13 +190,13 @@ B2DUtils.classMethods({
                 }
             }
         }
-        for (var i = 0; i < tiles.length; ++i)
+        for (let i = 0; i < tiles.length; ++i)
         {
             // Bottom wall.
             if (tiles[i][tiles[0].length-1][0] == 1)
             {
                 // The points containing the collider geometry (must be convex).
-                var points = new Array();
+                const points = [];
             
                 points[points.length] = i * Constants.MAZE_TILE_SIZE.m - Constants.MAZE_WALL_WIDTH.m/2.0;
                 points[points.length] = tiles[0].length * Constants.MAZE_TILE_SIZE.m - Constants.MAZE_WALL_WIDTH.m/2.0;
@@ -221,7 +221,7 @@ B2DUtils.classMethods({
                 points[points.length] = i * Constants.MAZE_TILE_SIZE.m + Constants.MAZE_WALL_WIDTH.m/2.0;
                 points[points.length] = tiles[0].length * Constants.MAZE_TILE_SIZE.m - Constants.MAZE_WALL_WIDTH.m/2.0;
         
-                var wallVertices = [
+                const wallVertices = [
                     Box2D.Common.Math.b2Vec2.Make(points[6], points[7]),
                     Box2D.Common.Math.b2Vec2.Make(points[4], points[5]),
                     Box2D.Common.Math.b2Vec2.Make(points[2], points[3]),
@@ -231,13 +231,13 @@ B2DUtils.classMethods({
                 this._createWallBody(b2dworld, wallVertices, maze);
             }
         }
-        for (var j = 0; j < tiles[0].length;  ++j)
+        for (let j = 0; j < tiles[0].length;  ++j)
         {
             // Right wall.
             if (tiles[tiles.length-1][j][0] == 1)
             {
                 // The points containing the collider geometry (must be convex).
-                var points = new Array();
+                const points = [];
 
                 points[points.length] = tiles.length * Constants.MAZE_TILE_SIZE.m - Constants.MAZE_WALL_WIDTH.m/2.0;
                 points[points.length] = j * Constants.MAZE_TILE_SIZE.m - Constants.MAZE_WALL_WIDTH.m/2.0;
@@ -262,7 +262,7 @@ B2DUtils.classMethods({
                 points[points.length] = tiles.length * Constants.MAZE_TILE_SIZE.m - Constants.MAZE_WALL_WIDTH.m/2.0;
                 points[points.length] = j * Constants.MAZE_TILE_SIZE.m + Constants.MAZE_WALL_WIDTH.m/2.0;
 
-                var wallVertices = [
+                const wallVertices = [
                     Box2D.Common.Math.b2Vec2.Make(points[0], points[1]),
                     Box2D.Common.Math.b2Vec2.Make(points[2], points[3]),
                     Box2D.Common.Math.b2Vec2.Make(points[4], points[5]),
@@ -275,7 +275,7 @@ B2DUtils.classMethods({
     },
     
     _createWallBody: function(b2dworld, wallVertices, maze) {
-        var wallFixtureDef = new Box2D.Dynamics.b2FixtureDef;
+        const wallFixtureDef = new Box2D.Dynamics.b2FixtureDef;
         wallFixtureDef.density = 0.0;
         wallFixtureDef.friction = 0.05;
         wallFixtureDef.restitution = 0.0;
@@ -287,10 +287,10 @@ B2DUtils.classMethods({
         wallFixtureDef.filter.maskBits = Constants.COLLISION_CATEGORIES.TANK |
             Constants.COLLISION_CATEGORIES.PROJECTILE;
 
-        var wallBodyDef = new Box2D.Dynamics.b2BodyDef;
+		const wallBodyDef = new Box2D.Dynamics.b2BodyDef;
         wallBodyDef.type = Box2D.Dynamics.b2Body.b2_staticBody;
 
-        var box2dBody = b2dworld.CreateBody(wallBodyDef);
+        const box2dBody = b2dworld.CreateBody(wallBodyDef);
         box2dBody.CreateFixture(wallFixtureDef);
 
         return box2dBody;
@@ -298,7 +298,7 @@ B2DUtils.classMethods({
 
     createProjectileBody: function(b2dworld, projectile, radius) {
         // Enable physics on the projectile.
-        var projectileFixtureDef = new Box2D.Dynamics.b2FixtureDef;
+        const projectileFixtureDef = new Box2D.Dynamics.b2FixtureDef;
         projectileFixtureDef.density = 0.01;
         projectileFixtureDef.friction = 0.0;
         projectileFixtureDef.restitution = 1.0;
@@ -312,14 +312,14 @@ B2DUtils.classMethods({
             Constants.COLLISION_CATEGORIES.SHIELD |
             Constants.COLLISION_CATEGORIES.ZONE;
 
-        var projectileBodyDef = new Box2D.Dynamics.b2BodyDef;
+		const projectileBodyDef = new Box2D.Dynamics.b2BodyDef;
         projectileBodyDef.type = Box2D.Dynamics.b2Body.b2_dynamicBody;
         projectileBodyDef.linearDamping = 0.0;
         projectileBodyDef.fixedRotation = true;
         projectileBodyDef.active = true;
         // Prevents tunneling through dynamic bodies such as the tanks!
         projectileBodyDef.bullet = true;
-        var box2dBody = b2dworld.CreateBody(projectileBodyDef);
+        const box2dBody = b2dworld.CreateBody(projectileBodyDef);
         box2dBody.CreateFixture(projectileFixtureDef);
         box2dBody.SetPosition(
             Box2D.Common.Math.b2Vec2.Make(projectile.getX(), projectile.getY())
@@ -333,7 +333,7 @@ B2DUtils.classMethods({
 
     createCrateBody: function(b2dworld, collectible) {
         //enable physics on the crate
-        var crateFixtureDef = new Box2D.Dynamics.b2FixtureDef;
+        const crateFixtureDef = new Box2D.Dynamics.b2FixtureDef;
         crateFixtureDef.density = 0.1;
         crateFixtureDef.friction = 0.0;
         crateFixtureDef.restitution = 1.0;
@@ -347,7 +347,7 @@ B2DUtils.classMethods({
         crateFixtureDef.filter.maskBits =
             Constants.COLLISION_CATEGORIES.TANK;
 
-        var crateBodyDef = new Box2D.Dynamics.b2BodyDef;
+		const crateBodyDef = new Box2D.Dynamics.b2BodyDef;
         crateBodyDef.type = Box2D.Dynamics.b2Body.b2_dynamicBody;
         crateBodyDef.angle = collectible.getRotation();
         crateBodyDef.linearDamping = 4.0;
@@ -355,7 +355,7 @@ B2DUtils.classMethods({
         crateBodyDef.fixedRotation = false;
         crateBodyDef.active = true;
         crateBodyDef.allowSleep = false;
-        var box2dBody = b2dworld.CreateBody(crateBodyDef);
+        const box2dBody = b2dworld.CreateBody(crateBodyDef);
         box2dBody.CreateFixture(crateFixtureDef);
         box2dBody.SetPosition(
             Box2D.Common.Math.b2Vec2.Make(collectible.getX(), collectible.getY())
@@ -366,7 +366,7 @@ B2DUtils.classMethods({
 
     createGoldBody: function(b2dworld, collectible) {
         //enable physics on the gold
-        var goldFixtureDef = new Box2D.Dynamics.b2FixtureDef;
+        const goldFixtureDef = new Box2D.Dynamics.b2FixtureDef;
         goldFixtureDef.density = 0.1;
         goldFixtureDef.friction = 0.0;
         goldFixtureDef.restitution = 1.0;
@@ -377,13 +377,13 @@ B2DUtils.classMethods({
         goldFixtureDef.filter.maskBits =
             Constants.COLLISION_CATEGORIES.TANK;
 
-        var goldBodyDef = new Box2D.Dynamics.b2BodyDef;
+		const goldBodyDef = new Box2D.Dynamics.b2BodyDef;
         goldBodyDef.type = Box2D.Dynamics.b2Body.b2_dynamicBody;
         goldBodyDef.linearDamping = 4.0;
         goldBodyDef.fixedRotation = true;
         goldBodyDef.active = true;
         goldBodyDef.allowSleep = false;
-        var box2dBody = b2dworld.CreateBody(goldBodyDef);
+        const box2dBody = b2dworld.CreateBody(goldBodyDef);
         box2dBody.CreateFixture(goldFixtureDef);
         box2dBody.SetPosition(
             Box2D.Common.Math.b2Vec2.Make(collectible.getX(), collectible.getY())
@@ -394,11 +394,11 @@ B2DUtils.classMethods({
 
     createDiamondBody: function(b2dworld, collectible) {
         //enable physics on the diamond
-        var diamondFixtureDef = new Box2D.Dynamics.b2FixtureDef;
+        const diamondFixtureDef = new Box2D.Dynamics.b2FixtureDef;
         diamondFixtureDef.density = 0.1;
         diamondFixtureDef.friction = 0.0;
         diamondFixtureDef.restitution = 1.0;
-        var diamondVertices = [
+        const diamondVertices = [
             Box2D.Common.Math.b2Vec2.Make(0, Constants.DIAMOND.HEIGHT.m/2.0),
             Box2D.Common.Math.b2Vec2.Make(-Constants.DIAMOND.WIDTH.m/2.0, Constants.DIAMOND.MIDDLE_HEIGHT.m/2.0),
             Box2D.Common.Math.b2Vec2.Make(-Constants.DIAMOND.WIDTH.m/2.0, -Constants.DIAMOND.MIDDLE_HEIGHT.m/2.0),
@@ -414,14 +414,14 @@ B2DUtils.classMethods({
         diamondFixtureDef.filter.maskBits =
             Constants.COLLISION_CATEGORIES.TANK;
 
-        var diamondBodyDef = new Box2D.Dynamics.b2BodyDef;
+		const diamondBodyDef = new Box2D.Dynamics.b2BodyDef;
         diamondBodyDef.type = Box2D.Dynamics.b2Body.b2_dynamicBody;
         diamondBodyDef.angle = collectible.getRotation();
         diamondBodyDef.linearDamping = 4.0;
         diamondBodyDef.fixedRotation = true;
         diamondBodyDef.active = true;
         diamondBodyDef.allowSleep = false;
-        var box2dBody = b2dworld.CreateBody(diamondBodyDef);
+        const box2dBody = b2dworld.CreateBody(diamondBodyDef);
         box2dBody.CreateFixture(diamondFixtureDef);
         box2dBody.SetPosition(
             Box2D.Common.Math.b2Vec2.Make(collectible.getX(), collectible.getY())
@@ -431,7 +431,7 @@ B2DUtils.classMethods({
     },
 
     createSpawnZoneBody: function(b2dworld, zone, radius) {
-        var spawnZoneFixtureDef = new Box2D.Dynamics.b2FixtureDef;
+        const spawnZoneFixtureDef = new Box2D.Dynamics.b2FixtureDef;
         spawnZoneFixtureDef.density = 0.0;
         spawnZoneFixtureDef.friction = 0.0;
         spawnZoneFixtureDef.restitution = 1.0;
@@ -444,12 +444,12 @@ B2DUtils.classMethods({
             Constants.COLLISION_CATEGORIES.PROJECTILE |
             Constants.COLLISION_CATEGORIES.SHIELD;
 
-        var spawnZoneBodyDef = new Box2D.Dynamics.b2BodyDef;
+		const spawnZoneBodyDef = new Box2D.Dynamics.b2BodyDef;
         spawnZoneBodyDef.type = Box2D.Dynamics.b2Body.b2_staticBody;
 
-        var box2dBody = b2dworld.CreateBody(spawnZoneBodyDef);
+        const box2dBody = b2dworld.CreateBody(spawnZoneBodyDef);
         box2dBody.CreateFixture(spawnZoneFixtureDef);
-        var position = zone.getTiles()[0];
+        const position = zone.getTiles()[0];
         box2dBody.SetPosition(
             Box2D.Common.Math.b2Vec2.Make((position.x + 0.5) * Constants.MAZE_TILE_SIZE.m, (position.y + 0.5) * Constants.MAZE_TILE_SIZE.m)
         );
@@ -458,10 +458,10 @@ B2DUtils.classMethods({
     },
 
     updateSpawnZoneBody: function(b2body, zone, radius) {
-        var fixture = b2body.GetFixtureList();
+        const fixture = b2body.GetFixtureList();
         b2body.DestroyFixture(fixture);
 
-        var spawnZoneFixtureDef = new Box2D.Dynamics.b2FixtureDef;
+        const spawnZoneFixtureDef = new Box2D.Dynamics.b2FixtureDef;
         spawnZoneFixtureDef.density = 0.0;
         spawnZoneFixtureDef.friction = 0.0;
         spawnZoneFixtureDef.restitution = 1.0;
@@ -482,7 +482,7 @@ B2DUtils.classMethods({
         B2DUtils.removeTankBodyUpgrade(b2body, upgrade.getType());
 
         // Add new upgrade.
-        var newFixtureDefs = [];
+        let newFixtureDefs = [];
         switch(upgrade.getType()) {
             case Constants.UPGRADE_TYPES.LASER_AIMER:
             case Constants.UPGRADE_TYPES.AIMER:
@@ -499,16 +499,16 @@ B2DUtils.classMethods({
             }
         }
 
-        for (var i = 0; i < newFixtureDefs.length; ++i) {
+        for (let i = 0; i < newFixtureDefs.length; ++i) {
             b2body.CreateFixture(newFixtureDefs[i]);
         }
     },
 
     removeTankBodyUpgrade: function(b2body, upgradeType) {
-        var currentFixture = b2body.GetFixtureList();
+        let currentFixture = b2body.GetFixtureList();
         while (currentFixture !== null) {
             if (currentFixture.GetUserData().type === upgradeType) {
-                var nextFixture = currentFixture.GetNext();
+                const nextFixture = currentFixture.GetNext();
                 b2body.DestroyFixture(currentFixture);
                 currentFixture = nextFixture;
             } else {
@@ -518,7 +518,7 @@ B2DUtils.classMethods({
     },
 
     _createShieldFixtureDefs: function(upgrade) {
-        var shieldFixtureDef = new Box2D.Dynamics.b2FixtureDef;
+        const shieldFixtureDef = new Box2D.Dynamics.b2FixtureDef;
         shieldFixtureDef.density = 10.0;
         shieldFixtureDef.friction = 0.0;
         shieldFixtureDef.restitution = 1.0;
@@ -537,10 +537,10 @@ B2DUtils.classMethods({
 
     updateTankBodyTurret: function(b2body, tank, weapon) {
         // Remove old tank turret.
-        var currentFixture = b2body.GetFixtureList();
+        let currentFixture = b2body.GetFixtureList();
         while (currentFixture !== null) {
             if (currentFixture.GetUserData().type === "turret") {
-                var nextFixture = currentFixture.GetNext();
+                const nextFixture = currentFixture.GetNext();
                 b2body.DestroyFixture(currentFixture);
                 currentFixture = nextFixture;
             } else {
@@ -549,7 +549,7 @@ B2DUtils.classMethods({
         }
         
         // Add new tank turret.
-        var newFixtureDefs = [];
+        let newFixtureDefs = [];
         switch(weapon.getType()) {
             case Constants.WEAPON_TYPES.BULLET:
             {
@@ -580,17 +580,17 @@ B2DUtils.classMethods({
             }
         }
         
-        for (var i = 0; i < newFixtureDefs.length; ++i) {
+        for (let i = 0; i < newFixtureDefs.length; ++i) {
             b2body.CreateFixture(newFixtureDefs[i]);
         }
     },
 
     _createBulletTurretFixtureDefs: function(tank) {
-        var turretFixtureDef = new Box2D.Dynamics.b2FixtureDef;
+        const turretFixtureDef = new Box2D.Dynamics.b2FixtureDef;
         turretFixtureDef.density = 0.0;
         turretFixtureDef.friction = 0.25;
         turretFixtureDef.restitution = 0.0;
-        var turretVertices = [
+        const turretVertices = [
             Box2D.Common.Math.b2Vec2.Make(Constants.BULLET_TURRET.OFFSET_X.m + Constants.BULLET_TURRET.WIDTH.m/2.0, Constants.BULLET_TURRET.OFFSET_Y.m + Constants.BULLET_TURRET.HEIGHT.m/2.0),
             Box2D.Common.Math.b2Vec2.Make(Constants.BULLET_TURRET.OFFSET_X.m - Constants.BULLET_TURRET.WIDTH.m/2.0, Constants.BULLET_TURRET.OFFSET_Y.m + Constants.BULLET_TURRET.HEIGHT.m/2.0),
             Box2D.Common.Math.b2Vec2.Make(Constants.BULLET_TURRET.OFFSET_X.m - Constants.BULLET_TURRET.WIDTH.m/2.0, Constants.BULLET_TURRET.OFFSET_Y.m - Constants.BULLET_TURRET.HEIGHT.m/2.0),
@@ -613,11 +613,11 @@ B2DUtils.classMethods({
     },
     
     _createLaserTurretFixtureDefs: function(tank) {
-        var dishFixtureDef = new Box2D.Dynamics.b2FixtureDef;
+        const dishFixtureDef = new Box2D.Dynamics.b2FixtureDef;
         dishFixtureDef.density = 0.0;
         dishFixtureDef.friction = 0.25;
         dishFixtureDef.restitution = 0.0;
-        var dishVertices = [
+        const dishVertices = [
             Box2D.Common.Math.b2Vec2.Make(Constants.LASER_TURRET.DISH_OFFSET_X.m + Constants.LASER_TURRET.DISH_WIDTH.m/2.0, Constants.LASER_TURRET.DISH_OFFSET_Y.m + Constants.LASER_TURRET.DISH_HEIGHT.m/2.0),
             Box2D.Common.Math.b2Vec2.Make(Constants.LASER_TURRET.DISH_OFFSET_X.m - Constants.LASER_TURRET.DISH_WIDTH.m/2.0, Constants.LASER_TURRET.DISH_OFFSET_Y.m + Constants.LASER_TURRET.DISH_HEIGHT.m/2.0),
             Box2D.Common.Math.b2Vec2.Make(Constants.LASER_TURRET.DISH_OFFSET_X.m - Constants.LASER_TURRET.DISH_WIDTH.m/2.0, Constants.LASER_TURRET.DISH_OFFSET_Y.m - Constants.LASER_TURRET.DISH_HEIGHT.m/2.0),
@@ -636,11 +636,11 @@ B2DUtils.classMethods({
             Constants.COLLISION_CATEGORIES.SHIELD |
             Constants.COLLISION_CATEGORIES.ZONE;
         
-        var antennaFixtureDef = new Box2D.Dynamics.b2FixtureDef;
+		const antennaFixtureDef = new Box2D.Dynamics.b2FixtureDef;
         antennaFixtureDef.density = 0.0;
         antennaFixtureDef.friction = 0.25;
         antennaFixtureDef.restitution = 0.0;
-        var antennaVertices = [
+        const antennaVertices = [
             Box2D.Common.Math.b2Vec2.Make(Constants.LASER_TURRET.ANTENNA_OFFSET_X.m + Constants.LASER_TURRET.ANTENNA_WIDTH.m/2.0, Constants.LASER_TURRET.ANTENNA_OFFSET_Y.m + Constants.LASER_TURRET.ANTENNA_HEIGHT.m/2.0),
             Box2D.Common.Math.b2Vec2.Make(Constants.LASER_TURRET.ANTENNA_OFFSET_X.m - Constants.LASER_TURRET.ANTENNA_WIDTH.m/2.0, Constants.LASER_TURRET.ANTENNA_OFFSET_Y.m + Constants.LASER_TURRET.ANTENNA_HEIGHT.m/2.0),
             Box2D.Common.Math.b2Vec2.Make(Constants.LASER_TURRET.ANTENNA_OFFSET_X.m - Constants.LASER_TURRET.ANTENNA_WIDTH.m/2.0, Constants.LASER_TURRET.ANTENNA_OFFSET_Y.m - Constants.LASER_TURRET.ANTENNA_HEIGHT.m/2.0),
@@ -663,11 +663,11 @@ B2DUtils.classMethods({
     },
 
     _createDoubleBarrelTurretFixtureDefs: function(tank) {
-        var turretFixtureDef = new Box2D.Dynamics.b2FixtureDef;
+        const turretFixtureDef = new Box2D.Dynamics.b2FixtureDef;
         turretFixtureDef.density = 0.0;
         turretFixtureDef.friction = 0.25;
         turretFixtureDef.restitution = 0.0;
-        var turretVertices = [
+        const turretVertices = [
             Box2D.Common.Math.b2Vec2.Make(Constants.DOUBLE_BARREL_TURRET.OFFSET_X.m + Constants.DOUBLE_BARREL_TURRET.WIDTH.m/2.0, Constants.DOUBLE_BARREL_TURRET.OFFSET_Y.m + Constants.DOUBLE_BARREL_TURRET.HEIGHT.m/2.0),
             Box2D.Common.Math.b2Vec2.Make(Constants.DOUBLE_BARREL_TURRET.OFFSET_X.m - Constants.DOUBLE_BARREL_TURRET.WIDTH.m/2.0, Constants.DOUBLE_BARREL_TURRET.OFFSET_Y.m + Constants.DOUBLE_BARREL_TURRET.HEIGHT.m/2.0),
             Box2D.Common.Math.b2Vec2.Make(Constants.DOUBLE_BARREL_TURRET.OFFSET_X.m - Constants.DOUBLE_BARREL_TURRET.WIDTH.m/2.0, Constants.DOUBLE_BARREL_TURRET.OFFSET_Y.m - Constants.DOUBLE_BARREL_TURRET.HEIGHT.m/2.0),
@@ -690,11 +690,11 @@ B2DUtils.classMethods({
     },
 
     _createShotgunTurretFixtureDef: function(tank) {
-        var turretFixtureDef = new Box2D.Dynamics.b2FixtureDef;
+        const turretFixtureDef = new Box2D.Dynamics.b2FixtureDef;
         turretFixtureDef.density = 0.0;
         turretFixtureDef.friction = 0.25;
         turretFixtureDef.restitution = 0.0;
-        var turretVertices = [
+        const turretVertices = [
             Box2D.Common.Math.b2Vec2.Make(Constants.SHOTGUN_TURRET.OFFSET_X.m + Constants.SHOTGUN_TURRET.WIDTH.m/2.0, Constants.SHOTGUN_TURRET.OFFSET_Y.m + Constants.SHOTGUN_TURRET.HEIGHT.m/2.0),
             Box2D.Common.Math.b2Vec2.Make(Constants.SHOTGUN_TURRET.OFFSET_X.m - Constants.SHOTGUN_TURRET.WIDTH.m/2.0, Constants.SHOTGUN_TURRET.OFFSET_Y.m + Constants.SHOTGUN_TURRET.HEIGHT.m/2.0),
             Box2D.Common.Math.b2Vec2.Make(Constants.SHOTGUN_TURRET.OFFSET_X.m - Constants.SHOTGUN_TURRET.WIDTH.m/2.0, Constants.SHOTGUN_TURRET.OFFSET_Y.m - Constants.SHOTGUN_TURRET.HEIGHT.m/2.0),
@@ -717,11 +717,11 @@ B2DUtils.classMethods({
     },
 
     _createMissileTurretFixtureDef: function(tank) {
-        var turretFixtureDef = new Box2D.Dynamics.b2FixtureDef;
+        const turretFixtureDef = new Box2D.Dynamics.b2FixtureDef;
         turretFixtureDef.density = 0.0;
         turretFixtureDef.friction = 0.25;
         turretFixtureDef.restitution = 0.0;
-        var turretVertices = [
+        const turretVertices = [
             Box2D.Common.Math.b2Vec2.Make(Constants.MISSILE_TURRET.OFFSET_X.m + Constants.MISSILE_TURRET.WIDTH.m/2.0, Constants.MISSILE_TURRET.OFFSET_Y.m + Constants.MISSILE_TURRET.CENTER_HEIGHT.m/2.0),
             Box2D.Common.Math.b2Vec2.Make(Constants.MISSILE_TURRET.OFFSET_X.m - Constants.MISSILE_TURRET.WIDTH.m/2.0, Constants.MISSILE_TURRET.OFFSET_Y.m + Constants.MISSILE_TURRET.CENTER_HEIGHT.m/2.0),
             Box2D.Common.Math.b2Vec2.Make(Constants.MISSILE_TURRET.OFFSET_X.m - Constants.MISSILE_TURRET.WIDTH.m/2.0, Constants.MISSILE_TURRET.OFFSET_Y.m - Constants.MISSILE_TURRET.SIDE_HEIGHT.m/2.0),
@@ -746,7 +746,7 @@ B2DUtils.classMethods({
 
     createTankBody: function(b2dworld, tank) {
         //enable physics on the player
-        var tankBaseFixtureDef = new Box2D.Dynamics.b2FixtureDef;
+        const tankBaseFixtureDef = new Box2D.Dynamics.b2FixtureDef;
         tankBaseFixtureDef.density = 1.0;
         tankBaseFixtureDef.friction = 0.25;
         tankBaseFixtureDef.restitution = 0.0;
@@ -765,14 +765,14 @@ B2DUtils.classMethods({
             Constants.COLLISION_CATEGORIES.SHIELD |
             Constants.COLLISION_CATEGORIES.ZONE;
 
-        var tankBodyDef = new Box2D.Dynamics.b2BodyDef;
+		const tankBodyDef = new Box2D.Dynamics.b2BodyDef;
         tankBodyDef.type = Box2D.Dynamics.b2Body.b2_dynamicBody;
         tankBodyDef.angle = tank.getRotation();
         tankBodyDef.linearDamping = 0.0;
         tankBodyDef.fixedRotation = false;
         tankBodyDef.active = true;
         tankBodyDef.allowSleep = false;
-        var box2dBody = b2dworld.CreateBody(tankBodyDef);
+        const box2dBody = b2dworld.CreateBody(tankBodyDef);
         box2dBody.CreateFixture(tankBaseFixtureDef);
         box2dBody.CreateFixture(B2DUtils._createBulletTurretFixtureDefs(tank)[0]);
         box2dBody.SetPosition(
@@ -791,15 +791,15 @@ B2DUtils.classMethods({
     },
     
     getContactData: function(b2dcontact) {
-        var categoryBitsA = b2dcontact.GetFixtureA().GetFilterData().categoryBits;
-        var categoryBitsB = b2dcontact.GetFixtureB().GetFilterData().categoryBits;
-        var fixtureA = b2dcontact.GetFixtureA();
-        var fixtureB = b2dcontact.GetFixtureB();
+        const categoryBitsA = b2dcontact.GetFixtureA().GetFilterData().categoryBits;
+        const categoryBitsB = b2dcontact.GetFixtureB().GetFilterData().categoryBits;
+        const fixtureA = b2dcontact.GetFixtureA();
+        const fixtureB = b2dcontact.GetFixtureB();
 
-        var data = {};
+        const data = {};
         data.contactBits = categoryBitsA | categoryBitsB;
 
-        var worldManifold = B2DUtils.getWorldManifold();
+        const worldManifold = B2DUtils.getWorldManifold();
         b2dcontact.GetWorldManifold(worldManifold);
         
         // Make a copy of the collision point since it will be overwritten by other collisions.
@@ -897,18 +897,18 @@ B2DUtils.classMethods({
 
     // Returns path info object containing path (array of {x,y}), direction ({x,y}), hit (Tank object), firstSegmentLength (float) and length (float)
     calculateProjectilePath: function(b2dworld, projectile, maxBounces, maxLength, collideWithTanks) {
-        var b2body = projectile.getB2DBody();
+        const b2body = projectile.getB2DBody();
         return B2DUtils.calculatePath(b2dworld, b2body.GetPosition(), b2body.GetLinearVelocity(), maxBounces, maxLength, collideWithTanks);
     },
 
     // Returns path info object containing path (array of {x,y}), direction ({x,y}), hit (Tank object), firstSegmentLength (float) and length (float)
     calculateFiringPath: function(b2dworld, tank, angle, maxBounces, maxLength, collideWithTanks) {
-        var b2body = tank.getB2DBody();
-        var direction = Box2D.Common.Math.b2Math.MulMV(
+        const b2body = tank.getB2DBody();
+        const direction = Box2D.Common.Math.b2Math.MulMV(
             Box2D.Common.Math.b2Mat22.FromAngle(b2body.GetAngle() + angle),
             Box2D.Common.Math.b2Vec2.Make(0, -Constants.TANK.HEIGHT.m * 0.5)
         );
-        var position = b2body.GetPosition().Copy();
+        const position = b2body.GetPosition().Copy();
         position.x += direction.x;
         position.y += direction.y;
         return B2DUtils.calculatePath(b2dworld, position, direction, maxBounces, maxLength, collideWithTanks);
@@ -916,25 +916,25 @@ B2DUtils.classMethods({
 
     // Returns path info object containing path (array of {x,y}), direction ({x,y}), hit (Tank object), firstSegmentLength (float) and length (float)
     calculatePath: function(b2dworld, position, direction, maxBounces, maxLength, collideWithTanks) {
-        var path = [];
-        var hit = null;
-        var pathLength = 0;
-        var firstSegmentLength = 0;
+        const path = [];
+        let hit = null;
+        let pathLength = 0;
+        let firstSegmentLength = 0;
         path.push(position);
-        var remainingLength = maxLength;
-        var bounces = 0;
+        let remainingLength = maxLength;
+        let bounces = 0;
         // Initialize ray.
-        var currentDirection = direction.Copy();
+        const currentDirection = direction.Copy();
         currentDirection.Normalize();
-        var currentPosition = position.Copy();
-        var nextPosition = currentPosition.Copy();
+        const currentPosition = position.Copy();
+        const nextPosition = currentPosition.Copy();
         nextPosition.x += currentDirection.x * remainingLength;
         nextPosition.y += currentDirection.y * remainingLength;
         // Intersection values.
-        var closestFixture = null;
-        var closestPoint = Box2D.Common.Math.b2Vec2.Make(0, 0);
-        var closestNormal = Box2D.Common.Math.b2Vec2.Make(0, 0);
-        var closestFraction = 1;
+        let closestFixture = null;
+        const closestPoint = Box2D.Common.Math.b2Vec2.Make(0, 0);
+        const closestNormal = Box2D.Common.Math.b2Vec2.Make(0, 0);
+        let closestFraction = 1;
         while(remainingLength > 0 && bounces <= maxBounces) {
             b2dworld.RayCast(function(fixture, point, normal, fraction) {
                 // Ignore all projectiles and collectibles!
@@ -962,7 +962,7 @@ B2DUtils.classMethods({
                 if (closestFixture.GetFilterData().categoryBits === Constants.COLLISION_CATEGORIES.MAZE ||
                     closestFixture.GetFilterData().categoryBits === Constants.COLLISION_CATEGORIES.SHIELD) {
                     // Continue ray.
-                    var rayLength = Math.max(Constants.PATH_MIN_STEP_LENGTH, closestFraction * remainingLength);
+                    const rayLength = Math.max(Constants.PATH_MIN_STEP_LENGTH, closestFraction * remainingLength);
                     pathLength += rayLength;
                     remainingLength -= rayLength;
                     // Reflect direction around normal.
@@ -1004,11 +1004,11 @@ B2DUtils.classMethods({
     },
 
     splatPathUntoMazeMap: function(map, path, stepSize, splatFn) {
-        var mapData = map.data();
+        const mapData = map.data();
 
         // First validate path.
-        for (var i = 0; i < path.length; ++i) {
-            var tile = {
+        for (let i = 0; i < path.length; ++i) {
+            const tile = {
                 x: Math.floor(path[i].x/Constants.MAZE_TILE_SIZE.m),
                 y: Math.floor(path[i].x/Constants.MAZE_TILE_SIZE.m)
             };
@@ -1018,18 +1018,18 @@ B2DUtils.classMethods({
         }
 
         // Then do the splatting.
-        var totalLength = 0;
-        var segmentSample = 0.0;
-        var tile = Box2D.Common.Math.b2Vec2.Make(0, 0);
-        for (var i = 1; i < path.length; ++i) {
-            var segmentStart = path[i-1];
-            var segmentEnd = path[i];
-            var segmentDir = segmentEnd.Copy();
+        let totalLength = 0;
+        let segmentSample = 0.0;
+        const tile = Box2D.Common.Math.b2Vec2.Make(0, 0);
+        for (let i = 1; i < path.length; ++i) {
+            const segmentStart = path[i-1];
+            const segmentEnd = path[i];
+            const segmentDir = segmentEnd.Copy();
             segmentDir.Subtract(segmentStart);
-            var segmentLength = segmentDir.Normalize();
+            const segmentLength = segmentDir.Normalize();
 
             while (segmentSample < segmentLength) {
-                var current = segmentDir.Copy();
+                const current = segmentDir.Copy();
                 current.Multiply(segmentSample);
                 current.Add(segmentStart);
 
@@ -1046,7 +1046,7 @@ B2DUtils.classMethods({
     },
 
     checkLineForMazeCollision: function(b2dworld, startPosition, endPosition) {
-        var hitMaze = false;
+        let hitMaze = false;
         b2dworld.RayCast(function(fixture, point, normal, fraction) {
             // Ignore everything except maze!
             if (fixture.GetFilterData().categoryBits !== Constants.COLLISION_CATEGORIES.MAZE) {
@@ -1061,15 +1061,15 @@ B2DUtils.classMethods({
     },
 
     toLocalSpace: function(b2body, position) {
-        var worldPoint = Box2D.Common.Math.b2Vec2.Make(position.x, position.y);
-        var localPoint = b2body.GetLocalPoint(worldPoint);
+        const worldPoint = Box2D.Common.Math.b2Vec2.Make(position.x, position.y);
+        const localPoint = b2body.GetLocalPoint(worldPoint);
         return localPoint;
     },
 
     directionToLocalSpace: function(b2body, direction) {
-        var worldPoint = b2body.GetPosition().Copy();
+        const worldPoint = b2body.GetPosition().Copy();
         worldPoint.Add(direction);
-        var localPoint = b2body.GetLocalPoint(worldPoint);
+        const localPoint = b2body.GetLocalPoint(worldPoint);
         return localPoint;
     }
 });

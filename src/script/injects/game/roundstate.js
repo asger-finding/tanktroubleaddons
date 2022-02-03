@@ -57,7 +57,7 @@ RoundState.methods({
         }
 
         var tankStates = [];
-        for (var i = 0; i < this.data.tankStates.length; ++i) {
+        for (let i = 0; i < this.data.tankStates.length; ++i) {
             tankStates.push(TankState.withObject(this.data.tankStates[i]));
         }
 
@@ -70,7 +70,7 @@ RoundState.methods({
         this.cachedTankStates = tankStates;
 
         this.data.tankStates = [];
-        for (var i = 0; i < tankStates.length; ++i) {
+        for (let i = 0; i < tankStates.length; ++i) {
             this.data.tankStates.push(tankStates[i].toObj());
         }
     },
@@ -81,7 +81,7 @@ RoundState.methods({
         }
 
         var projectileStates = [];
-        for (var i = 0; i < this.data.projectileStates.length; ++i) {
+        for (let i = 0; i < this.data.projectileStates.length; ++i) {
             projectileStates.push(ProjectileState.withObject(this.data.projectileStates[i]));
         }
 
@@ -94,7 +94,7 @@ RoundState.methods({
         this.cachedProjectileStates = projectileStates;
 
         this.data.projectileStates = [];
-        for (var i = 0; i < projectileStates.length; ++i) {
+        for (let i = 0; i < projectileStates.length; ++i) {
             this.data.projectileStates.push(projectileStates[i].toObj());
         }
     },
@@ -105,7 +105,7 @@ RoundState.methods({
         }
 
         var collectibleStates = [];
-        for (var i = 0; i < this.data.collectibleStates.length; ++i) {
+        for (let i = 0; i < this.data.collectibleStates.length; ++i) {
             collectibleStates.push(CollectibleState.withObject(this.data.collectibleStates[i]));
         }
 
@@ -119,7 +119,7 @@ RoundState.methods({
         this.cachedCollectibleStates = collectibleStates;
 
         this.data.collectibleStates = [];
-        for (var i = 0; i < collectibleStates.length; ++i) {
+        for (let i = 0; i < collectibleStates.length; ++i) {
             this.data.collectibleStates.push(collectibleStates[i].toObj());
         }
     },
@@ -130,7 +130,7 @@ RoundState.methods({
         }
 
         var weaponStates = [];
-        for (var i = 0; i < this.data.weaponStates.length; ++i) {
+        for (let i = 0; i < this.data.weaponStates.length; ++i) {
             weaponStates.push(WeaponState.withObject(this.data.weaponStates[i]));
         }
 
@@ -143,7 +143,7 @@ RoundState.methods({
         this.cachedWeaponStates = weaponStates;
 
         this.data.weaponStates = [];
-        for (var i = 0; i < weaponStates.length; ++i) {
+        for (let i = 0; i < weaponStates.length; ++i) {
             this.data.weaponStates.push(weaponStates[i].toObj());
         }
     },
@@ -154,7 +154,7 @@ RoundState.methods({
         }
 
         var upgradeStates = [];
-        for (var i = 0; i < this.data.upgradeStates.length; ++i) {
+        for (let i = 0; i < this.data.upgradeStates.length; ++i) {
             upgradeStates.push(UpgradeState.withObject(this.data.upgradeStates[i]));
         }
 
@@ -167,7 +167,7 @@ RoundState.methods({
         this.cachedUpgradeStates = upgradeStates;
 
         this.data.upgradeStates = [];
-        for (var i = 0; i < upgradeStates.length; ++i) {
+        for (let i = 0; i < upgradeStates.length; ++i) {
             this.data.upgradeStates.push(upgradeStates[i].toObj());
         }
     },
@@ -178,7 +178,7 @@ RoundState.methods({
         }
 
         var counterStates = [];
-        for (var i = 0; i < this.data.counterStates.length; ++i) {
+        for (let i = 0; i < this.data.counterStates.length; ++i) {
             counterStates.push(CounterState.withObject(this.data.counterStates[i]));
         }
 
@@ -191,7 +191,7 @@ RoundState.methods({
         this.cachedCounterStates = counterStates;
 
         this.data.counterStates = [];
-        for (var i = 0; i < counterStates.length; ++i) {
+        for (let i = 0; i < counterStates.length; ++i) {
             this.data.counterStates.push(counterStates[i].toObj());
         }
     },
@@ -202,7 +202,7 @@ RoundState.methods({
         }
 
         var zoneStates = [];
-        for (var i = 0; i < this.data.zoneStates.length; ++i) {
+        for (let i = 0; i < this.data.zoneStates.length; ++i) {
             zoneStates.push(ZoneState.withObject(this.data.zoneStates[i]));
         }
 
@@ -215,7 +215,7 @@ RoundState.methods({
         this.cachedZoneStates = zoneStates;
 
         this.data.zoneStates = [];
-        for (var i = 0; i < zoneStates.length; ++i) {
+        for (let i = 0; i < zoneStates.length; ++i) {
             this.data.zoneStates.push(zoneStates[i].toObj());
         }
     },

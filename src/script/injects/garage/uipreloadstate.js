@@ -1,4 +1,4 @@
-var Garage = Garage || {};
+const Garage = Garage || {};
 
 Garage.UIPreloadState = Classy.newClass();
 
@@ -55,15 +55,15 @@ Garage.UIPreloadState.methods({
         this.load.audio('woosh3', g_url('assets/audio/Woosh3.m4a'));
         
         // Create dynamic assets.
-        var spray = this.game.make.bitmapData(UIConstants.SPRAY_RADIUS * 2, UIConstants.SPRAY_RADIUS * 2);
+        let spray = this.game.make.bitmapData(UIConstants.SPRAY_RADIUS * 2, UIConstants.SPRAY_RADIUS * 2);
         this.game.cache.addBitmapData('spray0', spray);
         spray = this.game.make.bitmapData(UIConstants.SPRAY_RADIUS * 2, UIConstants.SPRAY_RADIUS * 2);
         this.game.cache.addBitmapData('spray1', spray);
-        var welderSmoke = this.game.make.bitmapData(UIConstants.WELDER_SMOKE_RADIUS * 2, UIConstants.WELDER_SMOKE_RADIUS * 2);
+        let welderSmoke = this.game.make.bitmapData(UIConstants.WELDER_SMOKE_RADIUS * 2, UIConstants.WELDER_SMOKE_RADIUS * 2);
         this.game.cache.addBitmapData('weldersmoke0', welderSmoke);
         welderSmoke = this.game.make.bitmapData(UIConstants.WELDER_SMOKE_RADIUS * 2, UIConstants.WELDER_SMOKE_RADIUS * 2);
         this.game.cache.addBitmapData('weldersmoke1', welderSmoke);
-        var welderSpark = this.game.make.bitmapData(UIConstants.WELDER_SPARK_LENGTH, UIConstants.WELDER_SPARK_WIDTH);
+        const welderSpark = this.game.make.bitmapData(UIConstants.WELDER_SPARK_LENGTH, UIConstants.WELDER_SPARK_WIDTH);
         welderSpark.line(0, UIConstants.WELDER_SPARK_WIDTH/2, UIConstants.WELDER_SPARK_LENGTH, UIConstants.WELDER_SPARK_WIDTH/2, "#ffddaa", UIConstants.WELDER_SPARK_WIDTH);
         this.game.cache.addBitmapData('welderspark', welderSpark);
     },

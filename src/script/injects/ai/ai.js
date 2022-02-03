@@ -106,9 +106,9 @@ AI.methods({
     },
 
     _updateState: function(deltaTime) {
-        var self = this;
+        const self = this;
 
-        var tank = this.gameController.getTank(this.aiId);
+        const tank = this.gameController.getTank(this.aiId);
         if (tank == undefined) {
             return;
         }
@@ -116,19 +116,19 @@ AI.methods({
         this.myPosition = {x: Math.floor(tank.getX()/Constants.MAZE_TILE_SIZE.m), y: Math.floor(tank.getY()/Constants.MAZE_TILE_SIZE.m)};
 
         // FIXME Share tankPositions, collectible positions and projectilePositions between AIs.
-        var tanks = this.gameController.getTanks();
+        const tanks = this.gameController.getTanks();
         this.tankPositions = {};
-        for (var tank in tanks) {
+        for (const tank in tanks) {
             this.tankPositions[tank] = {x: Math.floor(tanks[tank].getX()/Constants.MAZE_TILE_SIZE.m), y: Math.floor(tanks[tank].getY()/Constants.MAZE_TILE_SIZE.m)};
         }
 
-        var collectibles = this.gameController.getCollectibles();
+        const collectibles = this.gameController.getCollectibles();
         this.weaponCratePositions = [];
         this.shieldCratePositions = [];
         this.goldPositions = [];
         this.diamondPositions = [];
-        for (var collectible in collectibles) {
-            var position = {x: Math.floor(collectibles[collectible].getX()/Constants.MAZE_TILE_SIZE.m), y: Math.floor(collectibles[collectible].getY()/Constants.MAZE_TILE_SIZE.m)};
+        for (const collectible in collectibles) {
+            const position = {x: Math.floor(collectibles[collectible].getX()/Constants.MAZE_TILE_SIZE.m), y: Math.floor(collectibles[collectible].getY()/Constants.MAZE_TILE_SIZE.m)};
             switch(collectibles[collectible].getType()) {
                 case Constants.COLLECTIBLE_TYPES.CRATE_LASER:
                 case Constants.COLLECTIBLE_TYPES.CRATE_DOUBLE_BARREL:
@@ -156,15 +156,15 @@ AI.methods({
             }
         }
 
-        var projectiles = this.gameController.getProjectiles();
+        let projectiles = this.gameController.getProjectiles();
         this.projectilePositions = {};
         this.projectilePaths = {};
         this.laserAimerPaths = {};
-        for (var projectile in projectiles) {
+        for (const projectile in projectiles) {
             this.projectilePositions[projectile] = {x: Math.floor(projectiles[projectile].getX()/Constants.MAZE_TILE_SIZE.m), y: Math.floor(projectiles[projectile].getY()/Constants.MAZE_TILE_SIZE.m)};
         }
 
-        var maze = this.gameController.getMaze();
+        const maze = this.gameController.getMaze();
         if (maze) {
             if (this.threatMap) {
                 this.threatMap.clear(0);
@@ -174,23 +174,23 @@ AI.methods({
             }
 
             // Add projectiles to threat map.
-            var maxProjectileDistanceToConsider = MathUtils.linearInterpolation(Constants.AI.MIN_PROJECTILE_DISTANCE_TO_CONSIDER, Constants.AI.MAX_PROJECTILE_DISTANCE_TO_CONSIDER, this.config[AI._TRAITS.CLEVERNESS]);
-            var projectileBounces = Math.ceil(MathUtils.linearInterpolation(Constants.AI.MIN_PROJECTILE_BOUNCES, Constants.AI.MAX_PROJECTILE_BOUNCES, this.config[AI._TRAITS.CLEVERNESS]));
-            var projectilePathLength = MathUtils.linearInterpolation(Constants.AI.MIN_PROJECTILE_PATH_LENGTH, Constants.AI.MAX_PROJECTILE_PATH_LENGTH, this.config[AI._TRAITS.CLEVERNESS]);
-            var projectiles = this.gameController.getProjectiles();
-            for (var projectile in projectiles) {
-                var projectileDistance = maze.getDistanceBetweenPositions(this.myPosition, this.projectilePositions[projectile]);
+            const maxProjectileDistanceToConsider = MathUtils.linearInterpolation(Constants.AI.MIN_PROJECTILE_DISTANCE_TO_CONSIDER, Constants.AI.MAX_PROJECTILE_DISTANCE_TO_CONSIDER, this.config[AI._TRAITS.CLEVERNESS]);
+            const projectileBounces = Math.ceil(MathUtils.linearInterpolation(Constants.AI.MIN_PROJECTILE_BOUNCES, Constants.AI.MAX_PROJECTILE_BOUNCES, this.config[AI._TRAITS.CLEVERNESS]));
+            const projectilePathLength = MathUtils.linearInterpolation(Constants.AI.MIN_PROJECTILE_PATH_LENGTH, Constants.AI.MAX_PROJECTILE_PATH_LENGTH, this.config[AI._TRAITS.CLEVERNESS]);
+            projectiles = this.gameController.getProjectiles();
+            for (const projectile in projectiles) {
+                const projectileDistance = maze.getDistanceBetweenPositions(this.myPosition, this.projectilePositions[projectile]);
                 if (projectileDistance !== false && projectileDistance <= maxProjectileDistanceToConsider) {
-                    var pathInfo = B2DUtils.calculateProjectilePath(this.gameController.getB2DWorld(), projectiles[projectile], projectileBounces, Constants.MAZE_TILE_SIZE.m * projectilePathLength, false);
+                    const pathInfo = B2DUtils.calculateProjectilePath(this.gameController.getB2DWorld(), projectiles[projectile], projectileBounces, Constants.MAZE_TILE_SIZE.m * projectilePathLength, false);
                     this.projectilePaths[projectile] = pathInfo.path;
-                    var projectileSpeed = Math.sqrt(projectiles[projectile].getSpeedX() * projectiles[projectile].getSpeedX() + projectiles[projectile].getSpeedY() * projectiles[projectile].getSpeedY());
+                    const projectileSpeed = Math.sqrt(projectiles[projectile].getSpeedX() * projectiles[projectile].getSpeedX() + projectiles[projectile].getSpeedY() * projectiles[projectile].getSpeedY());
                     B2DUtils.splatPathUntoMazeMap(this.threatMap, pathInfo.path, Constants.MAZE_TILE_SIZE.m * Constants.AI.PATH_STEP_SIZE, function (tile, length, stepSize) {
-                        var distance = maze.getDistanceBetweenPositions(tile, self.myPosition);
+                        const distance = maze.getDistanceBetweenPositions(tile, self.myPosition);
                         if (distance === false) {
                             return 0;
                         }
-                        var projectileTimeToHere = length / projectileSpeed;
-                        var tankTimeToHere = distance * Constants.MAZE_TILE_SIZE.m / Constants.TANK.FORWARD_SPEED.m;
+                        const projectileTimeToHere = length / projectileSpeed;
+                        const tankTimeToHere = distance * Constants.MAZE_TILE_SIZE.m / Constants.TANK.FORWARD_SPEED.m;
 
                         return Math.min(1, Math.max(0, 1 - Math.abs(projectileTimeToHere - tankTimeToHere) * Constants.AI.PROJECTILE_THREAT_TIME_FALLOFF)) * Constants.AI.PROJECTILE_THREAT_WEIGHT * stepSize;
                     });
@@ -199,15 +199,15 @@ AI.methods({
             }
 
             // Add tanks to threat map.
-            var maxTankDistanceToConsider = MathUtils.linearInterpolation(Constants.AI.MIN_TANK_THREAT_DISTANCE_TO_CONSIDER, Constants.AI.MAX_TANK_THREAT_DISTANCE_TO_CONSIDER, this.config[AI._TRAITS.CLEVERNESS]);
-            var firingPathBounces = Math.ceil(MathUtils.linearInterpolation(Constants.AI.MIN_FIRING_THREAT_PATH_BOUNCES, Constants.AI.MAX_FIRING_THREAT_PATH_BOUNCES, this.config[AI._TRAITS.CLEVERNESS]));
-            var firingPathLength = MathUtils.linearInterpolation(Constants.AI.MIN_FIRING_THREAT_PATH_LENGTH, Constants.AI.MAX_FIRING_THREAT_PATH_LENGTH, this.config[AI._TRAITS.CLEVERNESS]);
-            for (var tank in tanks) {
+            const maxTankDistanceToConsider = MathUtils.linearInterpolation(Constants.AI.MIN_TANK_THREAT_DISTANCE_TO_CONSIDER, Constants.AI.MAX_TANK_THREAT_DISTANCE_TO_CONSIDER, this.config[AI._TRAITS.CLEVERNESS]);
+            const firingPathBounces = Math.ceil(MathUtils.linearInterpolation(Constants.AI.MIN_FIRING_THREAT_PATH_BOUNCES, Constants.AI.MAX_FIRING_THREAT_PATH_BOUNCES, this.config[AI._TRAITS.CLEVERNESS]));
+            const firingPathLength = MathUtils.linearInterpolation(Constants.AI.MIN_FIRING_THREAT_PATH_LENGTH, Constants.AI.MAX_FIRING_THREAT_PATH_LENGTH, this.config[AI._TRAITS.CLEVERNESS]);
+            for (const tank in tanks) {
                 if (tank !== this.aiId) {
                     // FIXME Do not consider team mates!
-                    var tankDistance = maze.getDistanceBetweenPositions(this.myPosition, this.tankPositions[tank]);
+                    const tankDistance = maze.getDistanceBetweenPositions(this.myPosition, this.tankPositions[tank]);
                     if (tankDistance !== false && tankDistance <= maxTankDistanceToConsider) {
-                        var pathInfo = B2DUtils.calculateFiringPath(this.gameController.getB2DWorld(), tanks[tank], 0, firingPathBounces, Constants.MAZE_TILE_SIZE.m * firingPathLength, false);
+                        const pathInfo = B2DUtils.calculateFiringPath(this.gameController.getB2DWorld(), tanks[tank], 0, firingPathBounces, Constants.MAZE_TILE_SIZE.m * firingPathLength, false);
                         B2DUtils.splatPathUntoMazeMap(this.threatMap, pathInfo.path, Constants.MAZE_TILE_SIZE.m * Constants.AI.PATH_STEP_SIZE, function (tile, length, stepSize) {
                             return (1.0 - length / (Constants.MAZE_TILE_SIZE.m * firingPathLength)) * Constants.AI.FIRING_PATH_THREAT_WEIGHT * stepSize;
                         });
@@ -221,15 +221,15 @@ AI.methods({
 
             // Add upgrades to threat map.
             // FIXME Check when adding upgrade.
-            var upgrades = this.gameController.getUpgrades();
-            for (var upgradeId in upgrades) {
-                var upgrade = upgrades[upgradeId];
+            const upgrades = this.gameController.getUpgrades();
+            for (const upgradeId in upgrades) {
+                const upgrade = upgrades[upgradeId];
                 if (upgrade.getPlayerId() !== this.aiId) {
                     // FIXME Do not consider team mates!
                     switch(upgrade.getType()) {
                         case Constants.UPGRADE_TYPES.LASER_AIMER:
                         {
-                            var pathInfo = B2DUtils.calculateFiringPath(this.gameController.getB2DWorld(), tanks[upgrade.getPlayerId()], 0, Number.MAX_VALUE, upgrade.getField("length"), true);
+                            const pathInfo = B2DUtils.calculateFiringPath(this.gameController.getB2DWorld(), tanks[upgrade.getPlayerId()], 0, Number.MAX_VALUE, upgrade.getField("length"), true);
                             this.laserAimerPaths[upgradeId] = pathInfo.path;
                             B2DUtils.splatPathUntoMazeMap(this.threatMap, pathInfo.path, Constants.MAZE_TILE_SIZE.m * Constants.AI.PATH_STEP_SIZE, function (tile, length, stepSize) {
                                 return Constants.AI.LASER_AIMER_THREAT_WEIGHT * stepSize;
@@ -241,14 +241,14 @@ AI.methods({
 
             // Add zones to threat map.
             // FIXME Check when adding zone.
-            var zones = this.gameController.getZones();
-            for (var zoneId in zones) {
-                var zone = zones[zoneId];
+            const zones = this.gameController.getZones();
+            for (const zoneId in zones) {
+                const zone = zones[zoneId];
                 switch(zone.getType()) {
                     case Constants.ZONE_TYPES.SPAWN:
                     {
-                        var tiles = zone.getTiles();
-                        for(var i = 0; i < tiles.length; ++i) {
+                        const tiles = zone.getTiles();
+                        for(let i = 0; i < tiles.length; ++i) {
                             this.threatMap.add(tiles[i], Constants.AI.SPAWN_ZONE_THREAT_WEIGHT);
                         }
                     }
@@ -263,9 +263,9 @@ AI.methods({
         }
         this.stuckNow = false;
 
-        var aggressivenessGrowth = MathUtils.linearInterpolation(Constants.AI.MIN_AGGRESSIVENESS_GROWTH, Constants.AI.MAX_AGGRESSIVENESS_GROWTH, this.config[AI._TRAITS.AGGRESSIVENESS]);
+        const aggressivenessGrowth = MathUtils.linearInterpolation(Constants.AI.MIN_AGGRESSIVENESS_GROWTH, Constants.AI.MAX_AGGRESSIVENESS_GROWTH, this.config[AI._TRAITS.AGGRESSIVENESS]);
         this.currentAggressiveness = Math.min(this.config[AI._TRAITS.AGGRESSIVENESS], this.currentAggressiveness + aggressivenessGrowth * deltaTime);
-        var greedinessGrowth = MathUtils.linearInterpolation(Constants.AI.MIN_GREEDINESS_GROWTH, Constants.AI.MAX_GREEDINESS_GROWTH, this.config[AI._TRAITS.GREEDINESS]);
+        const greedinessGrowth = MathUtils.linearInterpolation(Constants.AI.MIN_GREEDINESS_GROWTH, Constants.AI.MAX_GREEDINESS_GROWTH, this.config[AI._TRAITS.GREEDINESS]);
         this.currentGreediness = Math.min(this.config[AI._TRAITS.GREEDINESS], this.currentGreediness + greedinessGrowth * deltaTime);
     },
 
@@ -282,19 +282,19 @@ AI.methods({
 
     // Return target info object containing target (string) and priority (float)
     _getPreferredTarget: function(gameMode, tanks) {
-        var target = null;
-        var priority = 0;
+        let target = null;
+        let priority = 0;
 
-        var killsToBeBlindedByRevenge = MathUtils.linearInterpolation(Constants.AI.MAX_KILLS_TO_BE_BLINDED_BY_REVENGE, Constants.AI.MIN_KILLS_TO_BE_BLINDED_BY_REVENGE, this.config[AI._TRAITS.VENGEFULNESS]);
+        const killsToBeBlindedByRevenge = MathUtils.linearInterpolation(Constants.AI.MAX_KILLS_TO_BE_BLINDED_BY_REVENGE, Constants.AI.MIN_KILLS_TO_BE_BLINDED_BY_REVENGE, this.config[AI._TRAITS.VENGEFULNESS]);
 
         // Revenge target: The tank with most kills against us.
-        var revengeTarget = null;
-        var revengePriority = 0;
-        var highestKillCount = 0;
-        for (var tank in tanks) {
-            var killCount = 0;
-            for (var i = 0; i < this.kills.length; ++i) {
-                var kill = this.kills[i];
+        let revengeTarget = null;
+        let revengePriority = 0;
+        let highestKillCount = 0;
+        for (const tank in tanks) {
+            let killCount = 0;
+            for (let i = 0; i < this.kills.length; ++i) {
+                const kill = this.kills[i];
                 if (kill.getKillerPlayerId() == tank && kill.getVictimPlayerId() == this.aiId) {
                     ++killCount;
                 }
@@ -305,7 +305,7 @@ AI.methods({
             }
         }
         if (revengeTarget) {
-            var revengeWeight = Math.min(1.0, highestKillCount / killsToBeBlindedByRevenge);
+            const revengeWeight = Math.min(1.0, highestKillCount / killsToBeBlindedByRevenge);
             revengePriority = MathUtils.linearInterpolation(Constants.AI.MIN_REVENGE_PRIORITY, Constants.AI.MAX_REVENGE_PRIORITY, revengeWeight);
 
             if (revengePriority > priority) {
@@ -315,17 +315,17 @@ AI.methods({
         }
 
         // Win target: The tank that is currently winning.
-        var winTarget = null;
-        var winPriority = 0;
+        let winTarget = null;
+        let winPriority = 0;
         // FIXME Check when adding new game mode.
         switch(gameMode) {
             case Constants.GAME_MODES.DEATHMATCH:
             {
                 // Go for the tank with most points.
                 // FIXME Use mode.getWinnerPlayerIds()?
-                var highestScore = 0;
-                for (var tank in tanks) {
-                    var score = this.gameController.getScoreByPlayerIdAndType(tank, Constants.SCORE_TYPES.KILL);
+                let highestScore = 0;
+                for (const tank in tanks) {
+                    const score = this.gameController.getScoreByPlayerIdAndType(tank, Constants.SCORE_TYPES.KILL);
                     if (score) {
                         if (score.getValue() > highestScore) {
                             winTarget = tank;
@@ -359,75 +359,75 @@ AI.methods({
         // After its period, the goal's priority is decreased.
         this.goal.priority -= MathUtils.linearInterpolation(Constants.AI.MAX_PRIORITY_DECREASE, Constants.AI.MIN_PRIORITY_DECREASE, this.config[AI._TRAITS.DETERMINATION]) * deltaTime;
 
-        var tank = this.gameController.getTank(this.aiId);
+        const tank = this.gameController.getTank(this.aiId);
         if (tank === undefined) {
             return false;
         }
 
-        var maze = this.gameController.getMaze();
+        const maze = this.gameController.getMaze();
         if (maze === undefined) {
             return false;
         }
 
-        var tanks = this.gameController.getTanks();
+        const tanks = this.gameController.getTanks();
 
-        var projectiles = this.gameController.getProjectiles();
+        const projectiles = this.gameController.getProjectiles();
 
-        var upgrades = this.gameController.getUpgrades();
+        const upgrades = this.gameController.getUpgrades();
 
         // Determine new goal.
-        var currentGoal = this.goal;
+        const currentGoal = this.goal;
 
-        var defaultGoalPeriod = MathUtils.linearInterpolation(Constants.AI.MAX_GOAL_PERIOD, Constants.AI.MIN_GOAL_PERIOD, this.config[AI._TRAITS.CLEVERNESS]);
+        const defaultGoalPeriod = MathUtils.linearInterpolation(Constants.AI.MAX_GOAL_PERIOD, Constants.AI.MIN_GOAL_PERIOD, this.config[AI._TRAITS.CLEVERNESS]);
 
-        var preferredTargetInfo = this._getPreferredTarget(this.gameController.getMode(), tanks);
+        const preferredTargetInfo = this._getPreferredTarget(this.gameController.getMode(), tanks);
 
         //---------------------------------------
         // Compute go for collectible priorities.
         //---------------------------------------
-        var maxCrateDistanceToConsider = MathUtils.linearInterpolation(Constants.AI.MIN_CRATE_DISTANCE_TO_CONSIDER, Constants.AI.MAX_CRATE_DISTANCE_TO_CONSIDER, this.config[AI._TRAITS.CLEVERNESS]);
-        var crateDistanceFalloff = MathUtils.linearInterpolation(Constants.AI.MAX_CRATE_DISTANCE_FALLOFF, Constants.AI.MIN_CRATE_DISTANCE_FALLOFF, this.currentGreediness);
-        var cratePriorityOffset = MathUtils.linearInterpolation(Constants.AI.MIN_CRATE_PRIORITY_OFFSET, Constants.AI.MAX_CRATE_PRIORITY_OFFSET, this.config[AI._TRAITS.CLEVERNESS]);
-        var numQueuedWeapons = this.gameController.getQueuedWeapons(this.aiId).length;
+        const maxCrateDistanceToConsider = MathUtils.linearInterpolation(Constants.AI.MIN_CRATE_DISTANCE_TO_CONSIDER, Constants.AI.MAX_CRATE_DISTANCE_TO_CONSIDER, this.config[AI._TRAITS.CLEVERNESS]);
+        const crateDistanceFalloff = MathUtils.linearInterpolation(Constants.AI.MAX_CRATE_DISTANCE_FALLOFF, Constants.AI.MIN_CRATE_DISTANCE_FALLOFF, this.currentGreediness);
+        const cratePriorityOffset = MathUtils.linearInterpolation(Constants.AI.MIN_CRATE_PRIORITY_OFFSET, Constants.AI.MAX_CRATE_PRIORITY_OFFSET, this.config[AI._TRAITS.CLEVERNESS]);
+        const numQueuedWeapons = this.gameController.getQueuedWeapons(this.aiId).length;
         if (numQueuedWeapons < Constants.MAX_WEAPON_QUEUE) {
-            for (var i = 0; i < this.weaponCratePositions.length; ++i) {
-                var crateDistance = maze.getDistanceBetweenPositions(this.myPosition, this.weaponCratePositions[i]);
+            for (let i = 0; i < this.weaponCratePositions.length; ++i) {
+                const crateDistance = maze.getDistanceBetweenPositions(this.myPosition, this.weaponCratePositions[i]);
                 if (crateDistance !== false && crateDistance <= maxCrateDistanceToConsider) {
                     // FIXME Use getShortestPathWithGraph and take the length. Also, make sure to include limit on danger using boldness.
-                    var cratePriority = (Math.max(0.0, 1.0 - crateDistance * crateDistanceFalloff) + cratePriorityOffset) / (1.0 + cratePriorityOffset);
-                    var crateGoal = {type: AI._GOALS.PICK_UP_COLLECTIBLE, priority: cratePriority, id: this.nextGoalId++, period: defaultGoalPeriod, position: this.weaponCratePositions[i]};
+                    const cratePriority = (Math.max(0.0, 1.0 - crateDistance * crateDistanceFalloff) + cratePriorityOffset) / (1.0 + cratePriorityOffset);
+                    const crateGoal = {type: AI._GOALS.PICK_UP_COLLECTIBLE, priority: cratePriority, id: this.nextGoalId++, period: defaultGoalPeriod, position: this.weaponCratePositions[i]};
                     this._updateGoal(crateGoal);
                 }
             }
         }
-        for (var i = 0; i < this.shieldCratePositions.length; ++i) {
-            var crateDistance = maze.getDistanceBetweenPositions(this.myPosition, this.shieldCratePositions[i]);
+        for (let i = 0; i < this.shieldCratePositions.length; ++i) {
+            const crateDistance = maze.getDistanceBetweenPositions(this.myPosition, this.shieldCratePositions[i]);
             if (crateDistance !== false && crateDistance <= maxCrateDistanceToConsider) {
                 // FIXME Use getShortestPathWithGraph and take the length. Also, make sure to include limit on danger using boldness.
-                var cratePriority = (Math.max(0.0, 1.0 - crateDistance * crateDistanceFalloff) + cratePriorityOffset) / (1.0 + cratePriorityOffset);
-                var crateGoal = {type: AI._GOALS.PICK_UP_COLLECTIBLE, priority: cratePriority, id: this.nextGoalId++, period: defaultGoalPeriod, position: this.shieldCratePositions[i]};
+                const cratePriority = (Math.max(0.0, 1.0 - crateDistance * crateDistanceFalloff) + cratePriorityOffset) / (1.0 + cratePriorityOffset);
+                const crateGoal = {type: AI._GOALS.PICK_UP_COLLECTIBLE, priority: cratePriority, id: this.nextGoalId++, period: defaultGoalPeriod, position: this.shieldCratePositions[i]};
                 this._updateGoal(crateGoal);
             }
         }
-        var maxCurrencyDistanceToConsider = MathUtils.linearInterpolation(Constants.AI.MIN_CURRENCY_DISTANCE_TO_CONSIDER, Constants.AI.MAX_CURRENCY_DISTANCE_TO_CONSIDER, this.currentGreediness);
-        var currencyDistanceFalloff = MathUtils.linearInterpolation(Constants.AI.MAX_CURRENCY_DISTANCE_FALLOFF, Constants.AI.MIN_CURRENCY_DISTANCE_FALLOFF, this.currentGreediness);
-        for (var i = 0; i < this.goldPositions.length; ++i) {
-            var goldDistance = maze.getDistanceBetweenPositions(this.myPosition, this.goldPositions[i]);
+        const maxCurrencyDistanceToConsider = MathUtils.linearInterpolation(Constants.AI.MIN_CURRENCY_DISTANCE_TO_CONSIDER, Constants.AI.MAX_CURRENCY_DISTANCE_TO_CONSIDER, this.currentGreediness);
+        const currencyDistanceFalloff = MathUtils.linearInterpolation(Constants.AI.MAX_CURRENCY_DISTANCE_FALLOFF, Constants.AI.MIN_CURRENCY_DISTANCE_FALLOFF, this.currentGreediness);
+        for (let i = 0; i < this.goldPositions.length; ++i) {
+            const goldDistance = maze.getDistanceBetweenPositions(this.myPosition, this.goldPositions[i]);
             if (goldDistance !== false && goldDistance <= maxCurrencyDistanceToConsider) {
                 // FIXME Use getShortestPathWithGraph and take the length. Also, make sure to include limit on danger using boldness.
-                var goldPriorityOffset = MathUtils.linearInterpolation(Constants.AI.MIN_GOLD_PRIORITY_OFFSET, Constants.AI.MAX_GOLD_PRIORITY_OFFSET, this.currentGreediness);
-                var goldPriority = (Math.max(0.0, 1.0 - goldDistance * currencyDistanceFalloff) + goldPriorityOffset) / (1.0 + goldPriorityOffset);
-                var crateGoal = {type: AI._GOALS.PICK_UP_COLLECTIBLE, priority: goldPriority, id: this.nextGoalId++, period: defaultGoalPeriod, position: this.goldPositions[i]};
+                const goldPriorityOffset = MathUtils.linearInterpolation(Constants.AI.MIN_GOLD_PRIORITY_OFFSET, Constants.AI.MAX_GOLD_PRIORITY_OFFSET, this.currentGreediness);
+                const goldPriority = (Math.max(0.0, 1.0 - goldDistance * currencyDistanceFalloff) + goldPriorityOffset) / (1.0 + goldPriorityOffset);
+                const crateGoal = {type: AI._GOALS.PICK_UP_COLLECTIBLE, priority: goldPriority, id: this.nextGoalId++, period: defaultGoalPeriod, position: this.goldPositions[i]};
                 this._updateGoal(crateGoal);
             }
         }
-        for (var i = 0; i < this.diamondPositions.length; ++i) {
-            var diamondDistance = maze.getDistanceBetweenPositions(this.myPosition, this.diamondPositions[i]);
+        for (let i = 0; i < this.diamondPositions.length; ++i) {
+            const diamondDistance = maze.getDistanceBetweenPositions(this.myPosition, this.diamondPositions[i]);
             if (diamondDistance !== false && diamondDistance <= maxCurrencyDistanceToConsider) {
                 // FIXME Use getShortestPathWithGraph and take the length. Also, make sure to include limit on danger using boldness.
-                var diamondPriorityOffset = MathUtils.linearInterpolation(Constants.AI.MIN_DIAMOND_PRIORITY_OFFSET, Constants.AI.MAX_DIAMOND_PRIORITY_OFFSET, this.currentGreediness);
-                var diamondPriority = (Math.max(0.0, 1.0 - diamondDistance * currencyDistanceFalloff) + diamondPriorityOffset) / (1.0 + diamondPriorityOffset);
-                var crateGoal = {type: AI._GOALS.PICK_UP_COLLECTIBLE, priority: diamondPriority, id: this.nextGoalId++, period: defaultGoalPeriod, position: this.diamondPositions[i]};
+                const diamondPriorityOffset = MathUtils.linearInterpolation(Constants.AI.MIN_DIAMOND_PRIORITY_OFFSET, Constants.AI.MAX_DIAMOND_PRIORITY_OFFSET, this.currentGreediness);
+                const diamondPriority = (Math.max(0.0, 1.0 - diamondDistance * currencyDistanceFalloff) + diamondPriorityOffset) / (1.0 + diamondPriorityOffset);
+                const crateGoal = {type: AI._GOALS.PICK_UP_COLLECTIBLE, priority: diamondPriority, id: this.nextGoalId++, period: defaultGoalPeriod, position: this.diamondPositions[i]};
                 this._updateGoal(crateGoal);
             }
         }
@@ -435,22 +435,22 @@ AI.methods({
         //---------------------------------------
         // Compute dodge projectile priorities.
         //---------------------------------------
-        var scaryProjectileDistance = MathUtils.linearInterpolation(Constants.AI.MAX_SCARY_PROJECTILE_DISTANCE, Constants.AI.MIN_SCARY_PROJECTILE_DISTANCE, this.config[AI._TRAITS.BOLDNESS]);
-        var maxDodgeProjectileDistance = MathUtils.linearInterpolation(Constants.AI.MAX_DODGE_PROJECTILE_DISTANCE, Constants.AI.MIN_DODGE_PROJECTILE_DISTANCE, this.config[AI._TRAITS.BOLDNESS]);
-        for(var projectilePath in this.projectilePaths) {
+        const scaryProjectileDistance = MathUtils.linearInterpolation(Constants.AI.MAX_SCARY_PROJECTILE_DISTANCE, Constants.AI.MIN_SCARY_PROJECTILE_DISTANCE, this.config[AI._TRAITS.BOLDNESS]);
+        const maxDodgeProjectileDistance = MathUtils.linearInterpolation(Constants.AI.MAX_DODGE_PROJECTILE_DISTANCE, Constants.AI.MIN_DODGE_PROJECTILE_DISTANCE, this.config[AI._TRAITS.BOLDNESS]);
+        for(const projectilePath in this.projectilePaths) {
             if (AIUtils.checkProtected(this.aiId, this.gameController)) {
                 continue;
             }
-            var dodgeInfo = AIUtils.checkProjectilePathForDodging(tank, this.projectilePaths[projectilePath], projectiles[projectilePath], this.gameController.getB2DWorld(), scaryProjectileDistance * scaryProjectileDistance);
-            var dodgeProjectilePriority = ((maxDodgeProjectileDistance - dodgeInfo.closestDistance) / maxDodgeProjectileDistance + Constants.AI.DODGE_PRIORITY_OFFSET) / (1.0 + Constants.AI.DODGE_PRIORITY_OFFSET);
-            var dodgeGoal = {type: AI._GOALS.DODGE_PROJECTILE, priority: dodgeProjectilePriority, id: this.nextGoalId++, period: defaultGoalPeriod, dodgeInfo: dodgeInfo};
+            const dodgeInfo = AIUtils.checkProjectilePathForDodging(tank, this.projectilePaths[projectilePath], projectiles[projectilePath], this.gameController.getB2DWorld(), scaryProjectileDistance * scaryProjectileDistance);
+            const dodgeProjectilePriority = ((maxDodgeProjectileDistance - dodgeInfo.closestDistance) / maxDodgeProjectileDistance + Constants.AI.DODGE_PRIORITY_OFFSET) / (1.0 + Constants.AI.DODGE_PRIORITY_OFFSET);
+            const dodgeGoal = {type: AI._GOALS.DODGE_PROJECTILE, priority: dodgeProjectilePriority, id: this.nextGoalId++, period: defaultGoalPeriod, dodgeInfo: dodgeInfo};
             this._updateGoal(dodgeGoal);
         }
 
         //---------------------------------------
         // Compute shoot after priority.
         //---------------------------------------
-        var activeWeapon = this.gameController.getActiveWeapon(this.aiId);
+        const activeWeapon = this.gameController.getActiveWeapon(this.aiId);
         if (activeWeapon) {
             // FIXME Check when adding weapon.
             switch(activeWeapon.getType()) {
@@ -489,7 +489,7 @@ AI.methods({
         //---------------------------------------
         if (!AIUtils.checkProtected(this.aiId, this.gameController)) {
             // Check if out of ammo.
-            var defaultWeapon = this.gameController.getDefaultWeapon(this.aiId);
+            const defaultWeapon = this.gameController.getDefaultWeapon(this.aiId);
             if (activeWeapon && defaultWeapon) {
                 if (activeWeapon == defaultWeapon) {
                     // FIXME Check when adding weapon.
@@ -528,17 +528,17 @@ AI.methods({
             }
 
             // Check if in enemy laser aimer path.
-            var laserAimerDistance = MathUtils.linearInterpolation(Constants.AI.MAX_LASER_AIMER_DISTANCE, Constants.AI.MIN_LASER_AIMER_DISTANCE, this.config[AI._TRAITS.BOLDNESS]);
-            for(var laserAimerPath in this.laserAimerPaths) {
-                var dodgeInfo = AIUtils.checkAimerPathForDodging(tank, this.laserAimerPaths[laserAimerPath], upgrades[laserAimerPath], this.gameController.getB2DWorld());
+            const laserAimerDistance = MathUtils.linearInterpolation(Constants.AI.MAX_LASER_AIMER_DISTANCE, Constants.AI.MIN_LASER_AIMER_DISTANCE, this.config[AI._TRAITS.BOLDNESS]);
+            for(const laserAimerPath in this.laserAimerPaths) {
+                const dodgeInfo = AIUtils.checkAimerPathForDodging(tank, this.laserAimerPaths[laserAimerPath], upgrades[laserAimerPath], this.gameController.getB2DWorld());
                 if (dodgeInfo.closestDistance < laserAimerDistance) {
                     this._updateStandardRunAwayGoal(tanks, maze, defaultGoalPeriod);
                 }
             }
 
             // Check if all enemies are protected.
-            var allProtected = true;
-            for (var tank in tanks) {
+            let allProtected = true;
+            for (const tank in tanks) {
                 if (tank !== this.aiId) {
                     // FIXME Do not consider team mates!
                     if (!AIUtils.checkProtected(tank, this.gameController)) {
@@ -555,25 +555,25 @@ AI.methods({
         //---------------------------------------
         // Compute get unstuck priority.
         //---------------------------------------
-        var getUnstuckPriority = Math.min(this.stuckTime / Constants.AI.MAX_STUCK_TIME, 1.0);
+        const getUnstuckPriority = Math.min(this.stuckTime / Constants.AI.MAX_STUCK_TIME, 1.0);
         this._updateGoal({type: AI._GOALS.GET_UNSTUCK, priority: getUnstuckPriority, id: this.nextGoalId++, period: Constants.AI.GET_UNSTUCK_GOAL_PERIOD, normal: this.stuckNormal});
 
         //---------------------------------------
         // Compute hunt priority.
         //---------------------------------------
-        var maxTankDistanceToConsider = MathUtils.linearInterpolation(Constants.AI.MIN_TANK_HUNT_DISTANCE_TO_CONSIDER, Constants.AI.MAX_TANK_HUNT_DISTANCE_TO_CONSIDER, this.config[AI._TRAITS.CLEVERNESS]);
-        for (var tank in tanks) {
+        const maxTankDistanceToConsider = MathUtils.linearInterpolation(Constants.AI.MIN_TANK_HUNT_DISTANCE_TO_CONSIDER, Constants.AI.MAX_TANK_HUNT_DISTANCE_TO_CONSIDER, this.config[AI._TRAITS.CLEVERNESS]);
+        for (const tank in tanks) {
             if (tank !== this.aiId) {
                 // Ignore tanks with a shield.
                 if (AIUtils.checkProtected(tank, this.gameController)) {
                     continue;
                 }
-                var tankDistance = maze.getDistanceBetweenPositions(this.myPosition, this.tankPositions[tank]);
+                const tankDistance = maze.getDistanceBetweenPositions(this.myPosition, this.tankPositions[tank]);
                 if (tankDistance !== false) {
                     // FIXME Use getShortestPathWithGraph and take the length. Also, make sure to include limit on danger using boldness.
-                    var targetPriorityOffset = (tank == preferredTargetInfo.target ? preferredTargetInfo.priority : 0);
-                    var huntPriority = ((maxTankDistanceToConsider - tankDistance) / maxTankDistanceToConsider + targetPriorityOffset) / (1.0 + targetPriorityOffset) * Constants.AI.MAX_HUNT_PRIORITY;
-                    var huntGoal = {type: AI._GOALS.HUNT, priority: huntPriority, id: this.nextGoalId++, period: defaultGoalPeriod, position: this.tankPositions[tank]};
+                    const targetPriorityOffset = (tank == preferredTargetInfo.target ? preferredTargetInfo.priority : 0);
+                    const huntPriority = ((maxTankDistanceToConsider - tankDistance) / maxTankDistanceToConsider + targetPriorityOffset) / (1.0 + targetPriorityOffset) * Constants.AI.MAX_HUNT_PRIORITY;
+                    const huntGoal = {type: AI._GOALS.HUNT, priority: huntPriority, id: this.nextGoalId++, period: defaultGoalPeriod, position: this.tankPositions[tank]};
                     this._updateGoal(huntGoal);
                 }
             }
@@ -600,20 +600,20 @@ AI.methods({
     },
 
     _updateStandardShootAfterGoal: function(tanks, maze, period, weaponType, preferredTargetInfo) {
-        var maxTankDistanceToConsider = MathUtils.linearInterpolation(Constants.AI.MIN_TANK_TARGET_DISTANCE_TO_CONSIDER, Constants.AI.MAX_TANK_TARGET_DISTANCE_TO_CONSIDER, this.config[AI._TRAITS.CLEVERNESS]);
-        var shootAfterPriorityOffset = MathUtils.linearInterpolation(Constants.AI.MIN_SHOOT_AFTER_PRIORITY_OFFSET, Constants.AI.MAX_SHOOT_AFTER_PRIORITY_OFFSET, this.currentAggressiveness);
-        for (var tank in tanks) {
+        const maxTankDistanceToConsider = MathUtils.linearInterpolation(Constants.AI.MIN_TANK_TARGET_DISTANCE_TO_CONSIDER, Constants.AI.MAX_TANK_TARGET_DISTANCE_TO_CONSIDER, this.config[AI._TRAITS.CLEVERNESS]);
+        const shootAfterPriorityOffset = MathUtils.linearInterpolation(Constants.AI.MIN_SHOOT_AFTER_PRIORITY_OFFSET, Constants.AI.MAX_SHOOT_AFTER_PRIORITY_OFFSET, this.currentAggressiveness);
+        for (const tank in tanks) {
             if (tank !== this.aiId) {
                 // FIXME Do not consider team mates!
                 // Ignore tanks with a shield.
                 if (AIUtils.checkProtected(tank, this.gameController)) {
                     continue;
                 }
-                var tankDistance = maze.getDistanceBetweenPositions(this.myPosition, this.tankPositions[tank]);
+                const tankDistance = maze.getDistanceBetweenPositions(this.myPosition, this.tankPositions[tank]);
                 if (tankDistance !== false && tankDistance < maxTankDistanceToConsider) {
-                    var targetPriorityOffset = (tank == preferredTargetInfo.target ? preferredTargetInfo.priority : 0);
-                    var shootAfterPriority = ((maxTankDistanceToConsider - tankDistance) / maxTankDistanceToConsider + shootAfterPriorityOffset + targetPriorityOffset) / (1.0 + shootAfterPriorityOffset + targetPriorityOffset);
-                    var shootAfterGoal = {type: AI._GOALS.SHOOT_AFTER, priority: shootAfterPriority, id: this.nextGoalId++, period: period, target: tank, weaponType: weaponType, preferredTargetInfo: preferredTargetInfo};
+                    const targetPriorityOffset = (tank == preferredTargetInfo.target ? preferredTargetInfo.priority : 0);
+                    const shootAfterPriority = ((maxTankDistanceToConsider - tankDistance) / maxTankDistanceToConsider + shootAfterPriorityOffset + targetPriorityOffset) / (1.0 + shootAfterPriorityOffset + targetPriorityOffset);
+                    const shootAfterGoal = {type: AI._GOALS.SHOOT_AFTER, priority: shootAfterPriority, id: this.nextGoalId++, period: period, target: tank, weaponType: weaponType, preferredTargetInfo: preferredTargetInfo};
                     this._updateGoal(shootAfterGoal);
                 }
             }
@@ -622,12 +622,12 @@ AI.methods({
 
     _updateStandardRunAwayGoal: function(tanks, maze, period) {
         // Combine distances from all tanks.
-        var distances = [];
-        var avgDistance = 0;
-        for (var tank in tanks) {
+        const distances = [];
+        let avgDistance = 0;
+        for (const tank in tanks) {
             if (tank !== this.aiId) {
                 // FIXME Do not consider team mates!
-                var tankDistance = maze.getDistanceBetweenPositions(this.myPosition, this.tankPositions[tank]);
+                const tankDistance = maze.getDistanceBetweenPositions(this.myPosition, this.tankPositions[tank]);
                 if (tankDistance !== false) {
                     distances.push(maze.getDistancesFromPosition(this.tankPositions[tank]));
                     avgDistance += tankDistance;
@@ -636,23 +636,23 @@ AI.methods({
         }
         if (distances.length > 0) {
             avgDistance /= distances.length;
-            var maxDistanceToConsider = MathUtils.linearInterpolation(Constants.AI.MIN_RUN_AWAY_DISTANCE_TO_CONSIDER, Constants.AI.MAX_RUN_AWAY_DISTANCE_TO_CONSIDER, this.config[AI._TRAITS.CLEVERNESS]);
-            var runAwayPriorityOffset = MathUtils.linearInterpolation(Constants.AI.MAX_RUN_AWAY_PRIORITY_OFFSET, Constants.AI.MIN_RUN_AWAY_PRIORITY_OFFSET, this.config[AI._TRAITS.BOLDNESS]);
-            var runAwayPriority = ((maxDistanceToConsider - avgDistance) / maxDistanceToConsider + runAwayPriorityOffset) / (1.0 + runAwayPriorityOffset);
-            var runAwayGoal = {type: AI._GOALS.RUN_AWAY, priority: runAwayPriority, id: this.nextGoalId++, period: period, distances: distances};
+            const maxDistanceToConsider = MathUtils.linearInterpolation(Constants.AI.MIN_RUN_AWAY_DISTANCE_TO_CONSIDER, Constants.AI.MAX_RUN_AWAY_DISTANCE_TO_CONSIDER, this.config[AI._TRAITS.CLEVERNESS]);
+            const runAwayPriorityOffset = MathUtils.linearInterpolation(Constants.AI.MAX_RUN_AWAY_PRIORITY_OFFSET, Constants.AI.MIN_RUN_AWAY_PRIORITY_OFFSET, this.config[AI._TRAITS.BOLDNESS]);
+            const runAwayPriority = ((maxDistanceToConsider - avgDistance) / maxDistanceToConsider + runAwayPriorityOffset) / (1.0 + runAwayPriorityOffset);
+            const runAwayGoal = {type: AI._GOALS.RUN_AWAY, priority: runAwayPriority, id: this.nextGoalId++, period: period, distances: distances};
             this._updateGoal(runAwayGoal);
         }
     },
 
     _tryToRetaliate: function(tank) {
-        var activeWeapon = this.gameController.getActiveWeapon(this.aiId);
-        var tanks = this.gameController.getTanks();
+        const activeWeapon = this.gameController.getActiveWeapon(this.aiId);
+        const tanks = this.gameController.getTanks();
         if (activeWeapon) {
-            var firingPathBounces = Math.ceil(MathUtils.linearInterpolation(Constants.AI.MIN_FIRING_PATH_BOUNCES, Constants.AI.MAX_FIRING_PATH_BOUNCES, this.config[AI._TRAITS.CLEVERNESS]));
-            var firingPathLength = MathUtils.linearInterpolation(Constants.AI.MIN_FIRING_PATH_LENGTH, Constants.AI.MAX_FIRING_PATH_LENGTH, this.config[AI._TRAITS.CLEVERNESS]);
-            var closestDistanceToRetaliate = MathUtils.linearInterpolation(Constants.AI.MIN_DISTANCE_TO_RETALIATE, Constants.AI.MAX_DISTANCE_TO_RETALIATE, this.config[AI._TRAITS.AGGRESSIVENESS]);
-            var reactionDelay = MathUtils.linearInterpolation(Constants.AI.MAX_RETALIATE_DELAY, 0, this.config[AI._TRAITS.DEXTERITY]);
-            var firingInfo = null;
+            const firingPathBounces = Math.ceil(MathUtils.linearInterpolation(Constants.AI.MIN_FIRING_PATH_BOUNCES, Constants.AI.MAX_FIRING_PATH_BOUNCES, this.config[AI._TRAITS.CLEVERNESS]));
+            const firingPathLength = MathUtils.linearInterpolation(Constants.AI.MIN_FIRING_PATH_LENGTH, Constants.AI.MAX_FIRING_PATH_LENGTH, this.config[AI._TRAITS.CLEVERNESS]);
+            const closestDistanceToRetaliate = MathUtils.linearInterpolation(Constants.AI.MIN_DISTANCE_TO_RETALIATE, Constants.AI.MAX_DISTANCE_TO_RETALIATE, this.config[AI._TRAITS.AGGRESSIVENESS]);
+            const reactionDelay = MathUtils.linearInterpolation(Constants.AI.MAX_RETALIATE_DELAY, 0, this.config[AI._TRAITS.DEXTERITY]);
+            let firingInfo = null;
             // FIXME Check when adding weapon.
             switch(activeWeapon.getType()) {
                 case Constants.WEAPON_TYPES.BULLET:
@@ -702,7 +702,7 @@ AI.methods({
     _updateActionsToAchieveGoal: function() {
         this.actions = [];
 
-        var tank = this.gameController.getTank(this.aiId);
+        const tank = this.gameController.getTank(this.aiId);
         if (!tank) {
             return;
         }
@@ -712,39 +712,39 @@ AI.methods({
             {
                 this.currentAggressiveness = Math.max(0, this.currentAggressiveness - Constants.AI.AGGRESSIVENESS_SHOOT_AFTER_SHRINKAGE);
 
-                var target = this.gameController.getTank(this.goal.target);
+                const target = this.gameController.getTank(this.goal.target);
                 if (target) {
-                    var tankPosition = {x: tank.getX(), y: tank.getY()};
-                    var targetPosition = {x: target.getX(), y: target.getY()};
-                    var imprecision = MathUtils.randomAroundZero(MathUtils.linearInterpolation(Constants.AI.MAX_ROTATION_IMPRECISION, 0, this.config[AI._TRAITS.DEXTERITY]));
-                    var reactionDelay = MathUtils.linearInterpolation(Constants.AI.MAX_FIRE_DELAY, 0, this.config[AI._TRAITS.DEXTERITY]);
+                    const tankPosition = {x: tank.getX(), y: tank.getY()};
+                    const targetPosition = {x: target.getX(), y: target.getY()};
+                    const imprecision = MathUtils.randomAroundZero(MathUtils.linearInterpolation(Constants.AI.MAX_ROTATION_IMPRECISION, 0, this.config[AI._TRAITS.DEXTERITY]));
+                    const reactionDelay = MathUtils.linearInterpolation(Constants.AI.MAX_FIRE_DELAY, 0, this.config[AI._TRAITS.DEXTERITY]);
                     // First check if we can make a direct hit.
                     if (!B2DUtils.checkLineForMazeCollision(this.gameController.getB2DWorld(), tankPosition, targetPosition)) {
-                        var direction = {x: targetPosition.x - tankPosition.x, y: targetPosition.y - tankPosition.y};
+                        const direction = {x: targetPosition.x - tankPosition.x, y: targetPosition.y - tankPosition.y};
                         this.actions.push({type: AI._ACTIONS.TURN_TO, direction: direction, imprecision: imprecision});
                         this.actions.push({type: AI._ACTIONS.FIRE, duration: 1, delay: reactionDelay});
                     } else {
                         // Then check a few angles for bounce shots - include all tanks in this search.
-                        var tanks = this.gameController.getTanks();
-                        var firingPathBounces = Math.ceil(MathUtils.linearInterpolation(Constants.AI.MIN_FIRING_PATH_BOUNCES, Constants.AI.MAX_FIRING_PATH_BOUNCES, this.config[AI._TRAITS.CLEVERNESS]));
+                        const tanks = this.gameController.getTanks();
+                        const firingPathBounces = Math.ceil(MathUtils.linearInterpolation(Constants.AI.MIN_FIRING_PATH_BOUNCES, Constants.AI.MAX_FIRING_PATH_BOUNCES, this.config[AI._TRAITS.CLEVERNESS]));
                         // FIXME Possibly modify firingPathLength based on weapon type.
-                        var firingPathLength = MathUtils.linearInterpolation(Constants.AI.MIN_FIRING_PATH_LENGTH, Constants.AI.MAX_FIRING_PATH_LENGTH, this.config[AI._TRAITS.CLEVERNESS]);
-                        var numFiringPathsToCheck = Math.ceil(MathUtils.linearInterpolation(Constants.AI.MIN_NUM_FIRING_PATHS, Constants.AI.MAX_NUM_FIRING_PATHS, this.config[AI._TRAITS.CLEVERNESS]));
+                        const firingPathLength = MathUtils.linearInterpolation(Constants.AI.MIN_FIRING_PATH_LENGTH, Constants.AI.MAX_FIRING_PATH_LENGTH, this.config[AI._TRAITS.CLEVERNESS]);
+                        let numFiringPathsToCheck = Math.ceil(MathUtils.linearInterpolation(Constants.AI.MIN_NUM_FIRING_PATHS, Constants.AI.MAX_NUM_FIRING_PATHS, this.config[AI._TRAITS.CLEVERNESS]));
                         // Always make sure that num firing paths is odd. This ensures that we check the direction we're facing.
                         numFiringPathsToCheck += (numFiringPathsToCheck + 1) % 2;
-                        var firingPathSpread = MathUtils.linearInterpolation(Constants.AI.MIN_FIRING_PATH_SPREAD, Constants.AI.MAX_FIRING_PATH_SPREAD, this.config[AI._TRAITS.AGGRESSIVENESS]);
-                        var minAngle = -firingPathSpread * 0.5;
-                        var angleStep = firingPathSpread / (numFiringPathsToCheck - 1);
-                        var closestDistance = Number.MAX_VALUE;
-                        var shortestLength = Number.MAX_VALUE;
-                        var targetDirection = null;
-                        var preferredClosestDistance = Number.MAX_VALUE;
-                        var preferredShortestLength = Number.MAX_VALUE;
-                        var preferredTargetDirection = null;
-                        for (var i = 0; i < numFiringPathsToCheck; ++i) {
+                        const firingPathSpread = MathUtils.linearInterpolation(Constants.AI.MIN_FIRING_PATH_SPREAD, Constants.AI.MAX_FIRING_PATH_SPREAD, this.config[AI._TRAITS.AGGRESSIVENESS]);
+                        const minAngle = -firingPathSpread * 0.5;
+                        const angleStep = firingPathSpread / (numFiringPathsToCheck - 1);
+                        let closestDistance = Number.MAX_VALUE;
+                        let shortestLength = Number.MAX_VALUE;
+                        let targetDirection = null;
+                        let preferredClosestDistance = Number.MAX_VALUE;
+                        let preferredShortestLength = Number.MAX_VALUE;
+                        let preferredTargetDirection = null;
+                        for (let i = 0; i < numFiringPathsToCheck; ++i) {
                             // Add some random offset to direction.
-                            var angle = minAngle + i * angleStep + MathUtils.randomAroundZero(Constants.AI.FIRING_PATH_RANDOM_OFFSET);;
-                            var firingInfo = AIUtils.checkFiringPath(tank, tanks, this.gameController, angle, firingPathBounces, Constants.MAZE_TILE_SIZE.m * firingPathLength, this.goal.weaponType);
+                            const angle = minAngle + i * angleStep + MathUtils.randomAroundZero(Constants.AI.FIRING_PATH_RANDOM_OFFSET);
+                            const firingInfo = AIUtils.checkFiringPath(tank, tanks, this.gameController, angle, firingPathBounces, Constants.MAZE_TILE_SIZE.m * firingPathLength, this.goal.weaponType);
                             if (firingInfo.result === AIUtils._FIRING_RESULTS.HIT) {
                                 if (firingInfo.pathLength < shortestLength) {
                                     shortestLength = firingInfo.pathLength;
@@ -779,14 +779,14 @@ AI.methods({
                         }
 
                         // Figure out if going for preferred target or not.
-                        var closestPreferredDistanceOffset = MathUtils.linearInterpolation(Constants.AI.MIN_PREFERRED_CLOSEST_DISTANCE_OFFSET, Constants.MAX_PREFERRED_CLOSEST_DISTANCE_OFFSET, this.config[AI._TRAITS.CLEVERNESS]);
+                        const closestPreferredDistanceOffset = MathUtils.linearInterpolation(Constants.AI.MIN_PREFERRED_CLOSEST_DISTANCE_OFFSET, Constants.MAX_PREFERRED_CLOSEST_DISTANCE_OFFSET, this.config[AI._TRAITS.CLEVERNESS]);
                         if (preferredClosestDistance - closestPreferredDistanceOffset <= closestDistance) {
                             closestDistance = preferredClosestDistance;
                             targetDirection = preferredTargetDirection;
                         }
 
                         // FIXME Possibly modify closestDistanceToFire based on weapon type.
-                        var closestDistanceToFire = MathUtils.linearInterpolation(Constants.AI.MIN_DISTANCE_TO_FIRE, Constants.AI.MAX_DISTANCE_TO_FIRE, this.config[AI._TRAITS.AGGRESSIVENESS]);
+                        const closestDistanceToFire = MathUtils.linearInterpolation(Constants.AI.MIN_DISTANCE_TO_FIRE, Constants.AI.MAX_DISTANCE_TO_FIRE, this.config[AI._TRAITS.AGGRESSIVENESS]);
                         if (closestDistance < closestDistanceToFire) {
                             // We found a direct hit or something close enough.
                             this.actions.push({type: AI._ACTIONS.TURN_TO, direction: targetDirection, imprecision: imprecision});
@@ -796,9 +796,9 @@ AI.methods({
                             this.actions.push({type: AI._ACTIONS.TURN_TO, direction: targetDirection, imprecision: imprecision});
                         } else {
                             // We found nothing but suicide or miss shots so try turning around.
-                            var angle = MathUtils.randomSign(MathUtils.randomRange(Constants.AI.MIN_TURN_AROUND_ANGLE, Constants.AI.MAX_TURN_AROUND_ANGLE));
-                            var directionX = Math.sin(tank.getRotation() + angle); // Normally it would be Math.cos(rotation), but the tank graphics is rotated 90 degrees CCW
-                            var directionY = -Math.cos(tank.getRotation() + angle); // Normally it would be Math.sin(rotation), but the tank graphics is rotated 90 degrees CCW
+                            const angle = MathUtils.randomSign(MathUtils.randomRange(Constants.AI.MIN_TURN_AROUND_ANGLE, Constants.AI.MAX_TURN_AROUND_ANGLE));
+                            const directionX = Math.sin(tank.getRotation() + angle); // Normally it would be Math.cos(rotation), but the tank graphics is rotated 90 degrees CCW
+                            const directionY = -Math.cos(tank.getRotation() + angle); // Normally it would be Math.sin(rotation), but the tank graphics is rotated 90 degrees CCW
                             this.actions.push({type: AI._ACTIONS.TURN_TO, direction: {x: directionX, y: directionY}, imprecision: imprecision});
                         }
                     }
@@ -808,29 +808,29 @@ AI.methods({
             }
             case AI._GOALS.DODGE_PROJECTILE:
             {
-                var escapePathLength = Math.ceil(MathUtils.linearInterpolation(Constants.AI.MIN_ESCAPE_PATH_LENGTH, Constants.AI.MAX_ESCAPE_PATH_LENGTH, this.config[AI._TRAITS.CLEVERNESS]));
-                var deadEndWeight = MathUtils.linearInterpolation(Constants.AI.MIN_PATH_DEAD_END_WEIGHT, Constants.AI.MAX_PATH_DEAD_END_WEIGHT, this.config[AI._TRAITS.CLEVERNESS]);
-                var threatWeight = MathUtils.linearInterpolation(Constants.AI.MAX_PATH_THREAT_WEIGHT, Constants.AI.MIN_PATH_THREAT_WEIGHT, this.config[AI._TRAITS.BOLDNESS]);
+                const escapePathLength = Math.ceil(MathUtils.linearInterpolation(Constants.AI.MIN_ESCAPE_PATH_LENGTH, Constants.AI.MAX_ESCAPE_PATH_LENGTH, this.config[AI._TRAITS.CLEVERNESS]));
+                const deadEndWeight = MathUtils.linearInterpolation(Constants.AI.MIN_PATH_DEAD_END_WEIGHT, Constants.AI.MAX_PATH_DEAD_END_WEIGHT, this.config[AI._TRAITS.CLEVERNESS]);
+                const threatWeight = MathUtils.linearInterpolation(Constants.AI.MAX_PATH_THREAT_WEIGHT, Constants.AI.MIN_PATH_THREAT_WEIGHT, this.config[AI._TRAITS.BOLDNESS]);
 
                 if (this.myPosition && this.projectilePositions[this.goal.dodgeInfo.closestId]) {
-                    var maze = this.gameController.getMaze();
-                    var escapePath = maze.getPathAwayFromWithThreats(this.myPosition, this.projectilePositions[this.goal.dodgeInfo.closestId], escapePathLength, deadEndWeight, this.threatMap, threatWeight);
+                    const maze = this.gameController.getMaze();
+                    const escapePath = maze.getPathAwayFromWithThreats(this.myPosition, this.projectilePositions[this.goal.dodgeInfo.closestId], escapePathLength, deadEndWeight, this.threatMap, threatWeight);
                     // If the projectile is really close in time and space, drive to a position next to it and align with the direction.
                     // If there is no escape path, do the same.
                     if ((this.goal.dodgeInfo.closestTime < Constants.AI.TIME_TO_DODGE && this.goal.dodgeInfo.closestDistance < Constants.AI.DISTANCE_TO_DODGE) || escapePath.length == 0) {
                         // Determine position and direction.
-                        var closestDirection = this.goal.dodgeInfo.closestDirection;
-                        var closestPosition = this.goal.dodgeInfo.closestPosition;
-                        var imprecision = MathUtils.randomAroundZero(MathUtils.linearInterpolation(Constants.AI.MAX_ROTATION_IMPRECISION, 0, this.config[AI._TRAITS.DEXTERITY]));
+                        const closestDirection = this.goal.dodgeInfo.closestDirection;
+                        const closestPosition = this.goal.dodgeInfo.closestPosition;
+                        const imprecision = MathUtils.randomAroundZero(MathUtils.linearInterpolation(Constants.AI.MAX_ROTATION_IMPRECISION, 0, this.config[AI._TRAITS.DEXTERITY]));
                         if (this.goal.dodgeInfo.closestDistance < Constants.AI.AMOUNT_TO_DODGE) {
-                            var directionLength = Math.sqrt(closestDirection.x * closestDirection.x + closestDirection.y * closestDirection.y);
-                            var tangent = {x: -closestDirection.y / directionLength * Constants.AI.AMOUNT_TO_DODGE, y: closestDirection.x / directionLength * Constants.AI.AMOUNT_TO_DODGE};
-                            var closestPlusTangent = {x: closestPosition.x + tangent.x, y: closestPosition.y + tangent.y};
-                            var closestMinusTangent = {x: closestPosition.x - tangent.x, y: closestPosition.y - tangent.y};
-                            var distancePlusSquared = (tank.getX() - closestPlusTangent.x) * (tank.getX() - closestPlusTangent.x) + (tank.getY() - closestPlusTangent.y) + (tank.getY() - closestPlusTangent.y);
-                            var distanceMinusSquared = (tank.getX() - closestMinusTangent.x) * (tank.getX() - closestMinusTangent.x) + (tank.getY() - closestMinusTangent.y) + (tank.getY() - closestMinusTangent.y);
+                            const directionLength = Math.sqrt(closestDirection.x * closestDirection.x + closestDirection.y * closestDirection.y);
+                            const tangent = {x: -closestDirection.y / directionLength * Constants.AI.AMOUNT_TO_DODGE, y: closestDirection.x / directionLength * Constants.AI.AMOUNT_TO_DODGE};
+                            const closestPlusTangent = {x: closestPosition.x + tangent.x, y: closestPosition.y + tangent.y};
+                            const closestMinusTangent = {x: closestPosition.x - tangent.x, y: closestPosition.y - tangent.y};
+                            let distancePlusSquared = (tank.getX() - closestPlusTangent.x) * (tank.getX() - closestPlusTangent.x) + (tank.getY() - closestPlusTangent.y) + (tank.getY() - closestPlusTangent.y);
+                            let distanceMinusSquared = (tank.getX() - closestMinusTangent.x) * (tank.getX() - closestMinusTangent.x) + (tank.getY() - closestMinusTangent.y) + (tank.getY() - closestMinusTangent.y);
                             // If tangent-offset position is inside maze wall, do not prioritize it.
-                            var tankPosition = {x: tank.getX(), y: tank.getY()};
+                            const tankPosition = {x: tank.getX(), y: tank.getY()};
                             if (B2DUtils.checkLineForMazeCollision(this.gameController.getB2DWorld(), tankPosition, closestPlusTangent)) {
                                 distancePlusSquared += Constants.AI.AMOUNT_TO_DODGE * Constants.AI.AMOUNT_TO_DODGE;
                             }
@@ -844,7 +844,7 @@ AI.methods({
                             }
                         }
 
-                        var relativeToTank = B2DUtils.directionToLocalSpace(tank.getB2DBody(), closestDirection);
+                        const relativeToTank = B2DUtils.directionToLocalSpace(tank.getB2DBody(), closestDirection);
                         // If projectile is moving in my forward direction, turn towards the same direction as it will be shorter.
                         // Otherwise, turn to its opposite direction, as that will be shorter.
                         if (relativeToTank.y < 0) {
@@ -864,37 +864,37 @@ AI.methods({
             {
                 this.currentGreediness = Math.max(0, this.currentGreediness - Constants.AI.GREEDINESS_PICK_UP_COLLECTIBLE_SHRINKAGE);
 
-                var targetPosition = this.goal.position;
+                const targetPosition = this.goal.position;
 
                 if (this.myPosition && targetPosition) {
-                    var maze = this.gameController.getMaze();
-                    var path = maze.getShortestPathWithGraph(this.myPosition, targetPosition, this.threatMap.data(), 0.1);
+                    const maze = this.gameController.getMaze();
+                    const path = maze.getShortestPathWithGraph(this.myPosition, targetPosition, this.threatMap.data(), 0.1);
                     this.actions = AIUtils.getActionsToFollowPath(path, targetPosition, AI._ACTIONS.DRIVE_TO_TILE, AI._ACTIONS.DRIVE_TO_POSITION, this.config[AI._TRAITS.DEXTERITY]);
                 }
                 break;
             }
             case AI._GOALS.GET_UNSTUCK:
             {
-                var stuckNormal = this.goal.normal;
-                var targetPosition = {
+                const stuckNormal = this.goal.normal;
+                const targetPosition = {
                     x: tank.getX() - stuckNormal.x * Constants.AI.GET_UNSTUCK_DISTANCE,
                     y: tank.getY() - stuckNormal.y * Constants.AI.GET_UNSTUCK_DISTANCE
                 };
-                var imprecision = MathUtils.randomAroundZero(MathUtils.linearInterpolation(Constants.AI.MAX_ROTATION_IMPRECISION, 0, this.config[AI._TRAITS.DEXTERITY]));
+                const imprecision = MathUtils.randomAroundZero(MathUtils.linearInterpolation(Constants.AI.MAX_ROTATION_IMPRECISION, 0, this.config[AI._TRAITS.DEXTERITY]));
                 this.actions.push({type: AI._ACTIONS.DRIVE_TO_POSITION, position: targetPosition, canReverse: true, imprecision: imprecision});
                 break;
             }
             case AI._GOALS.RUN_AWAY:
             {
-                var distances = this.goal.distances;
+                const distances = this.goal.distances;
 
-                var escapePathLength = Math.ceil(MathUtils.linearInterpolation(Constants.AI.MIN_ESCAPE_PATH_LENGTH, Constants.AI.MAX_ESCAPE_PATH_LENGTH, this.config[AI._TRAITS.CLEVERNESS]));
-                var deadEndWeight = MathUtils.linearInterpolation(Constants.AI.MIN_PATH_DEAD_END_WEIGHT, Constants.AI.MAX_PATH_DEAD_END_WEIGHT, this.config[AI._TRAITS.CLEVERNESS]);
-                var threatWeight = MathUtils.linearInterpolation(Constants.AI.MAX_PATH_THREAT_WEIGHT, Constants.AI.MIN_PATH_THREAT_WEIGHT, this.config[AI._TRAITS.BOLDNESS]);
+                const escapePathLength = Math.ceil(MathUtils.linearInterpolation(Constants.AI.MIN_ESCAPE_PATH_LENGTH, Constants.AI.MAX_ESCAPE_PATH_LENGTH, this.config[AI._TRAITS.CLEVERNESS]));
+                const deadEndWeight = MathUtils.linearInterpolation(Constants.AI.MIN_PATH_DEAD_END_WEIGHT, Constants.AI.MAX_PATH_DEAD_END_WEIGHT, this.config[AI._TRAITS.CLEVERNESS]);
+                const threatWeight = MathUtils.linearInterpolation(Constants.AI.MAX_PATH_THREAT_WEIGHT, Constants.AI.MIN_PATH_THREAT_WEIGHT, this.config[AI._TRAITS.BOLDNESS]);
 
-                var maze = this.gameController.getMaze();
+                const maze = this.gameController.getMaze();
                 if (this.myPosition) {
-                    var path = maze.getPathAwayWithMultipleDistancesAndThreats(this.myPosition, escapePathLength, deadEndWeight, distances, this.threatMap, threatWeight);
+                    const path = maze.getPathAwayWithMultipleDistancesAndThreats(this.myPosition, escapePathLength, deadEndWeight, distances, this.threatMap, threatWeight);
                     this.actions = AIUtils.getActionsToFollowPath(path, null, AI._ACTIONS.DRIVE_TO_TILE, AI._ACTIONS.DRIVE_TO_POSITION, this.config[AI._TRAITS.DEXTERITY]);
                 }
                 //Check if it makes sense to fire a shot in the direction we're facing.
@@ -904,11 +904,11 @@ AI.methods({
             }
             case AI._GOALS.HUNT:
             {
-                var targetPosition = this.goal.position;
+                const targetPosition = this.goal.position;
 
                 if (this.myPosition && targetPosition) {
-                    var maze = this.gameController.getMaze();
-                    var path = maze.getShortestPathWithGraph(this.myPosition, targetPosition, this.threatMap.data(), 0.1);
+                    const maze = this.gameController.getMaze();
+                    const path = maze.getShortestPathWithGraph(this.myPosition, targetPosition, this.threatMap.data(), 0.1);
                     this.actions = AIUtils.getActionsToFollowPath(path, targetPosition, AI._ACTIONS.DRIVE_TO_TILE, AI._ACTIONS.DRIVE_TO_POSITION, this.config[AI._TRAITS.DEXTERITY]);
                 }
 
@@ -917,7 +917,7 @@ AI.methods({
             case AI._GOALS.IDLE:
             {
                 // Do something random - including idling.
-                var randomAction = Math.floor(Math.random() * 3);
+                const randomAction = Math.floor(Math.random() * 3);
                 switch(randomAction) {
                     case 0:
                     {
@@ -926,21 +926,21 @@ AI.methods({
                     }
                     case 1:
                     {
-                        var angle = MathUtils.randomRange(0, 2 * Math.PI);
-                        var directionX = Math.sin(angle); // Normally it would be Math.cos(rotation), but the tank graphics is rotated 90 degrees CCW
-                        var directionY = -Math.cos(angle); // Normally it would be Math.sin(rotation), but the tank graphics is rotated 90 degrees CCW
-                        var imprecision = MathUtils.randomAroundZero(MathUtils.linearInterpolation(Constants.AI.MAX_ROTATION_IMPRECISION, 0, this.config[AI._TRAITS.DEXTERITY]));
+                        const angle = MathUtils.randomRange(0, 2 * Math.PI);
+                        const directionX = Math.sin(angle); // Normally it would be Math.cos(rotation), but the tank graphics is rotated 90 degrees CCW
+                        const directionY = -Math.cos(angle); // Normally it would be Math.sin(rotation), but the tank graphics is rotated 90 degrees CCW
+                        const imprecision = MathUtils.randomAroundZero(MathUtils.linearInterpolation(Constants.AI.MAX_ROTATION_IMPRECISION, 0, this.config[AI._TRAITS.DEXTERITY]));
                         this.actions.push({type: AI._ACTIONS.TURN_TO, direction: {x: directionX, y: directionY}, imprecision: imprecision});
                         break;
                     }
                     case 2:
                     {
-                        var maze = this.gameController.getMaze();
-                        var targetPosition = maze.getRandomUnusedPosition(this.gameController.getRoundState(), Constants.AI.MIN_IDLE_DISTANCE);
+                        const maze = this.gameController.getMaze();
+                        const targetPosition = maze.getRandomUnusedPosition(this.gameController.getRoundState(), Constants.AI.MIN_IDLE_DISTANCE);
                         if (this.myPosition && targetPosition) {
                             targetPosition.x = Math.floor(targetPosition.x / Constants.MAZE_TILE_SIZE.m);
                             targetPosition.y = Math.floor(targetPosition.y / Constants.MAZE_TILE_SIZE.m);
-                            var path = maze.getShortestPathWithGraph(this.myPosition, targetPosition, this.threatMap.data(), 0.1);
+                            const path = maze.getShortestPathWithGraph(this.myPosition, targetPosition, this.threatMap.data(), 0.1);
                             this.actions = AIUtils.getActionsToFollowPath(path, targetPosition, AI._ACTIONS.DRIVE_TO_TILE, AI._ACTIONS.DRIVE_TO_POSITION, this.config[AI._TRAITS.DEXTERITY]);
                         }
                         break;
@@ -957,17 +957,17 @@ AI.methods({
             return;
         }
 
-        var tank = this.gameController.getTank(this.aiId);
+        const tank = this.gameController.getTank(this.aiId);
         if (!tank) {
             return;
         }
 
-        var action = this.actions[0];
+        const action = this.actions[0];
 
         switch(action.type) {
             case AI._ACTIONS.DRIVE_TO_TILE:
             {
-                var targetPosition = {
+                const targetPosition = {
                     x: (action.position.x + 0.5) * Constants.MAZE_TILE_SIZE.m,
                     y: (action.position.y + 0.5) * Constants.MAZE_TILE_SIZE.m
                 };
@@ -1005,22 +1005,22 @@ AI.methods({
             return;
         }
 
-        var tank = this.gameController.getTank(this.aiId);
+        const tank = this.gameController.getTank(this.aiId);
         if (!tank) {
             return;
         }
 
-        var action = this.actions[0];
+        const action = this.actions[0];
 
         switch(action.type) {
             case AI._ACTIONS.DRIVE_TO_TILE:
             {
-                var targetPosition = {
+                const targetPosition = {
                     x: (action.position.x + 0.5) * Constants.MAZE_TILE_SIZE.m,
                     y: (action.position.y + 0.5) * Constants.MAZE_TILE_SIZE.m
                 };
 
-                var diffSqr = (tank.getX() - targetPosition.x) * (tank.getX() - targetPosition.x) + (tank.getY() - targetPosition.y) * (tank.getY() - targetPosition.y);
+                const diffSqr = (tank.getX() - targetPosition.x) * (tank.getX() - targetPosition.x) + (tank.getY() - targetPosition.y) * (tank.getY() - targetPosition.y);
                 if (diffSqr < Constants.AI.DRIVE_TO_TILE_DISTANCE_SQUARED) {
                     this.actions.shift();
                 }
@@ -1029,7 +1029,7 @@ AI.methods({
             }
             case AI._ACTIONS.DRIVE_TO_POSITION:
             {
-                var diffSqr = (tank.getX() - action.position.x) * (tank.getX() - action.position.x) + (tank.getY() - action.position.y) * (tank.getY() - action.position.y);
+                const diffSqr = (tank.getX() - action.position.x) * (tank.getX() - action.position.x) + (tank.getY() - action.position.y) * (tank.getY() - action.position.y);
                 if (diffSqr < Constants.AI.DRIVE_TO_POSITION_DISTANCE_SQUARED) {
                     this.actions.shift();
                 }
@@ -1038,7 +1038,7 @@ AI.methods({
             }
             case AI._ACTIONS.TURN_TO:
             {
-                var relativeToTank = B2DUtils.directionToLocalSpace(tank.getB2DBody(), action.direction);
+                const relativeToTank = B2DUtils.directionToLocalSpace(tank.getB2DBody(), action.direction);
                 if (Math.abs(Math.atan2(relativeToTank.y, relativeToTank.x) + Math.PI * 0.5 + action.imprecision) < Constants.AI.TURN_TO_DIFFERENCE)
                 {
                     this.actions.shift();

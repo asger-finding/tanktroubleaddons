@@ -1,4 +1,4 @@
-var Garage = Garage || {};
+const Garage = Garage || {};
 
 Garage.UIMainState = Classy.newClass();
 
@@ -73,11 +73,11 @@ Garage.UIMainState.methods({
 
         // Build a dictionary of boxes.
         this.boxDictionary = {};
-        for (var playerId in this.playerIdToContent) {
+        for (const playerId in this.playerIdToContent) {
             this.boxDictionary[playerId] = {};
-            var content = this.playerIdToContent[playerId];
-            for (var i = 0; i < content.boxes.length; ++i) {
-                var box = content.boxes[i];
+            const content = this.playerIdToContent[playerId];
+            for (let i = 0; i < content.boxes.length; ++i) {
+                const box = content.boxes[i];
                 this.boxDictionary[playerId][box.id] = box;
             }
         }
@@ -101,7 +101,7 @@ Garage.UIMainState.methods({
         // Create tank group to hold all tank icons.
         this.tankIconGroup = this.game.add.group();
 
-        var playerIds = [];
+        let playerIds = [];
         // If a player id was specified, only show that player.
         // Otherwise, show all users.
         if (this.playerId !== null) {
@@ -112,8 +112,8 @@ Garage.UIMainState.methods({
         }
 
         // Add all tank icons.
-        for (var i = 0; i < playerIds.length; ++i) {
-            var tankIconSprite = this.tankIconGroup.add(new UIGarageTankIconImage(this.game, playerIds[i], this._checkTankHit, this));
+        for (let i = 0; i < playerIds.length; ++i) {
+            const tankIconSprite = this.tankIconGroup.add(new UIGarageTankIconImage(this.game, playerIds[i], this._checkTankHit, this));
             this.tankIconSprites[playerIds[i]] = tankIconSprite;
         }
 
@@ -148,7 +148,7 @@ Garage.UIMainState.methods({
         this.sprayCanGroup = this.game.add.group();
 
         // Add pool of spray cans.
-        for (var i = 0; i < UIConstants.SPRAY_CAN_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.SPRAY_CAN_POOL_SIZE; ++i) {
             this.sprayCanGroup.add(new UISprayCanImage(this.game, this._setSprayCanSelection, this._checkSprayCanHit, this.sprayEmitters, this));
         }
 
@@ -163,13 +163,13 @@ Garage.UIMainState.methods({
         this.accessoryGroup = this.game.add.group();
 
         // Add all accessories
-        for (var i = 0; i < playerIds.length; ++i) {
-            var content = this.playerIdToContent[playerIds[i]];
-            for (var j = 0; j < content.boxes.length; ++j) {
-                var box = content.boxes[j];
-                for (var k = 0; k < box.accessories.length; ++k) {
+        for (let i = 0; i < playerIds.length; ++i) {
+            const content = this.playerIdToContent[playerIds[i]];
+            for (let j = 0; j < content.boxes.length; ++j) {
+                const box = content.boxes[j];
+                for (let k = 0; k < box.accessories.length; ++k) {
                     if (!this.accessorySprites[box.accessories[k].type+box.accessories[k].value]) {
-                        var accessorySprite = this.accessoryGroup.add(new UIAccessoryImage(this.game, box.accessories[k].type, box.accessories[k].value, this._setAccessorySelection, this.welderSmokeEmitter, this.welderSparkEmitter, this.accessoryToWelderPoints, this));
+                        const accessorySprite = this.accessoryGroup.add(new UIAccessoryImage(this.game, box.accessories[k].type, box.accessories[k].value, this._setAccessorySelection, this.welderSmokeEmitter, this.welderSparkEmitter, this.accessoryToWelderPoints, this));
                         this.accessorySprites[box.accessories[k].type+box.accessories[k].value] = accessorySprite;
                     }
                 }
@@ -183,14 +183,14 @@ Garage.UIMainState.methods({
         this.boxGroup = this.game.add.group();
 
         // Add all boxes.
-        for (var i = 0; i < playerIds.length; ++i) {
+        for (let i = 0; i < playerIds.length; ++i) {
             this.boxSprites[playerIds[i]] = {};
         }
-        for (var i = 0; i < playerIds.length; ++i) {
-            var content = this.playerIdToContent[playerIds[i]];
-            for (var j = 0; j < content.boxes.length; ++j) {
-                var box = content.boxes[j];
-                var boxSprite = this.boxGroup.add(new UIBoxImage(this.game, box.id, this._setBoxSelection, this));
+        for (let i = 0; i < playerIds.length; ++i) {
+            const content = this.playerIdToContent[playerIds[i]];
+            for (let j = 0; j < content.boxes.length; ++j) {
+                const box = content.boxes[j];
+                const boxSprite = this.boxGroup.add(new UIBoxImage(this.game, box.id, this._setBoxSelection, this));
                 this.boxSprites[playerIds[i]][box.id] = boxSprite;
             }
         }
@@ -218,14 +218,14 @@ Garage.UIMainState.methods({
     },
 
     getAccessoryPosition: function(type, number) {
-        for (var i = 0; i < this.currentAccessorySprites.length; ++i) {
-            var accessorySprite = this.currentAccessorySprites[i];
+        for (let i = 0; i < this.currentAccessorySprites.length; ++i) {
+            const accessorySprite = this.currentAccessorySprites[i];
             if (accessorySprite.getType() == type && accessorySprite.getNumber() == number) {
 
                 if (accessorySprite.alive && !accessorySprite.busy) {
 
-                    var gameBounds = this.game.scale.bounds;
-                    var position = accessorySprite.toGlobal(new Phaser.Point(0, 0));
+                    const gameBounds = this.game.scale.bounds;
+                    const position = accessorySprite.toGlobal(new Phaser.Point(0, 0));
 
                     // Scale from game canvas position to pixel position.
                     Phaser.Point.divide(position, this.game.scale.scaleFactor, position);
@@ -286,7 +286,7 @@ Garage.UIMainState.methods({
                 if (self.playerId === data) {
                     OverlayManager.popOverlay(false, true);
                 } else {
-                    var playerIds = Users.getAllPlayerIds();
+                    const playerIds = Users.getAllPlayerIds();
                     // Check if no players are left.
                     if (playerIds.length == 0) {
                         self.state.start('NoUsers');
@@ -304,7 +304,7 @@ Garage.UIMainState.methods({
     },
 
     _updateTankIcons: function() {
-        var playerIds = [];
+        let playerIds = [];
         // If a player id was specified, only show that player.
         // Otherwise, show all users.
         if (this.playerId !== null) {
@@ -319,12 +319,12 @@ Garage.UIMainState.methods({
         this.currentTankIconSprites = [];
 
         // Spawn tank icons.
-        var tankIconCount = playerIds.length;
-        var visibleTankIconCount = 1;
+        const tankIconCount = playerIds.length;
+        const visibleTankIconCount = 1;
 
-        var tankIconNumber = 0;
-        for (var i = 0; i < tankIconCount; ++i) {
-            var tankIconSprite = this.tankIconSprites[playerIds[i]];
+        let tankIconNumber = 0;
+        for (let i = 0; i < tankIconCount; ++i) {
+            const tankIconSprite = this.tankIconSprites[playerIds[i]];
             if (tankIconNumber < visibleTankIconCount) {
                 tankIconSprite.spawn(
                     UIConstants.TANK_ICON_WIDTH_LARGE * -(visibleTankIconCount - 1) / 2 + UIConstants.TANK_ICON_WIDTH_LARGE * tankIconNumber,
@@ -387,14 +387,14 @@ Garage.UIMainState.methods({
         self.sprayEmitters[1].remove();
 
         // Spawn boxes.
-        var content = self.playerIdToContent[self.selectedPlayerId];
-        var boxCount = content.boxes.length;
+        const content = self.playerIdToContent[self.selectedPlayerId];
+        const boxCount = content.boxes.length;
 
-        var visibleBoxCount = Math.min(boxCount, UIConstants.BOXES_PER_ROW);
+        const visibleBoxCount = Math.min(boxCount, UIConstants.BOXES_PER_ROW);
 
-        var boxNumber = 0;
-        for (var i = 0; i < boxCount; ++i) {
-            var boxSprite = this.boxSprites[self.selectedPlayerId][content.boxes[i].id];
+        let boxNumber = 0;
+        for (let i = 0; i < boxCount; ++i) {
+            const boxSprite = this.boxSprites[self.selectedPlayerId][content.boxes[i].id];
             if (boxNumber < visibleBoxCount) {
                 boxSprite.spawn(
                     UIConstants.GARAGE_BOX_WIDTH * -(visibleBoxCount - 1) / 2 + UIConstants.GARAGE_BOX_WIDTH * boxNumber,
@@ -440,7 +440,7 @@ Garage.UIMainState.methods({
             self.selectedBox = box;
         }
 
-        var boxContent = self.boxDictionary[self.selectedPlayerId][box.getId()];
+        const boxContent = self.boxDictionary[self.selectedPlayerId][box.getId()];
 
         // Remove old spray cans.
         self.sprayCanGroup.callAll('remove');
@@ -448,11 +448,11 @@ Garage.UIMainState.methods({
         self.selectedSprayCan = null;
 
         // Spawn new spray cans.
-        var sprayCanCount = boxContent.sprayCans.length;
+        const sprayCanCount = boxContent.sprayCans.length;
 
-        var sprayCanNumber = 0;
-        for (var i = 0; i < boxContent.sprayCans.length; ++i) {
-            var sprayCanSprite = self.sprayCanGroup.getFirstExists(false);
+        let sprayCanNumber = 0;
+        for (let i = 0; i < boxContent.sprayCans.length; ++i) {
+            const sprayCanSprite = self.sprayCanGroup.getFirstExists(false);
             if (sprayCanSprite) {
                 self.currentSprayCanSprites.push(sprayCanSprite);
                 sprayCanSprite.spawn(
@@ -471,18 +471,18 @@ Garage.UIMainState.methods({
         self.currentAccessorySprites = [];
 
         // Spawn new accessories.
-        var accessoryCount = boxContent.accessories.length;
+        const accessoryCount = boxContent.accessories.length;
 
-        var visibleAccessoryCount = Math.min(accessoryCount, UIConstants.ACCESSORIES_PER_ROW);
+        const visibleAccessoryCount = Math.min(accessoryCount, UIConstants.ACCESSORIES_PER_ROW);
 
-        var accessoryNumber = 0;
-        for (var i = 0; i < accessoryCount; ++i) {
-            var accessorySprite = self.accessorySprites[boxContent.accessories[i].type+boxContent.accessories[i].value];
+        let accessoryNumber = 0;
+        for (let i = 0; i < accessoryCount; ++i) {
+            const accessorySprite = self.accessorySprites[boxContent.accessories[i].type+boxContent.accessories[i].value];
             // FIXME Ensure that load state loads in all non-hidden accessories of the boxes that should be active for this user.
             // FIXME Then remove this check.
             if (accessorySprite) {
                 if (accessoryNumber < visibleAccessoryCount) {
-                    var startPosition = self.accessoryGroup.toLocal(self.boxGroup.toGlobal(self.boxSprites[self.selectedPlayerId][box.getId()].position));
+                    const startPosition = self.accessoryGroup.toLocal(self.boxGroup.toGlobal(self.boxSprites[self.selectedPlayerId][box.getId()].position));
 
                     accessorySprite.spawn(
                         UIConstants.ACCESSORY_WIDTH * -(visibleAccessoryCount - 1) / 2 + UIConstants.ACCESSORY_WIDTH * accessoryNumber,
@@ -524,13 +524,13 @@ Garage.UIMainState.methods({
     },
 
     _checkSprayCanHit: function(sprayCan, position) {
-        var localPosition = this.selectedTankIcon.toLocal(position).divide(this.selectedTankIcon.width, this.selectedTankIcon.height);
+        const localPosition = this.selectedTankIcon.toLocal(position).divide(this.selectedTankIcon.width, this.selectedTankIcon.height);
 
         return this._checkTankHitzones(localPosition, sprayCan);
     },
 
     _checkTankHit: function(sprite, pointer) {
-        var localPosition = this.selectedTankIcon.toLocal(pointer.position).divide(this.selectedTankIcon.width, this.selectedTankIcon.height);
+        const localPosition = this.selectedTankIcon.toLocal(pointer.position).divide(this.selectedTankIcon.width, this.selectedTankIcon.height);
 
         if (this.selectedSprayCan) {
             this._checkTankHitzones(localPosition, this.selectedSprayCan);

@@ -1,7 +1,7 @@
 //FIXME See if this can be ported to Classy.
 UIRubbleFragmentSprite = function(game)
 {
-    var randomRubbleIndex = Math.floor(Math.random() * 3);
+    const randomRubbleIndex = Math.floor(Math.random() * 3);
     
     // Call super.
     Phaser.Sprite.call(this, game, 0, 0, 'game', 'rubble' + randomRubbleIndex);
@@ -56,8 +56,8 @@ UIRubbleFragmentSprite.prototype.update = function()
 UIRubbleFragmentSprite.prototype.spawn = function(x, y, rotation, speed)
 {
     // Determine a direction for the fragment.
-    var speedX = Math.sin(rotation) * speed; // Normally it would be Math.cos(rotation), but the tank graphics is rotated 90 degrees CCW
-    var speedY = -Math.cos(rotation) * speed; // Normally it would be Math.sin(rotation), but the tank graphics is rotated 90 degrees CCW
+    let speedX = Math.sin(rotation) * speed; // Normally it would be Math.cos(rotation), but the tank graphics is rotated 90 degrees CCW
+    let speedY = -Math.cos(rotation) * speed; // Normally it would be Math.sin(rotation), but the tank graphics is rotated 90 degrees CCW
 
     speedX *= -UIConstants.RUBBLE_FRAGMENT_SPEED_SCALE;
     speedY *= -UIConstants.RUBBLE_FRAGMENT_SPEED_SCALE;

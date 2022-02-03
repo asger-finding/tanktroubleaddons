@@ -1,4 +1,4 @@
-var GameManager = Classy.newClass();
+const GameManager = Classy.newClass();
 
 GameManager.classFields({
     goldPickupAudio: null,
@@ -18,7 +18,7 @@ GameManager.classMethods({
     },
 
     removeGameEventListener: function(callback, context) {
-        for (var i=0;i<GameManager.gameEventListeners.length;i++) {
+        for (let i = 0;i<GameManager.gameEventListeners.length;i++) {
             if (GameManager.gameEventListeners[i].cb===callback && GameManager.gameEventListeners[i].ctxt===context) {
                 // Remove single entry from array, and return immediately
                 // as continuing iteration is unsafe, as the underlying array
@@ -34,7 +34,7 @@ GameManager.classMethods({
     },
 
     removeRoundEventListener: function(callback, context) {
-        for (var i=0;i<GameManager.roundEventListeners.length;i++) {
+        for (let i = 0;i<GameManager.roundEventListeners.length;i++) {
             if (GameManager.roundEventListeners[i].cb===callback && GameManager.roundEventListeners[i].ctxt===context) {
                 // Remove single entry from array, and return immediately
                 // as continuing iteration is unsafe, as the underlying array
@@ -69,7 +69,7 @@ GameManager.classMethods({
     insertGame: function(parentElement) {
         parentElement.empty();
         
-        var config = {
+        const config = {
             width: parentElement.width(),
             height: parentElement.height(),
             renderer: Phaser.WEBGL,
@@ -113,7 +113,7 @@ GameManager.classMethods({
     },
 
     disableGameInput: function() {
-        var game = GameManager.getGame();
+        const game = GameManager.getGame();
         if (game && game.input) {
             game.input.enabled = false;
             game.input.reset();
@@ -121,7 +121,7 @@ GameManager.classMethods({
     },
 
     enableGameInput: function() {
-        var game = GameManager.getGame();
+        const game = GameManager.getGame();
         if (game && game.input) {
             game.input.enabled = true;
             game.input.reset();
@@ -154,11 +154,11 @@ GameManager.classMethods({
         }
 
         if (position) {
-            var updateDiv = $("<div class='rankChange'></div>");
+            const updateDiv = $("<div class='rankChange'></div>");
             updateDiv.svg({settings: {width: 80, height: 32}});
-            var updateSvg = updateDiv.svg("get");
+            const updateSvg = updateDiv.svg("get");
 
-            var fillColor = '#ffda00';
+            let fillColor = '#ffda00';
             if (rankChange < 0) {
                 fillColor = '#e00000';
             }
@@ -185,11 +185,11 @@ GameManager.classMethods({
         }
 
         if (position) {
-            var updateDiv = $("<div class='rankChange'></div>");
+            const updateDiv = $("<div class='rankChange'></div>");
             updateDiv.svg({settings: {width: 60, height: 32}});
-            var updateSvg = updateDiv.svg("get");
+            const updateSvg = updateDiv.svg("get");
 
-            var fillColor = '#e600ff';
+            const fillColor = '#e600ff';
 
             updateSvg.text(30, 30, xpChange + "", {textAnchor: 'middle', fontFamily: 'Arial Black', fontWeight: 'normal', fontSize: 30, fill: 'none', stroke: 'black', strokeLineJoin: 'round', strokeWidth: 4});
             updateSvg.text(30, 30, xpChange + "", {textAnchor: 'middle', fontFamily: 'Arial Black', fontWeight: 'normal', fontSize: 30, fill: fillColor, strokeLineJoin: 'round'});
@@ -210,7 +210,7 @@ GameManager.classMethods({
     },
 
     createNewGame: function(ranked, gameMode) {
-        var game = GameManager.getGame();
+        const game = GameManager.getGame();
         if (game && game.state) {
             if (game.state.current == 'Lobby') {
                 game.state.getCurrentState().createNewGame(ranked, gameMode);
@@ -224,18 +224,16 @@ GameManager.classMethods({
             return;
         }
 
-        var targetPosition = UIPlayerPanel.getLocalTankIconPosition(playerId);
+        const targetPosition = UIPlayerPanel.getLocalTankIconPosition(playerId);
 
         if (tankPosition && targetPosition) {
             AudioManager.playSound(GameManager.goldPickupAudio);
         }
 
-        var self = this;
-
-        for (var i=0; i < goldAmount; ++i) {
+        for (let i = 0; i < goldAmount; ++i) {
             if (tankPosition && targetPosition) {
-                var goldIcon = $("<div class='goldIcon'></div>");
-                var goldImage = $("<img class='gold' src='" + g_url("assets/images/game/gold.png") + "' srcset='" + g_url("assets/images/game/gold@2x.png") + " 2x'>");
+                const goldIcon = $("<div class='goldIcon'></div>");
+                const goldImage = $("<img class='gold' src='" + g_url("assets/images/game/gold.png") + "' srcset='" + g_url("assets/images/game/gold@2x.png") + " 2x'>");
 
                 goldIcon.data("done", false);
 
@@ -247,12 +245,12 @@ GameManager.classMethods({
                 goldIcon.append(goldImage);
                 $("body").append(goldIcon);
 
-                var xOffset = 0;
-                var yOffset = 0;
+                let xOffset = 0;
+                let yOffset = 0;
 
                 // Offset gold slightly in a circle.
                 if (goldAmount > 1) {
-                    var angle = 2.0 * Math.PI / goldAmount * i;
+                    const angle = 2.0 * Math.PI / goldAmount * i;
                     xOffset = Math.cos(angle) * 40.0;
                     yOffset = Math.sin(angle) * 40.0;
                 }
@@ -279,11 +277,11 @@ GameManager.classMethods({
     sendGoldToTank: function(pickup, positionAngleScale) {
         AudioManager.playSound(GameManager.goldPickupAudio);
 
-        var targetPosition = UIPlayerPanel.getLocalTankIconPosition(pickup.getPlayerId());
+        const targetPosition = UIPlayerPanel.getLocalTankIconPosition(pickup.getPlayerId());
         if (positionAngleScale && targetPosition) {
 
-            var goldIcon = $("<div class='goldIcon'></div>");
-            var goldImage = $("<img class='gold' src='" + g_url("assets/images/game/gold.png") + "' srcset='" + g_url("assets/images/game/gold@2x.png") + " 2x'>");
+            const goldIcon = $("<div class='goldIcon'></div>");
+            const goldImage = $("<img class='gold' src='" + g_url("assets/images/game/gold.png") + "' srcset='" + g_url("assets/images/game/gold@2x.png") + " 2x'>");
 
             goldIcon.data("done", false);
 
@@ -302,8 +300,6 @@ GameManager.classMethods({
 
             this._spawnGoldSparkle(goldIcon);
 
-            var self = this;
-
             goldIcon
                 .animate({left: targetPosition.x - 18, top: targetPosition.y - 18, scale: 0.5}, {specialEasing: {top: 'easeInBack'}, duration: 800, complete: function() {
                     $(this).remove();
@@ -319,13 +315,13 @@ GameManager.classMethods({
         }
 
         // 17 is half the radius of an unscaled coin.
-        var distance = 17 - Math.random() * 2;
-        var angle = Math.random() * 2.0*Math.PI;
+        const distance = 17 - Math.random() * 2;
+        const angle = Math.random() * 2.0*Math.PI;
 
-        var sparkleX = -20 + 18 + Math.cos(angle) * distance;
-        var sparkleY = -20 + 18 + Math.sin(angle) * distance;
+        const sparkleX = -20 + 18 + Math.cos(angle) * distance;
+        const sparkleY = -20 + 18 + Math.sin(angle) * distance;
 
-        var sparkle = $("<img class='sparkle' src='" + g_url("assets/images/game/sparkle.png") + "' srcset='" + g_url("assets/images/game/sparkle@2x.png") + " 2x'>");
+        const sparkle = $("<img class='sparkle' src='" + g_url("assets/images/game/sparkle.png") + "' srcset='" + g_url("assets/images/game/sparkle@2x.png") + " 2x'>");
         sparkle
             .css({left: sparkleX,
                 top: sparkleY,
@@ -340,7 +336,7 @@ GameManager.classMethods({
                 $(this).remove();
             }});
 
-        var self = this;
+        const self = this;
         setTimeout(function() {
             self._spawnGoldSparkle(goldElement)
         }, UIConstants.GOLD_SPARKLE_MIN_INTERVAL_TIME + Math.random() * (UIConstants.GOLD_SPARKLE_MAX_INTERVAL_TIME - UIConstants.GOLD_SPARKLE_MIN_INTERVAL_TIME));
@@ -350,14 +346,14 @@ GameManager.classMethods({
     sendDiamondToTank: function(pickup, positionAngleScale) {
         AudioManager.playSound(GameManager.goldPickupAudio);
 
-        var targetPosition = UIPlayerPanel.getLocalTankIconPosition(pickup.getPlayerId());
+        const targetPosition = UIPlayerPanel.getLocalTankIconPosition(pickup.getPlayerId());
         if (positionAngleScale && targetPosition) {
 
-            var diamondIcon = $("<div class='diamondIcon'></div>");
-            var diamondImage = $("<img class='diamond' src='" + g_url("assets/images/game/diamond.png") + "' srcset='" + g_url("assets/images/game/diamond@2x.png") + " 2x'>");
-            var diamondGlowImage = $("<img class='glow' src='" + g_url("assets/images/game/diamondGlow.png") + "' srcset='" + g_url("assets/images/game/diamondGlow@2x.png") + " 2x'>");
-            var diamondFirstRayImage = $("<img class='ray' src='" + g_url("assets/images/game/diamondRays.png") + "' srcset='" + g_url("assets/images/game/diamondRays@2x.png") + " 2x'>");
-            var diamondSecondRayImage = $("<img class='ray' src='" + g_url("assets/images/game/diamondRays.png") + "' srcset='" + g_url("assets/images/game/diamondRays@2x.png") + " 2x'>");
+            const diamondIcon = $("<div class='diamondIcon'></div>");
+            const diamondImage = $("<img class='diamond' src='" + g_url("assets/images/game/diamond.png") + "' srcset='" + g_url("assets/images/game/diamond@2x.png") + " 2x'>");
+            const diamondGlowImage = $("<img class='glow' src='" + g_url("assets/images/game/diamondGlow.png") + "' srcset='" + g_url("assets/images/game/diamondGlow@2x.png") + " 2x'>");
+            const diamondFirstRayImage = $("<img class='ray' src='" + g_url("assets/images/game/diamondRays.png") + "' srcset='" + g_url("assets/images/game/diamondRays@2x.png") + " 2x'>");
+            const diamondSecondRayImage = $("<img class='ray' src='" + g_url("assets/images/game/diamondRays.png") + "' srcset='" + g_url("assets/images/game/diamondRays@2x.png") + " 2x'>");
 
             diamondIcon.data("done", false);
 
@@ -379,8 +375,8 @@ GameManager.classMethods({
             $("body").append(diamondIcon);
 
             // Time to rotate 1080 degrees (including conversion from radians to degrees, and from s to ms).
-            var firstRayRotationTime = 1080 / (UIConstants.DIAMOND_FIRST_RAY_ROTATION_SPEED / Math.PI * 180) * 1000;
-            var secondRayRotationTime = 1080 / (UIConstants.DIAMOND_SECOND_RAY_ROTATION_SPEED / Math.PI * 180) * 1000;
+            const firstRayRotationTime = 1080 / (UIConstants.DIAMOND_FIRST_RAY_ROTATION_SPEED / Math.PI * 180) * 1000;
+            const secondRayRotationTime = 1080 / (UIConstants.DIAMOND_SECOND_RAY_ROTATION_SPEED / Math.PI * 180) * 1000;
 
             diamondFirstRayImage.transition({rotate: '+=1080deg'}, firstRayRotationTime, 'linear');
             diamondSecondRayImage.transition({rotate: '+=1080deg'}, secondRayRotationTime, 'linear');
@@ -390,8 +386,6 @@ GameManager.classMethods({
                 .delay(300);
 
             this._spawnDiamondSparkle(diamondIcon);
-
-            var self = this;
 
             diamondIcon
                 .animate({left: targetPosition.x - 10, top: targetPosition.y - 21, scale: 0.5}, {specialEasing: {top: 'easeInBack'}, duration: 800, complete: function() {
@@ -409,14 +403,14 @@ GameManager.classMethods({
         }
 
         // 19 is half the height of an unscaled diamond.
-        var distance = 19 - 2 - Math.random() * 2;
-        var angle = Math.random() * 2.0*Math.PI;
+        const distance = 19 - 2 - Math.random() * 2;
+        const angle = Math.random() * 2.0*Math.PI;
 
         // 20 is half the width of a sparkle.
-        var sparkleX = -20 + 12 + Math.cos(angle) * distance * 0.5;
-        var sparkleY = -20 + 20 + Math.sin(angle) * distance;
+        const sparkleX = -20 + 12 + Math.cos(angle) * distance * 0.5;
+        const sparkleY = -20 + 20 + Math.sin(angle) * distance;
 
-        var sparkle = $("<img class='sparkle' src='" + g_url("assets/images/game/sparkle.png") + "' srcset='" + g_url("assets/images/game/sparkle@2x.png") + " 2x'>");
+        const sparkle = $("<img class='sparkle' src='" + g_url("assets/images/game/sparkle.png") + "' srcset='" + g_url("assets/images/game/sparkle@2x.png") + " 2x'>");
         sparkle
             .css({left: sparkleX,
                 top: sparkleY,
@@ -431,7 +425,7 @@ GameManager.classMethods({
                 $(this).remove();
             }});
 
-        var self = this;
+        const self = this;
         setTimeout(function() {
             self._spawnDiamondSparkle(diamondElement)
         }, UIConstants.DIAMOND_SPARKLE_MIN_INTERVAL_TIME + Math.random() * (UIConstants.DIAMOND_SPARKLE_MAX_INTERVAL_TIME - UIConstants.DIAMOND_SPARKLE_MIN_INTERVAL_TIME));
@@ -478,14 +472,14 @@ GameManager.classMethods({
 
     _gameEventHandler: function(self, id, evt, data) {
         // Forward to game event listeners.
-        for (var i = 0; i < GameManager.gameEventListeners.length; ++i) {
+        for (let i = 0; i < GameManager.gameEventListeners.length; ++i) {
             GameManager.gameEventListeners[i].cb(GameManager.gameEventListeners[i].ctxt, id, evt, data);
         }
     },
 
     _roundEventHandler: function(self, id, evt, data) {
         // Forward to round event listeners.
-        for (var i = 0; i < GameManager.roundEventListeners.length; ++i) {
+        for (let i = 0; i < GameManager.roundEventListeners.length; ++i) {
             GameManager.roundEventListeners[i].cb(GameManager.roundEventListeners[i].ctxt, id, evt, data);
         }
     }

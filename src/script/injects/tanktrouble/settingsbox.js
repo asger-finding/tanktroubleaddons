@@ -1,4 +1,4 @@
-var TankTrouble = TankTrouble || {};
+const TankTrouble = TankTrouble || {};
 
 TankTrouble.SettingsBox = {
     // jQuery objects.
@@ -26,7 +26,7 @@ TankTrouble.SettingsBox = {
         // Create a custom select menu, called 'iconselectmenu', which defines a custom render function.
         $.widget( "custom.iconselectmenu", $.ui.selectmenu, {
             _renderItem: function(ul, item) {
-                var li = $("<li>", { 
+                const li = $("<li>", { 
                     text: item.label 
                 });
 
@@ -53,11 +53,11 @@ TankTrouble.SettingsBox = {
         this.settingsServerForm = $("<form class='spaced'></form>");
         this.settingsServerSelect = $("<select/>");
 
-        var servers = ClientManager.getAvailableServers();
-        var serverIds = Object.keys(servers);
-        for (var i = 0; i < serverIds.length; ++i) {
-            var serverData = servers[serverIds[i]];
-            var option = $("<option disabled value='" + serverIds[i] + "' data-imagesrc='" + g_url("assets/images/game/pingTimeNoConnection.png") + "' data-imagesrcset='" + g_url("assets/images/game/pingTimeNoConnection@2x.png") + " 2x' data-description=' (N/A ms)'>" + serverData.name + "</option>");
+        const servers = ClientManager.getAvailableServers();
+        const serverIds = Object.keys(servers);
+        for (let i = 0; i < serverIds.length; ++i) {
+            const serverData = servers[serverIds[i]];
+            const option = $("<option disabled value='" + serverIds[i] + "' data-imagesrc='" + g_url("assets/images/game/pingTimeNoConnection.png") + "' data-imagesrcset='" + g_url("assets/images/game/pingTimeNoConnection@2x.png") + " 2x' data-description=' (N/A ms)'>" + serverData.name + "</option>");
             
             this.settingsServerOptions.push(option);
         }
@@ -73,13 +73,13 @@ TankTrouble.SettingsBox = {
 
         this.settingsBackground = $("<div class='boxbackground'></div>");
 
-        for (var i = 0; i < this.settingsServerOptions.length; ++i) {
+        for (let i = 0; i < this.settingsServerOptions.length; ++i) {
             this.settingsServerSelect.append(this.settingsServerOptions[i]);
         }
 
         this.settingsServerForm.append(this.settingsServerSelect);
 
-        for (var i = 0; i < this.settingsQualityOptions.length; ++i) {
+        for (let i = 0; i < this.settingsQualityOptions.length; ++i) {
             this.settingsQualitySelect.append(this.settingsQualityOptions[i]);
         }
 
@@ -101,7 +101,7 @@ TankTrouble.SettingsBox = {
         this.settingsBackground.hide();
         this.settings.hide();
     
-        var self = this;
+        const self = this;
 
         this.settingsBackground.click(function(event) {
             if (self.showing) {
@@ -170,7 +170,7 @@ TankTrouble.SettingsBox = {
     },
     
     hide: function() {
-        var self = this;
+        const self = this;
         this.settings.transition({scale: 0, queue: false}, 200, 'easeInQuad', function() {
             self.settings.hide();
             self.settings.css({scale: 1});
@@ -197,7 +197,7 @@ TankTrouble.SettingsBox = {
 
     enableServer: function(serverId, latency) {
         if (this.settingsServerSelect) {
-            var option = this.settingsServerSelect.find("option[value='" + serverId + "']");
+            const option = this.settingsServerSelect.find("option[value='" + serverId + "']");
 
             option.removeAttr("disabled");
             option.attr("data-description", " (" + latency + " ms)");
@@ -218,7 +218,7 @@ TankTrouble.SettingsBox = {
     
     disableServer: function(serverId) {
         if (this.settingsServerSelect) {
-            var option = this.settingsServerSelect.find("option[value='"+serverId+"']");
+            const option = this.settingsServerSelect.find("option[value='"+serverId+"']");
 
             option.attr("disabled", "disabled");
             option.attr("data-description", " Offline");
@@ -235,7 +235,7 @@ TankTrouble.SettingsBox = {
     },
 
     _refreshServerStats: function() {
-        var self = this;
+        const self = this;
         ClientManager.getAvailableServerStats(function(success, serverId, latency, gameCount, playerCount, message) {
             if (success) {
                 // Enable server.
@@ -254,7 +254,7 @@ TankTrouble.SettingsBox = {
     },
 
     _updateFps: function(fps) {
-        var option = this.settingsQualitySelect.find("option[value='auto']");
+        const option = this.settingsQualitySelect.find("option[value='auto']");
         if (fps) {
             option.attr("data-description", " (" + Math.floor(fps) + " fps)");
             if (fps > UIConstants.MINIMUM_GOOD_FPS) {

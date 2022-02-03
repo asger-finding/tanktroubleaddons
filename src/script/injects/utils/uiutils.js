@@ -1,4 +1,4 @@
-var UIUtils = Classy.newClass();
+const UIUtils = Classy.newClass();
 
 UIUtils.classFields({
     wallCollisionGroup: null,
@@ -89,7 +89,7 @@ UIUtils.classMethods({
         this.floorScoreFragmentContactMaterial.restitution = 0.35;
         this.floorScoreFragmentContactMaterial.friction = 1.0;
 
-        var floorBody = new Phaser.Physics.P2.Body(game, null, 0.0, 0.0);
+        const floorBody = new Phaser.Physics.P2.Body(game, null, 0.0, 0.0);
         floorBody.static = true;
         floorBody.addPlane(0.0, UIConstants.SCORE_EXPLOSION_Y, 0.0);
         floorBody.setMaterial(this.playerPanelFloorMaterial);
@@ -144,14 +144,14 @@ UIUtils.classMethods({
     },
     
     easingCubicBezier: function(a, b, c, d) {
-        var result = function(k) {
+        const result = function(k) {
             return a * (1 - k) * (1 - k) * (1 - k) + b * 3 * k * (1 - k) * (1 - k) + c * 3 * k * k * (1 - k) + d * k * k * k;
         };
         return result;
     },
 
     easingSin: function(f, p) {
-        var result = function(k) {
+        const result = function(k) {
             return Math.sin((k + p) * f);
         };
         return result;
@@ -166,12 +166,12 @@ UIUtils.classMethods({
         }
 
         // create a step object
-        var colorBlend = {
+        const colorBlend = {
             step: 0
         };
 
         // create a tween to increment that step from 0 to 100.
-        var colorTween = obj.game.add.tween(colorBlend).to({ step: 100 }, time, easing, delay);
+        const colorTween = obj.game.add.tween(colorBlend).to({ step: 100 }, time, easing, delay);
 
         // add an anonomous function with lexical scope to change the tint, calling Phaser.Colour.interpolateColor
         colorTween.onUpdateCallback(function() {
@@ -193,7 +193,7 @@ UIUtils.classMethods({
     },
 
     getRankLevelFromRank: function(rank) {
-        for (var i = 0; i < UIConstants.RANK_LEVELS.length; ++i) {
+        for (let i = 0; i < UIConstants.RANK_LEVELS.length; ++i) {
             if (rank < UIConstants.RANK_LEVELS[i]) {
                 return i;
             }
@@ -203,7 +203,7 @@ UIUtils.classMethods({
     },
 
     getLevelFromXp: function(xp) {
-        for (var i = 0; i < UIConstants.XP_LEVELS.length; ++i) {
+        for (let i = 0; i < UIConstants.XP_LEVELS.length; ++i) {
             if (xp < UIConstants.XP_LEVELS[i]) {
                 return i;
             }

@@ -1,4 +1,4 @@
-var UIPlayerPanel = Classy.newClass();
+const UIPlayerPanel = Classy.newClass();
 
 UIPlayerPanel.classFields({
     phaserInstance: null,
@@ -10,7 +10,7 @@ UIPlayerPanel.classMethods({
 
         parentElement.empty();
         
-        var config = {
+        const config = {
             width: parentElement.width(),
             height: parentElement.height(),
             renderer: Phaser.WEBGL,
@@ -68,7 +68,7 @@ UIPlayerPanel.classMethods({
     },
     
     getTankIconPosition: function(playerId) {
-        var localPosition = this.getLocalTankIconPosition(playerId);
+        const localPosition = this.getLocalTankIconPosition(playerId);
         if (!localPosition) {
             return this.getOnlineTankIconPosition(playerId);
         }

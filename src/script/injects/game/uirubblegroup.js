@@ -8,7 +8,7 @@ UIRubbleGroup = function(game)
     this.fragmentGroup = this.game.add.group(this);
 
     // Add pool of fragments.
-    for (var i = 0; i < UIConstants.RUBBLE_FRAGMENT_POOL_SIZE; ++i) {
+    for (let i = 0; i < UIConstants.RUBBLE_FRAGMENT_POOL_SIZE; ++i) {
         this.fragmentGroup.add(new UIRubbleFragmentSprite(game));
     }
 
@@ -47,7 +47,7 @@ UIRubbleGroup.prototype.emit = function(tank) {
             this.exists = true;
             this.visible = true;
 
-            var rubbleFragmentSprite = this.fragmentGroup.getFirstExists(false);
+            const rubbleFragmentSprite = this.fragmentGroup.getFirstExists(false);
             if (rubbleFragmentSprite) {
                 rubbleFragmentSprite.spawn(UIUtils.mpx(tank.getX()), UIUtils.mpx(tank.getY()), tank.getRotation(), tank.getSpeed());
             } else {

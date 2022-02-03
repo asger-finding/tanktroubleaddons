@@ -1,4 +1,4 @@
-var UIConstants = Classy.newClass();
+const UIConstants = Classy.newClass();
 
 UIConstants.classFields({
     SCORE_CATEGORIES: {
@@ -920,7 +920,7 @@ UIConstants.classMethods({
         {
             this.SCALED_FOR_HIGH_DENSITY = true;
 
-            var resolutionScale = UIUtils.getLoadedAssetResolutionScale(devicePixelRatio);
+            const resolutionScale = UIUtils.getLoadedAssetResolutionScale(devicePixelRatio);
 
             this.ASSET_SCALE = devicePixelRatio / resolutionScale;
             this.GAME_ASSET_SCALE /= resolutionScale;

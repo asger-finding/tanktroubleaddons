@@ -25,7 +25,7 @@ if (typeof require === 'function') {
     var CollectibleState = require('./collectiblestate');
 }
 
-var RoundController = Classy.newClass();
+const RoundController = Classy.newClass();
 
 RoundController.fields({
     model: null,
@@ -106,7 +106,7 @@ RoundController.methods({
                 switch(data.zone.getType()) {
                     case Constants.ZONE_TYPES.SPAWN:
                     {
-                        var upgradeUpdate = UpgradeUpdate.create(data.shieldA.getId(), data.shieldA.getPlayerId());
+                        const upgradeUpdate = UpgradeUpdate.create(data.shieldA.getId(), data.shieldA.getPlayerId());
                         self.destroyUpgrade(upgradeUpdate);
                         break;
                     }
@@ -136,7 +136,7 @@ RoundController.methods({
             }
             case RoundModel._EVENTS.TANK_COLLECTIBLE_COLLISION:
             {
-                var pickup = Pickup.create(data.tankA.getPlayerId(), data.collectible.getId(), data.collectible.getType());
+                const pickup = Pickup.create(data.tankA.getPlayerId(), data.collectible.getId(), data.collectible.getType());
 
                 // Check that tank has room to pick up crate.
                 if (data.collectible.getType() < Constants.COLLECTIBLE_TYPES.WEAPON_CRATE_COUNT) {
@@ -156,12 +156,12 @@ RoundController.methods({
             }
             case RoundModel._EVENTS.TANK_DEADLY_COLLISION:
             {
-                var killExperience = 0;
+                let killExperience = 0;
                 if (data.tankA.getPlayerId() !== data.projectile.getPlayerId()) {
                     killExperience = self.gameMode.getKillExperience();
                 }
 
-                var kill = Kill.create(data.tankA.getPlayerId(), data.projectile.getPlayerId(), killExperience, data.projectile.getId(), data.projectile.getType());
+                const kill = Kill.create(data.tankA.getPlayerId(), data.projectile.getPlayerId(), killExperience, data.projectile.getId(), data.projectile.getType());
                 self.killTank(kill);
                 self.destroyProjectile(data.projectile.getId());
                 break;
@@ -201,8 +201,8 @@ RoundController.methods({
     // CLIENT ONLY.
     setRoundState: function(roundState) {
         //Iterate over tanks, projectiles, etc., and call setTankState, and setProjectileState etc.
-        var tankStates = roundState.getTankStates();
-        for (var i=0;i<tankStates.length;i++) {
+        const tankStates = roundState.getTankStates();
+        for (let i = 0;i<tankStates.length;i++) {
             // If online client and the player id is my player id, ignore the tank state.
             // Except if the tank is not present (it has spawned). Since, we use websockets we are guaranteed that a round state containing a previously destroyed tank will never show up after the tank destruction message.
             if (Constants.getMode() != Constants.MODE_CLIENT_ONLINE || this.localPlayerIds.indexOf(tankStates[i].getPlayerId()) == -1 || this.model.getTanks()[tankStates[i].getPlayerId()] === undefined) {
@@ -210,33 +210,33 @@ RoundController.methods({
             }
         }
 
-        var projectileStates = roundState.getProjectileStates();
-        for (var i=0;i<projectileStates.length;i++) {
+        const projectileStates = roundState.getProjectileStates();
+        for (let i = 0;i<projectileStates.length;i++) {
             this.setProjectileState(projectileStates[i]);
         }
 
-        var collectibleStates = roundState.getCollectibleStates();
-        for (var i=0;i<collectibleStates.length;i++) {
+        const collectibleStates = roundState.getCollectibleStates();
+        for (let i = 0;i<collectibleStates.length;i++) {
             this.setCollectibleState(collectibleStates[i]);
         }
 
-        var weaponStates = roundState.getWeaponStates();
-        for (var i=0;i<weaponStates.length;i++) {
+        const weaponStates = roundState.getWeaponStates();
+        for (let i = 0;i<weaponStates.length;i++) {
             this.setWeaponState(weaponStates[i]);
         }
 
-        var upgradeStates = roundState.getUpgradeStates();
-        for (var i=0;i<upgradeStates.length;i++) {
+        const upgradeStates = roundState.getUpgradeStates();
+        for (let i = 0;i<upgradeStates.length;i++) {
             this.setUpgradeState(upgradeStates[i]);
         }
 
-        var counterStates = roundState.getCounterStates();
-        for (var i=0;i<counterStates.length;i++) {
+        const counterStates = roundState.getCounterStates();
+        for (let i = 0;i<counterStates.length;i++) {
             this.setCounterState(counterStates[i]);
         }
 
-        var zoneStates = roundState.getZoneStates();
-        for (var i=0;i<zoneStates.length;i++) {
+        const zoneStates = roundState.getZoneStates();
+        for (let i = 0;i<zoneStates.length;i++) {
             this.setZoneState(zoneStates[i]);
         }
 
@@ -245,7 +245,7 @@ RoundController.methods({
 
     getRoundState: function(expandedState) {
         expandedState |= !this.initialRoundStateSent;
-        var roundState = this.model.getRoundState(expandedState);
+        const roundState = this.model.getRoundState(expandedState);
 
         return roundState;
     },
@@ -257,7 +257,7 @@ RoundController.methods({
     
     verifyAndCorrectTankState: function(tankState) {
         // Do some verification of the tank state - only used in server mode.
-        var tank = this.getTank(tankState.getPlayerId());
+        const tank = this.getTank(tankState.getPlayerId());
 
         if (!tank) {
             return false;
@@ -265,7 +265,7 @@ RoundController.methods({
 
         // Keeps tabs of whether or not the state was modified because it was invalid.
         // If it is modified, signal that the client's state should be overwritten by the server's modified state.
-        var stateVerified = true;
+        let stateVerified = true;
 
         if (isNaN(tankState.getX()) || isNaN(tankState.getY())) {
             this.log.error("Received NaN tank position in tank state");
@@ -275,7 +275,7 @@ RoundController.methods({
             stateVerified = false;
         }
 
-        var positionDiff = Box2D.Common.Math.b2Vec2.Make(tank.getX() - tankState.getX(), tank.getY() - tankState.getY());
+        const positionDiff = Box2D.Common.Math.b2Vec2.Make(tank.getX() - tankState.getX(), tank.getY() - tankState.getY());
         if (positionDiff.LengthSquared() > Constants.SERVER.MAX_ACCEPTED_POSITION_DIFF_SQUARED) {
             // Client's position needs to be corrected.
             // FIXME Perhaps set the position to extrapolated version based on client's latency.
@@ -283,7 +283,7 @@ RoundController.methods({
             tankState.setY(tank.getY());
             stateVerified = false;
         }
-        var rotationDiff = tank.getRotation() - tankState.getRotation();
+        const rotationDiff = tank.getRotation() - tankState.getRotation();
         if (Math.abs(rotationDiff) > Constants.SERVER.MAX_ACCEPTED_ROTATION_DIFF) {
             // Client's rotation needs to be corrected.
             // FIXME Perhaps set the rotation to extrapolated version based on client's latency.
@@ -291,7 +291,7 @@ RoundController.methods({
             stateVerified = false;
         }
 
-        var maze = this.getMaze();
+        const maze = this.getMaze();
         if (maze) {
             if (!maze.isTankStateInsideMaze(tankState)) {
                 // Client's position needs to be corrected.
@@ -310,7 +310,7 @@ RoundController.methods({
         if (Constants.getMode() === Constants.MODE_CLIENT_LOCAL || Constants.getMode() === Constants.MODE_SERVER) {
 
             // Check that tank is still alive.
-            var tank = this.getTank(tankState.getPlayerId());
+            const tank = this.getTank(tankState.getPlayerId());
             if (!tank && !initial) {
                 return;
             }
@@ -354,10 +354,10 @@ RoundController.methods({
             return;
         }
         
-        var playerId = inputState.getPlayerId();
-        var tank = this.getTank(playerId);
+        const playerId = inputState.getPlayerId();
+        const tank = this.getTank(playerId);
         if (tank) {
-            var tankState = TankState.withState(
+            const tankState = TankState.withState(
                 playerId,
                 tank.getX(),
                 tank.getY(),
@@ -408,17 +408,17 @@ RoundController.methods({
 
     // CLIENT AND SERVER.
     pullTrigger: function(playerId) {
-        var tank = this.getTank(playerId);
+        const tank = this.getTank(playerId);
         if (tank) {
-            var weapon = this.getActiveWeapon(playerId);
+            const weapon = this.getActiveWeapon(playerId);
             if (weapon) {
                 // Fire correct weapon according to tank's current weapon.
                 if (weapon.fire()) {
                     // Only do game logic if local client or server.
                     if (Constants.getMode() === Constants.MODE_CLIENT_LOCAL || Constants.getMode() === Constants.MODE_SERVER) {
                         // Add the weapon's projectiles.
-                        var projectileStates = weapon.getProjectileStates(tank);
-                        for (var i = 0; i < projectileStates.length; ++i) {
+                        const projectileStates = weapon.getProjectileStates(tank);
+                        for (let i = 0; i < projectileStates.length; ++i) {
                             this.setProjectileState(projectileStates[i]);
                         }
                     }
@@ -429,9 +429,9 @@ RoundController.methods({
     
     // CLIENT AND SERVER.
     releaseTrigger: function(playerId) {
-        var tank = this.getTank(playerId);
+        const tank = this.getTank(playerId);
         if (tank) {
-            var weapon = this.getActiveWeapon(playerId);
+            const weapon = this.getActiveWeapon(playerId);
             if (weapon) {
                 weapon.release();
             }
@@ -513,7 +513,7 @@ RoundController.methods({
 
     // Server or game mode.
     spawnTank: function(playerId, position, respawn) {
-        var tankState = TankState.withState(
+        const tankState = TankState.withState(
             playerId,
             position.x,
             position.y,
@@ -528,8 +528,8 @@ RoundController.methods({
 
         this.setTankState(tankState, true);
 
-        var weaponState = null;
-        var upgradeState = null;
+        let weaponState = null;
+        let upgradeState = null;
         if (respawn) {
             weaponState = this.gameMode.getRespawnWeaponState(tankState.getPlayerId());
             upgradeState = this.gameMode.getRespawnUpgradeState(tankState.getPlayerId());
@@ -548,7 +548,7 @@ RoundController.methods({
     // FIXME Move entirely into game mode?
     // Game mode.
     spawnCrate: function(type, position) {
-        var collectibleState = CollectibleState.withState(
+        const collectibleState = CollectibleState.withState(
             IdGenerator.instance.gen('c'),
             type,
             position.x,
@@ -562,10 +562,10 @@ RoundController.methods({
     // FIXME Move entirely into game mode?
     pickUpCrate: function(pickup) {
         if (this.model.getStarted() || Constants.getMode() == Constants.MODE_CLIENT_ONLINE) {
-            var weaponState = null;
-            var upgradeState = null;
+            let weaponState = null;
+            let upgradeState = null;
 
-            var collectible = this.getCollectible(pickup.getCollectibleId());
+            const collectible = this.getCollectible(pickup.getCollectibleId());
             if (collectible) {
                 switch(collectible.getType()) {
                     case Constants.COLLECTIBLE_TYPES.CRATE_LASER:
@@ -662,10 +662,10 @@ RoundController.methods({
             if (this.model.getTankCount() > 1) {
                 // Check if there are already max number of simultaneous golds in the round.
                 if (this.getCollectibleCount(Constants.COLLECTIBLE_TYPES.GOLD) < Constants.MAX_GOLDS) {
-                    var goldPosition = this.model.getMaze().getRandomUnusedPosition(this.getRoundState(), Constants.GOLD_MINIMUM_TILES_TO_TANKS);
+                    const goldPosition = this.model.getMaze().getRandomUnusedPosition(this.getRoundState(), Constants.GOLD_MINIMUM_TILES_TO_TANKS);
                     if (goldPosition) {
 
-                        var collectibleState = CollectibleState.withState(
+                        const collectibleState = CollectibleState.withState(
                             IdGenerator.instance.gen('g'),
                             Constants.COLLECTIBLE_TYPES.GOLD,
                             goldPosition.x,
@@ -687,10 +687,10 @@ RoundController.methods({
             if (this.model.getTankCount() > 1) {
                 // Check if there are already max number of simultaneous diamonds in the round.
                 if (this.getCollectibleCount(Constants.COLLECTIBLE_TYPES.DIAMOND) < Constants.MAX_DIAMONDS) {
-                    var diamondPosition = this.model.getMaze().getRandomUnusedPosition(this.getRoundState(), Constants.DIAMOND_MINIMUM_TILES_TO_TANKS);
+                    const diamondPosition = this.model.getMaze().getRandomUnusedPosition(this.getRoundState(), Constants.DIAMOND_MINIMUM_TILES_TO_TANKS);
                     if (diamondPosition) {
 
-                        var collectibleState = CollectibleState.withState(
+                        const collectibleState = CollectibleState.withState(
                             IdGenerator.instance.gen('d'),
                             Constants.COLLECTIBLE_TYPES.DIAMOND,
                             diamondPosition.x,
@@ -707,16 +707,16 @@ RoundController.methods({
 
     _updateWeaponLockingAndFiring: function() {
         // Lock movement on both client and server side.
-        var tanks = this.model.getTanks();
-        for (var tank in tanks) {
-            var weapon = this.getActiveWeapon(tanks[tank].getPlayerId());
+        const tanks = this.model.getTanks();
+        for (const tank in tanks) {
+            const weapon = this.getActiveWeapon(tanks[tank].getPlayerId());
             if (weapon) {
                 tanks[tank].setLocked(weapon.movementLocked());
             }
         }
 
         // Pull and release trigger on both client and server side.
-        for (var tank in tanks) {
+        for (const tank in tanks) {
             if (tanks[tank].getFireDown()) {
                 this.pullTrigger(tanks[tank].getPlayerId());
             } else {
@@ -736,42 +736,42 @@ RoundController.methods({
             if (this.model.getStarted() && this.model.getMaze()) {
                 
                 // Time out projectiles.
-                var projectiles = this.model.getProjectiles();
-                for (var projectile in projectiles) {
+                const projectiles = this.model.getProjectiles();
+                for (const projectile in projectiles) {
                     if (projectiles[projectile].done()) {
                         this.model.timeoutProjectile(projectiles[projectile].getId());
                     }                 
                 }
 
                 // Check whether weapons are done
-                var weapons = this.model.getWeapons();
-                for (var weapon in weapons) {
+                const weapons = this.model.getWeapons();
+                for (const weapon in weapons) {
                     if (weapons[weapon].done()) {
-                        var weaponDeactivation = WeaponDeactivation.create(weapons[weapon].getId(), weapons[weapon].getPlayerId());
+                        const weaponDeactivation = WeaponDeactivation.create(weapons[weapon].getId(), weapons[weapon].getPlayerId());
                         this.destroyWeapon(weaponDeactivation);
                     }
                 }
 
                 // Check whether upgrades are done
-                var upgrades = this.model.getUpgrades();
-                for (var upgrade in upgrades) {
+                const upgrades = this.model.getUpgrades();
+                for (const upgrade in upgrades) {
                     if (upgrades[upgrade].done()) {
-                        var upgradeUpdate = UpgradeUpdate.create(upgrades[upgrade].getId(), upgrades[upgrade].getPlayerId());
+                        const upgradeUpdate = UpgradeUpdate.create(upgrades[upgrade].getId(), upgrades[upgrade].getPlayerId());
                         this.destroyUpgrade(upgradeUpdate);
                     }
                 }
 
                 // Check whether counters are done
-                var counters = this.model.getCounters();
-                for (var counter in counters) {
+                const counters = this.model.getCounters();
+                for (const counter in counters) {
                     if (counters[counter].done()) {
                         this.destroyCounter(counters[counter].getId());
                     }
                 }
 
                 // Check whether zones are done
-                var zones = this.model.getZones();
-                for (var zone in zones) {
+                const zones = this.model.getZones();
+                for (const zone in zones) {
                     if (zones[zone].done()) {
                         this.destroyZone(zones[zone].getId());
                     }
@@ -783,19 +783,19 @@ RoundController.methods({
                 // Check whether round has ended
                 if (this.gameMode.isRoundOver()) {
                     // Figure out if anyone won.
-                    var winnerPlayerIds = this.gameMode.getWinnerPlayerIds();
+                    const winnerPlayerIds = this.gameMode.getWinnerPlayerIds();
 
-                    var victoryExperiencePerWinner = 0;
+                    let victoryExperiencePerWinner = 0;
                     if (winnerPlayerIds.length > 0) {
                         victoryExperiencePerWinner = Math.ceil(this.gameMode.getVictoryExperience() / winnerPlayerIds.length);
                     }
 
-                    var victoryGoldAmountPerWinner = 0;
+                    let victoryGoldAmountPerWinner = 0;
                     if (winnerPlayerIds.length > 0) {
                         victoryGoldAmountPerWinner = Math.ceil(this.model.getVictoryGoldAmount() / winnerPlayerIds.length);
                     }
 
-                    var rankChanges = this.model.getRankChanges(winnerPlayerIds);
+                    const rankChanges = this.model.getRankChanges(winnerPlayerIds);
 
                     this.endRound(VictoryAward.create(winnerPlayerIds, victoryExperiencePerWinner, victoryGoldAmountPerWinner, rankChanges));
                 }
@@ -806,8 +806,8 @@ RoundController.methods({
                 this.tankStateEmissionValue += deltaTime;
                 if (this.tankStateEmissionValue >= Constants.CLIENT.TANKSTATE_EMISSION_INTERVAL) {
                     this.tankStateEmissionValue = 0.0;
-                    for (var i = 0; i < this.localPlayerIds.length; ++i) {
-                        var tank = this.getTank(this.localPlayerIds[i]);
+                    for (let i = 0; i < this.localPlayerIds.length; ++i) {
+                        const tank = this.getTank(this.localPlayerIds[i]);
                         if (tank) {
                             this.model.emitTankState(tank.getTankState());
                         }

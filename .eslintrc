@@ -1,0 +1,49 @@
+{
+    "root": true,
+    "parserOptions": {
+		"ecmaVersion": 2022
+	},
+    "env": {
+        "browser": true,
+        "node": true,
+		"es6": true
+    },
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "globals": {
+        "chrome": true,
+        "document": true,
+        "window": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "ignorePatterns": [
+        "**/phaser.js",
+        "**/phaser-nineslice.js"
+    ],
+    "rules": {
+        "@typescript-eslint/no-var-requires": "off",
+        "@typescript-eslint/no-empty-function": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "@typescript-eslint/ban-types": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "no-undef": "off",
+        "no-unused-vars": ["error", { "args": "none" }],
+        "linebreak-style": [
+			"warn",
+			"unix"
+		],
+        "@typescript-eslint/no-this-alias": [
+            "error",
+            {
+              "allowDestructuring": true,
+              "allowedNames": ["self", "client"]
+            }
+          ]
+    }
+}

@@ -91,7 +91,7 @@ UIDimitriSpine.prototype.update = function()
         if (this.idleWiggleDelay < 0) {
             this.idleWiggleDelay = MathUtils.randomRange(UIConstants.DIMITRI.MIN_WIGGLE_DELAY, UIConstants.DIMITRI.MAX_WIGGLE_DELAY);
             this.setAnimationByName(UIConstants.DIMITRI.TRACKS.SCHNURRBART, 'schnurrbart wiggle');
-            for (var i = 1; i < UIConstants.DIMITRI.SCHNURRBART_NUM_WIGGLES; ++i) {
+            for (let i = 1; i < UIConstants.DIMITRI.SCHNURRBART_NUM_WIGGLES; ++i) {
                 this.addAnimationByName(UIConstants.DIMITRI.TRACKS.SCHNURRBART, 'schnurrbart wiggle');
             }
             this.addAnimationByName(UIConstants.DIMITRI.TRACKS.SCHNURRBART, 'schnurrbart breathe', true);
@@ -100,22 +100,22 @@ UIDimitriSpine.prototype.update = function()
         this.idleLegsDelay -= this.game.time.delta / 1000;
         if (this.idleLegsDelay < 0) {
             this.idleLegsDelay = MathUtils.randomRange(UIConstants.DIMITRI.MIN_LEGS_DELAY, UIConstants.DIMITRI.MAX_LEGS_DELAY);
-            var randomValue = Math.random();
+            const randomValue = Math.random();
             if (randomValue <= UIConstants.DIMITRI.HIP_BOUNCE_PROBABILITY) {
                 this.setAnimationByName(UIConstants.DIMITRI.TRACKS.HIP, 'hip bounce');
-                for (var i = 1; i < UIConstants.DIMITRI.HIP_NUM_BOUNCES; ++i) {
+                for (let i = 1; i < UIConstants.DIMITRI.HIP_NUM_BOUNCES; ++i) {
                     this.addAnimationByName(UIConstants.DIMITRI.TRACKS.HIP, 'hip bounce');
                 }
                 this.addAnimationByName(UIConstants.DIMITRI.TRACKS.HIP, 'hip normalise');
             } else if (randomValue - UIConstants.DIMITRI.HIP_BOUNCE_PROBABILITY <= UIConstants.DIMITRI.FOOT_SCRATCH_PROBABILITY) {
                 this.setAnimationByName(UIConstants.DIMITRI.TRACKS.FOOT, 'left foot scratch');
-                for (var i = 1; i < UIConstants.DIMITRI.FOOT_NUM_SCRATCHES; ++i) {
+                for (let i = 1; i < UIConstants.DIMITRI.FOOT_NUM_SCRATCHES; ++i) {
                     this.addAnimationByName(UIConstants.DIMITRI.TRACKS.FOOT, 'left foot scratch');
                 }
                 this.addAnimationByName(UIConstants.DIMITRI.TRACKS.FOOT, 'left foot normalise');
             } else {
                 this.setAnimationByName(UIConstants.DIMITRI.TRACKS.FOOT, 'left foot tap');
-                for (var i = 1; i < UIConstants.DIMITRI.FOOT_NUM_TAPS; ++i) {
+                for (let i = 1; i < UIConstants.DIMITRI.FOOT_NUM_TAPS; ++i) {
                     this.addAnimationByName(UIConstants.DIMITRI.TRACKS.FOOT, 'left foot tap');
                 }
                 this.addAnimationByName(UIConstants.DIMITRI.TRACKS.FOOT, 'left foot normalise');

@@ -1,4 +1,4 @@
-var UITankIconLoader = Classy.newClass().name("UITankIconLoader");
+const UITankIconLoader = Classy.newClass().name("UITankIconLoader");
 
 UITankIconLoader.fields({
     
@@ -39,7 +39,7 @@ UITankIconLoader.methods({
     queueColour: function(tintPart, colour) {
         if (colour.type === 'numeric') {
             // Reformat number to make it edible for canvas operations.
-            var hashColour = colour.numericValue.substr(2);
+            let hashColour = colour.numericValue.substr(2);
             hashColour = "#" + new Array(6 - hashColour.length + 1).join("0") + hashColour;
 
             // Store colour in output colours.
@@ -66,22 +66,22 @@ UITankIconLoader.methods({
     },
     
     _queueImage: function(basePath, part, image, output, customKey) {
-        var key = part;
+        let key = part;
 
         if (customKey !== undefined) {
             key = customKey;
         }
 
         // Check image cache.
-        var cachedImage = UITankIconLoader.imageCache[part + image + "-" + this.size];
+        const cachedImage = UITankIconLoader.imageCache[part + image + "-" + this.size];
         if (cachedImage === undefined) {
             // Make request for image.
-            var imageName = basePath + part + image + "-" + UIConstants.TANK_ICON_RESOLUTIONS[this.size];
-            var src = g_url(imageName + ".png");
-            var srcset = g_url(imageName + "@2x.png") + " 2x";
-            var imageElement = $("<img src='" + src + "' srcset='" + srcset + "' crossorigin='anonymous'/>");
+            const imageName = basePath + part + image + "-" + UIConstants.TANK_ICON_RESOLUTIONS[this.size];
+            const src = g_url(imageName + ".png");
+            const srcset = g_url(imageName + "@2x.png") + " 2x";
+            const imageElement = $("<img src='" + src + "' srcset='" + srcset + "' crossorigin='anonymous'/>");
             
-            var self = this;
+            const self = this;
             imageElement.load(function() {
                 // Store image in output.
                 output[key] = imageElement[0];

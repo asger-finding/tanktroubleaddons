@@ -1,4 +1,4 @@
-var Game = Game || {};
+const Game = Game || {};
 
 Game.UILobbyState = Classy.newClass();
 
@@ -48,10 +48,10 @@ Game.UILobbyState.methods({
         this.gameIconPlaceholderGroup = this.game.add.group();
 
         // Add game icon placeholders.
-        for (var i = 0; i < UIConstants.GAME_ICON_COUNT; ++i) {
-            var x = (i / (UIConstants.GAME_ICON_COUNT - 1)) * (this.game.width - UIConstants.GAME_ICON_MARGIN - UIConstants.GAME_ICON_WIDTH) + UIConstants.GAME_ICON_WIDTH / 2.0 + UIConstants.GAME_ICON_MARGIN/2.0;
+        for (let i = 0; i < UIConstants.GAME_ICON_COUNT; ++i) {
+            const x = (i / (UIConstants.GAME_ICON_COUNT - 1)) * (this.game.width - UIConstants.GAME_ICON_MARGIN - UIConstants.GAME_ICON_WIDTH) + UIConstants.GAME_ICON_WIDTH / 2.0 + UIConstants.GAME_ICON_MARGIN/2.0;
 
-            var iconPlaceholder = this.gameIconPlaceholderGroup.add(this.game.make.sprite(x, UIConstants.GAME_ICON_Y, 'gameiconplaceholder'));
+            const iconPlaceholder = this.gameIconPlaceholderGroup.add(this.game.make.sprite(x, UIConstants.GAME_ICON_Y, 'gameiconplaceholder'));
             iconPlaceholder.anchor.setTo(0.5, 0.5);
             iconPlaceholder.width = UIConstants.GAME_ICON_WIDTH;
             iconPlaceholder.height = UIConstants.GAME_ICON_HEIGHT;
@@ -62,7 +62,7 @@ Game.UILobbyState.methods({
         this.gameIconGroup = this.game.add.group();
 
         // Add pool of game icons
-        for (var i = 0; i < UIConstants.GAME_ICON_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.GAME_ICON_POOL_SIZE; ++i) {
             this.gameIconGroup.add(new UIGameIconImage(this.game));
         }
 
@@ -73,13 +73,13 @@ Game.UILobbyState.methods({
         this.gameButtonGroup = this.game.add.group();
 
         // Add pool of game buttons
-        for (var i = 0; i < UIConstants.GAME_ICON_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.GAME_ICON_POOL_SIZE; ++i) {
             this.gameButtonGroup.add(new UIGameButtonGroup(this.game, this._joinGame, this));
         }
 
         // Allocate placement array.
         this.gameIconPlacementsTaken = [];
-        for (var i = 0; i < UIConstants.GAME_ICON_COUNT; ++i) {
+        for (let i = 0; i < UIConstants.GAME_ICON_COUNT; ++i) {
             this.gameIconPlacementsTaken.push(false);
         }
 
@@ -155,7 +155,7 @@ Game.UILobbyState.methods({
         this.log.debug("SIZE CHANGE!");
 
         // FIXME: Handle when game cannot show more than 2 game icons.
-        var iconCount = UIConstants.GAME_ICON_COUNT;
+        let iconCount = UIConstants.GAME_ICON_COUNT;
         if (this.game.width < UIConstants.GAME_ICON_WIDTH * 3 + UIConstants.GAME_ICON_MARGIN) {
             iconCount--;
         }
@@ -164,9 +164,9 @@ Game.UILobbyState.methods({
         }
 
         // Move game icon placeholders and game icons.
-        for (var i = 0; i < UIConstants.GAME_ICON_COUNT; ++i) {
+        for (let i = 0; i < UIConstants.GAME_ICON_COUNT; ++i) {
             if (i < iconCount) {
-                var x = (i / (iconCount - 1)) * (this.game.width - UIConstants.GAME_ICON_MARGIN - UIConstants.GAME_ICON_WIDTH) + UIConstants.GAME_ICON_WIDTH / 2.0 + UIConstants.GAME_ICON_MARGIN/2.0;
+                const x = (i / (iconCount - 1)) * (this.game.width - UIConstants.GAME_ICON_MARGIN - UIConstants.GAME_ICON_WIDTH) + UIConstants.GAME_ICON_WIDTH / 2.0 + UIConstants.GAME_ICON_MARGIN/2.0;
 
                 this.gameIconPlaceholderGroup.getAt(i).x = x;
                 this.gameIconPlaceholderGroup.getAt(i).visible = true;
@@ -175,10 +175,10 @@ Game.UILobbyState.methods({
             }
 
         }
-        for (var gameIconSpriteId in this.gameIcons) {
-            var placement = this.gameIcons[gameIconSpriteId].placement;
+        for (const gameIconSpriteId in this.gameIcons) {
+            const placement = this.gameIcons[gameIconSpriteId].placement;
             if (placement < iconCount) {
-                var x = (placement / (iconCount - 1)) * (this.game.width - UIConstants.GAME_ICON_MARGIN - UIConstants.GAME_ICON_WIDTH) + UIConstants.GAME_ICON_WIDTH / 2.0 + UIConstants.GAME_ICON_MARGIN/2.0;
+                const x = (placement / (iconCount - 1)) * (this.game.width - UIConstants.GAME_ICON_MARGIN - UIConstants.GAME_ICON_WIDTH) + UIConstants.GAME_ICON_WIDTH / 2.0 + UIConstants.GAME_ICON_MARGIN/2.0;
 
                 this.gameIcons[gameIconSpriteId].icon.x = x;
                 this.gameIcons[gameIconSpriteId].button.x = x;
@@ -240,17 +240,17 @@ Game.UILobbyState.methods({
         // Start a local battle.
         Constants.setMode(Constants.MODE_CLIENT_LOCAL);
 
-        var ttGame = GameController.create(BootCampGameMode.create(), Constants.MAZE_THEMES.RANDOM);
+        const ttGame = GameController.create(BootCampGameMode.create(), Constants.MAZE_THEMES.RANDOM);
 
-        var playerIds = Users.getAllPlayerIds();
-        for (var i = 0; i < playerIds.length; ++i) {
+        const playerIds = Users.getAllPlayerIds();
+        for (let i = 0; i < playerIds.length; ++i) {
             ttGame.addPlayer(playerIds[i]);
         }
 
         // Add an AI if only one local player.
         if (playerIds.length <= 1) {
             if (AIs.isReady()) {
-                var aiId = AIs.getAvailableAIId(ttGame.getId());
+                const aiId = AIs.getAvailableAIId(ttGame.getId());
                 if (aiId) {
                     AIs.addAIManager(ttGame, aiId);
                     ttGame.addPlayer(aiId);
@@ -335,14 +335,14 @@ Game.UILobbyState.methods({
         this.randomGameButton.spawn();
         this.createGameButton.spawn();
         this.gameIcons = {};
-        for (var i = 0; i < UIConstants.GAME_ICON_COUNT; ++i) {
+        for (let i = 0; i < UIConstants.GAME_ICON_COUNT; ++i) {
             this.gameIconPlacementsTaken[i] = false;
         }
     },
 
     _compareGameStates: function(gameStateA, gameStateB) {
-        var statsA = this._countFavouritesActiveAndQueuedInGame(gameStateA);
-        var statsB = this._countFavouritesActiveAndQueuedInGame(gameStateB);
+        const statsA = this._countFavouritesActiveAndQueuedInGame(gameStateA);
+        const statsB = this._countFavouritesActiveAndQueuedInGame(gameStateB);
         // First compare number of favourites.
         if (statsA[0] != statsB[0]) {
             return statsB[0] - statsA[0];
@@ -363,19 +363,19 @@ Game.UILobbyState.methods({
     },
 
     _countFavouritesActiveAndQueuedInGame: function(gameState) {
-        var favouritePlayerCount = 0;
-        var activePlayerCount = 0;
-        var queuedPlayerCount = 0;
-        var playerStates = gameState.getPlayerStates();
-        for (var i = 0; i < playerStates.length; i++) {
-            var playerId = playerStates[i].getPlayerId();
-            for (var j = 0; j < this.favouritePlayerIds.length; j++) {
-                var favouritePlayerId = this.favouritePlayerIds[j];
+        let favouritePlayerCount = 0;
+        let activePlayerCount = 0;
+        let queuedPlayerCount = 0;
+        const playerStates = gameState.getPlayerStates();
+        for (let i = 0; i < playerStates.length; i++) {
+            const playerId = playerStates[i].getPlayerId();
+            for (let j = 0; j < this.favouritePlayerIds.length; j++) {
+                const favouritePlayerId = this.favouritePlayerIds[j];
                 if (playerId==favouritePlayerId) {
                     ++favouritePlayerCount;
                 }
             }
-            var playerQueued = playerStates[i].getQueued();
+            const playerQueued = playerStates[i].getQueued();
             if (playerQueued) {
                 ++queuedPlayerCount;
             } else {
@@ -415,7 +415,7 @@ Game.UILobbyState.methods({
             this.localGameButton.enable();
         }
 
-        for(var gameIconId in this.gameIcons) {
+        for(const gameIconId in this.gameIcons) {
             if (this.joiningGame) {
                 this.gameIcons[gameIconId].button.disable();
             } else {
@@ -429,12 +429,12 @@ Game.UILobbyState.methods({
         switch(evt) {
             case TTClient.EVENTS.GAME_LIST_CHANGED:
             {
-                var gameStates = ClientManager.getClient().getAvailableGameStates();
-                var numGames = gameStates.length;
+                const gameStates = ClientManager.getClient().getAvailableGameStates();
+                const numGames = gameStates.length;
 
                 self.allGamesActive = numGames === Constants.SERVER.MAX_GAME_COUNT;
                 self.allGamesFull = true;
-                for (var i = 0; i < numGames; ++i) {
+                for (let i = 0; i < numGames; ++i) {
                     if (gameStates[i].getPlayerStates().length < Constants.GAME.MAX_ACTIVE_PLAYERS + Constants.GAME.MAX_QUEUED_PLAYERS) {
                         self.allGamesFull = false;
                         break;
@@ -444,12 +444,12 @@ Game.UILobbyState.methods({
                 self._updateGameButtons();
 
                 // Get all favourites.
-                var playerIds = Users.getAllPlayerIds();
-                var numFavouritesResponses = 0;
-                var numExpectedFavouritesResponses = playerIds.length;
+                const playerIds = Users.getAllPlayerIds();
+                let numFavouritesResponses = 0;
+                let numExpectedFavouritesResponses = playerIds.length;
                 self.favouritePlayerIds = [];
 
-                for (var i = 0; i < playerIds.length; ++i) {
+                for (let i = 0; i < playerIds.length; ++i) {
                     Backend.getInstance().getFavourites(
                         function(result) {
                             if (Array.isArray(result)) {
@@ -464,7 +464,7 @@ Game.UILobbyState.methods({
                             ++numFavouritesResponses;
                             // If we have them all, build up list of games we want to show.
                             if (numFavouritesResponses == numExpectedFavouritesResponses) {
-                                var gameStates = ClientManager.getClient().getAvailableGameStates().sort(
+                                const gameStates = ClientManager.getClient().getAvailableGameStates().sort(
                                     // Create anonymous function to get correct context.
                                     function(a, b) {
                                         return self._compareGameStates(a, b);
@@ -472,9 +472,9 @@ Game.UILobbyState.methods({
                                 );
 
                                 // Remove icons that should no longer show.
-                                for (var gameIconSpriteId in self.gameIcons) {
-                                    var gameIconStillNeeded = false;
-                                    for (var j = 0; j < Math.min(gameStates.length, UIConstants.GAME_ICON_COUNT); ++j) {
+                                for (const gameIconSpriteId in self.gameIcons) {
+                                    let gameIconStillNeeded = false;
+                                    for (let j = 0; j < Math.min(gameStates.length, UIConstants.GAME_ICON_COUNT); ++j) {
                                         if (gameIconSpriteId == gameStates[j].getId()) {
                                             gameIconStillNeeded = true;
                                             break;
@@ -489,18 +489,18 @@ Game.UILobbyState.methods({
                                     }
                                 }
 
-                                /*var index = 0;
-                                var widthPerGameIcon = UIConstants.TANK_PANEL_MAX_WIDTH / iconCount;
+                                /*let index = 0;
+                                const widthPerGameIcon = UIConstants.TANK_PANEL_MAX_WIDTH / iconCount;
 
-                                for (var j = 0; j < UIConstants.GAME_ICON_COUNT; ++j) {
-                                    var x = (index + 0.5) * widthPerGameIcon;
+                                for (let j = 0; j < UIConstants.GAME_ICON_COUNT; ++j) {
+                                    const x = (index + 0.5) * widthPerGameIcon;
                                     if (this.localUsernames[j] in this.localTankIcons) {
                                         //FIXME Update tank icon sprite position.
                                         this.localTankIcons[this.localUsernames[j]].icon.refresh(x);
                                         this.localTankIcons[this.localUsernames[j]].name.refresh(x);
                                     } else {
-                                        var tankIconSprite = this.tankIconGroup.getFirstExists(false);
-                                        var tankNameSprite = this.tankNameGroup.getFirstExists(false);
+                                        const tankIconSprite = this.tankIconGroup.getFirstExists(false);
+                                        const tankNameSprite = this.tankNameGroup.getFirstExists(false);
                                         if (tankIconSprite && tankNameSprite) {
                                             this.localTankIcons[this.localUsernames[j]] = {icon: tankIconSprite, name: tankNameSprite};
 
@@ -514,20 +514,20 @@ Game.UILobbyState.methods({
                                 }*/
 
                                 // Update existing icons and show new ones.
-                                for (var j = 0; j < Math.min(gameStates.length, UIConstants.GAME_ICON_COUNT); ++j) {
+                                for (let j = 0; j < Math.min(gameStates.length, UIConstants.GAME_ICON_COUNT); ++j) {
 
                                     if (gameStates[j].getId() in self.gameIcons) {
                                         //Update game icon sprite.
-                                        var counts = self._countFavouritesActiveAndQueuedInGame(gameStates[j]);
+                                        const counts = self._countFavouritesActiveAndQueuedInGame(gameStates[j]);
                                         self.gameIcons[gameStates[j].getId()].icon.refresh(gameStates[j], counts);
                                         self.gameIcons[gameStates[j].getId()].button.refresh(counts);
                                     } else {
-                                        var gameIconSprite = self.gameIconGroup.getFirstExists(false);
-                                        var gameButton = self.gameButtonGroup.getFirstExists(false);
+                                        const gameIconSprite = self.gameIconGroup.getFirstExists(false);
+                                        const gameButton = self.gameButtonGroup.getFirstExists(false);
                                         if (gameIconSprite && gameButton) {
                                             // Compute the first available position.
-                                            var availablePosition = 0;
-                                            for (var k = 0; k < UIConstants.GAME_ICON_COUNT; ++k) {
+                                            let availablePosition = 0;
+                                            for (let k = 0; k < UIConstants.GAME_ICON_COUNT; ++k) {
                                                 if (!self.gameIconPlacementsTaken[k]) {
                                                     availablePosition = k;
                                                     break;
@@ -535,8 +535,8 @@ Game.UILobbyState.methods({
                                             }
                                             self.gameIconPlacementsTaken[availablePosition] = true;
                                             self.gameIcons[gameStates[j].getId()] = {icon: gameIconSprite, button: gameButton, placement: availablePosition};
-                                            var x = (availablePosition / (UIConstants.GAME_ICON_COUNT - 1)) * (self.game.width - UIConstants.GAME_ICON_MARGIN - UIConstants.GAME_ICON_WIDTH) + UIConstants.GAME_ICON_WIDTH / 2.0 + UIConstants.GAME_ICON_MARGIN/2.0;
-                                            var counts = self._countFavouritesActiveAndQueuedInGame(gameStates[j]);
+                                            const x = (availablePosition / (UIConstants.GAME_ICON_COUNT - 1)) * (self.game.width - UIConstants.GAME_ICON_MARGIN - UIConstants.GAME_ICON_WIDTH) + UIConstants.GAME_ICON_WIDTH / 2.0 + UIConstants.GAME_ICON_MARGIN/2.0;
+                                            const counts = self._countFavouritesActiveAndQueuedInGame(gameStates[j]);
                                             gameIconSprite.spawn(x, UIConstants.GAME_ICON_Y, gameStates[j], counts);
                                             gameButton.spawn(x, UIConstants.JOIN_GAME_BUTTON_Y, gameStates[j].getId(), counts, !self.joiningGame);
                                         } else {
@@ -554,10 +554,10 @@ Game.UILobbyState.methods({
             case TTClient.EVENTS.PLAYER_UPDATED:
             {
                 // Iterate over all game icons in search of the tank icon and name to update.
-                for (var gameIconSpriteId in self.gameIcons) {
-                    var gameIcon = self.gameIcons[gameIconSpriteId].icon;
-                    var tankIcons = gameIcon.getTankIcons();
-                    for (var tankIconSpriteId in tankIcons) {
+                for (const gameIconSpriteId in self.gameIcons) {
+                    const gameIcon = self.gameIcons[gameIconSpriteId].icon;
+                    const tankIcons = gameIcon.getTankIcons();
+                    for (const tankIconSpriteId in tankIcons) {
                         if (tankIconSpriteId == data.getPlayerId()) {
                             if (data.getIconChanged()) {
                                 tankIcons[tankIconSpriteId].icon.updateIcon();
@@ -575,9 +575,9 @@ Game.UILobbyState.methods({
             case TTClient.EVENTS.GAME_JOINED:
             {
                 // It is important to use TTClient.getPlayerIds here, as the array reference makes round controller work correctly.
-                var playerIds = ClientManager.getClient().getPlayerIds();
+                const playerIds = ClientManager.getClient().getPlayerIds();
 
-                var ttGame = GameController.withIds(data, playerIds);
+                const ttGame = GameController.withIds(data, playerIds);
 
                 self.state.start('Game', true, false, ttGame);
 

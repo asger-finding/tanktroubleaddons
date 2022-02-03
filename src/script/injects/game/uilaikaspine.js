@@ -97,7 +97,7 @@ UILaikaSpine.prototype.update = function()
                 this.idleBlinkDelay = MathUtils.randomRange(UIConstants.LAIKA.MIN_BLINK_DELAY, UIConstants.LAIKA.MAX_BLINK_DELAY);
                 if (Math.random() <= UIConstants.LAIKA.LASER_BLINK_PROBABILITY) {
                     this.setAnimationByName(UIConstants.LAIKA.TRACKS.EYES, 'eyes close');
-                    for (var i = 1; i < UIConstants.LAIKA.LASER_NUM_BLINKS; ++i) {
+                    for (let i = 1; i < UIConstants.LAIKA.LASER_NUM_BLINKS; ++i) {
                         this.addAnimationByName(UIConstants.LAIKA.TRACKS.EYES, 'eyes normalise', false, UIConstants.LAIKA.LASER_BLINK_TIME);
                         this.addAnimationByName(UIConstants.LAIKA.TRACKS.EYES, 'eyes close', false, UIConstants.LAIKA.LASER_BLINK_TIME);
                     }
@@ -120,8 +120,8 @@ UILaikaSpine.prototype.update = function()
 UILaikaSpine.prototype._updateAiming = function() {
     if (!this.isAiming) {
         // Check if we need to start aiming.
-        var foundActiveAimer = false;
-        for(var aimerId in this.aimers) {
+        let foundActiveAimer = false;
+        for(const aimerId in this.aimers) {
             if (this.aimers[aimerId]) {
                 foundActiveAimer = true;
                 break;
@@ -136,8 +136,8 @@ UILaikaSpine.prototype._updateAiming = function() {
         }
     } else {
         // Check if we need to stop aiming.
-        var foundActiveAimer = false;
-        for(var aimerId in this.aimers) {
+        let foundActiveAimer = false;
+        for(const aimerId in this.aimers) {
             if (this.aimers[aimerId]) {
                 foundActiveAimer = true;
                 break;
@@ -207,8 +207,8 @@ UILaikaSpine.prototype.howl = function(time) {
     this.setAnimationByName(UIConstants.LAIKA.TRACKS.EYES, 'eyes close');
     this.setAnimationByName(UIConstants.LAIKA.TRACKS.MOUTH, 'mouth oh');
     this.setAnimationByName(UIConstants.LAIKA.TRACKS.HOWL, 'mouth oh');
-    for (var i = 0; i < UIConstants.LAIKA.NUM_HOWLS; ++i) {
-        var howlTime = MathUtils.randomRange(UIConstants.LAIKA.MIN_HOWL_TIME, UIConstants.LAIKA.MAX_HOWL_TIME);
+    for (let i = 0; i < UIConstants.LAIKA.NUM_HOWLS; ++i) {
+        const howlTime = MathUtils.randomRange(UIConstants.LAIKA.MIN_HOWL_TIME, UIConstants.LAIKA.MAX_HOWL_TIME);
         this.addAnimationByName(UIConstants.LAIKA.TRACKS.HOWL, 'mouth howl', false, howlTime);
     }
     this.setAnimationByName(UIConstants.LAIKA.TRACKS.EARS, 'ears relax');
@@ -262,7 +262,7 @@ UILaikaSpine.prototype._roundEventHandler = function(self, id, evt, data) {
         case RoundModel._EVENTS.TANK_KILLED:
         {
             if (data.getVictimPlayerId() === self.playerId) {
-                var randomValue = Math.random();
+                const randomValue = Math.random();
                 if (randomValue > 0.66) {
                     self.growl(UIConstants.AVATAR_LAIKA_GROWL_TIME);
                 } else if (randomValue > 0.33) {

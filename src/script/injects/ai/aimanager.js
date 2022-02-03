@@ -33,9 +33,9 @@ AIManager.methods({
     update: function(deltaTime) {
         this.ai.update(deltaTime);
 
-        var newInputState = this.ai.getInputState();
+        const newInputState = this.ai.getInputState();
 
-        var stateChanged = false;
+        let stateChanged = false;
         stateChanged |= this.storedStates["forward"] !== newInputState.getForward();
         stateChanged |= this.storedStates["back"] !== newInputState.getBack();
         stateChanged |= this.storedStates["left"] !== newInputState.getLeft();

@@ -1,4 +1,4 @@
-var Inputs = Classy.newClass();
+const Inputs = Classy.newClass();
 
 Inputs.classFields({
     inputManagers: [],
@@ -46,7 +46,7 @@ Inputs.classMethods({
         Users.addEventListener(Inputs._authenticationEventHandler, Inputs);
 
         // Assign controls to unassigned players.
-        for (var i = 0; i < Inputs._unassignedPlayerIds.length; ++i) {
+        for (let i = 0; i < Inputs._unassignedPlayerIds.length; ++i) {
             OverlayManager.enqueueOverlay(
                 TankTrouble.ControlsOverlay,
                 {playerId: Inputs._unassignedPlayerIds[i], count: (Inputs._unassignedPlayerIds.length > 1 ? i+1 : undefined)}
@@ -63,11 +63,11 @@ Inputs.classMethods({
     loadInputSetAssignments: function(playerIds) {
         Inputs._unassignedPlayerIds = [];
 
-        var inputSetAssigments = Cookies.getJSON("inputSetAssignments");
+        const inputSetAssigments = Cookies.getJSON("inputSetAssignments");
         if (inputSetAssigments) {
-            var storedPlayerIds = Object.keys(inputSetAssigments);
+            const storedPlayerIds = Object.keys(inputSetAssigments);
             // Load and assign all stored input assignments.
-            for (var i=0; i<storedPlayerIds.length; ++i) {
+            for (let i = 0; i<storedPlayerIds.length; ++i) {
                 // Only assign inputs to players that are present.
                 if (playerIds.indexOf(storedPlayerIds[i]) !== -1) {
                     Inputs._assignInput(storedPlayerIds[i], inputSetAssigments[storedPlayerIds[i]]);
@@ -75,14 +75,14 @@ Inputs.classMethods({
             }
 
             // Check if any players are present that had no stored input assignment.
-            for (var i=0; i<playerIds.length; ++i) {
+            for (let i = 0; i<playerIds.length; ++i) {
                 if (storedPlayerIds.indexOf(playerIds[i]) == -1) {
                     Inputs._unassignedPlayerIds.push(playerIds[i]);
                 }
             }
         } else {
             // Queue up input assignment for present players.
-            for (var i=0; i<playerIds.length; ++i) {
+            for (let i = 0; i<playerIds.length; ++i) {
                 Inputs._unassignedPlayerIds.push(playerIds[i]);
             }
         }
@@ -95,8 +95,8 @@ Inputs.classMethods({
 
     getAvailableInputSetId: function() {
         // Find available input set.
-        var inputSetIds = Object.keys(Inputs._inputSets);
-        for (var i = 0; i < inputSetIds.length; ++i) {
+        const inputSetIds = Object.keys(Inputs._inputSets);
+        for (let i = 0; i < inputSetIds.length; ++i) {
             if (Inputs._inputSetsInUse[inputSetIds[i]] == undefined) {
                 return inputSetIds[i];
             }
@@ -106,15 +106,15 @@ Inputs.classMethods({
     },
 
     getAllInputSetIds: function() {
-        var inputSetIds = Object.keys(Inputs._inputSets);
+        const inputSetIds = Object.keys(Inputs._inputSets);
         return inputSetIds;
     },
 
     getUnavailableInputSetIds: function() {
         // Find all unavailable input sets.
-        var unavilableInputSetIds = [];
-        var inputSetIds = Object.keys(Inputs._inputSets);
-        for (var i = 0; i < inputSetIds.length; ++i) {
+        const unavilableInputSetIds = [];
+        const inputSetIds = Object.keys(Inputs._inputSets);
+        for (let i = 0; i < inputSetIds.length; ++i) {
             if (Inputs._inputSetsInUse[inputSetIds[i]] !== undefined) {
                 unavilableInputSetIds.push(inputSetIds[i]);
             }
@@ -152,7 +152,7 @@ Inputs.classMethods({
     },
 
     reassignInputManager: function(oldPlayerId, newPlayerId) {
-        var inputSetId = Inputs._playerIdInputSetId[oldPlayerId];
+        const inputSetId = Inputs._playerIdInputSetId[oldPlayerId];
 
         Inputs._releaseInput(oldPlayerId);
         Inputs._assignInput(newPlayerId, inputSetId);
@@ -161,19 +161,19 @@ Inputs.classMethods({
     },
 
     update: function() {
-        for (var i = 0; i < Inputs.inputManagers.length; ++i) {
+        for (let i = 0; i < Inputs.inputManagers.length; ++i) {
             Inputs.inputManagers[i].update();
         }
     },
 
     reset: function() {
-        for (var i = 0; i < Inputs.inputManagers.length; ++i) {
+        for (let i = 0; i < Inputs.inputManagers.length; ++i) {
             Inputs.inputManagers[i].reset();
         }
     },
 
     _assignInput: function(playerId, inputSetId) {
-        var inputSet = Inputs._inputSets[inputSetId];
+        const inputSet = Inputs._inputSets[inputSetId];
         switch(inputSet.type) {
             case Inputs.INPUT_TYPES.KEYBOARD:
             {
@@ -192,8 +192,8 @@ Inputs.classMethods({
     },
 
     _releaseInput: function(playerId) {
-        for (var i = 0; i < Inputs.inputManagers.length; ++i) {
-            var inputManager = Inputs.inputManagers[i];
+        for (let i = 0; i < Inputs.inputManagers.length; ++i) {
+            const inputManager = Inputs.inputManagers[i];
             if (inputManager.getPlayerId() == playerId) {
                 Inputs.inputManagers.splice(i, 1);
                 break;
@@ -223,7 +223,7 @@ Inputs.classMethods({
             case Users.EVENTS.GUESTS_ADDED:
             {
                 // Assign controls to players.
-                for (var i = 0; i < data.length; ++i) {
+                for (let i = 0; i < data.length; ++i) {
                     OverlayManager.enqueueOverlay(
                         TankTrouble.ControlsOverlay,
                         {playerId: data[i], count: (data.length > 1 ? i+1 : undefined)}

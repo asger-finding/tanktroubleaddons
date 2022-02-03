@@ -3,7 +3,7 @@ if (typeof require === 'function') {
     var PlayerState = require('./playerstate');
 }
 
-var GameState = Classy.newClass().name('GameState');
+const GameState = Classy.newClass().name('GameState');
 
 GameState.constructor(function() {
 
@@ -38,14 +38,14 @@ GameState.fields({
 GameState.methods({
     setPlayerStates: function(playerStates) {
         this.data.playerStates = [];
-        for (var i = 0; i < playerStates.length; ++i) {
+        for (let i = 0; i < playerStates.length; ++i) {
             this.data.playerStates.push(playerStates[i].toObj());
         }
     },
 
     getPlayerStates: function() {
-        var playerStates = [];
-        for (var i = 0; i < this.data.playerStates.length; ++i) {
+        const playerStates = [];
+        for (let i = 0; i < this.data.playerStates.length; ++i) {
             playerStates.push(PlayerState.withObject(this.data.playerStates[i]));
         }
         return playerStates;
@@ -77,14 +77,14 @@ GameState.methods({
 
     setScoreStates: function(scoreStates) {
         this.data.scoreStates = [];
-        for (var i = 0; i < scoreStates.length; ++i) {
+        for (let i = 0; i < scoreStates.length; ++i) {
             this.data.scoreStates.push(scoreStates[i].toObj());
         }
     },
 
     getScoreStates: function() {
-        var scoreStates = [];
-        for (var i = 0; i < this.data.scoreStates.length; ++i) {
+        const scoreStates = [];
+        for (let i = 0; i < this.data.scoreStates.length; ++i) {
             scoreStates.push(ScoreState.withObject(this.data.scoreStates[i]));
         }
         return scoreStates;
@@ -92,14 +92,14 @@ GameState.methods({
 
     setEmblemStates: function(emblemStates) {
         this.data.emblemStates = [];
-        for (var i = 0; i < emblemStates.length; ++i) {
+        for (let i = 0; i < emblemStates.length; ++i) {
             this.data.emblemStates.push(emblemStates[i].toObj());
         }
     },
 
     getEmblemStates: function() {
-        var emblemStates = [];
-        for (var i = 0; i < this.data.emblemStates.length; ++i) {
+        const emblemStates = [];
+        for (let i = 0; i < this.data.emblemStates.length; ++i) {
             emblemStates.push(EmblemState.withObject(this.data.emblemStates[i]));
         }
         return emblemStates;

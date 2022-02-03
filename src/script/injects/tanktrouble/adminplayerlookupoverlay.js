@@ -1,4 +1,4 @@
-var TankTrouble = TankTrouble || {};
+const TankTrouble = TankTrouble || {};
 
 TankTrouble.AdminPlayerLookupOverlay = {
 
@@ -48,7 +48,7 @@ TankTrouble.AdminPlayerLookupOverlay = {
 
         AdminOverlayNavigation.update(this.adminId, this.navigation);
 
-        self = this;
+        const self = this;
 
         this.wrapper.parent().on('scroll.tankIcon', function(){
             self._positionTankIcon();
@@ -80,7 +80,7 @@ TankTrouble.AdminPlayerLookupOverlay = {
     setPlayerNameApproved: function(playerName, approved) {
         this._disable();
 
-        var self = this;
+        const self = this;
         Backend.getInstance().setPlayerNamesApproved(
             function(result) {
                 if (result === true) {
@@ -106,7 +106,7 @@ TankTrouble.AdminPlayerLookupOverlay = {
     setPlayerBanned: function(banned) {
         this._disable();
 
-        var self = this;
+        const self = this;
         Backend.getInstance().setPlayerBanned(
             function(result) {
                 if (result === true) {
@@ -129,7 +129,7 @@ TankTrouble.AdminPlayerLookupOverlay = {
     recommendPlayerPromotion: function() {
         this._disable();
 
-        var self = this;
+        const self = this;
         Backend.getInstance().recommendPlayerPromotion(
             function(result) {
                 if (result === true) {
@@ -151,7 +151,7 @@ TankTrouble.AdminPlayerLookupOverlay = {
     setPlayerAdminLevel: function(adminLevel) {
         this._disable();
 
-        var self = this;
+        const self = this;
         Backend.getInstance().setPlayerAdminLevel(
             function(result) {
                 if (result === true) {
@@ -186,7 +186,7 @@ TankTrouble.AdminPlayerLookupOverlay = {
     confirmRetire: function() {
         this._disable();
 
-        var self = this;
+        const self = this;
 
         Backend.getInstance().retireAdmin(
             function(result) {
@@ -231,7 +231,7 @@ TankTrouble.AdminPlayerLookupOverlay = {
     confirmResetPassword: function() {
         this._disable();
 
-        var self = this;
+        const self = this;
         Backend.getInstance().resetAccountPassword(
             function(result) {
                 if (result === true) {
@@ -252,7 +252,7 @@ TankTrouble.AdminPlayerLookupOverlay = {
     resendVerificationEmail: function() {
         this._disable();
 
-        var self = this;
+        const self = this;
         Backend.getInstance().resendVerificationEmailAsAdmin(
             function(result) {
                 if (result === true) {
@@ -287,7 +287,7 @@ TankTrouble.AdminPlayerLookupOverlay = {
     confirmEditEmail: function() {
         this._disable();
 
-        var self = this;
+        const self = this;
         Backend.getInstance().setEmailAsAdmin(
             function(result){
                 if (result === true) {
@@ -324,7 +324,7 @@ TankTrouble.AdminPlayerLookupOverlay = {
     confirmDeleteEmail: function() {
         this._disable();
 
-        var self = this;
+        const self = this;
         Backend.getInstance().setEmailAsAdmin(
             function(result){
                 if (result === true) {
@@ -359,7 +359,7 @@ TankTrouble.AdminPlayerLookupOverlay = {
     deleteAccountConfirm: function() {
         this._disable();
 
-        var self = this;
+        const self = this;
         Backend.getInstance().deleteUserAsAdmin(
             function(result){
                 if (result === true) {
@@ -394,7 +394,7 @@ TankTrouble.AdminPlayerLookupOverlay = {
     cancelAccountDeletion: function() {
         this._disable();
 
-        var self = this;
+        const self = this;
         Backend.getInstance().cancelUserDeletion(
             function(result){
                 if (result === true) {
@@ -415,7 +415,7 @@ TankTrouble.AdminPlayerLookupOverlay = {
     revertAccountChange: function(accountChangeId) {
         this._disable();
 
-        var self = this;
+        const self = this;
         Backend.getInstance().revertAccountChange(
             function(result) {
                 if (result === true) {
@@ -441,7 +441,7 @@ TankTrouble.AdminPlayerLookupOverlay = {
     refundPurchase: function(purchaseId) {
         this._disable();
 
-        var self = this;
+        const self = this;
         Backend.getInstance().refundPurchase(
             function(result){
                 if (result === true) {
@@ -469,7 +469,7 @@ TankTrouble.AdminPlayerLookupOverlay = {
     refundGoldPurchase: function(purchaseId) {
         this._disable();
 
-        var self = this;
+        const self = this;
         Backend.getInstance().refundGoldPurchase(
             function(result){
                 if (result === true) {
@@ -495,7 +495,7 @@ TankTrouble.AdminPlayerLookupOverlay = {
     refundVirtualPurchase: function(purchaseId) {
         this._disable();
 
-        var self = this;
+        const self = this;
         Backend.getInstance().refundVirtualPurchase(
             function(result){
                 if (result === true) {
@@ -525,7 +525,7 @@ TankTrouble.AdminPlayerLookupOverlay = {
         this.logs = [];
         this.logsLoaded = 0;
 
-        var self = this;
+        const self = this;
 
         // Get details.
         Backend.getInstance().getSensitivePlayerDetails(
@@ -534,14 +534,14 @@ TankTrouble.AdminPlayerLookupOverlay = {
                     self.details.append(result.data.html);
                     self.details.find('button.cancel, button.confirm, input.editEmail').hide();
 
-                    var garageButton = $('<button/>').attr({
+                    const garageButton = $('<button/>').attr({
                         "class": "small",
                         type: "button",
                         tabindex: "-1",
                         onclick: "OverlayManager.pushOverlay(TankTrouble.GarageOverlay, { playerId: '" + self.playerId + "' })"
                     });
                     garageButton.text('Garage');
-                    var achievementsButton = $('<button/>').attr({
+                    const achievementsButton = $('<button/>').attr({
                         "class": "small",
                         type: "button",
                         tabindex: "-1",
@@ -638,13 +638,13 @@ TankTrouble.AdminPlayerLookupOverlay = {
         // Show maximum 100 logs.
         this.logs.slice(0, 100);
 
-        for (var i = 0; i < this.logs.length; i++) {
+        for (let i = 0; i < this.logs.length; i++) {
             this.adminLogs.append(this.logs[i]['html']);
         }
     },
 
     _positionTankIcon: function() {
-        var icon = this.details.find('.icon');
+        const icon = this.details.find('.icon');
         if (self.wrapper.position().top + icon.parent().height() - icon.height() - 20 < 0) {
             $('.admin.playerLookup .icon').removeClass('fixed');
         } else {

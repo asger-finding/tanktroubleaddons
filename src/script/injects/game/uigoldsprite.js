@@ -39,7 +39,7 @@ UIGoldSprite.prototype.update = function()
     }
     
     // Update position from game model.
-    var gold = this.gameController.getCollectible(this.goldId);
+    const gold = this.gameController.getCollectible(this.goldId);
     if (gold)
     {
         this.smoothedX = (this.body.x + UIUtils.mpx(gold.getX())) / 2.0;
@@ -81,14 +81,14 @@ UIGoldSprite.prototype.getExtraPositionInfo = function()
 
 UIGoldSprite.prototype._sparkle = function()
 {
-    var sparkleImage = this.sparkleGroup.getFirstExists(false);
+    const sparkleImage = this.sparkleGroup.getFirstExists(false);
     if (sparkleImage) {
-        var distance = Constants.GOLD.RADIUS.px - Math.random() * 5;
-        var angle = Math.random() * 2.0*Math.PI;
+        const distance = Constants.GOLD.RADIUS.px - Math.random() * 5;
+        const angle = Math.random() * 2.0*Math.PI;
         
         
-        var sparkleX = this.body.x + Math.cos(angle) * distance;
-        var sparkleY = this.body.y + Math.sin(angle) * distance;
+        const sparkleX = this.body.x + Math.cos(angle) * distance;
+        const sparkleY = this.body.y + Math.sin(angle) * distance;
         
         sparkleImage.spawn(sparkleX, sparkleY);
     } else {

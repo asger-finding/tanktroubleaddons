@@ -54,12 +54,12 @@ UITankIconImage = function(game, active, size)
             },
             function(self) {
                 if (self.playerId && self.showingDetails) {
-                    var gameBounds = self.game.scale.bounds;
-                    var position = self.toGlobal(new Phaser.Point(0, 0));
+                    const gameBounds = self.game.scale.bounds;
+                    const position = self.toGlobal(new Phaser.Point(0, 0));
                     // Scale from game canvas position to pixel position.
                     Phaser.Point.divide(position, self.game.scale.scaleFactor, position);
-                    var preferredInfoOffsetHorizontal = Math.abs(self.width) / self.game.scale.scaleFactor.x * 0.4;
-                    var preferredInfoOffsetVertical = Math.abs(self.height) / self.game.scale.scaleFactor.y * 0.25;
+                    const preferredInfoOffsetHorizontal = Math.abs(self.width) / self.game.scale.scaleFactor.x * 0.4;
+                    const preferredInfoOffsetVertical = Math.abs(self.height) / self.game.scale.scaleFactor.y * 0.25;
                     TankTrouble.TankInfoBox.show(gameBounds.x + position.x, gameBounds.y + position.y, self.playerId, preferredInfoOffsetHorizontal, preferredInfoOffsetVertical);
                 }
             }, 
@@ -106,7 +106,7 @@ UITankIconImage.prototype.spawn = function(x, y, playerId, flipped, animate, tar
     this.flipped = flipped;
     this.targetScale = targetScale || 1.0;
 
-    var delay = 50 + Math.random() * 200;
+    const delay = 50 + Math.random() * 200;
 
     if (this.removeTween) {
         this.removeTween.stop();

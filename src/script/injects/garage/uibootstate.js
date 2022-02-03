@@ -1,4 +1,4 @@
-var Garage = Garage || {};
+const Garage = Garage || {};
 
 Garage.UIBootState = Classy.newClass();
 

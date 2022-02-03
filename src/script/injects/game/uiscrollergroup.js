@@ -63,7 +63,7 @@ UIScrollerGroup.prototype._onInputUpHandler = function(pointer) {
 
     // Enable all items.
     if (this.currentItems) {
-        for (var i = 0; i < this.currentItems.length; ++i) {
+        for (let i = 0; i < this.currentItems.length; ++i) {
             this.currentItems[i].enable();
         }
     }
@@ -88,7 +88,7 @@ UIScrollerGroup.prototype.update = function() {
     // Update drag and velocity.
     if (this.dragging) {
         // Compute drag velocity.
-        var dragDiff = (this.game.input.activePointer.x - this.oldDragX);
+        const dragDiff = (this.game.input.activePointer.x - this.oldDragX);
         this.dragVelocity = (this.dragVelocity * 3.0 + dragDiff / this.game.time.delta * 0.001) / 4.0;
         
         // Limit drag velocity.
@@ -104,22 +104,22 @@ UIScrollerGroup.prototype.update = function() {
             this.game.input.touch.preventDefault = true;
 
             // Disable all items to prevent them from registering events.
-            for (var i = 0; i < this.currentItems.length; ++i) {
+            for (let i = 0; i < this.currentItems.length; ++i) {
                 this.currentItems[i].disable();
             }
             
             // Move all items.
-            for (var i = 0; i < this.currentItems.length; ++i) {
+            for (let i = 0; i < this.currentItems.length; ++i) {
                 this.currentItems[i].position.x += this.dragVelocity * this.game.time.delta / 1000;
             }            
         }
     } else {
-        var itemVelocity = this.dragVelocity;
+        let itemVelocity = this.dragVelocity;
         
         // Snap items to "grid" when not scrolling.
         if (this.snapItems && !this.scrolling) {
-            var snapDistanceDiff = (this.minItemX + this.itemWidth / 2) - this.currentItems[this.firstVisibleItemIndex].position.x;
-            var snapVelocity = snapDistanceDiff * UIConstants.GARAGE_SNAP_DISTANCE_TO_SPEED_SCALE;
+            const snapDistanceDiff = (this.minItemX + this.itemWidth / 2) - this.currentItems[this.firstVisibleItemIndex].position.x;
+            const snapVelocity = snapDistanceDiff * UIConstants.GARAGE_SNAP_DISTANCE_TO_SPEED_SCALE;
             
             itemVelocity += snapVelocity;
         }
@@ -130,7 +130,7 @@ UIScrollerGroup.prototype.update = function() {
         }
         
         // Move all items with velocity.
-        for (var i = 0; i < this.currentItems.length; ++i) {
+        for (let i = 0; i < this.currentItems.length; ++i) {
             this.currentItems[i].position.x += itemVelocity * this.game.time.delta / 1000;
         }
                     
@@ -147,7 +147,7 @@ UIScrollerGroup.prototype.update = function() {
         }
         
         this.firstVisibleItemIndex = (this.firstVisibleItemIndex + 1) % this.currentItems.length;
-        var lastItemX = this.currentItems[this.lastVisibleItemIndex].position.x;
+        const lastItemX = this.currentItems[this.lastVisibleItemIndex].position.x;
         this.lastVisibleItemIndex = (this.lastVisibleItemIndex + 1) % this.currentItems.length;
         this.currentItems[this.lastVisibleItemIndex].spawn(lastItemX + this.itemWidth, 0, true, 0);
 
@@ -164,7 +164,7 @@ UIScrollerGroup.prototype.update = function() {
         }
 
         this.lastVisibleItemIndex = (this.lastVisibleItemIndex - 1 + this.currentItems.length) % this.currentItems.length;
-        var firstItemX = this.currentItems[this.firstVisibleItemIndex].position.x;
+        const firstItemX = this.currentItems[this.firstVisibleItemIndex].position.x;
         this.firstVisibleItemIndex = (this.firstVisibleItemIndex - 1 + this.currentItems.length) % this.currentItems.length;
         this.currentItems[this.firstVisibleItemIndex].spawn(firstItemX - this.itemWidth, 0, true, 0);
 
@@ -221,7 +221,7 @@ UIScrollerGroup.prototype._scrollLeft = function() {
     this.scrolling = true;
     this.dragVelocity = -this.maxScrollSpeed;
     // Disable all items to prevent them from registering events.
-    for (var i = 0; i < this.currentItems.length; ++i) {
+    for (let i = 0; i < this.currentItems.length; ++i) {
         this.currentItems[i].disable();
     }
 };
@@ -230,14 +230,14 @@ UIScrollerGroup.prototype._scrollRight = function() {
     this.scrolling = true;
     this.dragVelocity = this.maxScrollSpeed;
     // Disable all items to prevent them from registering events.
-    for (var i = 0; i < this.currentItems.length; ++i) {
+    for (let i = 0; i < this.currentItems.length; ++i) {
         this.currentItems[i].disable();
     }
 };
 
 UIScrollerGroup.prototype._releaseScroll = function() {
     // Enable all items.
-    for (var i = 0; i < this.currentItems.length; ++i) {
+    for (let i = 0; i < this.currentItems.length; ++i) {
         this.currentItems[i].enable();
     }
 };
@@ -245,7 +245,7 @@ UIScrollerGroup.prototype._releaseScroll = function() {
 UIScrollerGroup.prototype.remove = function() {
     this.exists = false;
 
-    var self = this;
+    const self = this;
     this.removeTimeout = setTimeout(function() {
         self.visible = false;
     }, UIConstants.ELEMENT_GLIDE_OUT_TIME);

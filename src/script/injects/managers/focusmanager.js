@@ -1,4 +1,4 @@
-var FocusManager = Classy.newClass();
+const FocusManager = Classy.newClass();
 
 FocusManager.classFields({
     focused: true,
@@ -15,7 +15,7 @@ FocusManager.classMethods({
     },
 
     removeEventListener: function(callback, context) {
-        for (var i=0;i<FocusManager.eventListeners.length;i++) {
+        for (let i = 0;i<FocusManager.eventListeners.length;i++) {
             if (FocusManager.eventListeners[i].cb===callback && FocusManager.eventListeners[i].ctxt===context) {
                 // Remove single entry from array, and return immediately
                 // as continuing iteration is unsafe, as the underlying array
@@ -66,7 +66,7 @@ FocusManager.classMethods({
     },
 
     _notifyEventListeners: function(evt, data) {
-        for (var i=0;i<FocusManager.eventListeners.length;i++) {
+        for (let i = 0;i<FocusManager.eventListeners.length;i++) {
             FocusManager.eventListeners[i].cb(FocusManager.eventListeners[i].ctxt, evt, data);
         }
     }

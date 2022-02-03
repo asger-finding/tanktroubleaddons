@@ -1,4 +1,4 @@
-var PlayerPanel = PlayerPanel || {};
+const PlayerPanel = PlayerPanel || {};
 
 PlayerPanel.UIMainState = Classy.newClass();
 
@@ -68,16 +68,16 @@ PlayerPanel.UIMainState.methods({
 
         // Add pool of tank icons - use custom pool to be able to put icons and avatars in same group for correct layering.
         this.tankIconPool = UIPool.create();
-        for (var i = 0; i < UIConstants.TANK_ICON_POOL_SIZE; ++i) {
-            var tankIcon = new UITankIconImage(this.game, true, UIConstants.TANK_ICON_SIZES.MEDIUM)
+        for (let i = 0; i < UIConstants.TANK_ICON_POOL_SIZE; ++i) {
+            const tankIcon = new UITankIconImage(this.game, true, UIConstants.TANK_ICON_SIZES.MEDIUM)
             this.tankIconPool.add(tankIcon);
             this.tankIconGroup.add(tankIcon);
         }
 
         // Add pool of tank avatars - use custom pool to be able to put icons and avatars in same group for correct layering.
         this.tankAvatarPool = UIPool.create();
-        for (var i = 0; i < UIConstants.TANK_AVATAR_POOL_SIZE; ++i) {
-            var tankAvatar = new UITankAvatarGroup(this.game);
+        for (let i = 0; i < UIConstants.TANK_AVATAR_POOL_SIZE; ++i) {
+            const tankAvatar = new UITankAvatarGroup(this.game);
             this.tankAvatarPool.add(tankAvatar);
             this.tankIconGroup.add(tankAvatar);
         }
@@ -86,7 +86,7 @@ PlayerPanel.UIMainState.methods({
         this.tankNameGroup = this.game.add.group();
 
         // Add pool of tank names
-        for (var i = 0; i < UIConstants.TANK_ICON_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.TANK_ICON_POOL_SIZE; ++i) {
             this.tankNameGroup.add(new UITankIconNameGroup(this.game, UIConstants.TANK_ICON_WIDTH_MEDIUM));
         }
 
@@ -103,7 +103,7 @@ PlayerPanel.UIMainState.methods({
         this.tankScoreGroup = this.game.add.group();
 
         // Add pool of tank scores
-        for (var i = 0; i < UIConstants.TANK_ICON_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.TANK_ICON_POOL_SIZE; ++i) {
             this.tankScoreGroup.add(new UITankIconScoreGroup(this.game));
         }
 
@@ -146,7 +146,7 @@ PlayerPanel.UIMainState.methods({
         this.log.debug("SIZE CHANGE!");
         // FIXME: Handle when game cannot show more than 2 or 1 tank icon.
 
-        var iconScale = Math.min(1.0, Math.min(this.game.width / UIConstants.TANK_PANEL_MAX_WIDTH, this.game.height / (UIConstants.TANK_PANEL_MAX_HEIGHT - UIConstants.TANK_PANEL_ICON_BOTTOM_MARGIN)));
+        const iconScale = Math.min(1.0, Math.min(this.game.width / UIConstants.TANK_PANEL_MAX_WIDTH, this.game.height / (UIConstants.TANK_PANEL_MAX_HEIGHT - UIConstants.TANK_PANEL_ICON_BOTTOM_MARGIN)));
 
         this.tankIconGroup.scale.setTo(iconScale * UIConstants.ASSET_SCALE);
         this.tankIconGroup.position.set((this.game.width - iconScale * UIConstants.TANK_PANEL_MAX_WIDTH) / 2.0, this.game.height - iconScale * UIConstants.TANK_PANEL_MAX_HEIGHT);
@@ -157,7 +157,7 @@ PlayerPanel.UIMainState.methods({
     },
 
     update: function() {
-        var uiNeedsUpdate = this.updateScheduled;
+        let uiNeedsUpdate = this.updateScheduled;
         this.updateScheduled = false;
 
         if (this.addingLocalPlayer) {
@@ -209,13 +209,13 @@ PlayerPanel.UIMainState.methods({
             return undefined;
         }
 
-        for (var i = 0; i < this.localPlayerIds.length; ++i) {
+        for (let i = 0; i < this.localPlayerIds.length; ++i) {
             if (playerId == this.localPlayerIds[i]) {
                 if (playerId in this.localTankIcons) {
-                    var icon = this.localTankIcons[playerId].icon;
+                    const icon = this.localTankIcons[playerId].icon;
 
-                    var gameBounds = this.game.scale.bounds;
-                    var position = icon.toGlobal(new Phaser.Point(0, 0));
+                    const gameBounds = this.game.scale.bounds;
+                    const position = icon.toGlobal(new Phaser.Point(0, 0));
 
                     // Scale from game canvas position to pixel position.
                     Phaser.Point.divide(position, this.game.scale.scaleFactor, position);
@@ -235,13 +235,13 @@ PlayerPanel.UIMainState.methods({
             return undefined;
         }
 
-        for (var i = 0; i < this.onlinePlayerIds.length; ++i) {
+        for (let i = 0; i < this.onlinePlayerIds.length; ++i) {
             if (playerId == this.onlinePlayerIds[i]) {
                 if (playerId in this.onlineTankIcons) {
-                    var icon = this.onlineTankIcons[playerId].icon;
+                    const icon = this.onlineTankIcons[playerId].icon;
 
-                    var gameBounds = this.game.scale.bounds;
-                    var position = icon.toGlobal(new Phaser.Point(0, 0));
+                    const gameBounds = this.game.scale.bounds;
+                    const position = icon.toGlobal(new Phaser.Point(0, 0));
 
                     // Scale from game canvas position to pixel position.
                     Phaser.Point.divide(position, this.game.scale.scaleFactor, position);
@@ -257,7 +257,7 @@ PlayerPanel.UIMainState.methods({
     },
 
     showRankChanges: function(rankChanges) {
-        for (var i = 0; i < rankChanges.length; ++i) {
+        for (let i = 0; i < rankChanges.length; ++i) {
             this._updateTankIcon(rankChanges[i].playerId, false, false, rankChanges[i].rank, rankChanges[i].change);
         }
     },
@@ -292,9 +292,9 @@ PlayerPanel.UIMainState.methods({
 
     _updateUI: function() {
         // Remove local tank icons that should no longer show.
-        for (var tankIconSpriteId in this.localTankIcons) {
-            var tankIconStillNeeded = false;
-            for (var i = 0; i < this.localPlayerIds.length; ++i) {
+        for (const tankIconSpriteId in this.localTankIcons) {
+            let tankIconStillNeeded = false;
+            for (let i = 0; i < this.localPlayerIds.length; ++i) {
                 if (tankIconSpriteId == this.localPlayerIds[i]) {
                     tankIconStillNeeded = true;
                     break;
@@ -311,9 +311,9 @@ PlayerPanel.UIMainState.methods({
         }
 
         // Remove online tank icons that should no longer show.
-        for (var tankIconSpriteId in this.onlineTankIcons) {
-            var tankIconStillNeeded = false;
-            for (var i = 0; i < this.onlinePlayerIds.length; ++i) {
+        for (const tankIconSpriteId in this.onlineTankIcons) {
+            let tankIconStillNeeded = false;
+            for (let i = 0; i < this.onlinePlayerIds.length; ++i) {
                 if (tankIconSpriteId == this.onlinePlayerIds[i]) {
                     tankIconStillNeeded = true;
                     break;
@@ -330,7 +330,7 @@ PlayerPanel.UIMainState.methods({
         }
 
         // Remove login icon if it should no longer show.
-        var showTankIconLogin = this.showLoginIcon && this.localPlayerIds.length < Constants.CLIENT.MAX_PLAYERS && (!this.addingLocalPlayer || this.onlinePlayerIds.length > 0);
+        const showTankIconLogin = this.showLoginIcon && this.localPlayerIds.length < Constants.CLIENT.MAX_PLAYERS && (!this.addingLocalPlayer || this.onlinePlayerIds.length > 0);
         if (!showTankIconLogin) {
             if (this.loginTankIcon) {
                 this.loginTankIcon.remove(this.onlinePlayerIds.length > 0 || !this.showLoginIcon);
@@ -339,20 +339,20 @@ PlayerPanel.UIMainState.methods({
         }
 
         // Update existing icons and show new ones.
-        var index = 0;
-        var totalPlayerIds = this.localPlayerIds.length + this.onlinePlayerIds.length + (showTankIconLogin ? 1 : 0);
-        var widthPerUser = (UIConstants.TANK_PANEL_MAX_WIDTH - UIConstants.TANK_PANEL_SIDE_MARGIN * 2) / totalPlayerIds;
-        var scale = Math.min(1.0, widthPerUser / UIConstants.TANK_PANEL_MIN_WIDTH_PER_ICON);
-        var interleaved = totalPlayerIds > UIConstants.TANK_PANEL_MAX_ICONS_BEFORE_INTERLEAVING;
-        var scoreY = interleaved ? UIConstants.TANK_PANEL_INTERLEAVE_HEIGHT - UIConstants.TANK_PANEL_INTERLEAVE_OFFSET : 0;
+        let index = 0;
+        const totalPlayerIds = this.localPlayerIds.length + this.onlinePlayerIds.length + (showTankIconLogin ? 1 : 0);
+        const widthPerUser = (UIConstants.TANK_PANEL_MAX_WIDTH - UIConstants.TANK_PANEL_SIDE_MARGIN * 2) / totalPlayerIds;
+        const scale = Math.min(1.0, widthPerUser / UIConstants.TANK_PANEL_MIN_WIDTH_PER_ICON);
+        const interleaved = totalPlayerIds > UIConstants.TANK_PANEL_MAX_ICONS_BEFORE_INTERLEAVING;
+        const scoreY = interleaved ? UIConstants.TANK_PANEL_INTERLEAVE_HEIGHT - UIConstants.TANK_PANEL_INTERLEAVE_OFFSET : 0;
 
-        for (var i = 0; i < this.localPlayerIds.length; ++i) {
+        for (let i = 0; i < this.localPlayerIds.length; ++i) {
 
-            var x = (index + 0.5) * widthPerUser + UIConstants.TANK_PANEL_SIDE_MARGIN;
-            var y = interleaved ? (1 - index % 2) * UIConstants.TANK_PANEL_INTERLEAVE_HEIGHT - UIConstants.TANK_PANEL_INTERLEAVE_OFFSET : 0;
-            var iconScale = interleaved ? scale * (index % 2 == 1 ? UIConstants.TANK_PANEL_ICON_INTERLEAVE_SCALE : 1.0) : 1.0;
+            const x = (index + 0.5) * widthPerUser + UIConstants.TANK_PANEL_SIDE_MARGIN;
+            const y = interleaved ? (1 - index % 2) * UIConstants.TANK_PANEL_INTERLEAVE_HEIGHT - UIConstants.TANK_PANEL_INTERLEAVE_OFFSET : 0;
+            const iconScale = interleaved ? scale * (index % 2 == 1 ? UIConstants.TANK_PANEL_ICON_INTERLEAVE_SCALE : 1.0) : 1.0;
 
-            var animatePopIn = !((this.localPlayerIds[i] == this.newlyAddedPlayerId) && (this.onlinePlayerIds.length == 0)) || this.loginIconWasHidden;
+            const animatePopIn = !((this.localPlayerIds[i] == this.newlyAddedPlayerId) && (this.onlinePlayerIds.length == 0)) || this.loginIconWasHidden;
 
             if (this.localPlayerIds[i] in this.localTankIcons) {
                 // Update tank icon sprite position.
@@ -361,10 +361,10 @@ PlayerPanel.UIMainState.methods({
                 this.localTankIcons[this.localPlayerIds[i]].name.refresh(x / UIConstants.ASSET_SCALE, y / UIConstants.ASSET_SCALE, scale, this.inRankedGame);
                 this.localTankIcons[this.localPlayerIds[i]].score.refresh(x / UIConstants.ASSET_SCALE, scoreY / UIConstants.ASSET_SCALE);
             } else {
-                var tankAvatarSprite = this.tankAvatarPool.getFirstExists(false);
-                var tankIconSprite = this.tankIconPool.getFirstExists(false);
-                var tankNameSprite = this.tankNameGroup.getFirstExists(false);
-                var tankScoreSprite = this.tankScoreGroup.getFirstExists(false);
+                const tankAvatarSprite = this.tankAvatarPool.getFirstExists(false);
+                const tankIconSprite = this.tankIconPool.getFirstExists(false);
+                const tankNameSprite = this.tankNameGroup.getFirstExists(false);
+                const tankScoreSprite = this.tankScoreGroup.getFirstExists(false);
                 if (tankAvatarSprite && tankIconSprite && tankNameSprite && tankScoreSprite) {
                     this.localTankIcons[this.localPlayerIds[i]] = {avatar: tankAvatarSprite, icon: tankIconSprite, name: tankNameSprite, score: tankScoreSprite};
 
@@ -380,11 +380,11 @@ PlayerPanel.UIMainState.methods({
         }
 
         // Update existing icons and show new ones.
-        for (var i = 0; i < this.onlinePlayerIds.length; ++i) {
+        for (let i = 0; i < this.onlinePlayerIds.length; ++i) {
 
-            var x = (index + 0.5) * widthPerUser + UIConstants.TANK_PANEL_SIDE_MARGIN;
-            var y = interleaved ? (1 - index % 2) * UIConstants.TANK_PANEL_INTERLEAVE_HEIGHT - UIConstants.TANK_PANEL_INTERLEAVE_OFFSET : 0;
-            var iconScale = interleaved ? scale * (index % 2 == 1 ? UIConstants.TANK_PANEL_ICON_INTERLEAVE_SCALE : 1.0) : 1.0;
+            const x = (index + 0.5) * widthPerUser + UIConstants.TANK_PANEL_SIDE_MARGIN;
+            const y = interleaved ? (1 - index % 2) * UIConstants.TANK_PANEL_INTERLEAVE_HEIGHT - UIConstants.TANK_PANEL_INTERLEAVE_OFFSET : 0;
+            const iconScale = interleaved ? scale * (index % 2 == 1 ? UIConstants.TANK_PANEL_ICON_INTERLEAVE_SCALE : 1.0) : 1.0;
 
             if (this.onlinePlayerIds[i] in this.onlineTankIcons) {
                 // Update tank icon sprite position.
@@ -393,10 +393,10 @@ PlayerPanel.UIMainState.methods({
                 this.onlineTankIcons[this.onlinePlayerIds[i]].name.refresh(x / UIConstants.ASSET_SCALE, y / UIConstants.ASSET_SCALE, scale, this.inRankedGame);
                 this.onlineTankIcons[this.onlinePlayerIds[i]].score.refresh(x / UIConstants.ASSET_SCALE, scoreY / UIConstants.ASSET_SCALE);
             } else {
-                var tankAvatarSprite = this.tankAvatarPool.getFirstExists(false);
-                var tankIconSprite = this.tankIconPool.getFirstExists(false);
-                var tankNameSprite = this.tankNameGroup.getFirstExists(false);
-                var tankScoreSprite = this.tankScoreGroup.getFirstExists(false);
+                const tankAvatarSprite = this.tankAvatarPool.getFirstExists(false);
+                const tankIconSprite = this.tankIconPool.getFirstExists(false);
+                const tankNameSprite = this.tankNameGroup.getFirstExists(false);
+                const tankScoreSprite = this.tankScoreGroup.getFirstExists(false);
                 if (tankAvatarSprite && tankIconSprite && tankNameSprite && tankScoreSprite) {
                     this.onlineTankIcons[this.onlinePlayerIds[i]] = {avatar: tankAvatarSprite, icon: tankIconSprite, name: tankNameSprite, score: tankScoreSprite};
 
@@ -413,9 +413,9 @@ PlayerPanel.UIMainState.methods({
 
         // Update or show login icon.
         if (showTankIconLogin) {
-            var x = (index + 0.5) * widthPerUser + UIConstants.TANK_PANEL_SIDE_MARGIN;
-            var y = interleaved ? (1 - index % 2) * UIConstants.TANK_PANEL_INTERLEAVE_HEIGHT - UIConstants.TANK_PANEL_INTERLEAVE_OFFSET : 0;
-            var iconScale = interleaved ? scale * (index % 2 == 1 ? UIConstants.TANK_PANEL_ICON_INTERLEAVE_SCALE : 1.0) : 1.0;
+            const x = (index + 0.5) * widthPerUser + UIConstants.TANK_PANEL_SIDE_MARGIN;
+            const y = interleaved ? (1 - index % 2) * UIConstants.TANK_PANEL_INTERLEAVE_HEIGHT - UIConstants.TANK_PANEL_INTERLEAVE_OFFSET : 0;
+            const iconScale = interleaved ? scale * (index % 2 == 1 ? UIConstants.TANK_PANEL_ICON_INTERLEAVE_SCALE : 1.0) : 1.0;
 
             if (this.loginTankIcon) {
                 this.loginTankIcon.refresh(x / UIConstants.ASSET_SCALE, ((UIConstants.TANK_PANEL_MAX_HEIGHT - UIConstants.TANK_PANEL_ICON_BOTTOM_MARGIN) / 2.0 + y) / UIConstants.ASSET_SCALE, iconScale);
@@ -436,13 +436,13 @@ PlayerPanel.UIMainState.methods({
         }
 
         if (iconChanged) {
-            for (var iconPlayerId in this.localTankIcons) {
+            for (const iconPlayerId in this.localTankIcons) {
                 if (iconPlayerId == playerId) {
                     this.localTankIcons[iconPlayerId].icon.updateIcon();
                     break;
                 }
             }
-            for (var iconPlayerId in this.onlineTankIcons) {
+            for (const iconPlayerId in this.onlineTankIcons) {
                 if (iconPlayerId == playerId) {
                     this.onlineTankIcons[iconPlayerId].icon.updateIcon();
                     break;
@@ -450,13 +450,13 @@ PlayerPanel.UIMainState.methods({
             }
         }
         if (usernameChanged) {
-            for (var iconPlayerId in this.localTankIcons) {
+            for (const iconPlayerId in this.localTankIcons) {
                 if (iconPlayerId == playerId) {
                     this.localTankIcons[iconPlayerId].name.updateName();
                     break;
                 }
             }
-            for (var iconPlayerId in this.onlineTankIcons) {
+            for (const iconPlayerId in this.onlineTankIcons) {
                 if (iconPlayerId == playerId) {
                     this.onlineTankIcons[iconPlayerId].name.updateName();
                     break;
@@ -464,13 +464,13 @@ PlayerPanel.UIMainState.methods({
             }
         }
         if (rankChange) {
-            for (var iconPlayerId in this.localTankIcons) {
+            for (const iconPlayerId in this.localTankIcons) {
                 if (iconPlayerId == playerId) {
                     this.localTankIcons[iconPlayerId].name.updateRank(rank, rankChange);
                     break;
                 }
             }
-            for (var iconPlayerId in this.onlineTankIcons) {
+            for (const iconPlayerId in this.onlineTankIcons) {
                 if (iconPlayerId == playerId) {
                     this.onlineTankIcons[iconPlayerId].name.updateRank(rank, rankChange);
                     break;
@@ -498,10 +498,10 @@ PlayerPanel.UIMainState.methods({
                 // Store if in ranked game.
                 self.inRankedGame = data.getRanked();
 
-                var playerStates = data.getPlayerStates();
+                const playerStates = data.getPlayerStates();
                 // Overwrite online player ids.
                 self.onlinePlayerIds = [];
-                for (var i = 0; i < playerStates.length; ++i) {
+                for (let i = 0; i < playerStates.length; ++i) {
                     if (self.localPlayerIds.indexOf(playerStates[i].getPlayerId()) == -1 &&
                         self.localPlayerIdsToAdd.indexOf(playerStates[i].getPlayerId()) == -1) {
                         self.onlinePlayerIds[self.onlinePlayerIds.length] = playerStates[i].getPlayerId();
@@ -562,7 +562,7 @@ PlayerPanel.UIMainState.methods({
                     self.newlyAddedPlayerId = data[0];
                 }
 
-                for (var i = 0; i < data.length; ++i) {
+                for (let i = 0; i < data.length; ++i) {
                     self.localPlayerIdsToAdd.push(data[i]);
                 }
 
@@ -572,13 +572,13 @@ PlayerPanel.UIMainState.methods({
             case Users.EVENTS.PLAYER_DEAUTHENTICATED:
             {
                 // Remove user from local player ids not yet added.
-                var userIndex = self.localPlayerIdsToAdd.indexOf(data);
+                let userIndex = self.localPlayerIdsToAdd.indexOf(data);
                 if (userIndex != -1) {
                     self.localPlayerIdsToAdd.splice(userIndex, 1);
                 }
 
                 // Remove user from local player ids.
-                var userIndex = self.localPlayerIds.indexOf(data);
+                userIndex = self.localPlayerIds.indexOf(data);
                 if (userIndex != -1) {
                     self.localPlayerIds.splice(userIndex, 1);
                 }
@@ -594,13 +594,13 @@ PlayerPanel.UIMainState.methods({
             }
             case Users.EVENTS.GUEST_SIGNED_UP:
             {
-                for (var iconPlayerId in self.localTankIcons) {
+                for (const iconPlayerId in self.localTankIcons) {
                     if (iconPlayerId == data) {
                         self.localTankIcons[iconPlayerId].name.updateName();
                         break;
                     }
                 }
-                for (var iconPlayerId in self.onlineTankIcons) {
+                for (const iconPlayerId in self.onlineTankIcons) {
                     if (iconPlayerId == data) {
                         self.onlineTankIcons[iconPlayerId].name.updateName();
                         break;

@@ -1,4 +1,4 @@
-var Game = Game || {};
+const Game = Game || {};
 
 Game.UIPreloadState = Classy.newClass();
 

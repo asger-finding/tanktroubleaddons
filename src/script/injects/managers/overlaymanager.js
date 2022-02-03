@@ -1,4 +1,4 @@
-var OverlayManager = Classy.newClass();
+const OverlayManager = Classy.newClass();
 
 OverlayManager.classFields({
     initialOverlayParams: {},
@@ -20,10 +20,10 @@ OverlayManager.classMethods({
 
     init: function(hashString) {
         if (hashString.length > 0) {
-            var overlayString = decodeURIComponent(hashString.substr(1));
-            var overlayParams = overlayString.split('&');
-            for (var i = 0; i < overlayParams.length; ++i) {
-                var overlayParam = overlayParams[i].split('=');
+            const overlayString = decodeURIComponent(hashString.substr(1));
+            const overlayParams = overlayString.split('&');
+            for (let i = 0; i < overlayParams.length; ++i) {
+                const overlayParam = overlayParams[i].split('=');
 
                 if (overlayParam.length == 2) {
                     OverlayManager.initialOverlayParams[overlayParam[0]] = overlayParam[1];
@@ -52,7 +52,7 @@ OverlayManager.classMethods({
     },
 
     enqueueInitialOverlay: function() {
-        var initialOverlayParams = OverlayManager.initialOverlayParams;
+        const initialOverlayParams = OverlayManager.initialOverlayParams;
         switch(initialOverlayParams.type) {
             case 'verify':
             {
@@ -143,7 +143,7 @@ OverlayManager.classMethods({
         }
 
         if (OverlayManager.overlayQueue.length >= 1) {
-            var currentOverlay = OverlayManager.overlayQueue[0];
+            const currentOverlay = OverlayManager.overlayQueue[0];
             currentOverlay.overlay.hide();
         }
 
@@ -264,7 +264,7 @@ OverlayManager.classMethods({
 
     _attemptToHideCurrentOverlay: function(force) {
         if (OverlayManager.overlayQueue.length >= 1) {
-            var currentOverlay = OverlayManager.overlayQueue[0];
+            const currentOverlay = OverlayManager.overlayQueue[0];
 
             // Check if overlay should hide.
             if (force || currentOverlay.overlay.shouldHide()) {
@@ -297,7 +297,7 @@ OverlayManager.classMethods({
     _showOverlay: function(delay) {
         OverlayManager.inTransition = true;
 
-        var newOverlay = OverlayManager.overlayQueue[0];
+        const newOverlay = OverlayManager.overlayQueue[0];
 
         setTimeout(function() {
             if (OverlayManager.content) {

@@ -1,4 +1,4 @@
-var TankTrouble = TankTrouble || {};
+const TankTrouble = TankTrouble || {};
 
 TankTrouble.Statistics = {
     init: function() {
@@ -18,7 +18,7 @@ TankTrouble.Statistics = {
         this._switchStats();
         this._updateStatistics();
 
-        var self = this;
+        const self = this;
 
         this.statsToggle.on("mouseup", function(event) {
             self._switchStats();
@@ -29,7 +29,7 @@ TankTrouble.Statistics = {
     },
     
     _updateStatistics: function() {
-        var self = this;
+        const self = this;
 
         if (this.type === "global") {
             Backend.getInstance().getStatistics(
@@ -50,7 +50,7 @@ TankTrouble.Statistics = {
                 }
             );
         } else if (this.type === "server") {
-            var serverId = ClientManager.multiplayerServerId;
+            const serverId = ClientManager.multiplayerServerId;
 
             ClientManager._getSelectedServerStats(serverId, function(success, serverId, latency, gameCount, playerCount, message) {
                 self._updateNumber(self.onlinePlayerCount, playerCount || 0);
@@ -60,19 +60,18 @@ TankTrouble.Statistics = {
     },
     
     _updateNumber: function(element, newValue, suffix) {
-        var textContent = element.text();
-        var number = parseInt(textContent, 10);
+        const textContent = element.text();
+        const number = parseInt(textContent, 10);
         if (!isNaN(number)) {
             if (number != newValue) {
-                var oldColor = element.css('color');
                 if (newValue > number) {
                     $({value: number}).animate({value: newValue}, {
                           duration: 2000,
                           easing:'easeOutQuad',
                           step: function() {
                               // Update the element's text with ceiled value.
-                              var ceiledValue = Math.ceil(this.value);
-                              var finalSuffix = "";
+                              const ceiledValue = Math.ceil(this.value);
+                              let finalSuffix = "";
                               if (suffix) {
                                   finalSuffix = suffix + (ceiledValue != 1 ? "s":"");
                               }
@@ -81,26 +80,14 @@ TankTrouble.Statistics = {
                     });
                     element.addClass('positive');
                     element.switchClass('positive', '', 2000, 'easeOutQuad');
-                    /*element.css('color', 'lawngreen');
-                    element.prop('glowSize', 20);
-                    element.animate({color: oldColor, glowSize: 0}, {
-                        duration: 2000,
-                        easing: 'easeOutCubic',
-                        step: function() {
-                            element.css('text-shadow', '0px 0px ' + element.prop('glowSize') + 'px ' + element.css('color'));
-                        },
-                        complete: function() {
-                            element.css('text-shadow', 'none');
-                        }
-                    });*/
                 } else {
                     $({value: number}).animate({value: newValue}, {
                           duration: 2000,
                           easing:'easeOutQuad',
                           step: function() {
                               // Update the element's text with floored value.
-                              var flooredValue = Math.floor(this.value);
-                              var finalSuffix = "";
+                              const flooredValue = Math.floor(this.value);
+                              let finalSuffix = "";
                               if (suffix) {
                                   finalSuffix = suffix + (flooredValue != 1 ? "s":"");
                               }
@@ -109,22 +96,10 @@ TankTrouble.Statistics = {
                     });
                     element.addClass('negative');
                     element.switchClass('negative', '', 2000, 'easeOutQuad');
-/*                    element.css('color', 'red');
-                    element.prop('glowSize', 20);
-                    element.animate({color: oldColor, glowSize: 0}, {
-                        duration: 2000,
-                        easing: 'easeOutCubic',
-                        step: function() {
-                            element.css('text-shadow', '0px 0px ' + element.prop('glowSize') + 'px ' + element.css('color'));
-                        },
-                        complete: function() {
-                            element.css('text-shadow', 'none');
-                        }
-                    });*/
                 }
             }
         } else {
-            var finalSuffix = "";
+            let finalSuffix = "";
             if (suffix) {
                 finalSuffix = suffix + (newValue != 1 ? "s":"");
             }

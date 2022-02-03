@@ -1,4 +1,4 @@
-var Game = Game || {};
+const Game = Game || {};
 
 Game.UIGameState = Classy.newClass();
 
@@ -103,10 +103,10 @@ Game.UIGameState.methods({
     preload: function() {
         // Trigger load of images used for "breaking out" of Phaser canvas.
         // This prevents a one-frame flicker when breaking out first time.
-        var goldImage = $("<img class='hidden' src='" + g_url("assets/images/game/gold.png") + "' srcset='" + g_url("assets/images/game/gold@2x.png") + " 2x'>");
-        var diamondImage = $("<img class='hidden' src='" + g_url("assets/images/game/diamond.png") + "' srcset='" + g_url("assets/images/game/diamond@2x.png") + " 2x'>");
-        var diamondGlowImage = $("<img class='hidden' src='" + g_url("assets/images/game/diamondGlow.png") + "' srcset='" + g_url("assets/images/game/diamondGlow@2x.png") + " 2x'>");
-        var diamondRayImage = $("<img class='hidden' src='" + g_url("assets/images/game/diamondRays.png") + "' srcset='" + g_url("assets/images/game/diamondRays@2x.png") + " 2x'>");
+        const goldImage = $("<img class='hidden' src='" + g_url("assets/images/game/gold.png") + "' srcset='" + g_url("assets/images/game/gold@2x.png") + " 2x'>");
+        const diamondImage = $("<img class='hidden' src='" + g_url("assets/images/game/diamond.png") + "' srcset='" + g_url("assets/images/game/diamond@2x.png") + " 2x'>");
+        const diamondGlowImage = $("<img class='hidden' src='" + g_url("assets/images/game/diamondGlow.png") + "' srcset='" + g_url("assets/images/game/diamondGlow@2x.png") + " 2x'>");
+        const diamondRayImage = $("<img class='hidden' src='" + g_url("assets/images/game/diamondRays.png") + "' srcset='" + g_url("assets/images/game/diamondRays@2x.png") + " 2x'>");
         $("body").append(goldImage).append(diamondImage).append(diamondGlowImage).append(diamondRayImage);
     },
 
@@ -152,7 +152,7 @@ Game.UIGameState.methods({
         this.counterTimerGroup = this.game.add.group(this.overlayGroup);
 
         // Add pool of counter timer groups.
-        for (var i = 0; i < UIConstants.COUNTER_TIMER_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.COUNTER_TIMER_POOL_SIZE; ++i) {
             this.counterTimerGroup.add(new UICounterTimerGroup(this.game, this.gameController));
         }
 
@@ -163,7 +163,7 @@ Game.UIGameState.methods({
         this.countDownGroup = this.game.add.group(this.overlayGroup);
 
         // Add pool of count down images.
-        for (var i = 0; i < UIConstants.COUNT_DOWN_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.COUNT_DOWN_POOL_SIZE; ++i) {
             this.countDownGroup.add(new UICountDownImage(this.game));
         }
 
@@ -182,8 +182,8 @@ Game.UIGameState.methods({
 
         // Create the groups in the order they should sort:
 
-    	// Create maze floor group.
-    	this.mazeFloorGroup = this.game.add.group(this.gameGroup);
+		// Create maze floor group.
+		this.mazeFloorGroup = this.game.add.group(this.gameGroup);
 
         // Create spawn zone group.
         this.spawnZoneGroup = this.game.add.group(this.gameGroup);
@@ -228,10 +228,10 @@ Game.UIGameState.methods({
         this.laserGroup = this.game.add.group(this.gameGroup);
 
         // Create maze wall group.
-    	this.mazeWallGroup = this.game.add.group(this.gameGroup);
+		this.mazeWallGroup = this.game.add.group(this.gameGroup);
 
-    	// Create explosion group.
-    	this.explosionGroup = this.game.add.group(this.gameGroup);
+		// Create explosion group.
+		this.explosionGroup = this.game.add.group(this.gameGroup);
 
         // Create bullet puff group.
         this.bulletPuffGroup = this.game.add.group(this.gameGroup);
@@ -261,100 +261,100 @@ Game.UIGameState.methods({
         this.weaponSymbolGroup = this.game.add.group(this.gameGroup);
 
         // Add dust.
-        var dustEmitter = this.dustGroup.add(new UIDustEmitter(this.game));
+        const dustEmitter = this.dustGroup.add(new UIDustEmitter(this.game));
 
         // Add missile launch smoke.
-        var missileLaunchEmitter = this.missileLaunchGroup.add(new UIMissileLaunchEmitter(this.game));
+        const missileLaunchEmitter = this.missileLaunchGroup.add(new UIMissileLaunchEmitter(this.game));
 
         // Add pool of spawn zone sprites.
-        for (var i = 0; i < UIConstants.SPAWN_ZONE_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.SPAWN_ZONE_POOL_SIZE; ++i) {
             this.spawnZoneGroup.add(new UISpawnZoneSprite(this.game, this.gameController, this.spawnZoneTearingSound, this.spawnZoneUnstableSound));
         }
 
         // Add pool of crates.
-        for (var i = 0; i < UIConstants.CRATE_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.CRATE_POOL_SIZE; ++i) {
             this.crateGroup.add(new UICrateSprite(this.game, this.gameController, dustEmitter));
         }
 
         // Add pool of golds.
-        for (var i = 0; i < UIConstants.GOLD_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.GOLD_POOL_SIZE; ++i) {
             this.goldGroup.add(new UIGoldSprite(this.game, this.gameController, this.sparkleGroup));
         }
 
         // Add pool of diamond shine effects.
-        for (var i = 0; i < UIConstants.DIAMOND_SHINE_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.DIAMOND_SHINE_POOL_SIZE; ++i) {
             this.diamondShineGroup.add(new UIDiamondShineGroup(this.game));
         }
 
         // Add pool of diamonds.
-        for (var i = 0; i < UIConstants.DIAMOND_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.DIAMOND_POOL_SIZE; ++i) {
             this.diamondGroup.add(new UIDiamondSprite(this.game, this.gameController, this.diamondShineGroup, this.sparkleGroup));
         }
 
         // Add pool of sparkles.
-        for (var i = 0; i < UIConstants.SPARKLE_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.SPARKLE_POOL_SIZE; ++i) {
             this.sparkleGroup.add(new UISparkleImage(this.game))
         }
 
         // Add pool of projectiles
-        for (var i = 0; i < UIConstants.PROJECTILE_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.PROJECTILE_POOL_SIZE; ++i) {
             this.projectileGroup.add(new UIProjectileImage(this.game, this.gameController));
         }
 
         // Add pool of missiles and missile smoke
-        for (var i = 0; i < UIConstants.MISSILE_POOL_SIZE; ++i) {
-            var missile = this.missileGroup.add(new UIMissileImage(this.game, this.gameController, this.homingMissileTargetingSound));
-            var missileSmokeEmitter = this.missileSmokeGroup.add(new UIColouredSmokeEmitter(this.game, missile, UIConstants.MISSILE_SMOKE_COLOUR));
+        for (let i = 0; i < UIConstants.MISSILE_POOL_SIZE; ++i) {
+            const missile = this.missileGroup.add(new UIMissileImage(this.game, this.gameController, this.homingMissileTargetingSound));
+            const missileSmokeEmitter = this.missileSmokeGroup.add(new UIColouredSmokeEmitter(this.game, missile, UIConstants.MISSILE_SMOKE_COLOUR));
             missile.setSmokeEmitter(missileSmokeEmitter);
         }
 
         // Add pool of aimers
-        for (var i = 0; i < UIConstants.AIMER_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.AIMER_POOL_SIZE; ++i) {
             this.aimerGroup.add(new UIAimerGraphics(this.game, this.gameController));
         }
 
         // Add pool of lasers
-        for (var i = 0; i < UIConstants.LASER_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.LASER_POOL_SIZE; ++i) {
             this.laserGroup.add(new UILaserGraphics(this.game, this.gameController));
         }
 
         // Add pool of tanks.
-        for (var i = 0; i < UIConstants.TANK_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.TANK_POOL_SIZE; ++i) {
             this.tankGroup.add(new UITankSprite(this.game, this.gameController, this.fireBulletSound, this.fireLaserSound, this.fireShotgunSound, this.fireMissileSound, this.weaponStoreSound, dustEmitter, missileLaunchEmitter));
         }
 
         // Add pool of explosions.
-        for (var i = 0; i < UIConstants.EXPLOSION_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.EXPLOSION_POOL_SIZE; ++i) {
             this.explosionGroup.add(new UIExplosionGroup(this.game, this.tankExplosionSound));
         }
 
         // Add pool of bullet puffs.
-        for (var i = 0; i < UIConstants.BULLET_PUFF_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.BULLET_PUFF_POOL_SIZE; ++i) {
             this.bulletPuffGroup.add(new UIPuffSprite(this.game));
         }
 
         // Add pool of tank feathers.
-        for (var i = 0; i < UIConstants.TANK_FEATHER_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.TANK_FEATHER_POOL_SIZE; ++i) {
             this.tankFeatherGroup.add(new UITankFeatherSprite(this.game));
         }
 
         // Add pool of shield sprites.
-        for (var i = 0; i < UIConstants.SHIELD_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.SHIELD_POOL_SIZE; ++i) {
             this.shieldGroup.add(new UIShieldSprite(this.game, this.gameController, this.shieldWeakenedSound));
         }
 
         // Add pool of tank names.
-        for (var i = 0; i < UIConstants.TANK_NAME_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.TANK_NAME_POOL_SIZE; ++i) {
             this.tankNameGroup.add(new UITankNameGroup(this.game, this.gameController));
         }
 
         // Add pool of chat symbol sprites.
-        for (var i = 0; i < UIConstants.CHAT_SYMBOL_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.CHAT_SYMBOL_POOL_SIZE; ++i) {
             this.chatSymbolGroup.add(new UIChatSymbolImage(this.game, this.gameController));
         }
 
         // Add pool of weapon symbol stacks.
-        for (var i = 0; i < UIConstants.WEAPON_SYMBOL_POOL_SIZE; ++i) {
+        for (let i = 0; i < UIConstants.WEAPON_SYMBOL_POOL_SIZE; ++i) {
             this.weaponSymbolGroup.add(new UIWeaponSymbolGroup(this.game, this.gameController));
         }
 
@@ -389,11 +389,11 @@ Game.UIGameState.methods({
             ClientManager.getClient().requestMaze();
 
             // Try and set up game state and expanded round state.
-            var gameState = ClientManager.getClient().getGameState();
+            const gameState = ClientManager.getClient().getGameState();
             if (gameState) {
                 this.gameController.setGameState(gameState);
             }
-            var expandedRoundState = ClientManager.getClient().getExpandedRoundState();
+            const expandedRoundState = ClientManager.getClient().getExpandedRoundState();
             if (expandedRoundState) {
                 this.gameController.setRoundState(expandedRoundState);
             }
@@ -449,7 +449,6 @@ Game.UIGameState.methods({
         this.log.debug("FOCUS!");
         // Remove focus from other UI elements that might grab it upon refocusing of the page.
         // FIXME Perhaps pass a general UI object to which has its own blur method so the gamestate does need to know each UI component.
-        var self = this;
         setTimeout(function() {
             TankTrouble.ChatBox.blur();
         }, 100);
@@ -461,15 +460,15 @@ Game.UIGameState.methods({
 
     _onSizeChangeHandler: function() {
         this.log.debug("SIZE CHANGE!");
-        var localBounds = this.gameGroup.getLocalBounds();
-        var unscaledMazeWidth = localBounds.width;
-        var unscaledMazeHeight = localBounds.height;
-        var unscaledMazeOffsetX = -localBounds.x;
-        var unscaledMazeOffsetY = -localBounds.y;
+        const localBounds = this.gameGroup.getLocalBounds();
+        const unscaledMazeWidth = localBounds.width;
+        const unscaledMazeHeight = localBounds.height;
+        const unscaledMazeOffsetX = -localBounds.x;
+        const unscaledMazeOffsetY = -localBounds.y;
 
         // Leave a small gap on the sides, and a larger one at the bottom.
         // Do not scale up more than 2x.
-        var gameScale = Math.min(2.0, Math.min((this.game.width - UIConstants.MAZE_SIDE_MARGIN) / unscaledMazeWidth, (this.game.height - UIConstants.MAZE_BOTTOM_MARGIN - UIConstants.MAZE_TOP_MARGIN) / unscaledMazeHeight));
+        let gameScale = Math.min(2.0, Math.min((this.game.width - UIConstants.MAZE_SIDE_MARGIN) / unscaledMazeWidth, (this.game.height - UIConstants.MAZE_BOTTOM_MARGIN - UIConstants.MAZE_TOP_MARGIN) / unscaledMazeHeight));
         // Round the scale to a whole percent.
         gameScale = Math.floor(gameScale * 100.0) / 100.0;
         this.gameGroup.scale.set(gameScale, gameScale);
@@ -522,9 +521,9 @@ Game.UIGameState.methods({
                     // Clean up any potential celebrations.
                     this._cleanUp();
 
-                    var message;
-                    var header = UIConstants.GAME_MODE_NAME_INFO[this.gameController.getMode()].NAME;
-                    var iconFrame = UIConstants.GAME_MODE_NAME_INFO[this.gameController.getMode()].ICON;
+                    let message;
+                    const header = UIConstants.GAME_MODE_NAME_INFO[this.gameController.getMode()].NAME;
+                    const iconFrame = UIConstants.GAME_MODE_NAME_INFO[this.gameController.getMode()].ICON;
                     if (this.gameController.getTotalPlayerCount() < Constants.GAME_MODE_INFO[this.gameController.getMode()].MIN_PLAYERS) {
                         message = "Waiting for more players";
                     } else {
@@ -546,17 +545,17 @@ Game.UIGameState.methods({
         this.gameController.update();
         this.updateRoundTime();
 
-    	if (this.cameraShake >= 0)
-    	{
-            var shakeX = Math.random() * this.cameraShake - this.cameraShake / 2.0;
-            var shakeY = Math.random() * this.cameraShake - this.cameraShake / 2.0;
+		if (this.cameraShake >= 0)
+		{
+            const shakeX = Math.random() * this.cameraShake - this.cameraShake / 2.0;
+            const shakeY = Math.random() * this.cameraShake - this.cameraShake / 2.0;
 
             this.game.world.setBounds(shakeX, shakeY, this.game.width + shakeX, this.game.height + shakeY);
-    		this.cameraShake -= UIConstants.CAMERA_SHAKE_FADE;
-    	}
+			this.cameraShake -= UIConstants.CAMERA_SHAKE_FADE;
+		}
 
-        var tanks = this.gameController.getTanks();
-        for (var tank in tanks) {
+        const tanks = this.gameController.getTanks();
+        for (const tank in tanks) {
             if (Math.random() > UIConstants.INVERSE_RUBBLE_SPAWN_PROBABILITY_IN_THE_OPEN) {
                 this._spawnRubble(tanks[tank]);
             }
@@ -566,13 +565,13 @@ Game.UIGameState.methods({
         //this._debugDrawWorld(this.game.world);
         // FIXME Wrap the following in _debugDrawAI
         /*if (this.gameController.getMaze()) {
-            var position = null;
-            for (var tank in tanks) {
+            let position = null;
+            for (const tank in tanks) {
                 position = {x: Math.floor(tanks[tank].getX()/Constants.MAZE_TILE_SIZE.m), y: Math.floor(tanks[tank].getY()/Constants.MAZE_TILE_SIZE.m)};
                 break;
             }
             if (position !== null) {
-                var distances = this.gameController.getMaze().getDistancesFromPosition(position);
+                const distances = this.gameController.getMaze().getDistancesFromPosition(position);
                 if (distances) {
                     this._debugDrawMazeMap(distances, 0, 18, 0x00ff00, 0xff0000, 0.8);
                 }
@@ -582,9 +581,9 @@ Game.UIGameState.methods({
             this._debugDrawMazeMap(this.gameController.getMaze().getDeadEndPenalties(), 0, Constants.MAZE_MAX_DEAD_END_PENALTY, 0xff0000, 0x00ff00, 0.8);
         }*/
         /*if (this.gameController.getMaze()) {
-            var startPosition = null;
-            var endPosition = null;
-            for (var tank in tanks) {
+            let startPosition = null;
+            let endPosition = null;
+            for (const tank in tanks) {
                 if (startPosition === null) {
                     startPosition = {x: Math.floor(tanks[tank].getX()/Constants.MAZE_TILE_SIZE.m), y: Math.floor(tanks[tank].getY()/Constants.MAZE_TILE_SIZE.m)};
                 }
@@ -598,9 +597,9 @@ Game.UIGameState.methods({
             }
         }*/
         /*if (this.gameController.getMaze()) {
-            var startPosition = null;
-            var fromPosition = null;
-            for (var tank in tanks) {
+            let startPosition = null;
+            let fromPosition = null;
+            for (const tank in tanks) {
                 if (startPosition === null) {
                     startPosition = {x: Math.floor(tanks[tank].getX()/Constants.MAZE_TILE_SIZE.m), y: Math.floor(tanks[tank].getY()/Constants.MAZE_TILE_SIZE.m)};
                 }
@@ -614,8 +613,8 @@ Game.UIGameState.methods({
             }
         }*/
         /*if (this.gameController.getMaze()) {
-            var projectiles = this.gameController.getProjectiles();
-            for (var projectile in projectiles) {
+            const projectiles = this.gameController.getProjectiles();
+            for (const projectile in projectiles) {
                 // FIXME Take remaining lifetime into account? Probably do it from the caller.
                 //        remainingLength = Math.min(maxLength, currentDirection.Length() * (projectile.lifetime - projectile.getTimeAlive()));
                 this._debugDrawPath(B2DUtils.calculateProjectilePath(this.gameController.getB2DWorld(), projectiles[projectile], 8, Constants.MAZE_TILE_SIZE.m * 10, false), 5, 0xffff00, 0xdddd00);
@@ -623,35 +622,35 @@ Game.UIGameState.methods({
             }
         }*/
         /*if (this.gameController.getMaze()) {
-            var selectedTank = null;
-            var endPosition = null;
-            for (var tank in tanks) {
+            let selectedTank = null;
+            let endPosition = null;
+            for (const tank in tanks) {
                 selectedTank = tanks[tank];
                 break;
             }
             if (selectedTank !== null) {
-                var position = {x: Math.floor(selectedTank.getX()/Constants.MAZE_TILE_SIZE.m), y: Math.floor(selectedTank.getY()/Constants.MAZE_TILE_SIZE.m)};
+                const position = {x: Math.floor(selectedTank.getX()/Constants.MAZE_TILE_SIZE.m), y: Math.floor(selectedTank.getY()/Constants.MAZE_TILE_SIZE.m)};
 
-                var maze = this.gameController.getMaze();
-                var threatMap = MazeMap.create(maze.getWidth(), maze.getHeight(), 0);
-                var projectiles = this.gameController.getProjectiles();
-                for (var projectile in projectiles) {
-                    var projectilePath = B2DUtils.calculateProjectilePath(this.gameController.getB2DWorld(), projectiles[projectile], 8, Constants.MAZE_TILE_SIZE.m * 10, false);
+                const maze = this.gameController.getMaze();
+                const threatMap = MazeMap.create(maze.getWidth(), maze.getHeight(), 0);
+                const projectiles = this.gameController.getProjectiles();
+                for (const projectile in projectiles) {
+                    const projectilePath = B2DUtils.calculateProjectilePath(this.gameController.getB2DWorld(), projectiles[projectile], 8, Constants.MAZE_TILE_SIZE.m * 10, false);
                     B2DUtils.splatPathUntoMazeMap(threatMap, projectilePath, Constants.MAZE_TILE_SIZE.m * 0.1, function (tile, length, stepSize) {
-                        var distance = maze.getDistanceBetweenPositions(tile, position);
+                        const distance = maze.getDistanceBetweenPositions(tile, position);
                         if (distance === false) {
                             return 0;
                         }
 
-                        var projectileTimeToHere = length / new Phaser.Point(projectiles[projectile].getSpeedX(), projectiles[projectile].getSpeedY()).getMagnitude();
-                        var tankTimeToHere = distance * Constants.MAZE_TILE_SIZE.m / Constants.TANK.FORWARD_SPEED.m;
+                        const projectileTimeToHere = length / new Phaser.Point(projectiles[projectile].getSpeedX(), projectiles[projectile].getSpeedY()).getMagnitude();
+                        const tankTimeToHere = distance * Constants.MAZE_TILE_SIZE.m / Constants.TANK.FORWARD_SPEED.m;
 
                         return Math.min(1, Math.max(0, 1 - Math.abs(projectileTimeToHere - tankTimeToHere) * 0.25)) * 0.2 * stepSize;
                     });
                 }
-                for (var tank in tanks) {
+                for (const tank in tanks) {
                     if (tanks[tank] !== selectedTank) {
-                        var firingPath = B2DUtils.calculateFiringPath(this.gameController.getB2DWorld(), tanks[tank], 0, 4, Constants.MAZE_TILE_SIZE.m * 4, false);
+                        const firingPath = B2DUtils.calculateFiringPath(this.gameController.getB2DWorld(), tanks[tank], 0, 4, Constants.MAZE_TILE_SIZE.m * 4, false);
                         B2DUtils.splatPathUntoMazeMap(threatMap, firingPath, Constants.MAZE_TILE_SIZE.m * 0.1, function (tile, length, stepSize) {
                             return (1.0 - length / (Constants.MAZE_TILE_SIZE.m * 4)) * 0.2 * stepSize;
                         });
@@ -667,7 +666,7 @@ Game.UIGameState.methods({
             }
         }*/
         /*if (this.gameController.getMaze()) {
-            for (var tank in tanks) {
+            for (const tank in tanks) {
                 this._debugDrawPath(B2DUtils.calculateFiringPath(this.gameController.getB2DWorld(), tanks[tank], 0, 4, Constants.MAZE_TILE_SIZE.m * 10, false), 5, 0x00ff00, 0x00aa00);
                 break;
             }
@@ -684,9 +683,9 @@ Game.UIGameState.methods({
         if (this.elapsedTime > 0) {
             this.elapsedTime += this.game.time.delta;
 
-            var ms = Math.floor((this.elapsedTime % 1000) / 10) + "";
-            var sec = Math.floor((this.elapsedTime / 1000) % 60) + "";
-            var min = Math.floor((this.elapsedTime / (1000 * 60)) % 60) + "";
+            const ms = Math.floor((this.elapsedTime % 1000) / 10) + "";
+            const sec = Math.floor((this.elapsedTime / 1000) % 60) + "";
+            const min = Math.floor((this.elapsedTime / (1000 * 60)) % 60) + "";
 
             this.roundTimeText.text = (" " + min + sec.padStart(3, ":00") + ms.padStart(3, ":00") + " ");
         }
@@ -698,10 +697,10 @@ Game.UIGameState.methods({
 
     _getTankPosition: function(playerId) {
         if (playerId in this.tankSprites) {
-            var tank = this.tankSprites[playerId];
+            const tank = this.tankSprites[playerId];
 
-            var gameBounds = this.game.scale.bounds;
-            var position = tank.toGlobal(new Phaser.Point(0, 0));
+            const gameBounds = this.game.scale.bounds;
+            const position = tank.toGlobal(new Phaser.Point(0, 0));
 
             // Scale from game canvas position to pixel position.
             Phaser.Point.divide(position, this.game.scale.scaleFactor, position);
@@ -714,16 +713,16 @@ Game.UIGameState.methods({
 
     _getCollectiblePositionAngleAndScale: function(collectibleId) {
         if (collectibleId in this.collectibles) {
-            var collectible = this.collectibles[collectibleId];
+            const collectible = this.collectibles[collectibleId];
 
-            var gameBounds = this.game.scale.bounds;
-            var position = collectible.toGlobal(new Phaser.Point(0, 0));
+            const gameBounds = this.game.scale.bounds;
+            const position = collectible.toGlobal(new Phaser.Point(0, 0));
 
             // Scale from game canvas position to pixel position.
             Phaser.Point.divide(position, this.game.scale.scaleFactor, position);
 
-            var extraInfo = collectible.getExtraPositionInfo();
-            var scale = collectible.worldScale.x / UIConstants.GAME_ASSET_SCALE;
+            const extraInfo = collectible.getExtraPositionInfo();
+            const scale = collectible.worldScale.x / UIConstants.GAME_ASSET_SCALE;
             return {x: gameBounds.x + position.x, y: gameBounds.y + position.y, angle: collectible.angle, scale: scale, extraInfo: extraInfo};
         }
 
@@ -809,8 +808,8 @@ Game.UIGameState.methods({
                 if (Constants.GAME_MODE_INFO[self.gameController.getMode()].HAS_CELEBRATION) {
                     self.nextVictoryAward = data;
                 } else {
-                    for (var i = 0; i < data.getPlayerIds().length; ++i) {
-                        var playerId = data.getPlayerIds()[i];
+                    for (let i = 0; i < data.getPlayerIds().length; ++i) {
+                        const playerId = data.getPlayerIds()[i];
                         GameManager.sendVictoryGoldToTank(playerId, data.getGoldAmountPerWinner(), self._getTankPosition(playerId));
                         GameManager.showXPChange(data.getExperiencePerWinner(), UIPlayerPanel.getLocalTankIconPosition(playerId), self.gameController.getRanked() ? 1200 : 0);
                     }
@@ -835,7 +834,7 @@ Game.UIGameState.methods({
                         TankTrouble.MessageOverlay,
                         {
                             headline: 'Embedding detected',
-                            message: "We hope you are enjoying TankTrouble!<br/><br/>This site has embedded the game without permission, thereby stealing our revenue, which pays for the development and servers.<br/>Please go to the original site to show your support and enjoy the game as it was intended.<br/><button class=\"medium\" type=\"button\" onclick=\"window.open(window.self.location, \'_blank\');\">Go to TankTrouble.com</button><br/>Thanks for playing!",
+                            message: "We hope you are enjoying TankTrouble!<br/><br/>This site has embedded the game without permission, thereby stealing our revenue, which pays for the development and servers.<br/>Please go to the original site to show your support and enjoy the game as it was intended.<br/><button class=\"medium\" type=\"button\" onclick=\"window.open(window.self.location, '_blank');\">Go to TankTrouble.com</button><br/>Thanks for playing!",
                             canCancel: false
                         }
                     );
@@ -868,7 +867,7 @@ Game.UIGameState.methods({
             }
             case RoundModel._EVENTS.TANK_CREATED:
             {
-                var smoothing = Users.isAnyUser(data.getPlayerId()) || Constants.getMode() == Constants.MODE_CLIENT_LOCAL ? UIConstants.TANK_LOCAL_SMOOTHING : UIConstants.TANK_ONLINE_SMOOTHING;
+                const smoothing = Users.isAnyUser(data.getPlayerId()) || Constants.getMode() == Constants.MODE_CLIENT_LOCAL ? UIConstants.TANK_LOCAL_SMOOTHING : UIConstants.TANK_ONLINE_SMOOTHING;
                 self._createTank(data, self.gameController.getInitialRoundStateReceived(), smoothing);
                 break;
             }
@@ -891,14 +890,14 @@ Game.UIGameState.methods({
             }
             case RoundModel._EVENTS.TANK_CHICKENED_OUT:
             {
-                var tankPosition = self._getTankPosition(data.getPlayerId());
+                const tankPosition = self._getTankPosition(data.getPlayerId());
 
                 if (self._removeTank(data.getPlayerId())) {
                     self._spawnTankFeathers(data.getPlayerId(), tankPosition);
                 }
 
-                var projectileIds = data.getProjectileIds();
-                for (var i = 0; i < projectileIds.length; ++i) {
+                const projectileIds = data.getProjectileIds();
+                for (let i = 0; i < projectileIds.length; ++i) {
                     self._removeProjectile(projectileIds[i]);
                 }
 
@@ -935,7 +934,7 @@ Game.UIGameState.methods({
             }
             case RoundModel._EVENTS.TANK_SHIELD_COLLISION:
             {
-                var shieldedTank = self.gameController.getTank(data.shieldA.getPlayerId());
+                const shieldedTank = self.gameController.getTank(data.shieldA.getPlayerId());
                 if (shieldedTank) {
                     if (Math.random() > UIConstants.INVERSE_SHIELD_SPARK_PROBABILITY_IN_COLLISION) {
                         self._bounceTankOnShield(data.tankA, shieldedTank, data.collisionPoint, true);
@@ -948,7 +947,7 @@ Game.UIGameState.methods({
             }
             case RoundModel._EVENTS.PROJECTILE_SHIELD_COLLISION:
             {
-                var shieldedTank = self.gameController.getTank(data.shieldA.getPlayerId());
+                const shieldedTank = self.gameController.getTank(data.shieldA.getPlayerId());
                 if (shieldedTank) {
                     self._bounceProjectileOnShield(data.projectile, shieldedTank, data.collisionPoint);
                 }
@@ -961,8 +960,8 @@ Game.UIGameState.methods({
             }
             case RoundModel._EVENTS.SHIELD_SHIELD_COLLISION:
             {
-                var shieldedTankA = self.gameController.getTank(data.shieldA.getPlayerId());
-                var shieldedTankB = self.gameController.getTank(data.shieldB.getPlayerId());
+                const shieldedTankA = self.gameController.getTank(data.shieldA.getPlayerId());
+                const shieldedTankB = self.gameController.getTank(data.shieldB.getPlayerId());
                 if (shieldedTankA && shieldedTankB) {
                     if (Math.random() > UIConstants.INVERSE_SHIELD_SPARK_PROBABILITY_IN_COLLISION) {
                         if (Math.random() > 0.5) {
@@ -1171,8 +1170,8 @@ Game.UIGameState.methods({
         // Clean up UI physics.
         // NOT necessary as killing the associated sprites removes the bodies from the world!
         // EXCEPT! The maze bodies do NOT have associated sprites, so they need to be removed manually!
-        var bodies = this.game.physics.p2.getBodies();
-        for (var i = 0; i < bodies.length; ++i) {
+        const bodies = this.game.physics.p2.getBodies();
+        for (let i = 0; i < bodies.length; ++i) {
             if (bodies[i]) {
                 this.game.physics.p2.removeBody(bodies[i]);
             }
@@ -1191,68 +1190,68 @@ Game.UIGameState.methods({
         //FIXME Wrap maze in uimazegroup.js
 
         // Create graphics.
-        var theme = maze.getTheme();
-        var borders = maze.getBorders();
-        var floors = maze.getFloors();
-        var spaces = maze.getSpaces();
-        var walls = maze.getWalls();
-        var wallDecorations = maze.getWallDecorations();
+        const theme = maze.getTheme();
+        const borders = maze.getBorders();
+        const floors = maze.getFloors();
+        const spaces = maze.getSpaces();
+        const walls = maze.getWalls();
+        const wallDecorations = maze.getWallDecorations();
 
-        for (var i = 0; i < borders.length; ++i) {
-            var border = borders[i];
+        for (let i = 0; i < borders.length; ++i) {
+            const border = borders[i];
 
-            var borderImage = 'border' + theme + '-' + border.number;
-            var sprite = this.mazeFloorGroup.create((border.x + 0.5 + border.offsetX) * Constants.MAZE_TILE_SIZE.px, (border.y + 0.5 + border.offsetY) * Constants.MAZE_TILE_SIZE.px, 'game', borderImage);
+            const borderImage = 'border' + theme + '-' + border.number;
+            const sprite = this.mazeFloorGroup.create((border.x + 0.5 + border.offsetX) * Constants.MAZE_TILE_SIZE.px, (border.y + 0.5 + border.offsetY) * Constants.MAZE_TILE_SIZE.px, 'game', borderImage);
             sprite.scale.setTo(UIConstants.GAME_ASSET_SCALE * (border.flip ? -1 : 1), UIConstants.GAME_ASSET_SCALE);
             sprite.anchor.setTo(0.5, 1.0);
             sprite.rotation = border.rotation;
         }
 
-        for (var i = 0; i < floors.length; ++i) {
-            var floor = floors[i];
+        for (let i = 0; i < floors.length; ++i) {
+            const floor = floors[i];
 
-            var floorImage = 'floor' + theme + '-' + floor.number;
+            const floorImage = 'floor' + theme + '-' + floor.number;
 
-            var sprite = this.mazeFloorGroup.create((floor.x + 0.5) * Constants.MAZE_TILE_SIZE.px, (floor.y + 0.5) * Constants.MAZE_TILE_SIZE.px, 'game', floorImage);
+            const sprite = this.mazeFloorGroup.create((floor.x + 0.5) * Constants.MAZE_TILE_SIZE.px, (floor.y + 0.5) * Constants.MAZE_TILE_SIZE.px, 'game', floorImage);
             sprite.scale.setTo(UIConstants.GAME_ASSET_SCALE, UIConstants.GAME_ASSET_SCALE);
             sprite.anchor.setTo(0.5, 0.5);
             sprite.rotation = floor.rotation;
         }
 
-        for (var i = 0; i < wallDecorations.length; ++i) {
-            var wallDecoration = wallDecorations[i];
+        for (let i = 0; i < wallDecorations.length; ++i) {
+            const wallDecoration = wallDecorations[i];
 
-            var wallDecorationImage = 'wallDecoration' + theme + '-' + wallDecoration.number;
+            const wallDecorationImage = 'wallDecoration' + theme + '-' + wallDecoration.number;
 
-            var sprite = this.mazeWallDecorationGroup.create((wallDecoration.x + 0.5) * Constants.MAZE_TILE_SIZE.px, (wallDecoration.y + 0.5) * Constants.MAZE_TILE_SIZE.px, 'game', wallDecorationImage);
+            const sprite = this.mazeWallDecorationGroup.create((wallDecoration.x + 0.5) * Constants.MAZE_TILE_SIZE.px, (wallDecoration.y + 0.5) * Constants.MAZE_TILE_SIZE.px, 'game', wallDecorationImage);
             sprite.scale.setTo(UIConstants.GAME_ASSET_SCALE, UIConstants.GAME_ASSET_SCALE);
             sprite.anchor.setTo(0.5, 0.5);
             sprite.rotation = wallDecoration.rotation;
         }
 
-        for (var i = 0; i < spaces.length; ++i) {
-            var space = spaces[i];
+        for (let i = 0; i < spaces.length; ++i) {
+            const space = spaces[i];
 
-            var spaceImage = 'space' + theme + '-' + space.number;
+            const spaceImage = 'space' + theme + '-' + space.number;
 
-            var sprite = this.mazeFloorGroup.create((space.x + 0.5) * Constants.MAZE_TILE_SIZE.px, (space.y + 0.5) * Constants.MAZE_TILE_SIZE.px, 'game', spaceImage);
+            const sprite = this.mazeFloorGroup.create((space.x + 0.5) * Constants.MAZE_TILE_SIZE.px, (space.y + 0.5) * Constants.MAZE_TILE_SIZE.px, 'game', spaceImage);
             sprite.scale.setTo(UIConstants.GAME_ASSET_SCALE, UIConstants.GAME_ASSET_SCALE);
             sprite.anchor.setTo(0.5, 0.5);
             sprite.rotation = space.rotation;
         }
 
-        for (var i = 0; i < walls.length; ++i) {
-            var wall = walls[i];
+        for (let i = 0; i < walls.length; ++i) {
+            const wall = walls[i];
 
-            var wallImage = 'wall' + theme + '-' + wall.number;
+            const wallImage = 'wall' + theme + '-' + wall.number;
 
-            var sprite = this.mazeWallGroup.create((wall.x + 0.5 + wall.offsetX) * Constants.MAZE_TILE_SIZE.px, (wall.y + 0.5 + wall.offsetY) * Constants.MAZE_TILE_SIZE.px, 'game', wallImage);
+            const sprite = this.mazeWallGroup.create((wall.x + 0.5 + wall.offsetX) * Constants.MAZE_TILE_SIZE.px, (wall.y + 0.5 + wall.offsetY) * Constants.MAZE_TILE_SIZE.px, 'game', wallImage);
             sprite.anchor.setTo(0.5, 0.5);
             sprite.scale.setTo(UIConstants.GAME_ASSET_SCALE * (wall.flipX ? -1 : 1), UIConstants.GAME_ASSET_SCALE * (wall.flipY ? -1 : 1));
             sprite.rotation = wall.rotation;
 
             // Set up UI Physics body.
-            var wallBody = new Phaser.Physics.P2.Body(this.game, null, (wall.x + 0.5 + wall.offsetX) * Constants.MAZE_TILE_SIZE.px, (wall.y + 0.5 + wall.offsetY) * Constants.MAZE_TILE_SIZE.px);
+            const wallBody = new Phaser.Physics.P2.Body(this.game, null, (wall.x + 0.5 + wall.offsetX) * Constants.MAZE_TILE_SIZE.px, (wall.y + 0.5 + wall.offsetY) * Constants.MAZE_TILE_SIZE.px);
             wallBody.setRectangle(Constants.MAZE_TILE_SIZE.px + Constants.MAZE_WALL_WIDTH.px, Constants.MAZE_WALL_WIDTH.px, 0.0, 0.0, wall.rotation);
             wallBody.dynamic = false;
             wallBody.setMaterial(UIUtils.wallMaterial);
@@ -1269,7 +1268,7 @@ Game.UIGameState.methods({
 
     _spawnRoundTitle: function(name, ranked) {
         this.roundTitleShown = true;
-        var subtitle = "";
+        let subtitle = "";
         if (ranked) {
             subtitle = "Ranked";
         } else if (this.gameController.getMode() == Constants.GAME_MODES.BOOT_CAMP) {
@@ -1279,7 +1278,7 @@ Game.UIGameState.methods({
     },
 
     _spawnCountDown: function(value) {
-        var countDownSprite = this.countDownGroup.getFirstExists(false);
+        const countDownSprite = this.countDownGroup.getFirstExists(false);
         if (countDownSprite) {
             countDownSprite.spawn(value);
         } else {
@@ -1288,12 +1287,12 @@ Game.UIGameState.methods({
     },
 
     _createTank: function(tank, playSpawnAnimation, smoothing) {
-        var tankSprite = this.tankGroup.getFirstExists(false);
+        const tankSprite = this.tankGroup.getFirstExists(false);
         if (tankSprite) {
             this.tankSprites[tank.getPlayerId()] = tankSprite;
             tankSprite.spawn(UIUtils.mpx(tank.getX()), UIUtils.mpx(tank.getY()), tank.getRotation(), tank.getPlayerId(), playSpawnAnimation, smoothing);
 
-            var tankNameSprite = this.tankNameGroup.getFirstExists(false);
+            const tankNameSprite = this.tankNameGroup.getFirstExists(false);
             if (tankNameSprite) {
                 tankNameSprite.spawn(tank.getPlayerId());
             } else {
@@ -1322,11 +1321,11 @@ Game.UIGameState.methods({
     },
 
     _spawnTankExplosion: function(playerId) {
-        var explosion = this.explosionGroup.getFirstExists(false);
-        var tank = this.gameController.getTank(playerId);
+        const explosion = this.explosionGroup.getFirstExists(false);
+        const tank = this.gameController.getTank(playerId);
         if (tank && explosion) {
-            var x = UIUtils.mpx(tank.getX());
-            var y = UIUtils.mpx(tank.getY());
+            const x = UIUtils.mpx(tank.getX());
+            const y = UIUtils.mpx(tank.getY());
 
             explosion.spawn(x, y, playerId);
         } else {
@@ -1335,14 +1334,14 @@ Game.UIGameState.methods({
     },
 
     _spawnTankFeathers: function(playerId, tankPosition) {
-        var tank = this.gameController.getTank(playerId);
+        const tank = this.gameController.getTank(playerId);
         if (tank) {
             this.chickenOutSound.play();
-            for (var i = 0; i < UIConstants.TANK_FEATHER_COUNT; ++i) {
-                var feather = this.tankFeatherGroup.getFirstExists(false);
+            for (let i = 0; i < UIConstants.TANK_FEATHER_COUNT; ++i) {
+                const feather = this.tankFeatherGroup.getFirstExists(false);
                 if (feather) {
-                    var x = UIUtils.mpx(tank.getX());
-                    var y = UIUtils.mpx(tank.getY());
+                    const x = UIUtils.mpx(tank.getX());
+                    const y = UIUtils.mpx(tank.getY());
 
                     feather.spawn(x, y);
                 } else {
@@ -1350,7 +1349,7 @@ Game.UIGameState.methods({
                 }
             }
 
-            var stake = this.gameController.getStake(playerId);
+            const stake = this.gameController.getStake(playerId);
             if (stake) {
                 GameManager.showRankChange(-stake.value, tankPosition);
             }
@@ -1368,7 +1367,7 @@ Game.UIGameState.methods({
     },
 
     _fireWeapon: function(playerId) {
-        var tankSprite = this.tankSprites[playerId];
+        const tankSprite = this.tankSprites[playerId];
         if (tankSprite) {
             tankSprite.fire();
         }
@@ -1411,7 +1410,7 @@ Game.UIGameState.methods({
         switch(projectile.getType()) {
             case Constants.WEAPON_TYPES.BULLET:
             {
-                var projectileImage = this.projectileGroup.getFirstExists(false);
+                let projectileImage = this.projectileGroup.getFirstExists(false);
                 if (!projectileImage) {
                     projectileImage = this.projectileGroup.add(new UIProjectileImage(this.game, this.gameController));
                 }
@@ -1421,7 +1420,7 @@ Game.UIGameState.methods({
             }
             case Constants.WEAPON_TYPES.LASER:
             {
-                var laserGraphicsInstance = this.laserGroup.getFirstExists(false);
+                let laserGraphicsInstance = this.laserGroup.getFirstExists(false);
                 if (!laserGraphicsInstance) {
                     laserGraphicsInstance = this.laserGroup.add(new UILaserGraphics(this.game, this.gameController));
                 }
@@ -1431,7 +1430,7 @@ Game.UIGameState.methods({
             }
             case Constants.WEAPON_TYPES.DOUBLE_BARREL:
             {
-                var projectileImage = this.projectileGroup.getFirstExists(false);
+                let projectileImage = this.projectileGroup.getFirstExists(false);
                 if (!projectileImage) {
                     projectileImage = this.projectileGroup.add(new UIProjectileImage(this.game, this.gameController));
                 }
@@ -1441,7 +1440,7 @@ Game.UIGameState.methods({
             }
             case Constants.WEAPON_TYPES.SHOTGUN:
             {
-                var projectileImage = this.projectileGroup.getFirstExists(false);
+                let projectileImage = this.projectileGroup.getFirstExists(false);
                 if (!projectileImage) {
                     projectileImage = this.projectileGroup.add(new UIProjectileImage(this.game, this.gameController));
                 }
@@ -1451,7 +1450,7 @@ Game.UIGameState.methods({
             }
             case Constants.WEAPON_TYPES.HOMING_MISSILE:
             {
-                var homingMissileImage = this.missileGroup.getFirstExists(false);
+                let homingMissileImage = this.missileGroup.getFirstExists(false);
                 if (!homingMissileImage) {
                     homingMissileImage = this.missileGroup.add(new UIMissileImage(this.game, this.gameController, this.homingMissileTargetingSound));
                 }
@@ -1476,7 +1475,7 @@ Game.UIGameState.methods({
         switch(projectile.getType()) {
             case Constants.WEAPON_TYPES.LASER:
             {
-                var laserGraphicsInstance = this.projectiles[projectile.getId()];
+                const laserGraphicsInstance = this.projectiles[projectile.getId()];
                 if (laserGraphicsInstance) {
                     laserGraphicsInstance.addPoint(UIUtils.mpx(collisionPoint.x), UIUtils.mpx(collisionPoint.y));
                 }
@@ -1500,7 +1499,7 @@ Game.UIGameState.methods({
             }
             case Constants.WEAPON_TYPES.LASER:
             {
-                var laserGraphicsInstance = this.projectiles[projectile.getId()];
+                const laserGraphicsInstance = this.projectiles[projectile.getId()];
                 if (laserGraphicsInstance) {
                     laserGraphicsInstance.addPoint(UIUtils.mpx(collisionPoint.x), UIUtils.mpx(collisionPoint.y));
                 }
@@ -1517,7 +1516,7 @@ Game.UIGameState.methods({
     },
 
     _spawnProjectilePuffs: function(projectileId) {
-        var projectile = this.gameController.getProjectile(projectileId);
+        const projectile = this.gameController.getProjectile(projectileId);
         if (projectile) {
             switch (projectile.getType()) {
                 case Constants.WEAPON_TYPES.BULLET:
@@ -1525,14 +1524,14 @@ Game.UIGameState.methods({
                 case Constants.WEAPON_TYPES.HOMING_MISSILE:
                 {
                     this.bulletPuffSound.play();
-                    var numPuffs = QualityManager.getQualityValue(QualityManager.QUALITY_PARAMETERS.BULLET_PUFF_COUNT);
-                    for (var i = 0; i < numPuffs; ++i) {
-                        var puff = this.bulletPuffGroup.getFirstExists(false);
+                    const numPuffs = QualityManager.getQualityValue(QualityManager.QUALITY_PARAMETERS.BULLET_PUFF_COUNT);
+                    for (let i = 0; i < numPuffs; ++i) {
+                        const puff = this.bulletPuffGroup.getFirstExists(false);
                         if (puff) {
-                            var x = UIUtils.mpx(projectile.getX());
-                            var y = UIUtils.mpx(projectile.getY());
-                            var speedX = UIUtils.mpx(projectile.getSpeedX());
-                            var speedY = UIUtils.mpx(projectile.getSpeedY());
+                            const x = UIUtils.mpx(projectile.getX());
+                            const y = UIUtils.mpx(projectile.getY());
+                            const speedX = UIUtils.mpx(projectile.getSpeedX());
+                            const speedY = UIUtils.mpx(projectile.getSpeedY());
 
                             puff.spawn(x, y, speedX, speedY);
                         } else {
@@ -1546,12 +1545,12 @@ Game.UIGameState.methods({
                     if (!this.bulletPuffSound.isPlaying) {
                         this.bulletPuffSound.play();
                     }
-                    var puff = this.bulletPuffGroup.getFirstExists(false);
+                    const puff = this.bulletPuffGroup.getFirstExists(false);
                     if (puff) {
-                        var x = UIUtils.mpx(projectile.getX());
-                        var y = UIUtils.mpx(projectile.getY());
-                        var speedX = UIUtils.mpx(projectile.getSpeedX());
-                        var speedY = UIUtils.mpx(projectile.getSpeedY());
+                        const x = UIUtils.mpx(projectile.getX());
+                        const y = UIUtils.mpx(projectile.getY());
+                        const speedX = UIUtils.mpx(projectile.getSpeedX());
+                        const speedY = UIUtils.mpx(projectile.getSpeedY());
 
                         puff.spawn(x, y, speedX, speedY);
                     } else {
@@ -1579,7 +1578,7 @@ Game.UIGameState.methods({
             case Constants.COLLECTIBLE_TYPES.CRATE_SHIELD:
             case Constants.COLLECTIBLE_TYPES.CRATE_SPEED_BOOST:
             {
-                var crateSprite = this.crateGroup.getFirstExists(false);
+                const crateSprite = this.crateGroup.getFirstExists(false);
                 if (crateSprite) {
                     this.collectibles[collectible.getId()] = crateSprite;
                     crateSprite.spawn(UIUtils.mpx(collectible.getX()), UIUtils.mpx(collectible.getY()), collectible.getRotation(), collectible.getType(), collectible.getId(), playSpawnAnimation);
@@ -1590,7 +1589,7 @@ Game.UIGameState.methods({
             }
             case Constants.COLLECTIBLE_TYPES.GOLD:
             {
-                var goldSprite = this.goldGroup.getFirstExists(false);
+                const goldSprite = this.goldGroup.getFirstExists(false);
                 if (goldSprite) {
                     this.collectibles[collectible.getId()] = goldSprite;
                     goldSprite.spawn(UIUtils.mpx(collectible.getX()), UIUtils.mpx(collectible.getY()), collectible.getId(), playSpawnAnimation);
@@ -1601,7 +1600,7 @@ Game.UIGameState.methods({
             }
             case Constants.COLLECTIBLE_TYPES.DIAMOND:
             {
-                var diamondSprite = this.diamondGroup.getFirstExists(false);
+                const diamondSprite = this.diamondGroup.getFirstExists(false);
                 if (diamondSprite) {
                     this.collectibles[collectible.getId()] = diamondSprite;
                     diamondSprite.spawn(UIUtils.mpx(collectible.getX()), UIUtils.mpx(collectible.getY()), collectible.getRotation(), collectible.getId(), playSpawnAnimation);
@@ -1622,7 +1621,7 @@ Game.UIGameState.methods({
     },
 
     _startCollectibleAnimation: function(pickup) {
-        var collectible = this.gameController.getCollectible(pickup.getCollectibleId());
+        const collectible = this.gameController.getCollectible(pickup.getCollectibleId());
         if (collectible) {
             switch (collectible.getType()) {
                 case Constants.COLLECTIBLE_TYPES.GOLD:
@@ -1642,14 +1641,14 @@ Game.UIGameState.methods({
     },
 
     _createWeapon: function(weapon, playSpawnAnimation) {
-        var tankSprite = this.tankSprites[weapon.getPlayerId()];
+        const tankSprite = this.tankSprites[weapon.getPlayerId()];
         if (tankSprite) {
             tankSprite.addWeapon(weapon.getId(), playSpawnAnimation);
         }
     },
 
     _removeWeapon: function(playerId) {
-        var tankSprite = this.tankSprites[playerId];
+        const tankSprite = this.tankSprites[playerId];
         if (tankSprite) {
             tankSprite.removeWeapon();
         }
@@ -1659,7 +1658,7 @@ Game.UIGameState.methods({
         switch(upgrade.getType()) {
             case Constants.UPGRADE_TYPES.LASER_AIMER:
             {
-                var aimerGraphics = this.aimerGroup.getFirstExists(false);
+                let aimerGraphics = this.aimerGroup.getFirstExists(false);
                 if (!aimerGraphics) {
                     aimerGraphics = this.aimerGroup.add(new UIAimerGraphics(this.game, this.gameController));
                 }
@@ -1670,7 +1669,7 @@ Game.UIGameState.methods({
             case Constants.UPGRADE_TYPES.SPAWN_SHIELD:
             case Constants.UPGRADE_TYPES.SHIELD:
             {
-                var shieldSprite = this.shieldGroup.getFirstExists(false);
+                let shieldSprite = this.shieldGroup.getFirstExists(false);
                 if (!shieldSprite) {
                     shieldSprite = this.shieldGroup.add(new UIShieldSprite(this.game, this.gameController, this.shieldWeakenedSound));
                 }
@@ -1680,7 +1679,7 @@ Game.UIGameState.methods({
             }
             case Constants.UPGRADE_TYPES.AIMER:
             {
-                var aimerGraphics = this.aimerGroup.getFirstExists(false);
+                let aimerGraphics = this.aimerGroup.getFirstExists(false);
                 if (!aimerGraphics) {
                     aimerGraphics = this.aimerGroup.add(new UIAimerGraphics(this.game, this.gameController));
                 }
@@ -1704,7 +1703,7 @@ Game.UIGameState.methods({
     },
 
     _removeUpgrades: function(playerId) {
-        for (var upgradeId in this.upgrades) {
+        for (const upgradeId in this.upgrades) {
             if (this.upgrades[upgradeId].getPlayerId() == playerId) {
                 this.upgrades[upgradeId].remove();
                 delete this.upgrades[upgradeId];
@@ -1716,7 +1715,7 @@ Game.UIGameState.methods({
         switch(counter.getType()) {
             case Constants.COUNTER_TYPES.TIMER_COUNTDOWN:
             {
-                var counterSprite = this.counterTimerGroup.getFirstExists(false);
+                const counterSprite = this.counterTimerGroup.getFirstExists(false);
                 if (counterSprite) {
                     this.counters[counter.getId()] = counterSprite;
                     // FIXME Hack to place counter beneath overtime sprite. Make a proper system for handling this.
@@ -1747,7 +1746,7 @@ Game.UIGameState.methods({
     },
 
     _removeCounters: function(playerId) {
-        for (var counterId in this.counters) {
+        for (const counterId in this.counters) {
             if (this.counters[counterId].getPlayerId() == playerId) {
                 this.counters[counterId].remove();
                 delete this.counters[counterId];
@@ -1759,7 +1758,7 @@ Game.UIGameState.methods({
         switch(zone.getType()) {
             case Constants.ZONE_TYPES.SPAWN:
             {
-                var zoneSprite = this.spawnZoneGroup.getFirstExists(false);
+                const zoneSprite = this.spawnZoneGroup.getFirstExists(false);
                 if (zoneSprite) {
                     this.zones[zone.getId()] = zoneSprite;
                     zoneSprite.spawn(zone.getId(), zone.getField("radius"), zone.getField("unstable"), playSpawnAnimation);
@@ -1783,7 +1782,7 @@ Game.UIGameState.methods({
         if (playerId in this.weaponSymbolGroups) {
             this.weaponSymbolGroups[playerId].refresh();
         } else {
-            var weaponSymbolSprite = this.weaponSymbolGroup.getFirstExists(false);
+            const weaponSymbolSprite = this.weaponSymbolGroup.getFirstExists(false);
             if (weaponSymbolSprite) {
                 this.weaponSymbolGroups[playerId] = weaponSymbolSprite;
                 weaponSymbolSprite.spawn(playerId);
@@ -1802,12 +1801,12 @@ Game.UIGameState.methods({
 
     _showChatSymbol: function(playerIds) {
         // Check if symbol is present.
-        for (var i = 0; i < playerIds.length; ++i) {
-            var playerId = playerIds[i];
+        for (let i = 0; i < playerIds.length; ++i) {
+            const playerId = playerIds[i];
             if (playerId in this.chatSymbolSprites) {
                 this.chatSymbolSprites[playerId].refresh();
             } else {
-                var chatSymbolSprite = this.chatSymbolGroup.getFirstExists(false);
+                const chatSymbolSprite = this.chatSymbolGroup.getFirstExists(false);
                 if (chatSymbolSprite) {
                     this.chatSymbolSprites[playerId] = chatSymbolSprite;
                     chatSymbolSprite.spawn(playerId);
@@ -1819,8 +1818,8 @@ Game.UIGameState.methods({
     },
 
     _hideChatSymbol: function(playerIds) {
-        for (var i = 0; i < playerIds.length; ++i) {
-            var playerId = playerIds[i];
+        for (let i = 0; i < playerIds.length; ++i) {
+            const playerId = playerIds[i];
             if (this.chatSymbolSprites[playerId]) {
                 this.chatSymbolSprites[playerId].hide();
             }
@@ -1873,7 +1872,7 @@ Game.UIGameState.methods({
             }
             case Users.EVENTS.GUESTS_ADDED:
             {
-                for (var i = 0; i < data.length; ++i) {
+                for (let i = 0; i < data.length; ++i) {
                     self.gameController.addPlayer(data[i]);
                 }
 
@@ -1913,11 +1912,12 @@ Game.UIGameState.methods({
 
     _debugDrawB2DWorld: function(b2dWorld) {
         if (b2dWorld) {
-            var body = b2dWorld.GetBodyList();
+            let body = b2dWorld.GetBodyList();
             this.debugGraphics.clear();
             this.debugGraphics.lineStyle(2, 0xff0000, 0.9);
             this.debugGraphics.beginFill(0x00ff00, 0.3);
-            while(true)
+			let bool = true;
+            while(bool)
             {
                 if (body == null)
                     break;
@@ -1928,8 +1928,9 @@ Game.UIGameState.methods({
     },
 
     _debugDrawB2DBody: function(b2dBody) {
-        var fixture = b2dBody.GetFixtureList();
-        while(true)
+        let fixture = b2dBody.GetFixtureList();
+		let bool = true;
+        while(bool)
         {
             if (fixture == null)
                 break;
@@ -1942,10 +1943,10 @@ Game.UIGameState.methods({
     },
 
     _debugDrawB2DPolygonFixture: function(b2dBody, b2dFixture) {
-        var shape = b2dFixture.GetShape();
-        var vertices = shape.GetVertices();
-        var bodyTransform = b2dBody.GetTransform();
-        var debugVertex = Box2D.Common.Math.b2Vec2.Make(0, 0);
+        const shape = b2dFixture.GetShape();
+        const vertices = shape.GetVertices();
+        const bodyTransform = b2dBody.GetTransform();
+        const debugVertex = Box2D.Common.Math.b2Vec2.Make(0, 0);
 
         if (vertices.length > 0)
         {
@@ -1954,7 +1955,7 @@ Game.UIGameState.methods({
             debugVertex.Add(bodyTransform.position);
             this.debugGraphics.moveTo(UIUtils.mpx(debugVertex.x), UIUtils.mpx(debugVertex.y));
         }
-        for (var i = 1; i < vertices.length; ++i)
+        for (let i = 1; i < vertices.length; ++i)
         {
             debugVertex.SetV(vertices[i]);
             debugVertex.MulM(bodyTransform.R);
@@ -1964,8 +1965,8 @@ Game.UIGameState.methods({
     },
 
     _debugDrawB2DCircleFixture: function(b2dBody, b2dFixture) {
-        var shape = b2dFixture.GetShape();
-        var bodyTransform = b2dBody.GetTransform();
+        const shape = b2dFixture.GetShape();
+        const bodyTransform = b2dBody.GetTransform();
 
         this.debugGraphics.drawCircle(UIUtils.mpx(bodyTransform.position.x), UIUtils.mpx(bodyTransform.position.y), 2.0 * UIUtils.mpx(shape.GetRadius()));
     },
@@ -1977,8 +1978,8 @@ Game.UIGameState.methods({
     },
 
     _debugDrawGroup: function(group) {
-        for (var i = 0; i < group.children.length; ++i) {
-            var child = group.children[i];
+        for (let i = 0; i < group.children.length; ++i) {
+            const child = group.children[i];
             if (child.type == Phaser.GROUP || child.type == Phaser.EMITTER) {
                 this._debugDrawGroup(child);
             } else if (child.type == Phaser.SPRITE || child.type == Phaser.IMAGE) {
@@ -1988,7 +1989,7 @@ Game.UIGameState.methods({
     },
 
     _debugDrawSprite: function(sprite) {
-        var rect = sprite.getBounds();
+        const rect = sprite.getBounds();
         rect.topLeft = this.gameGroup.toLocal(rect.topLeft);
         if (sprite.exists) {
             this.debugGraphics.beginFill(0x00ff00, 0.1);
@@ -2005,11 +2006,11 @@ Game.UIGameState.methods({
             this.debugGraphics.clear();
         }
         this.debugGraphics.lineStyle(0, 0x000000, 0);
-        for (var i = 0; i < map.length; ++i) {
-            for (var j = 0; j < map[i].length; ++j) {
-                var rect = new Phaser.Rectangle(i * Constants.MAZE_TILE_SIZE.px, j * Constants.MAZE_TILE_SIZE.px, Constants.MAZE_TILE_SIZE.px, Constants.MAZE_TILE_SIZE.px);
-                var value = map[i][j];
-                var colour = Phaser.Color.interpolateColor(minColour, maxColour, maxValue - minValue, value - minValue);
+        for (let i = 0; i < map.length; ++i) {
+            for (let j = 0; j < map[i].length; ++j) {
+                const rect = new Phaser.Rectangle(i * Constants.MAZE_TILE_SIZE.px, j * Constants.MAZE_TILE_SIZE.px, Constants.MAZE_TILE_SIZE.px, Constants.MAZE_TILE_SIZE.px);
+                const value = map[i][j];
+                const colour = Phaser.Color.interpolateColor(minColour, maxColour, maxValue - minValue, value - minValue);
                 this.debugGraphics.beginFill(colour, alpha);
                 this.debugGraphics.drawRect(rect.x, rect.y, rect.width, rect.height);
             }
@@ -2023,8 +2024,8 @@ Game.UIGameState.methods({
         }
         if (path.length > 0) {
             this.debugGraphics.moveTo((path[0].x + 0.5) * Constants.MAZE_TILE_SIZE.px, (path[0].y + 0.5) * Constants.MAZE_TILE_SIZE.px);
-            for (var i = 1; i < path.length; ++i) {
-                var colour = Phaser.Color.interpolateColor(startColour, endColour, path.length - 1, i);
+            for (let i = 1; i < path.length; ++i) {
+                const colour = Phaser.Color.interpolateColor(startColour, endColour, path.length - 1, i);
                 this.debugGraphics.lineStyle(width, colour, 0.8);
                 this.debugGraphics.lineTo((path[i].x + 0.5) * Constants.MAZE_TILE_SIZE.px, (path[i].y + 0.5) * Constants.MAZE_TILE_SIZE.px);
             }
@@ -2038,8 +2039,8 @@ Game.UIGameState.methods({
         }
         if (path.length > 0) {
             this.debugGraphics.moveTo(UIUtils.mpx(path[0].x), UIUtils.mpx(path[0].y));
-            for (var i = 1; i < path.length; ++i) {
-                var colour = Phaser.Color.interpolateColor(startColour, endColour, path.length - 1, i);
+            for (let i = 1; i < path.length; ++i) {
+                const colour = Phaser.Color.interpolateColor(startColour, endColour, path.length - 1, i);
                 this.debugGraphics.lineStyle(width, colour, 0.8);
                 this.debugGraphics.lineTo(UIUtils.mpx(path[i].x), UIUtils.mpx(path[i].y));
             }

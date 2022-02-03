@@ -115,7 +115,7 @@ class ScriptHashes {
     }
 }
 
-const Hasher = function(str: string, seed: number = 0) {
+const Hasher = function(str: string, seed = 0) {
     let h1 = 0xDeadBeef ^ seed,
         h2 = 0x41c6ce57 ^ seed;
     for (let i = 0, ch; i < str.length; i++) {
@@ -328,24 +328,27 @@ if (nodeData instanceof HTMLElement) {
 	const proxied = eval;
 	const hashLength = ScriptHashes.hashesLength;
 	let done =  0;
-	window.eval = function(code: any) { /* Should be type of string, but TankTrouble might throw some errors */
-		if (typeof code === 'string') {
-			const codeHash = Hasher(code),
-			match = ScriptHashes.hashes[codeHash],
-			colour = match ? '#C0FF33' : '#FA113D';
-
-			if (match) {
-				done++;
-				const script = document.createElement('script');
-				script.src = window.t_url('script/injects/' + match + '?=_' + (Math.floor(Math.random() * 10_000_000) + 10_000_000));
-				document.head.insertBefore(script, document.head.firstChild);
-			}
-
-			if (debugHashes && document.readyState === 'loading') {
-				Logger.log(`%c[ %c${ codeHash } %c] %c${ done }/${ hashLength }   ${code}`, `color: ${ colour }`, `color: #fff; font-weight: bold;`, `color: ${ colour }`, `color: ${ match ? colour : '#fff' }`);
+	window.eval = function(...code: Array<string>) { /* Should be type of string, but TankTrouble might throw some errors */
+		for (let i = 0; i < code.length; i++) {
+			if (typeof code[i] === 'string') {
+				const codeHash = Hasher(code[i]),
+				match = ScriptHashes.hashes[codeHash],
+				colour = match ? '#C0FF33' : '#FA113D';
+	
+				if (match) {
+					done++;
+					const script = document.createElement('script');
+					script.src = window.t_url('script/injects/' + match + '?=_' + (Math.floor(Math.random() * 10_000_000) + 10_000_000));
+					document.head.insertBefore(script, document.head.firstChild);
+				}
+	
+				if (debugHashes && document.readyState === 'loading') {
+					Logger.log(`%c[ %c${ codeHash } %c] %c${ done }/${ hashLength }   ${code}`, `color: ${ colour }`, `color: #fff; font-weight: bold;`, `color: ${ colour }`, `color: ${ match ? colour : '#fff' }`);
+				}
 			}
 		}
-		return proxied.apply(this, arguments);
+		return proxied.apply(this, ...[code]);
 	}
+	
 	Logger.log('Hasher loaded.');
 }

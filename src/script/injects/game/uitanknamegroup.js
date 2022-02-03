@@ -36,15 +36,15 @@ UITankNameGroup.prototype.update = function()
         return;
     }
 
-    var tank = this.gameController.getTank(this.playerId);
+    const tank = this.gameController.getTank(this.playerId);
     if (tank)
     {
         this.x = UIUtils.mpx(tank.getX());
         this.y = UIUtils.mpx(tank.getY()) + Constants.TANK.HEIGHT.px * 0.7;
 
         // Push name clear of edges.
-        var halfWorldWidth = this.tankName.width * this.tankName.worldScale.x * 0.5;
-        var worldPosition = this.parent.toGlobal(this.position);
+        const halfWorldWidth = this.tankName.width * this.tankName.worldScale.x * 0.5;
+        const worldPosition = this.parent.toGlobal(this.position);
 
         if (worldPosition.x - halfWorldWidth < UIConstants.TANK_NAME_MARGIN) {
             this.x = this.parent.toLocal({x: UIConstants.TANK_NAME_MARGIN + halfWorldWidth, y: worldPosition.y}).x;
@@ -86,7 +86,7 @@ UITankNameGroup.prototype.postUpdate = function() {
 UITankNameGroup.prototype.spawn = function(playerId)
 {
     // Revive and place the group.
-    var tank = this.gameController.getTank(playerId);
+    const tank = this.gameController.getTank(playerId);
     if (tank)
     {
         this.x = UIUtils.mpx(tank.getX());
@@ -106,11 +106,11 @@ UITankNameGroup.prototype.spawn = function(playerId)
     this.fading = false;
 
     // Send request for player details.
-    var self = this;
+    const self = this;
     Backend.getInstance().getPlayerDetails(
         function(result) {
             if (typeof(result) == "object") {
-                var username = Utils.maskUnapprovedUsername(result);
+                const username = Utils.maskUnapprovedUsername(result);
                 self.tankName.setText(username);
             }
         },

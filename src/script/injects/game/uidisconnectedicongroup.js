@@ -53,8 +53,8 @@ UIDisconnectedIconGroup.prototype.update = function()
         this._updateMessage();
     }
     
-    var dotsString = "";
-    for (var i = 0; i < this.numDots; ++i) {
+    let dotsString = "";
+    for (let i = 0; i < this.numDots; ++i) {
         dotsString += ".";
     }
 
@@ -77,7 +77,7 @@ UIDisconnectedIconGroup.prototype.spawn = function(x, y, delay)
         this.spawnEvent = false;
     }
 
-    var self = this;
+    const self = this;
     this.spawnEvent = this.game.time.events.add(delay, function() {
         // Revive and place the group.
         self.x = x;

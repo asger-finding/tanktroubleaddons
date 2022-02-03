@@ -1,4 +1,4 @@
-var Content = Classy.newClass().name('Content');
+const Content = Classy.newClass().name('Content');
 
 Content.classFields({
     activeTab: null
@@ -58,7 +58,7 @@ Content.classMethods({
 
         Content._initPage(g_initialTab);
         Content._setActiveTab(g_initialTab);
-        var state = {tab: g_initialTab, data: g_initialData};
+        const state = {tab: g_initialTab, data: g_initialData};
         Content._replaceHistory(state, location.pathname + location.search);
     },
 
@@ -79,7 +79,7 @@ Content.classMethods({
      * @param path The URI used to determine what content to return
      */
     navigateToTab: function(tab, path, data) {
-        var state = {tab: tab, data: data};
+        const state = {tab: tab, data: data};
         if (tab !== Content.activeTab) {
             Content._getPrimaryContent(tab, path);
             Content._setActiveTab(tab);
@@ -94,7 +94,7 @@ Content.classMethods({
     },
 
     updateTab: function(tab, path, data, replace) {
-        var state = {tab: tab, data: data};
+        const state = {tab: tab, data: data};
         if (replace) {
             Content._replaceHistory(state, path);
         } else {

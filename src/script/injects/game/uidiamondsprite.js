@@ -38,7 +38,7 @@ UIDiamondSprite.prototype.update = function()
     }
 
     // Update position from game model.
-    var diamond = this.gameController.getCollectible(this.diamondId);
+    const diamond = this.gameController.getCollectible(this.diamondId);
     if (diamond)
     {
         this.smoothedX = (this.x + UIUtils.mpx(diamond.getX())) / 2.0;
@@ -68,9 +68,9 @@ UIDiamondSprite.prototype.spawn = function(x, y, rotation, diamondId, animate) {
     // Create shine.
     this.diamondShine = this.shineGroup.getFirstExists(false);
     if (this.diamondShine) {
-        var shineX = this.x;
-        var shineY = this.y;
-        var shineRotation = this.rotation;
+        const shineX = this.x;
+        const shineY = this.y;
+        const shineRotation = this.rotation;
 
         this.diamondShine.spawn(shineX, shineY, shineRotation);
     } else {
@@ -95,17 +95,17 @@ UIDiamondSprite.prototype.getExtraPositionInfo = function()
 
 UIDiamondSprite.prototype._sparkle = function()
 {
-    var sparkleImage = this.sparkleGroup.getFirstExists(false);
+    const sparkleImage = this.sparkleGroup.getFirstExists(false);
     if (sparkleImage) {
-        var distance = Constants.DIAMOND.HEIGHT.px * 0.5 - 5 - Math.random() * 5;
-        var angle = Math.random() * 2.0*Math.PI;
+        const distance = Constants.DIAMOND.HEIGHT.px * 0.5 - 5 - Math.random() * 5;
+        const angle = Math.random() * 2.0*Math.PI;
 
-        var localX = Math.cos(angle) * distance * 0.5;
-        var localY = Math.sin(angle) * distance;
+        const localX = Math.cos(angle) * distance * 0.5;
+        const localY = Math.sin(angle) * distance;
 
         // Rotate sparkle position
-        var sparkleX = this.x + Math.cos(this.rotation) * localX - Math.sin(this.rotation) * localY;
-        var sparkleY = this.y + Math.sin(this.rotation) * localX + Math.cos(this.rotation) * localY;
+        const sparkleX = this.x + Math.cos(this.rotation) * localX - Math.sin(this.rotation) * localY;
+        const sparkleY = this.y + Math.sin(this.rotation) * localX + Math.cos(this.rotation) * localY;
 
         sparkleImage.spawn(sparkleX, sparkleY);
     } else {

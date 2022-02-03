@@ -19,7 +19,7 @@ UIAimerGraphics.prototype.constructor = UIAimerGraphics;
 // FIXME Move to UIUtils and reuse Ray object, RaycastResult object hitPoint array and so on.
 UIAimerGraphics.prototype._castRay = function(start, end) {
     // Do raycast against world.
-    var ray = new p2.Ray({
+    const ray = new p2.Ray({
         mode: p2.Ray.CLOSEST,
         from: [-start.x, -start.y],
         to: [-end.x, -end.y],
@@ -28,13 +28,13 @@ UIAimerGraphics.prototype._castRay = function(start, end) {
         collisionGroup: UIUtils.rayCollisionGroup.mask
     });
 
-    var result = new p2.RaycastResult();
+    const result = new p2.RaycastResult();
     this.game.physics.p2.world.raycast(result, ray);
 
-    var returnResult = {};
+    const returnResult = {};
     returnResult.hasHit = result.hasHit();
     if (result.hasHit()) {
-        var hitPoint = [0, 0];
+        const hitPoint = [0, 0];
         result.getHitPoint(hitPoint, ray);
         
         returnResult.hitPoint = new Phaser.Point(-hitPoint[0], -hitPoint[1]);
@@ -61,7 +61,7 @@ UIAimerGraphics.prototype.spawn = function(playerId, maxLength, activated) {
     this.activated = activated;
 
     // Send request for player details.
-    var self = this;
+    const self = this;
     Backend.getInstance().getPlayerDetails(
         function(result) {
             if (typeof(result) == "object") {
@@ -92,25 +92,25 @@ UIAimerGraphics.prototype.update = function()
     }
 
     // Compute aimer trajectory if not disabled.
-    var aimerPositions = [];
+    const aimerPositions = [];
 
-    var remainingLength = this.maxLength;
+    let remainingLength = this.maxLength;
 
-    var tank = this.gameController.getTank(this.playerId);
+    const tank = this.gameController.getTank(this.playerId);
     if (tank) {
         aimerPositions.push(new Phaser.Point(tank.getX() + Math.sin(tank.getRotation()) * UIUtils.pxm(UIConstants.AIMER_OFFSET),
                                              tank.getY() - Math.cos(tank.getRotation()) * UIUtils.pxm(UIConstants.AIMER_OFFSET)));
 
-        var rayDir = new Phaser.Point(Math.sin(tank.getRotation()), -Math.cos(tank.getRotation()));
-        var rayStart = new Phaser.Point(0, 0);
-        var rayEnd = new Phaser.Point(0, 0);
+        const rayDir = new Phaser.Point(Math.sin(tank.getRotation()), -Math.cos(tank.getRotation()));
+        const rayStart = new Phaser.Point(0, 0);
+        const rayEnd = new Phaser.Point(0, 0);
 
         while (remainingLength > 0.0) {
             rayStart.x = aimerPositions[aimerPositions.length - 1].x;
             rayStart.y = aimerPositions[aimerPositions.length - 1].y;
             Phaser.Point.multiplyAdd(rayStart, rayDir, remainingLength, rayEnd);
 
-            var result = this._castRay(rayStart, rayEnd);
+            const result = this._castRay(rayStart, rayEnd);
 
             if (result.hasHit) {
                 aimerPositions.push(result.hitPoint);
@@ -137,20 +137,20 @@ UIAimerGraphics.prototype.update = function()
     
     this.lineStyle(UIConstants.AIMER_WIDTH, this.colour, 1.0);
     
-    var beamPosition = new Phaser.Point(0, 0);
-    var beamOn = Math.random() > 0.5;
-    var segmentSample = 0.0;
+    const beamPosition = new Phaser.Point(0, 0);
+    let beamOn = Math.random() > 0.5;
+    let segmentSample = 0.0;
     
     if (aimerPositions.length >= 2) {
-        var minSegmentLength = QualityManager.getQualityValue(QualityManager.QUALITY_PARAMETERS.AIMER_MIN_SEGMENT_LENGTH);
-        var maxOffSegmentLength = QualityManager.getQualityValue(QualityManager.QUALITY_PARAMETERS.AIMER_OFF_MAX_SEGMENT_LENGTH);
-        var maxOnSegmentLength = QualityManager.getQualityValue(QualityManager.QUALITY_PARAMETERS.AIMER_ON_MAX_SEGMENT_LENGTH);
+        const minSegmentLength = QualityManager.getQualityValue(QualityManager.QUALITY_PARAMETERS.AIMER_MIN_SEGMENT_LENGTH);
+        const maxOffSegmentLength = QualityManager.getQualityValue(QualityManager.QUALITY_PARAMETERS.AIMER_OFF_MAX_SEGMENT_LENGTH);
+        const maxOnSegmentLength = QualityManager.getQualityValue(QualityManager.QUALITY_PARAMETERS.AIMER_ON_MAX_SEGMENT_LENGTH);
         this.moveTo(UIUtils.mpx(aimerPositions[0].x), UIUtils.mpx(aimerPositions[0].y));
-        for (var i = 1; i < aimerPositions.length; ++i) {
-            var segmentStart = aimerPositions[i-1];
-            var segmentEnd = aimerPositions[i];
-            var segmentDir = Phaser.Point.subtract(segmentEnd, segmentStart);
-            var segmentLength = segmentDir.getMagnitude();
+        for (let i = 1; i < aimerPositions.length; ++i) {
+            const segmentStart = aimerPositions[i-1];
+            const segmentEnd = aimerPositions[i];
+            const segmentDir = Phaser.Point.subtract(segmentEnd, segmentStart);
+            const segmentLength = segmentDir.getMagnitude();
             segmentDir.normalize();
             
             while (segmentSample < segmentLength) {

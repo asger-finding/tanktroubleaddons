@@ -1,4 +1,4 @@
-var Game = Game || {};
+const Game = Game || {};
 
 Game.UIMenuState = Classy.newClass();
 
@@ -78,19 +78,19 @@ Game.UIMenuState.methods({
     _onSizeChangeHandler: function() {
         this.log.debug("SIZE CHANGE!");
 
-        var unscaledBackgroundWidth = this.backgroundGroup.getLocalBounds().width;
-        var unscaledBackgroundHeight = this.backgroundGroup.getLocalBounds().height;
+        const unscaledBackgroundWidth = this.backgroundGroup.getLocalBounds().width;
+        const unscaledBackgroundHeight = this.backgroundGroup.getLocalBounds().height;
 
         // Do not scale up more than 1x.
-        var backgroundScale = Math.min(1.0, Math.min(this.game.width / unscaledBackgroundWidth, this.game.height * UIConstants.MENU_BACKGROUND_HEIGHT_RATIO / unscaledBackgroundHeight));
+        const backgroundScale = Math.min(1.0, Math.min(this.game.width / unscaledBackgroundWidth, this.game.height * UIConstants.MENU_BACKGROUND_HEIGHT_RATIO / unscaledBackgroundHeight));
         this.backgroundGroup.scale.setTo(backgroundScale);
 
-        var backgroundTopMargin = Math.max(UIConstants.MENU_BACKGROUND_MIN_TOP_MARGIN, this.game.height * UIConstants.MENU_BACKGROUND_Y_RATIO - this.backgroundGroup.height * 0.5);
+        const backgroundTopMargin = Math.max(UIConstants.MENU_BACKGROUND_MIN_TOP_MARGIN, this.game.height * UIConstants.MENU_BACKGROUND_Y_RATIO - this.backgroundGroup.height * 0.5);
         this.backgroundGroup.position.set(this.game.width * 0.5, backgroundTopMargin + this.backgroundGroup.height * 0.5);
 
-        var buttonAnchorY = backgroundTopMargin + this.backgroundGroup.height * UIConstants.MENU_BUTTON_BACKGROUND_Y_RATIO;
+        const buttonAnchorY = backgroundTopMargin + this.backgroundGroup.height * UIConstants.MENU_BUTTON_BACKGROUND_Y_RATIO;
 
-        var scaleDown = false;
+        let scaleDown = false;
         scaleDown |= this.game.width < 3 * UIConstants.MENU_BUTTON_WIDTHS[UIConstants.BUTTON_SIZES.LARGE] + 4 * UIConstants.MENU_BUTTON_SPACINGS[UIConstants.BUTTON_SIZES.LARGE];
         scaleDown |= this.game.height - buttonAnchorY < UIConstants.BUTTON_HEIGHTS[UIConstants.BUTTON_SIZES.LARGE] * 0.5 + UIConstants.BUTTON_HEIGHTS[UIConstants.BUTTON_SIZES.MEDIUM] * 0.5 + 2 * UIConstants.MENU_BUTTON_SPACINGS[UIConstants.BUTTON_SIZES.LARGE];
 
@@ -117,10 +117,10 @@ Game.UIMenuState.methods({
         }
 
         // Move buttons.
-        var buttonSpacing = UIConstants.MENU_BUTTON_SPACINGS[UIConstants.BUTTON_SIZES.LARGE];
-        var playerButtonWidth = UIConstants.MENU_BUTTON_WIDTHS[UIConstants.BUTTON_SIZES.LARGE];
-        var playerButtonHalfHeight = UIConstants.BUTTON_HEIGHTS[UIConstants.BUTTON_SIZES.LARGE] * 0.5;
-        var secondaryButtonHalfHeight = UIConstants.BUTTON_HEIGHTS[UIConstants.BUTTON_SIZES.MEDIUM] * 0.5;
+        let buttonSpacing = UIConstants.MENU_BUTTON_SPACINGS[UIConstants.BUTTON_SIZES.LARGE];
+        let playerButtonWidth = UIConstants.MENU_BUTTON_WIDTHS[UIConstants.BUTTON_SIZES.LARGE];
+        let playerButtonHalfHeight = UIConstants.BUTTON_HEIGHTS[UIConstants.BUTTON_SIZES.LARGE] * 0.5;
+        let secondaryButtonHalfHeight = UIConstants.BUTTON_HEIGHTS[UIConstants.BUTTON_SIZES.MEDIUM] * 0.5;
         if (this.buttonsScaledDown) {
             buttonSpacing = UIConstants.MENU_BUTTON_SPACINGS[UIConstants.BUTTON_SIZES.MEDIUM];
             playerButtonWidth = UIConstants.MENU_BUTTON_WIDTHS[UIConstants.BUTTON_SIZES.MEDIUM];
@@ -160,7 +160,7 @@ Game.UIMenuState.methods({
 
         this._updatePlayerButtons();
 
-        var self = this;
+        const self = this;
         Backend.getInstance().createGuests(
             function(result) {
                 self.addingGuests = false;
@@ -203,7 +203,7 @@ Game.UIMenuState.methods({
     },
 
     _updateLoginButton: function() {
-        var playerIds = Users.getAllPlayerIds();
+        const playerIds = Users.getAllPlayerIds();
         if (playerIds.length == 0) {
             UIPlayerPanel.hideLoginIcon();
         } else {

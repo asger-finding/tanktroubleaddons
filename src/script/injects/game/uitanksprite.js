@@ -79,7 +79,7 @@ UITankSprite.prototype.update = function()
     }
     
     // Update position from game model.
-    var tank = this.gameController.getTank(this.playerId);
+    const tank = this.gameController.getTank(this.playerId);
     if (tank)
     {
         this.smoothedX = (this.body.x * this.smoothing + UIUtils.mpx(tank.getX())) / (this.smoothing + 1);
@@ -87,10 +87,10 @@ UITankSprite.prototype.update = function()
         this.smoothedRotation = (this.body.rotation * this.smoothing + tank.getRotation()) / (this.smoothing + 1);
 
         // Move the treads according to UIConstants that define forward/back animation speeds.
-        var deltaTime = this.game.time.delta;
+        const deltaTime = this.game.time.delta;
         
         if (tank.getSpeed() > 0.0) {
-            var ratio = tank.getSpeed() / Constants.TANK.FORWARD_SPEED.m;
+            const ratio = tank.getSpeed() / Constants.TANK.FORWARD_SPEED.m;
             if (tank.getRotationSpeed() < 0.0) {
                 this.leftTreadPosition += deltaTime * ratio * UIConstants.TANK_TREAD_INNER_FORWARD_SPEED;
                 this.rightTreadPosition += deltaTime * ratio * UIConstants.TANK_TREAD_FORWARD_SPEED;
@@ -102,7 +102,7 @@ UITankSprite.prototype.update = function()
                 this.rightTreadPosition += deltaTime * ratio * UIConstants.TANK_TREAD_FORWARD_SPEED;
             }
         } else if (tank.getSpeed() < 0.0) {
-            var ratio = -tank.getSpeed() / Constants.TANK.BACK_SPEED.m;
+            const ratio = -tank.getSpeed() / Constants.TANK.BACK_SPEED.m;
             if (tank.getRotationSpeed() < 0.0) {
                 this.leftTreadPosition -= deltaTime * ratio * UIConstants.TANK_TREAD_INNER_BACK_SPEED;
                 this.rightTreadPosition -= deltaTime * ratio * UIConstants.TANK_TREAD_BACK_SPEED;
@@ -166,7 +166,7 @@ UITankSprite.prototype.spawn = function(x, y, rotation, playerId, animate, smoot
     this.playerId = playerId;
     
     // Send request for player details.
-    var self = this;
+    const self = this;
     Backend.getInstance().getPlayerDetails(
         function(result) {
             if (typeof(result) == "object") {
@@ -193,10 +193,10 @@ UITankSprite.prototype.spawn = function(x, y, rotation, playerId, animate, smoot
 
 UITankSprite.prototype.addWeapon = function(weaponId, animate)
 {
-    var activeWeapon = this.gameController.getActiveWeapon(this.playerId);
+    const activeWeapon = this.gameController.getActiveWeapon(this.playerId);
 
-    var defaultWeapon = this.gameController.getDefaultWeapon(this.playerId);
-    var queuedWeapons = this.gameController.getQueuedWeapons(this.playerId);
+    const defaultWeapon = this.gameController.getDefaultWeapon(this.playerId);
+    const queuedWeapons = this.gameController.getQueuedWeapons(this.playerId);
 
     if (activeWeapon) {
     
@@ -220,7 +220,7 @@ UITankSprite.prototype.addWeapon = function(weaponId, animate)
 
 UITankSprite.prototype.removeWeapon = function()
 {
-    var activeWeapon = this.gameController.getActiveWeapon(this.playerId);
+    const activeWeapon = this.gameController.getActiveWeapon(this.playerId);
     
     if (activeWeapon) {
         this._updateTurret(activeWeapon);
@@ -229,7 +229,7 @@ UITankSprite.prototype.removeWeapon = function()
 
 UITankSprite.prototype.fire = function()
 {
-    var activeWeapon = this.gameController.getActiveWeapon(this.playerId);
+    const activeWeapon = this.gameController.getActiveWeapon(this.playerId);
     if (activeWeapon) {
         switch(activeWeapon.getType()) {
             case Constants.WEAPON_TYPES.BULLET:

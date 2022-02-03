@@ -1,4 +1,4 @@
-var TankTrouble = TankTrouble || {};
+const TankTrouble = TankTrouble || {};
 
 TankTrouble.GarageOverlay = {
     // jQuery objects.
@@ -44,7 +44,7 @@ TankTrouble.GarageOverlay = {
     },
 
     removeEventListener: function(callback, context) {
-        for (var i=0;i<this.eventListeners.length;i++) {
+        for (let i = 0;i<this.eventListeners.length;i++) {
             if (this.eventListeners[i].cb===callback && this.eventListeners[i].ctxt===context) {
                 // Remove single entry from array, and return immediately
                 // as continuing iteration is unsafe, as the underlying array
@@ -69,7 +69,7 @@ TankTrouble.GarageOverlay = {
         this.garagePhaser.empty();
 
         if (this.phaserInstance == null) {
-            var config = {
+            const config = {
                 width: this.garagePhaser.width(),
                 height: $(window).height()*0.9,
                 renderer: Phaser.WEBGL,
@@ -98,11 +98,11 @@ TankTrouble.GarageOverlay = {
             this._initialize();
         }
 
-        var self = this;
+        const self = this;
 
         setTimeout(function() {
             // Phaser CE is a bit iffy with PIXI defaultRenderer and deletes it on phaserInstance destroy, so we store it and re-add it after destruction.
-            var { defaultRenderer } = PIXI;
+            const { defaultRenderer } = PIXI;
             self.phaserInstance.destroy();
             self.phaserInstance = null;
             PIXI.defaultRenderer = defaultRenderer;
@@ -148,7 +148,7 @@ TankTrouble.GarageOverlay = {
     },
 
     _notifyEventListeners: function(evt, data) {
-        for (var i = 0; i < this.eventListeners.length; i++) {
+        for (let i = 0; i < this.eventListeners.length; i++) {
             this.eventListeners[i].cb(this.eventListeners[i].ctxt, evt, data);
         }
     }

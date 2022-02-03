@@ -1,4 +1,4 @@
-var UIGarage = Classy.newClass();
+const UIGarage = Classy.newClass();
 
 UIGarage.classFields({
     phaserInstance: null 
@@ -24,7 +24,7 @@ UIGarage.classMethods({
     insertGarage: function(parentElement) {
         parentElement.empty();
 
-        var config = {
+        const config = {
             width: parentElement.width(),
             height: parentElement.height(),
             renderer: Phaser.WEBGL,

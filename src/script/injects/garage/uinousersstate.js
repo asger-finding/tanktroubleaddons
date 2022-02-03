@@ -1,4 +1,4 @@
-var Garage = Garage || {};
+const Garage = Garage || {};
 
 Garage.UINoUsersState = Classy.newClass();
 
@@ -50,13 +50,13 @@ Garage.UINoUsersState.methods({
     _onSizeChangeHandler: function() {
         this.log.debug("SIZE CHANGE!");
 
-        var unscaledBackgroundWidth = this.backgroundSprite.getLocalBounds().width;
-        var unscaledBackgroundHeight = this.backgroundSprite.getLocalBounds().height;
+        const unscaledBackgroundWidth = this.backgroundSprite.getLocalBounds().width;
+        const unscaledBackgroundHeight = this.backgroundSprite.getLocalBounds().height;
 
         // Leave a small gap on the sides and top and bottom.
         // Do not scale up more than 0.8x.
-        var backgroundScale = Math.min(0.8, Math.min((this.game.width - UIConstants.LOGIN_BACKGROUND_SIDE_MARGIN) / unscaledBackgroundWidth, (this.game.height - UIConstants.LOGIN_BACKGROUND_TOP_MARGIN - UIConstants.LOGIN_BACKGROUND_BOTTOM_MARGIN) / unscaledBackgroundHeight));
-        var messageTextScale = Math.min(1.0, (this.game.width * 0.8) / this.messageText.width);
+        const backgroundScale = Math.min(0.8, Math.min((this.game.width - UIConstants.LOGIN_BACKGROUND_SIDE_MARGIN) / unscaledBackgroundWidth, (this.game.height - UIConstants.LOGIN_BACKGROUND_TOP_MARGIN - UIConstants.LOGIN_BACKGROUND_BOTTOM_MARGIN) / unscaledBackgroundHeight));
+        const messageTextScale = Math.min(1.0, (this.game.width * 0.8) / this.messageText.width);
         this.backgroundSprite.scale.setTo(backgroundScale);
         this.messageText.scale.setTo(messageTextScale * UIConstants.ASSET_SCALE);
 

@@ -17,7 +17,7 @@ UICelebrationTrophyGroup = function(game)
     this.streamerGroup = this.game.add.group(this);
 
     // Add pool of streamers.
-    for (var i = 0; i < UIConstants.SCORE_FRAGMENT_POOL_SIZE; ++i) {
+    for (let i = 0; i < UIConstants.SCORE_FRAGMENT_POOL_SIZE; ++i) {
         this.streamerGroup.add(new UIStreamerGraphics(game));
     }*/
 
@@ -29,7 +29,7 @@ UICelebrationTrophyGroup = function(game)
     this.trophyBaseFragmentGroup = this.game.add.group(this);
 
     // Add pool of trophy base fragments.
-    for (var i = 0; i < UIConstants.TROPHY_BASE_FRAGMENT_POOL_SIZE; ++i) {
+    for (let i = 0; i < UIConstants.TROPHY_BASE_FRAGMENT_POOL_SIZE; ++i) {
         this.trophyBaseFragmentGroup.add(new UITrophyExplosionFragmentSprite(game, 'trophyBaseFragment', true, 3));
     }
 
@@ -37,7 +37,7 @@ UICelebrationTrophyGroup = function(game)
     this.trophyFragmentGroup = this.game.add.group(this);
 
     // Add pool of trophy fragments.
-    for (var i = 0; i < UIConstants.TROPHY_FRAGMENT_POOL_SIZE; ++i) {
+    for (let i = 0; i < UIConstants.TROPHY_FRAGMENT_POOL_SIZE; ++i) {
         this.trophyFragmentGroup.add(new UITrophyExplosionFragmentSprite(game, 'trophyFragment', true, 5));
     }
 
@@ -98,14 +98,14 @@ UICelebrationTrophyGroup.prototype.update = function()
 
     if (!this.handedOutPrizes) {
         if (this.timeAlive >= UIConstants.CELEBRATION_PRIZE_HANDOUT_TIME) {
-            var gameBounds = this.game.scale.bounds;
-            var position = this.tankIconSprite.toGlobal(new Phaser.Point(0, 0));
+            const gameBounds = this.game.scale.bounds;
+            const position = this.tankIconSprite.toGlobal(new Phaser.Point(0, 0));
             // Scale from game canvas position to pixel position.
             Phaser.Point.divide(position, this.game.scale.scaleFactor, position);
-            var pagePosition = {x: gameBounds.x + position.x, y: gameBounds.y + position.y};
+            const pagePosition = {x: gameBounds.x + position.x, y: gameBounds.y + position.y};
 
-            for (var i = 0; i < this.victoryAward.getPlayerIds().length; ++i) {
-                var playerId = this.victoryAward.getPlayerIds()[i];
+            for (let i = 0; i < this.victoryAward.getPlayerIds().length; ++i) {
+                const playerId = this.victoryAward.getPlayerIds()[i];
                 GameManager.sendVictoryGoldToTank(playerId, this.victoryAward.getGoldAmountPerWinner(), pagePosition);
                 GameManager.showXPChange(this.victoryAward.getExperiencePerWinner(), UIPlayerPanel.getLocalTankIconPosition(playerId), 1200);
             }
@@ -186,16 +186,16 @@ UICelebrationTrophyGroup.prototype._explode = function()
             this.trophySprite.kill();
 
             // Spawn fragments.
-            for (var i = 0; i < UIConstants.TROPHY_BASE_FRAGMENT_POOL_SIZE; ++i) {
-                var fragment = this.trophyBaseFragmentGroup.getFirstExists(false);
+            for (let i = 0; i < UIConstants.TROPHY_BASE_FRAGMENT_POOL_SIZE; ++i) {
+                const fragment = this.trophyBaseFragmentGroup.getFirstExists(false);
                 if (fragment) {
                     fragment.spawn(0, UIConstants.TROPHY_EXPLOSION_Y + UIConstants.TROPHY_BASE_FRAGMENT_EXPLOSION_OFFSET, this.trophySprite.width * 0.75, this.trophySprite.height * 0.25);
                 } else {
                     this.log.error("Could not create trophy fragment sprite. No sprite available.");
                 }
             }
-            for (var i = 0; i < UIConstants.TROPHY_FRAGMENT_POOL_SIZE; ++i) {
-                var fragment = this.trophyFragmentGroup.getFirstExists(false);
+            for (let i = 0; i < UIConstants.TROPHY_FRAGMENT_POOL_SIZE; ++i) {
+                const fragment = this.trophyFragmentGroup.getFirstExists(false);
                 if (fragment) {
                     fragment.spawn(0, UIConstants.TROPHY_EXPLOSION_Y, this.trophySprite.width * 0.75, this.trophySprite.height * 0.75);
                 } else {
@@ -209,8 +209,8 @@ UICelebrationTrophyGroup.prototype._explode = function()
             // Spawn explosion smoke.
             this.explosionEmitter.spawn(0, UIConstants.TROPHY_EXPLOSION_Y);
 
-            /*for (var i = 0; i < 3; ++i) {
-                var streamer = this.streamerGroup.getFirstExists(false);
+            /*for (let i = 0; i < 3; ++i) {
+                const streamer = this.streamerGroup.getFirstExists(false);
                 if (streamer) {
                     streamer.spawn(0, 0, Math.floor(Math.random() * 150 + 100) + (Math.floor(Math.random() * 150 + 100) << 8) + (Math.floor(Math.random() * 150 + 100) << 16));
                 } else {
@@ -222,12 +222,12 @@ UICelebrationTrophyGroup.prototype._explode = function()
     );
 
     if (this.victoryAward.getPlayerIds().length > 0) {
-        var self = this;
+        const self = this;
         // Get player name.
         Backend.getInstance().getPlayerDetails(
             function(result) {
                 if (typeof(result) == "object") {
-                    var username = Utils.maskUnapprovedUsername(result);
+                    const username = Utils.maskUnapprovedUsername(result);
                     self.header.setText(username);
                     self.game.add.tween(self.header.scale).to({x: 1.4, y: 1.4}, UIConstants.ELEMENT_POP_IN_TIME, Phaser.Easing.Back.Out, true);
                 } else {

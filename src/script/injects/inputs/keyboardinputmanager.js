@@ -1,4 +1,4 @@
-var KeyboardInputManager = InputManager.subclass();
+const KeyboardInputManager = InputManager.subclass();
 
 KeyboardInputManager.fields({
     forwardKey: null,
@@ -24,14 +24,14 @@ KeyboardInputManager.methods({
     update: function() {
         this._super();
 
-        var game = GameManager.getGame();
+        const game = GameManager.getGame();
 
         if (game) {
-            var forwardState = false;
-            var backState = false;
-            var leftState = false;
-            var rightState = false;
-            var fireState = false;
+            let forwardState = false;
+            let backState = false;
+            let leftState = false;
+            let rightState = false;
+            let fireState = false;
 
             if (game.input.enabled) {
                 forwardState = game.input.keyboard.isDown(this.forwardKey) || false;
@@ -41,17 +41,17 @@ KeyboardInputManager.methods({
                 fireState = game.input.keyboard.isDown(this.fireKey) || false;
             }
 
-            var stateChanged = false;
+            let stateChanged = false;
             stateChanged |= this.keyStates[this.forwardKey] !== forwardState;
             stateChanged |= this.keyStates[this.backKey] !== backState;
             stateChanged |= this.keyStates[this.leftKey] !== leftState;
             stateChanged |= this.keyStates[this.rightKey] !== rightState;
             stateChanged |= this.keyStates[this.fireKey] !== fireState;
 
-            var gameController = GameManager.getGameController();
+            const gameController = GameManager.getGameController();
 
             if (stateChanged && gameController) {
-                var inputState = InputState.withState(this.playerId, forwardState, backState, leftState, rightState, fireState);
+                const inputState = InputState.withState(this.playerId, forwardState, backState, leftState, rightState, fireState);
                 gameController.setInputState(inputState);
             }
 

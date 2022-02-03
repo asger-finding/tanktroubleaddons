@@ -1,4 +1,4 @@
-var Utils = Classy.newClass();
+const Utils = Classy.newClass();
 
 Utils.classFields({
     svgMeasurementContainer: null,
@@ -8,13 +8,13 @@ Utils.classFields({
 Utils.classMethods({
 
     dateToLocaleTimeString: function(date, period) {
-        var h = date.getHours();
-        var m = date.getMinutes();
-        var local = new Date();
+        let h = date.getHours();
+        const m = date.getMinutes();
+        const local = new Date();
 
         // 12 hour clock style
         if (local.toLocaleTimeString().match(/am|pm/i)) {
-            var p = "AM";
+            let p = "AM";
             if (h >= 12) {
                 h -= 12;
                 p = "PM"
@@ -42,10 +42,10 @@ Utils.classMethods({
 
     // Converts hex value to object with r,g and b properties
     hexToRGB: function(hex) {
-        var hexValue = parseInt(hex, 16);
-        var r = (hexValue >> 16) & 255;
-        var g = (hexValue >> 8) & 255;
-        var b = hexValue & 255;
+        const hexValue = parseInt(hex, 16);
+        const r = (hexValue >> 16) & 255;
+        const g = (hexValue >> 8) & 255;
+        const b = hexValue & 255;
 
         return {r: r, g: g, b: b};
     },
@@ -66,7 +66,7 @@ Utils.classMethods({
         Utils.svgMeasurementContainer.show();
 
         Utils.svgMeasurementHelper.clear();
-        var result = Utils.svgMeasurementHelper.text(0, 100, text, settings).getComputedTextLength();
+        const result = Utils.svgMeasurementHelper.text(0, 100, text, settings).getComputedTextLength();
 
         Utils.svgMeasurementContainer.hide();
 
@@ -76,9 +76,9 @@ Utils.classMethods({
     getSVGScaleAndTranslateToFit: function(containerWidth, textWidth, textHeight, horizontalAlignment) {
         if (horizontalAlignment === undefined) { horizontalAlignment = 'center'; }
 
-        var result = '';
+        let result = '';
 
-        var scale = Math.min(1.0, containerWidth/textWidth);
+        const scale = Math.min(1.0, containerWidth/textWidth);
 
         result += 'scale('+scale+')';
         switch (horizontalAlignment) {
@@ -103,7 +103,7 @@ Utils.classMethods({
     },
 
     createFixedWidthButton: function(label, sizeAndTypeClasses, width) {
-        var button = $("<button class='"+sizeAndTypeClasses+"' type='button' tabindex='-1' title=''></button>");
+        const button = $("<button class='"+sizeAndTypeClasses+"' type='button' tabindex='-1' title=''></button>");
         button.text(label);
         button.css("min-width", width);
 
@@ -111,7 +111,7 @@ Utils.classMethods({
         /*        // Temporarily append to body to enable styling.
         $("body").append(button);
 
-        var fontSize = parseFloat(button.css("font-size"));
+        let fontSize = parseFloat(button.css("font-size"));
 
         while(button.width() > width) {
             fontSize -= 0.2;
@@ -130,11 +130,11 @@ Utils.classMethods({
      * @param function callback
      */
     createPlayerNames: function(playerIds, callback) {
-        var names = $("<span></span>");
-        var count = 0;
+        const names = $("<span></span>");
+        let count = 0;
 
-        for (var i = 0; i < playerIds.length; i++) {
-            var span = $("<span class='username'></span>");
+        for (let i = 0; i < playerIds.length; i++) {
+            const span = $("<span class='username'></span>");
             names.append(span);
 
             if (i == playerIds.length - 2) {
@@ -162,8 +162,8 @@ Utils.classMethods({
     },
 
     addOverlayFormRow: function(form, content) {
-        var rowDiv = $("<div class='row'></div>");
-        var rowContentDiv = $("<div class='rowContent'></div>");
+        const rowDiv = $("<div class='row'></div>");
+        const rowContentDiv = $("<div class='rowContent'></div>");
         rowContentDiv.append(content);
         rowDiv.append(rowContentDiv);
         form.append(rowDiv);
@@ -172,7 +172,7 @@ Utils.classMethods({
     },
 
     addSuffix: function(container, suffix, willCollapse) {
-        var suffixDiv = $("<div class='suffix"+(willCollapse?" collapse":"")+"'></div>");
+        const suffixDiv = $("<div class='suffix"+(willCollapse?" collapse":"")+"'></div>");
         suffixDiv.append(suffix);
         container.append(suffixDiv);
 
@@ -180,7 +180,7 @@ Utils.classMethods({
     },
 
     addPrefix: function(container, prefix, willCollapse) {
-        var prefixDiv = $("<div class='prefix"+(willCollapse?" collapse":"")+"'></div>");
+        const prefixDiv = $("<div class='prefix"+(willCollapse?" collapse":"")+"'></div>");
         prefixDiv.append(prefix);
         container.prepend(prefixDiv);
 
@@ -188,11 +188,11 @@ Utils.classMethods({
     },
 
     addImageWithClasses: function(container, classes, src) {
-        var image = $("<img class='"+classes+"'/>");
+        const image = $("<img class='"+classes+"'/>");
         image.attr("src", g_url(src));
         // Generate srcset from src.
         if (src.substring(src.length - 4) === ".png") {
-            var srcset = g_url(src.substring(0, src.length - 4) + "@2x.png") + " 2x";
+            const srcset = g_url(src.substring(0, src.length - 4) + "@2x.png") + " 2x";
             image.attr("srcset", srcset);
         }
 
@@ -202,11 +202,11 @@ Utils.classMethods({
     },
 
     addAddonsImageWithClasses: function(container, classes, src) {
-        var image = $("<img class='"+classes+"'/>");
+        const image = $("<img class='"+classes+"'/>");
         image.attr("src", t_url(src));
         // Generate srcset from src.
         if (src.substring(src.length - 4) === ".png") {
-            var srcset = t_url(src.substring(0, src.length - 4) + "@2x.png") + " 2x";
+            const srcset = t_url(src.substring(0, src.length - 4) + "@2x.png") + " 2x";
             image.attr("srcset", srcset);
         }
 
@@ -235,7 +235,7 @@ Utils.classMethods({
             // is triggered while the textarea is hidden.
             if (this.scrollHeight > 0) {
                 this.style.height = 'auto';
-                var borderHeight = $(this).outerHeight() - $(this).innerHeight();
+                const borderHeight = $(this).outerHeight() - $(this).innerHeight();
                 this.style.height = (this.scrollHeight + borderHeight) + 'px';
             }
         });
@@ -247,9 +247,9 @@ Utils.classMethods({
     },
 
     arrayToNaturalString: function(input) {
-        var result = "";
+        let result = "";
 
-        for (var i = 0; i < input.length; ++i) {
+        for (let i = 0; i < input.length; ++i) {
             result += input[i];
             if (i == input.length - 2) {
                 result += " and ";
@@ -265,25 +265,25 @@ Utils.classMethods({
         if (now > then) {
             return "no time";
         } else {
-            var diff = then - now;
+            const diff = then - now;
             if (diff > 2 * 604800000) { // 2 weeks in ms
-                var weeks = Math.floor(diff / 604800000);
+                const weeks = Math.floor(diff / 604800000);
                 return weeks + " weeks";
             }
             if (diff > 2 * 86400000) { // 2 days in ms
-                var days = Math.floor(diff / 86400000);
+                const days = Math.floor(diff / 86400000);
                 return days + " days";
             }
             if (diff > 2 * 3600000) { // 2 hours in ms
-                var hours = Math.floor(diff / 3600000);
+                const hours = Math.floor(diff / 3600000);
                 return hours + " hours";
             }
             if (diff > 2 * 60000) { // 2 minutes in ms
-                var minutes = Math.floor(diff / 60000);
+                const minutes = Math.floor(diff / 60000);
                 return minutes + " minutes";
             }
 
-            var seconds = Math.floor(diff / 1000);
+            const seconds = Math.floor(diff / 1000);
             return seconds + " second" + (seconds !== 1 ?"s":"");
         }
     },
@@ -293,11 +293,11 @@ Utils.classMethods({
             margins = [0, 0, 0, 0];
         }
 
-        var foundPlacement = false;
-        var bestFit = "";
-        var highestRatioVisible = 0.0;
+        let foundPlacement = false;
+        let bestFit = "";
+        let highestRatioVisible = 0.0;
 
-        for (var i = 0; i < preferredDirections.length; ++i) {
+        for (let i = 0; i < preferredDirections.length; ++i) {
 
             Utils.placeBox(element, x, y, preferredDirections[i], preferredRadiusHorizontal, preferredRadiusVertical, 30, 35, collision);
 
@@ -306,7 +306,7 @@ Utils.classMethods({
                 foundPlacement = true;
                 break;
             } else {
-                var ratioVisible = Utils.computeVisibleRatio(element, margins);
+                const ratioVisible = Utils.computeVisibleRatio(element, margins);
 
                 if (ratioVisible > highestRatioVisible) {
                     bestFit = preferredDirections[i];
@@ -360,13 +360,13 @@ Utils.classMethods({
     },
 
     containedInViewport: function(element, margins) {
-        var clientRect = element[0].getBoundingClientRect();
+        const clientRect = element[0].getBoundingClientRect();
         if (clientRect.left - margins[3] < 0 || clientRect.top - margins[0] < 0) {
             return false;
         }
 
-        var width = $(window).width();
-        var height = $(window).height();
+        const width = $(window).width();
+        const height = $(window).height();
         if (clientRect.right + margins[1] > width || clientRect.bottom + margins[2] > height) {
             return false;
         }
@@ -375,24 +375,24 @@ Utils.classMethods({
     },
 
     computeVisibleRatio: function(element, margins) {
-        var clientRect = element[0].getBoundingClientRect();
-        var totalArea = (clientRect.width + margins[1] + margins[3]) * (clientRect.height + margins[0] + margins[2]);
+        const clientRect = element[0].getBoundingClientRect();
+        const totalArea = (clientRect.width + margins[1] + margins[3]) * (clientRect.height + margins[0] + margins[2]);
 
-        var width = $(window).width();
-        var height = $(window).height();
+        const width = $(window).width();
+        const height = $(window).height();
 
-        var left = Math.max(clientRect.left - margins[3], 0);
-        var top = Math.max(clientRect.top - margins[0], 0);
-        var right = Math.min(clientRect.right + margins[1], width);
-        var bottom = Math.min(clientRect.bottom + margins[2], height);
-        var visibleArea = (right - left) * (bottom - top);
+        const left = Math.max(clientRect.left - margins[3], 0);
+        const top = Math.max(clientRect.top - margins[0], 0);
+        const right = Math.min(clientRect.right + margins[1], width);
+        const bottom = Math.min(clientRect.bottom + margins[2], height);
+        const visibleArea = (right - left) * (bottom - top);
 
         return visibleArea / totalArea;
     },
 
     maskUnapprovedUsername: function(playerDetails) {
-        var adminStatus = this.getAdminStatus(playerDetails);
-        var username = "";
+        const adminStatus = this.getAdminStatus(playerDetails);
+        let username = "";
 
         if (adminStatus === "active") {
             username = "(GM" + playerDetails.getGmLevel() + ") " + username;

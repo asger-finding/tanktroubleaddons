@@ -1,4 +1,4 @@
-const Hasher = function(str: string, seed: number = 0) {
+const Hasher = function(str: string, seed = 0) {
     let h1 = 0xDeadBeef ^ seed,
         h2 = 0x41c6ce57 ^ seed;
     for (let i = 0, ch; i < str.length; i++) {

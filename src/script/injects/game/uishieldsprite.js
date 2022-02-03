@@ -15,9 +15,9 @@ UIShieldSprite = function(game, gameController, weakenedSound)
 
     this.bolts = [];
     this.boltRotationSpeeds = [];
-    var boltFrames = ['shieldBolt0', 'shieldBolt1', 'shieldBolt2'];
-    for (var i = 0; i < UIConstants.SHIELD_NUM_BOLTS; ++i) {
-        var bolt = this.addChild(new Phaser.Image(game, 0, 0, 'game', 'shieldBolt0'));
+    const boltFrames = ['shieldBolt0', 'shieldBolt1', 'shieldBolt2'];
+    for (let i = 0; i < UIConstants.SHIELD_NUM_BOLTS; ++i) {
+        const bolt = this.addChild(new Phaser.Image(game, 0, 0, 'game', 'shieldBolt0'));
         bolt.anchor.setTo(0.5, 1.0);
         ArrayUtils.shuffle(boltFrames);
         bolt.animations.add('buzz', boltFrames, 6, false).onComplete.add(
@@ -73,7 +73,7 @@ UIShieldSprite.prototype.spawn = function(playerId, weakened, animate)
         this.weakenedSound.play('', 0, 0.5, true);
     }
 
-    var tank = this.gameController.getTank(this.playerId);
+    const tank = this.gameController.getTank(this.playerId);
     if (tank) {
         this.body.x = UIUtils.mpx(tank.getX());
         this.body.y = UIUtils.mpx(tank.getY());
@@ -91,9 +91,9 @@ UIShieldSprite.prototype.update = function()
     this.layer1Shield.rotation += UIConstants.SHIELD_LAYER_1_ROTATION_SPEED * this.game.time.delta / 1000;
     this.layer2Shield.rotation += UIConstants.SHIELD_LAYER_2_ROTATION_SPEED * this.game.time.delta / 1000;
 
-    var inverseBoltProbability = QualityManager.getQualityValue(QualityManager.QUALITY_PARAMETERS.SHIELD_INVERSE_BOLT_PROBABILITY);
-    for (var i = 0; i < this.bolts.length; ++i) {
-        var bolt = this.bolts[i];
+    const inverseBoltProbability = QualityManager.getQualityValue(QualityManager.QUALITY_PARAMETERS.SHIELD_INVERSE_BOLT_PROBABILITY);
+    for (let i = 0; i < this.bolts.length; ++i) {
+        const bolt = this.bolts[i];
         bolt.rotation += this.boltRotationSpeeds[i] * this.game.time.delta / 1000;
         if (!bolt.exists) {
             if (Math.random() > inverseBoltProbability) {
@@ -109,7 +109,7 @@ UIShieldSprite.prototype.update = function()
     }
 
     // Update position from game model.
-    var tank = this.gameController.getTank(this.playerId);
+    const tank = this.gameController.getTank(this.playerId);
     if (tank) {
         this.body.x = UIUtils.mpx(tank.getX());
         this.body.y = UIUtils.mpx(tank.getY());

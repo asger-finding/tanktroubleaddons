@@ -13,9 +13,9 @@ UISpawnZoneSprite = function(game, gameController, tearingSound, unstableSound)
 
     this.bolts = [];
     this.boltRotationSpeeds = [];
-    var boltFrames = ['spawnSparkBolt0', 'spawnSparkBolt1', 'spawnSparkBolt2'];
-    for (var i = 0; i < UIConstants.SPAWN_ZONE_NUM_BOLTS; ++i) {
-        var bolt = this.addChild(new Phaser.Image(game, 0, 0, 'game', 'spawnSparkBolt0'));
+    const boltFrames = ['spawnSparkBolt0', 'spawnSparkBolt1', 'spawnSparkBolt2'];
+    for (let i = 0; i < UIConstants.SPAWN_ZONE_NUM_BOLTS; ++i) {
+        const bolt = this.addChild(new Phaser.Image(game, 0, 0, 'game', 'spawnSparkBolt0'));
         bolt.scale.setTo(UIConstants.GAME_ASSET_SCALE, UIConstants.GAME_ASSET_SCALE);
         bolt.anchor.setTo(0.5, 0.85);
         ArrayUtils.shuffle(boltFrames);
@@ -83,16 +83,16 @@ UISpawnZoneSprite.prototype.spawn = function(zoneId, radius, unstable, animate)
         this.unstableSound.play('', 0, 1.0);
     }
 
-    var zoneScale = UIUtils.mpx(radius) / UIUtils.mpx(Constants.SPAWN_ZONE_END_RADIUS) * UIConstants.GAME_ASSET_SCALE;
+    const zoneScale = UIUtils.mpx(radius) / UIUtils.mpx(Constants.SPAWN_ZONE_END_RADIUS) * UIConstants.GAME_ASSET_SCALE;
     this.hole1.scale.setTo(zoneScale, zoneScale);
     this.hole2.scale.setTo(zoneScale, zoneScale);
     this.layer1Swirl.scale.setTo(zoneScale, zoneScale);
     this.layer2Swirl.scale.setTo(zoneScale, zoneScale);
 
-    var zone = this.gameController.getZone(this.zoneId);
+    const zone = this.gameController.getZone(this.zoneId);
     if (zone) {
-        var position = zone.getTiles()[0];
-        var zonePosition = {x: (position.x + 0.5) * Constants.MAZE_TILE_SIZE.px, y: (position.y + 0.5) * Constants.MAZE_TILE_SIZE.px};
+        const position = zone.getTiles()[0];
+        const zonePosition = {x: (position.x + 0.5) * Constants.MAZE_TILE_SIZE.px, y: (position.y + 0.5) * Constants.MAZE_TILE_SIZE.px};
 
         this.body.x = zonePosition.x;
         this.body.y = zonePosition.y;
@@ -117,21 +117,21 @@ UISpawnZoneSprite.prototype.update = function()
 
     // Update radius from game model.
     if (!this.collapsing) {
-        var zone = this.gameController.getZone(this.zoneId);
+        const zone = this.gameController.getZone(this.zoneId);
         if (zone) {
-            var radius = UIUtils.mpx(zone.getField("radius"));
+            let radius = UIUtils.mpx(zone.getField("radius"));
 
             this.body.setCircle(radius);
             this.body.setCollisionGroup(UIUtils.spawnCollisionGroup);
             this.body.collides([UIUtils.fragmentCollisionGroup, UIUtils.rayCollisionGroup]);
 
             if (this.unstable) {
-                for (var i = 0; i < this.bolts.length; ++i) {
-                    var bolt = this.bolts[i];
+                for (let i = 0; i < this.bolts.length; ++i) {
+                    const bolt = this.bolts[i];
                     if (!bolt.exists) {
                         if (Math.random() > UIConstants.INVERSE_SPAWN_ZONE_UNSTABLE_BOLT_PROBABILITY) {
                             bolt.revive();
-                            var rotation = Math.random() * 2 * Math.PI;
+                            const rotation = Math.random() * 2 * Math.PI;
                             bolt.x = Math.sin(rotation) * (radius + UIConstants.SPAWN_ZONE_UNSTABLE_BOLT_OFFSET);
                             bolt.y = -Math.cos(rotation) * (radius + UIConstants.SPAWN_ZONE_UNSTABLE_BOLT_OFFSET);
                             bolt.rotation = rotation;
@@ -146,12 +146,12 @@ UISpawnZoneSprite.prototype.update = function()
                 }
 
             } else {
-                for (var i = 0; i < this.bolts.length; ++i) {
-                    var bolt = this.bolts[i];
+                for (let i = 0; i < this.bolts.length; ++i) {
+                    const bolt = this.bolts[i];
                     if (!bolt.exists) {
                         if (Math.random() > UIConstants.INVERSE_SPAWN_ZONE_STABLE_BOLT_PROBABILITY) {
                             bolt.revive();
-                            var rotation = Math.random() * 2 * Math.PI;
+                            const rotation = Math.random() * 2 * Math.PI;
                             bolt.x = Math.sin(rotation) * radius;
                             bolt.y = -Math.cos(rotation) * radius;
                             bolt.rotation = rotation;
@@ -167,7 +167,7 @@ UISpawnZoneSprite.prototype.update = function()
                 radius += (this.expansionAnimation / UIConstants.SPAWN_ZONE_HOLE_EXPANSION_TIME) * UIConstants.SPAWN_ZONE_HOLE_EXPANSION_SIZE;
             }
 
-            var zoneScale = radius / UIUtils.mpx(Constants.SPAWN_ZONE_END_RADIUS) * UIConstants.GAME_ASSET_SCALE;
+            const zoneScale = radius / UIUtils.mpx(Constants.SPAWN_ZONE_END_RADIUS) * UIConstants.GAME_ASSET_SCALE;
             this.hole1.scale.setTo(zoneScale, zoneScale);
             this.hole2.scale.setTo(zoneScale, zoneScale);
             this.layer1Swirl.scale.setTo(zoneScale, zoneScale);
@@ -202,12 +202,12 @@ UISpawnZoneSprite.prototype.remove = function()
     this.collapsing = true;
     this.unstableSound.fadeOut(UIConstants.SPAWN_ZONE_BREAK_TIME);
 
-    var zone = this.gameController.getZone(this.zoneId);
+    const zone = this.gameController.getZone(this.zoneId);
     if (zone) {
-        var radius = UIUtils.mpx(zone.getField("radius"));
-        var numParticles = QualityManager.getQualityValue(QualityManager.QUALITY_PARAMETERS.SPAWN_ZONE_NUM_COLLAPSE_PARTICLES);
-        for (var i = 0; i < numParticles; ++i) {
-            var speed = UIConstants.SPAWN_ZONE_COLLAPSE_MIN_PARTICLE_SPEED + Math.random() * (UIConstants.SPAWN_ZONE_COLLAPSE_MAX_PARTICLE_SPEED - UIConstants.SPAWN_ZONE_COLLAPSE_MIN_PARTICLE_SPEED);
+        const radius = UIUtils.mpx(zone.getField("radius"));
+        const numParticles = QualityManager.getQualityValue(QualityManager.QUALITY_PARAMETERS.SPAWN_ZONE_NUM_COLLAPSE_PARTICLES);
+        for (let i = 0; i < numParticles; ++i) {
+            const speed = UIConstants.SPAWN_ZONE_COLLAPSE_MIN_PARTICLE_SPEED + Math.random() * (UIConstants.SPAWN_ZONE_COLLAPSE_MAX_PARTICLE_SPEED - UIConstants.SPAWN_ZONE_COLLAPSE_MIN_PARTICLE_SPEED);
             this.emitter.emit(radius, speed, 1);
         }
     }

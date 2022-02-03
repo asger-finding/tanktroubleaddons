@@ -56,6 +56,9 @@ const state = {
 	}
 }
 paths.target = yargs.argv.target || 'chromium';
+const tsProject = ts.createProject('./tsconfig.json');
+const jsProject = ts.createProject('./tsconfig.json');
+
 
 function browserSpecificFiles(filename) {
     const browsers = filename.split('_');
@@ -65,7 +68,6 @@ function browserSpecificFiles(filename) {
         basename: (browsers.includes(paths.browserTarget) || browsers.length === 0) ? name : paths.redundancy,
         browsers: browsers
     }
-    callback.use = !(callback.filename === paths.redundancy);
     return callback;
 }
 function capitalizeFirstLetter(string) {
@@ -77,7 +79,7 @@ function typescript() {
         .pipe(changed(state.dest))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
         .pipe(ignore(paths.redundancy))
-        .pipe(ts.createProject('./tsconfig.json')())
+        .pipe(tsProject())
         .pipe(gulpif(state.prod, terser()))
         .pipe(dest(state.dest));
 }
@@ -87,7 +89,7 @@ function scripts() {
         .pipe(changed(state.dest))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
         .pipe(ignore(paths.redundancy))
-        .pipe(gulpif(state.prod, ts.createProject('./tsconfig.json')()))
+        .pipe(gulpif(state.prod, jsProject()))
         .pipe(gulpif(state.prod, terser()))
         .pipe(dest(state.dest));
 }

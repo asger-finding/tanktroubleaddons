@@ -1,12 +1,14 @@
 # **TankTroubleAddons v2**
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-21262d.svg?&style=flat-square&logo=google-chrome&logoColor=c9d1d9)](https://chrome.google.com/webstore/detail/tanktroubleaddons/iaahklbbofakekcbhbjnpjbgaadhedhm)
-<!--[![Apple App Store](https://img.shields.io/badge/Safari-21262d.svg?&style=flat-square&logo=safari&logoColor=c9d1d9)]()
+<!--
+[![Apple App Store](https://img.shields.io/badge/Safari-21262d.svg?&style=flat-square&logo=safari&logoColor=c9d1d9)]()
 [![Edge Addons](https://img.shields.io/badge/Edge-21262d.svg?&style=flat-square&logo=microsoft-edge&logoColor=c9d1d9)]()
 [![Firefox Add-ons](https://img.shields.io/badge/Firefox-21262d.svg?&style=flat-square&logo=firefox-browser&logoColor=c9d1d9)]()
-[![Opera Addons](https://img.shields.io/badge/Opera-21262d.svg?&style=flat-square&logo=opera&logoColor=c9d1d9)]()-->
+[![Opera Addons](https://img.shields.io/badge/Opera-21262d.svg?&style=flat-square&logo=opera&logoColor=c9d1d9)]()
+-->
 
-TankTroubleAddons v2, a complete rewrite of the original addons compatiable with the obligatory migration to Manifest V3. (Thanks, Google!)  
+TankTroubleAddons v2, a complete rewrite of the original addons compatible with the obligatory migration to Manifest V3. (Thanks, Google!)  
 Written in TypeScript with a SASS preprocessor, compiled with gulp.
 
 ## Minimum browser version
@@ -27,7 +29,7 @@ See the table below for safe minimum requirements.
 - Compile extension for support on all major browsers.
 - Add to Chrome Webstore, Firefox, Safari and Opera
 
-[Features checklist](https://github.com/CommanderAnime/TankTroubleAddons/issues/1)
+- [x] [Features checklist](https://github.com/CommanderAnime/TankTroubleAddons/issues/1)
 
 ## Installing and running for development **(chromium-only)**
 
@@ -40,7 +42,7 @@ See the table below for safe minimum requirements.
    - `npm run build:prod` — and minify for a production build
    - `npm run clean` — delete the build and distribution folders
 5. **Running TankTroubleAddons in your browser**
-   - Chromium browsers (Chrome, Edge, Opera)
+   - **Chromium browsers (Chrome, Edge, Opera)**
      1. Go to one of the following  
        [chrome://extensions/](chrome://extensions) (Chrome)  
        [edge://extensions/](edge://extensions/) (Microsoft Edge)  
@@ -61,22 +63,21 @@ Happy hacking!
 
 ## Useful tools for development
 
-Of course this all comes down to preference. I use Visual Studio Code on Windows with these useful extensions:
+Of course, this all comes down to preference. Your setup is completely up to you!  
+I use Visual Studio Code on Windows with these useful extensions
 
-- Beautify
-- Bracket Pair Colorizer 2
 - ESLint
-- GitHub Copilot (invite-only)
-- markdownlint
-- GitLens
-- Material Icon Theme
-- Visual Studio IntelliCode
-- YAML
 - EditorConfig for VS Code
+- Bracket Pair Colorizer 2
+- markdownlint
+- Beautify
+- GitLens
+- YAML
+- Material Icon Theme
+- GitHub Copilot (invite-only)
 
-### Final notes
+## Final notes
 
-Thanks to samme from the Phaser project for helping me sort out my stupid-bugs.  
-Thank you to the folks on Discord for helping me out with ideas and suggestions, and voting on my polls  
-A heartfelt thanks goes out to the entire community who has supported TankTroubleAddons and my work for multiple years now. Were it not for the overwhelming encoragement from all you guys, I would've quit the project long, long ago.  
-I couldn't have asked for a better community. This game has become a huge part of my life and has helped shape my roadmap for the future. For the many years, thank you. May there be many more to come.
+A heartfelt thank you goes out to everyone in the TankTrouble community.  
+This game has become a huge part of my life and has helped me shape my roadmap for the future.  
+For the many years, thank you. May there be many more to come.

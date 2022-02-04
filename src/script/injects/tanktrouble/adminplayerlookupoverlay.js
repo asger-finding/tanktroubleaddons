@@ -645,6 +645,8 @@ TankTrouble.AdminPlayerLookupOverlay = {
 
     _positionTankIcon: function() {
         const icon = this.details.find('.icon');
+
+		const self = this;
         if (self.wrapper.position().top + icon.parent().height() - icon.height() - 20 < 0) {
             $('.admin.playerLookup .icon').removeClass('fixed');
         } else {

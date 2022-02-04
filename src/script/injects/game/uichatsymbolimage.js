@@ -43,7 +43,7 @@ UIChatSymbolImage.prototype.update = function()
         this.x = UIUtils.mpx(tank.getX()) + Constants.TANK.HEIGHT.px * 0.5;
         this.y = UIUtils.mpx(tank.getY()) - Constants.TANK.HEIGHT.px * 0.5;
     
-        this.timeAlive += this.game.time.delta / 1000;
+        this.timeAlive += this.game.time.delta;
     
         if (this.timeAlive > UIConstants.CHAT_SYMBOL_DISPLAY_TIME && !this.removeTween) {
             this.hide();

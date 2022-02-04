@@ -287,9 +287,9 @@ UIConstants.classFields({
     WAITING_FOR_PLAYERS_DELAY_TIME: 1500,       // ms
     WAITING_FOR_CELEBRATION_TIME: 7000,         // ms - related to Constants.CELEBRATION_DURATION FIXME Maybe replace with that constant?
 
-    CELEBRATION_TROPHY_LIFETIME: 1.0,           // s
-    CELEBRATION_TANK_LIFETIME: 5.5,             // s
-    CELEBRATION_PRIZE_HANDOUT_TIME: 3.5,         // s
+    CELEBRATION_TROPHY_LIFETIME: 1000,          // ms
+    CELEBRATION_TANK_LIFETIME: 5500,            // ms
+    CELEBRATION_PRIZE_HANDOUT_TIME: 3500,       // ms
 
     CELEBRATION_HEADER_Y: -128,                 // canvas px
     CELEBRATION_HEADER_FONT_SIZE: 24,           // canvas px
@@ -545,8 +545,8 @@ UIConstants.classFields({
     ROUND_TITLE_DISPLAY_TIME: 2000,             // ms
 
     COUNT_DOWN_DISPLAY_TIME: 500,               // ms
-    TANK_NAME_DISPLAY_TIME: 2.5,                // s
-    CHAT_SYMBOL_DISPLAY_TIME: 3.0,              // s
+    TANK_NAME_DISPLAY_TIME: 2500,               // s
+    CHAT_SYMBOL_DISPLAY_TIME: 3000,             // ms
 
     TANK_LOCAL_SMOOTHING: 1,
     TANK_ONLINE_SMOOTHING: 3,
@@ -561,13 +561,13 @@ UIConstants.classFields({
     TANK_TREAD_INNER_BACK_SPEED: 0.012,         // frames/ms
     TANK_TREAD_TURN_SPEED: 0.069,               // frames/ms
 
-    LASER_RETRACTION_TIME: 0.05,                // s
+    LASER_RETRACTION_TIME: 50,                  // ms
     LASER_WIDTH: 4,                             // screen px
 
     MISSILE_LAUNCH_MIN_SPEED: 70,               // screen px
     MISSILE_LAUNCH_MAX_SPEED: 90,               // screen px
     MISSILE_SMOKE_COLOUR: 0x000000,
-    MISSILE_TARGETING_SOUND_INTERVAL_PER_TILE: 0.2, // s
+    MISSILE_TARGETING_SOUND_INTERVAL_PER_TILE: 200, // ms
 
     AIMER_WIDTH: 4,                             // screen px
     AIMER_OFFSET: 50,                           // screen px
@@ -603,7 +603,7 @@ UIConstants.classFields({
 
     SPAWN_ZONE_SPAWN_TIME: 300,                             // ms
     SPAWN_ZONE_NUM_BOLTS: 5,
-    SPAWN_ZONE_HOLE_EXPANSION_TIME: 0.5,                    // s
+    SPAWN_ZONE_HOLE_EXPANSION_TIME: 500,                    // ms
     SPAWN_ZONE_HOLE_EXPANSION_SIZE: 5,                      // screen px
     SPAWN_ZONE_SPARK_SPEED: 150,                            // screen px/s
     SPAWN_ZONE_SPARK_RANDOM_SPEED: 25,                      // screen px/s
@@ -645,9 +645,9 @@ UIConstants.classFields({
     SPARKLE_ANIMATION_TIME: 500,                // ms
 
     EXPLOSION_FRAGMENT_COUNT: 15,
-    EXPLOSION_FRAGMENT_COLLISION_TIME: 0.1,     // s
-    EXPLOSION_FRAGMENT_MIN_LIFETIME: 2.0,       // s
-    EXPLOSION_FRAGMENT_MAX_LIFETIME: 3.0,       // s
+    EXPLOSION_FRAGMENT_COLLISION_TIME: 100,     // ms
+    EXPLOSION_FRAGMENT_MIN_LIFETIME: 2000,      // ms
+    EXPLOSION_FRAGMENT_MAX_LIFETIME: 3999,      // ms
     EXPLOSION_FRAGMENT_MIN_SPEED: 50,           // screen px/s
     EXPLOSION_FRAGMENT_MAX_SPEED: 300,          // screen px/s
     EXPLOSION_FRAGMENT_MAX_ROTATION_SPEED: 30.0,// radian/s
@@ -655,8 +655,8 @@ UIConstants.classFields({
     RUBBLE_FRAGMENT_POOL_SIZE: 25,
     INVERSE_RUBBLE_SPAWN_PROBABILITY_IN_THE_OPEN: 0.99,
     INVERSE_RUBBLE_SPAWN_PROBABILITY_IN_COLLISION: 0.83,
-    RUBBLE_FRAGMENT_MIN_LIFETIME: 0.5,       // s
-    RUBBLE_FRAGMENT_MAX_LIFETIME: 0.8,       // s
+    RUBBLE_FRAGMENT_MIN_LIFETIME: 500,       // ms
+    RUBBLE_FRAGMENT_MAX_LIFETIME: 800,       // ms
     RUBBLE_FRAGMENT_SPEED_SCALE: 25,
     RUBBLE_FRAGMENT_RANDOM_SPEED: 120,       // screen px/s
     RUBBLE_FRAGMENT_MAX_ROTATION_SPEED: 40.0,// radian/s

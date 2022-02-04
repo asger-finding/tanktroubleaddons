@@ -102,7 +102,7 @@ TankTrouble.GarageOverlay = {
 
         setTimeout(function() {
             // Phaser CE is a bit iffy with PIXI defaultRenderer and deletes it on phaserInstance destroy, so we store it and re-add it after destruction.
-            const { defaultRenderer } = PIXI;
+            const defaultRenderer = PIXI.defaultRenderer;
             self.phaserInstance.destroy();
             self.phaserInstance = null;
             PIXI.defaultRenderer = defaultRenderer;

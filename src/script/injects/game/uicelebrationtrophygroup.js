@@ -88,7 +88,7 @@ UICelebrationTrophyGroup.prototype.update = function()
         return;
     }
 
-    this.timeAlive += this.game.time.delta / 1000;
+    this.timeAlive += this.game.time.delta;
 
     if (!this.exploded) {
         if (this.timeAlive >= UIConstants.CELEBRATION_TROPHY_LIFETIME) {

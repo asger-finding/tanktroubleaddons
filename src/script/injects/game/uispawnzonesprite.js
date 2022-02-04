@@ -160,7 +160,7 @@ UISpawnZoneSprite.prototype.update = function()
                     }
                 }
 
-                this.expansionAnimation += this.game.time.delta / 1000;
+                this.expansionAnimation += this.game.time.delta;
                 if (this.expansionAnimation >= UIConstants.SPAWN_ZONE_HOLE_EXPANSION_TIME) {
                     this.expansionAnimation -= Math.random() * UIConstants.SPAWN_ZONE_HOLE_EXPANSION_TIME;
                 }

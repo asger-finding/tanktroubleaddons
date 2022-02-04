@@ -36,7 +36,7 @@ UIExplosionFragmentSprite.prototype.update = function()
         return;
     }
 
-    this.timeAlive += this.game.time.delta / 1000;
+    this.timeAlive += this.game.time.delta;
     
     if (!this.colliding && this.timeAlive > UIConstants.EXPLOSION_FRAGMENT_COLLISION_TIME) {
         // Set collision.

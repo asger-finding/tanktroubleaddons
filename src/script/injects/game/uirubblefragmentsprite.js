@@ -36,7 +36,7 @@ UIRubbleFragmentSprite.prototype.update = function()
         return;
     }
 
-    this.timeAlive += this.game.time.delta / 1000;
+    this.timeAlive += this.game.time.delta;
     
     if (!this.fading && this.timeAlive > this.lifetime) {
         // Start fading out.

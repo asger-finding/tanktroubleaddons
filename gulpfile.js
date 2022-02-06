@@ -73,7 +73,7 @@ function capitalizeFirstLetter(string) {
 
 function typescript() {
     return src(paths.files.typescript)
-        .pipe(changed(state.dest))
+        .pipe(changed(state.dest, {extension: '.js'}))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
         .pipe(ignore(paths.redundancy))
         .pipe(ts.createProject('./tsconfig.json')())
@@ -83,7 +83,7 @@ function typescript() {
 
 function scripts() {
     return src(paths.files.script)
-        .pipe(changed(state.dest))
+        .pipe(changed(state.dest, {extension: '.js'}))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
         .pipe(ignore(paths.redundancy))
         .pipe(gulpif(state.prod, ts.createProject('./tsconfig.json')()))
@@ -99,7 +99,7 @@ function css() {
         ] : []
     ]
     return src(paths.files.css)
-        .pipe(changed(state.dest + '/css'))
+        .pipe(changed(state.dest + '/css', {extension: '.css'}))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
         .pipe(ignore(paths.redundancy))
         .pipe(sass())
@@ -136,7 +136,7 @@ function json() {
 
 function manifest() {
     return src(paths.manifest)
-        .pipe(changed(state.dest))
+        .pipe(changed(state.dest, {extension: '.json'}))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
         .pipe(ignore(paths.redundancy))
         .pipe(yaml({ schema: 'DEFAULT_FULL_SCHEMA' }))

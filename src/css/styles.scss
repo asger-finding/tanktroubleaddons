@@ -182,6 +182,13 @@ $bubble-unmoderated: #ffda00;
     }
 }
 
+#googlePlaySnippet {
+	display: none !important;
+}
+#red_infiltration {
+	transform: translateY(-50px);
+}
+
 #statisticsSnippet {
     display: inline-block !important;
     /* TankTrouble's selectors override it with a solid colour */

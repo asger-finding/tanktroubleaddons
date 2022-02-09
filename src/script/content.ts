@@ -46,7 +46,35 @@ class GameLoader {
 			subtree: true
 		});
 	}
+
+	set(key: string, value: string) {
+		chrome.storage.local.set({ [key]: value }, void function(result) {
+			return result[key];
+		});
+	}
+
+	get(keys: Array<string>) {
+		return chrome.storage.local.get(keys);
+	}
+
+	getWithFallback(key: string, fallback: string) {
+		return new Promise<string>((resolve, reject) => {
+			chrome.storage.local.get(key, function(result) {
+				resolve(result[key] || fallback);
+			});
+		});
+	}
+
+	async load() {
+		this.observe();
+
+		const theme = await this.getWithFallback('theme', 'dark');
+
+		console.log(theme)
+
+		document.documentElement.dataset.theme = theme;
+	}
 }
 
 const loader = new GameLoader();
-loader.observe();
+loader.load();

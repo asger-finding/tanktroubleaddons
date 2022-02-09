@@ -42,7 +42,8 @@ UIRubbleGroup.prototype.update = function() {
 };
 
 UIRubbleGroup.prototype.emit = function(tank) {
-    if (QualityManager.getQuality() !== (QualityManager.QUALITY_SETTINGS.LOW || QualityManager.QUALITY_SETTINGS.MINIMUM)) {
+    if (QualityManager.getQuality() !== QualityManager.QUALITY_SETTINGS.LOW &&
+		QualityManager.getQuality() !== QualityManager.QUALITY_SETTINGS.MINIMUM) {
         if (tank.getSpeed() != 0.0 || tank.getRotationSpeed() != 0.0) {
             this.exists = true;
             this.visible = true;

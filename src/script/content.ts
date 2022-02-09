@@ -2,7 +2,7 @@ class GameLoader {
 	extensionData: HTMLElement;
 	hasherScript: HTMLScriptElement;
 	indexLoader: HTMLScriptElement;
-	head: HTMLHeadElement;
+	head!: HTMLHeadElement;
 
 	constructor() {
 		this.hasherScript = document.createElement('script');
@@ -29,7 +29,7 @@ class GameLoader {
 							this.head = <HTMLHeadElement>node;
 							this.head.insertBefore(this.hasherScript, this.head.firstChild);
 	
-						} else if (node.parentElement?.tagName === 'BODY' && node.tagName === 'SCRIPT' && node.textContent.includes('content.php')) {
+						} else if (node.parentElement?.tagName === 'BODY' && node.tagName === 'SCRIPT' && node.textContent?.includes('content.php')) {
 							this.extensionData.dataset.loader = node.textContent;
 							
 							node.textContent = '';
@@ -48,7 +48,7 @@ class GameLoader {
 	}
 
 	set(key: string, value: string) {
-		chrome.storage.local.set({ [key]: value }, void function(result) {
+		chrome.storage.local.set({ [key]: value }, void function(result: any) {
 			return result[key];
 		});
 	}

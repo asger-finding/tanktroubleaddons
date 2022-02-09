@@ -1,5 +1,4 @@
-export default class ScriptHashes {
-    static hashes = {
+export const ScriptHashes: { [key: string]: string } = {
     // Game
         // Logic
             '7pqp95akl2s': 'game/gamemanager.js',
@@ -107,10 +106,5 @@ export default class ScriptHashes {
         '6v200sak2qq': 'classes/users.js',
         '3ip0fdausiq': 'classes/content.js',
         '7nqmob1fehq': 'classes/constants.js',
-        '697ii87vo0r': 'classes/uiconstants.js',
-    }
-
-    static get hashesLength() {
-        return Object.keys(this.hashes).length;
-    }
+        '697ii87vo0r': 'classes/uiconstants.js'
 }

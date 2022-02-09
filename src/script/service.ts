@@ -3,13 +3,14 @@ chrome.action.onClicked.addListener(execScript);
 
 async function execScript() {
 	const tabId = await getTabId();
-	console.log(chrome)
-	chrome.scripting.executeScript({
-		target: {
-			tabId: tabId
-		},
-		files: [ 'script/execute.js' ]
-	})
+	if (tabId) {
+		chrome.scripting.executeScript({
+			target: {
+				tabId: tabId
+			},
+			files: [ 'script/execute.js' ]
+		});
+	}
 }
 
 async function getTabId() {

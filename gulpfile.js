@@ -109,11 +109,11 @@ function css() {
 
 function html() {
     return src(paths.files.html)
-        .pipe(changed(state.dest))
+        .pipe(changed(state.dest + '/html'))
         .pipe(rename(path => (path.basename = browserSpecificFiles(path.basename).basename, path) ))
         .pipe(ignore(paths.redundancy))
         .pipe(gulpif(state.prod, htmlmin({ collapseWhitespace: true })))
-		.pipe(dest(state.dest));
+		.pipe(dest(state.dest + '/html'));
 }
 
 function images() {

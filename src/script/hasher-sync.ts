@@ -1,5 +1,4 @@
-class ScriptHashes {
-    static hashes = {
+const ScriptHashes: { [key: string]: string } = {
     // Game
         // Logic
             '7pqp95akl2s': 'game/gamemanager.js',
@@ -107,12 +106,7 @@ class ScriptHashes {
         '6v200sak2qq': 'classes/users.js',
         '3ip0fdausiq': 'classes/content.js',
         '7nqmob1fehq': 'classes/constants.js',
-        '697ii87vo0r': 'classes/uiconstants.js',
-    }
-
-    static get hashesLength() {
-        return Object.keys(this.hashes).length;
-    }
+        '697ii87vo0r': 'classes/uiconstants.js'
 }
 
 const Hasher = function(str: string, seed = 0) {
@@ -292,23 +286,23 @@ class Logger {
             'color: ' + colour, 'color: ' + Browser.devtools.font_default, ...styling ];
     }
 
-    static log(...args) {
+    static log(...args: string[]) {
         console.log(...Logger.time(Browser.devtools.font_dark, ...args));
     }
 
-    static error(...args) {
+    static error(...args: string[]) {
         console.error(...Logger.time(Browser.devtools.font_error, ...args));
     }
 
-    static warn(...args) {
+    static warn(...args: string[]) {
         console.warn(...Logger.time(Browser.devtools.font_warn, ...args));
     }
 
-    static trace(...args) {
+    static trace(...args: string[]) {
         console.trace(...Logger.time(Browser.devtools.font_dark, ...args));
     }
 
-    static detailedLog(trace, ...args) {
+    static detailedLog(trace: string | null, ...args: string[]) {
         console.groupCollapsed(...Logger.time(Browser.devtools.font_dark, ...args));
         console.trace(trace);
         console.groupEnd();
@@ -320,35 +314,33 @@ const debugHashes = false;
 const nodeData = document.querySelector('tanktroubleaddons');
 if (nodeData instanceof HTMLElement) {
 	const extensionURL = nodeData.dataset.url;
-
 	window.t_url = function(url: string) {
 		return extensionURL + url;
 	}
 
-	const proxied = eval;
+	const t_url = window.t_url;
+	const proxied: Function = eval;
 	const hashLength = ScriptHashes.hashesLength;
-	let done =  0;
-	window.eval = function(...code: Array<string>) { /* Should be type of string, but TankTrouble might throw some errors */
+	let done = 0;
+
+	window.eval = function(...code: string[]) {
 		for (let i = 0; i < code.length; i++) {
-			if (typeof code[i] === 'string') {
-				const codeHash = Hasher(code[i]),
-				match = ScriptHashes.hashes[codeHash],
-				colour = match ? '#C0FF33' : '#FA113D';
-	
-				if (match) {
-					done++;
-					const script = document.createElement('script');
-					script.src = window.t_url('script/injects/' + match + '?=_' + (Math.floor(Math.random() * 10_000_000) + 10_000_000));
-					document.head.insertBefore(script, document.head.firstChild);
-				}
-	
-				if (debugHashes && document.readyState === 'loading') {
-					Logger.log(`%c[ %c${ codeHash } %c] %c${ done }/${ hashLength }   ${code}`, `color: ${ colour }`, `color: #fff; font-weight: bold;`, `color: ${ colour }`, `color: ${ match ? colour : '#fff' }`);
-				}
+			const codeHash: string = Hasher(code[i]);
+			const match: string = ScriptHashes[codeHash];
+			const colour: string = match ? '#C0FF33' : '#FA113D';
+
+			if (match) {
+				done++;
+				const script = document.createElement('script');
+				script.src = t_url('script/injects/' + match + '?=_' + (Math.floor(Math.random() * 10_000_000) + 10_000_000));
+				document.head.insertBefore(script, document.head.firstChild);
+			}
+
+			if (debugHashes && document.readyState === 'loading') {
+				Logger.log(`%c[ %c${ codeHash } %c] %c${ done }/${ hashLength }   ${code}`, `color: ${ colour }`, `color: #fff; font-weight: bold;`, `color: ${ colour }`, `color: ${ match ? colour : '#fff' }`);
 			}
 		}
-		return proxied.apply(this, ...[code]);
+		return proxied.apply(this, code);
 	}
-	
 	Logger.log('Hasher loaded.');
 }

@@ -26,5 +26,6 @@ permissions:
     - "*://*.tanktrouble.com/*"
     - webRequest
     - webRequestBlocking
+    - storage
 web_accessible_resources:
     - "*"

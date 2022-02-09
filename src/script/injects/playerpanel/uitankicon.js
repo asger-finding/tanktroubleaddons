@@ -1,4 +1,4 @@
-const UITankIcon = Classy.newClass().name("UITankIcon");
+var UITankIcon = Classy.newClass().name("UITankIcon");
 
 UITankIcon.classFields({
     compositedBuffer: $("<canvas></canvas>")[0],

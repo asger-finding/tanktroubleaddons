@@ -1,4 +1,4 @@
-const KeyboardInputManager = InputManager.subclass();
+var KeyboardInputManager = InputManager.subclass();
 
 KeyboardInputManager.fields({
     forwardKey: null,

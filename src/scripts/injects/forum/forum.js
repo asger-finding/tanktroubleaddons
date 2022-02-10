@@ -5,89 +5,6 @@
  */
 
 (function() {
-	const defaults = {
-		pluginName: 'sanitize',
-
-		tagWhitelist:        [
-			'body', 'blockquote', 'pre', 'code', 'h1', 'h2', 'h3', 'h4', 'h6', 'ul', 'li', 'ol',
-			'p', 'a', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'strong', 'em', 'del',
-			'ins', 'mark', 'sup', 'sub', 'img', 'br', 'abbr', 'hr', 'dl', 'dt', 'dd', 'u'
-		],
-		contentTagWhitelist: [],
-		attributeWhitelist:  [ 'align', 'color', 'controls', 'href', 'src', 'alt', 'style', 'target', 'title', 'type', 'llang' ],
-		cssWhitelist:        [ 'color', 'background-color', 'font-size', 'text-align', 'text-decoration', 'font-weight' ],
-		schemaWhiteList:     [ 'https:', 'data:' ],
-		uriAttributes:       [ 'href' ]
-	}
-	function makeSanitizedCopy(node, iframedoc) {
-		const tagName = node.tagName && node.tagName.toLowerCase();
-		let newNode;
-		if (node.nodeType === Node.TEXT_NODE) {
-			newNode = node.cloneNode(true);
-		} else if (node.nodeType === Node.ELEMENT_NODE && (defaults.tagWhitelist.includes(tagName) || defaults.contentTagWhitelist.includes(tagName))) {
-			if (defaults.contentTagWhitelist.includes(tagName)) {
-				newNode = iframedoc.createElement('div');
-			} else newNode = iframedoc.createElement(tagName);
-
-			for (let i = 0, length = node.attributes.length; i < length; i++) { 
-				const attribute = node.attributes[i];
-
-				if (defaults.attributeWhitelist.includes(attribute.name)) {
-					if (attribute.name === 'style') {
-
-						for (let j = 0, len = node.style.length; j < len; j++) {
-							const styleName = node.style[j];
-							if (defaults.cssWhiteList.includes(styleName))
-								newNode.style.setProperty(styleName, node.style.getPropertyValue(styleName));
-						}
-
-					} else {
-						if (defaults.uriAttributes.includes(attribute.name)) {
-							if (attribute.value.indexOf(':') > -1 && !startsWithAny(attribute.value, defaults.schemaWhiteList))
-								continue;
-						}
-						newNode.setAttribute(attribute.name, attribute.value);
-					}
-				}
-			}
-			for (let i = 0, length = node.childNodes.length; i < length; i++) {
-				newNode.appendChild(makeSanitizedCopy(node.childNodes[i], iframedoc));
-			}
-		} else {
-			newNode = document.createDocumentFragment();
-		}
-		return newNode;
-	}
-	function startsWithAny(string, substrings) {
-		for (let i = 0, length = substrings.length; i < length; i++) {
-			if (string.indexOf(substrings[i]) === 0) {
-				return true;
-			}
-		}
-		return false;
-	}
-	function sanitize(input, options) {
-		if (!input) return '';
-
-		options = { ...defaults, ...options };
-
-        const iframe = $(`<iframe sandbox="allow-same-origin allow-scripts" src="about:blank" style="display: none"></iframe>`);
-        $('body').append(iframe);
-
-		const iframedoc = iframe[0].contentDocument || iframe[0].contentWindow.document;
-		iframedoc.body.innerHTML = input;
-
-		const resultElement = makeSanitizedCopy(iframedoc.body, iframedoc);
-		document.body.removeChild(iframe[0]);
-
-		return resultElement.innerHTML
-			.replace(/<br[^>]*>(\S)/g, '<br>\n$1');
-	}
-
-	$[defaults.pluginName] = sanitize;
-})();
-
-(function() {
 	const pluginName = 'snarkdown';
 	const tags = {
 		'': ['<em>', '</em>'],
@@ -98,12 +15,15 @@
 		' ': ['<br />'],
 		'-': ['<hr />']
 	};
+	const whitelistedHref = [
+		'http', 'https', 'mailto'
+	];
 
 	function outdent(str) {
 		return str.replace(RegExp('^' + (str.match(/^(\t| )+/) || '')[0], 'gm'), '');
 	}
 
-	function encodeAttr(str) {
+	function encodeAttribute(str) {
 		return (str + '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 	}
 
@@ -118,14 +38,11 @@
 		function tag(token) {
 			let desc  = tags[token[1] || ''];
 			let end   = context[context.length - 1] == token;
-			if (!desc) {
-				return token;
-			}
-			if (!desc[1]) {
-				return desc[0];
-			}
-			if (end) context.pop();
-			else context.push(token);
+
+			if (!desc) return token;
+			if (!desc[1]) return desc[0];
+			end ? context.pop() : context.push(token);
+			
 			return desc[end | 0];
 		}
 
@@ -147,11 +64,13 @@
 			if (prev.match(/[^\\](\\\\)*\\$/)) {
 				// escaped
 			}
-			// Code/Indent blocks:
+
+			// Code/Indent blocks
 			else if ((t = (token[3] || token[4]))) {
-				chunk = '<pre><code' + (token[2] ? ` llang="${token[2].toLowerCase()}"` : '') + '>' + outdent(encodeAttr(t).replace(/^\n+|\n+$/g, '')) + '</code></pre>';
+				chunk = '<pre><code' + (token[2] ? ` llang="${token[2].toLowerCase()}"` : '') + '>' + outdent(encodeAttribute(t).replace(/^\n+|\n+$/g, '')) + '</code></pre>';
 			}
-			// > Quotes, -* lists:
+
+			// > Quotes, -* lists
 			else if ((t = token[6])) {
 				if (t.match(/\./)) {
 					token[5] = token[5].replace(/^\d+/gm, '');
@@ -164,26 +83,32 @@
 				}
 				chunk = '<' + t + '>' + inner + '</' + t + '>';
 			}
-			// Images:
+
+			// Images
 			else if (token[8]) {
-				chunk = `<img src="${encodeAttr(token[8])}" alt="${encodeAttr(token[7])}">`;
+				chunk = `<img src="${encodeAttribute(token[8])}" alt="${encodeAttribute(token[7])}">`;
 			}
-			// Links:
+
+			// Links
 			else if (token[10]) {
-				out = out.replace('<a>', `<a href="${encodeAttr(token[11] || links[prev.toLowerCase()])}">`);
+				let tkn = token[11] || links[prev.toLowerCase()]
+				if (tkn && !(whitelistedHref.includes(tkn.slice(':').toLowerCase()))) tkn = 'javascript:void(0);';
+				out = out.replace('<a>', `<a href="${encodeAttribute(tkn)}">`);
 				chunk = flush() + '</a>';
 			} else if (token[9]) {
 				chunk = '<a>';
 			}
-			// Headings:
+			// Headings
 			else if (token[12] || token[14]) {
 				t = 'h' + (token[14] ? token[14].length : (token[13] > '=' ? 1 : 2));
-				chunk = '<' + t + '>' + parse(token[12] || token[15], links) + '</' + t + '>';
+				chunk = `<${t}>${ parse(token[12] || token[15], links) }</${t}>`;
 			}
+
 			// `code`:
 			else if (token[16]) {
-				chunk = '<code>' + encodeAttr(token[16]) + '</code>';
+				chunk = `<code>${ encodeAttribute(token[16]) }</code>`;
 			}
+
 			// Inline formatting: *em*, **strong** & friends
 			else if (token[17] || token[1]) {
 				chunk = tag(token[17] || '--');
@@ -195,18 +120,23 @@
 	}
 
 	function sanitized(md) {
-		const markdown = $('<div>').html($.sanitize(parse(md)));
+		const markdown = $('<div>').html(parse(md
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#039;')
+		));
 
 		markdown.find('code').html(function() {
-			const $this = $(this);
-			const lang = $this.attr('llang');
-			let html = $this.html();
-
+			let highlighed;
+			const lang = this.getAttribute('llang');
 			if (lang) {
-				html = $.liteLighter(html);
+				highlighed = $.liteLighter(this.innerHTML, { language: lang });
 			}
-			return html;
+			return highlighed || this.innerHTML;
 		});
+		
 		return markdown;
 	}
 
@@ -274,11 +204,11 @@
 			}
 		}
 
-		static highlight(text, language, style) {
-			if (!LiteLighter.languages[language]) language = 'generic';
-			if (!LiteLighter.styles[style]) style = 'light';
+		static highlight(text, options) {
+			const language = LiteLighter.languages[options.language] || LiteLighter.languages.generic;
+			const style = LiteLighter.styles[options.style] || LiteLighter.styles.light;
 
-			return LiteLighter._highlight(text, LiteLighter.languages[language], LiteLighter.styles[style]);
+			return LiteLighter._highlight(text, language, style);
 		}
 
 		static _highlight(text, language, style) {
@@ -360,13 +290,13 @@
 			'Heading Level 3':  { start: '## ',           end: '',         display: 'heading.svg',         type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			'Bold':             { start: '**',            end: '**',       display: 'bold.svg',            type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			'Italic':           { start: '*',             end: '*',        display: 'italic.svg',          type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
-			'Underline':        { start: '<u>',           end: '</u>',     display: 'underline.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
+			//'Underline':        { start: '<u>',           end: '</u>',     display: 'underline.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			'Strikethrough':    { start: '~~',            end: '~~',       display: 'strikethrough.svg',   type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE,    seperator: true },
 			'Embed image':      { start: '![<caption>](', end: ')',        display: 'image.svg',           type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			'Clickable link':   { start: '[',             end: '](<url>)', display: 'link.svg',            type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE,    seperator: true },
-			'Superscript':      { start: '<sup>',         end: '</sup>',   display: 'superscript.svg',     type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
-			'Subscript':        { start: '<sub>',         end: '</sub>',   display: 'subscript.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
-			'Highlight':        { start: '<mark>',        end: '</mark>',  display: 'highlight.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
+			//'Superscript':      { start: '<sup>',         end: '</sup>',   display: 'superscript.svg',     type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
+			//'Subscript':        { start: '<sub>',         end: '</sub>',   display: 'subscript.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
+			//'Highlight':        { start: '<mark>',        end: '</mark>',  display: 'highlight.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			'Code':             { start: '`',             end: '`',        display: 'code.svg',            type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			'Code Block':       { start: '```\n',         end: '\n```',    display: 'codeblock.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE,    seperator: true },
 			'Block Quote':      { start: '> ',            end: '',         display: 'blockquote.svg',      type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_AFTER_END                  },
@@ -375,8 +305,8 @@
 
 		constructor(element, options) {
 			this.options = {
-				...options,
-				...MDEditor.defaults
+				...MDEditor.defaults,
+				...options
 			};
 			this.textarea = $(element);
 			this.toolbar = $('<div class="mdeditor-toolbar"></div>');

@@ -26,15 +26,15 @@ class Injects {
 
 	rules:any = [
 		{
-			redirectPath: "/script/injects/forum/forum.js",
+			redirectPath: "/scripts/injects/forum/forum.js",
 			urlFilter: "forum.js.*pagespeed."
 		},
 		{
-			redirectPath: "/script/injects/game/phaser.js",
+			redirectPath: "/scripts/injects/game/phaser.js",
 			urlFilter: "phaser.min.js.*pagespeed.",
 		},
 		{
-			redirectPath: "/script/injects/game/phaser-nineslice.js",
+			redirectPath: "/scripts/injects/game/phaser-nineslice.js",
 			urlFilter: "phaser-nineslice.min.js.*pagespeed.",
 		}
 	];

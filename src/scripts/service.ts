@@ -8,7 +8,7 @@ async function execScript() {
 			target: {
 				tabId: tabId
 			},
-			files: [ 'script/execute.js' ]
+			files: [ 'scripts/execute.js' ]
 		});
 	}
 }

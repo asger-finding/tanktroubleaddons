@@ -1,7 +1,7 @@
 [
     {
         "id": 1,
-        "action": { "type": "redirect", "redirect": { "extensionPath": "/script/injects/forum/forum.js" } },
+        "action": { "type": "redirect", "redirect": { "extensionPath": "/scripts/injects/forum/forum.js" } },
         "condition": {
           "urlFilter": "forum.js.*pagespeed.",
           "domains": ["tanktrouble.com"],
@@ -10,7 +10,7 @@
       },
     {
         "id": 2,
-        "action": { "type": "redirect", "redirect": { "extensionPath": "/script/injects/game/phaser.js" } },
+        "action": { "type": "redirect", "redirect": { "extensionPath": "/scripts/injects/game/phaser.js" } },
         "condition": {
           "urlFilter": "phaser.min.js.*pagespeed.",
           "domains": ["tanktrouble.com"],
@@ -19,7 +19,7 @@
       },
     {
         "id": 3,
-        "action": { "type": "redirect", "redirect": { "extensionPath": "/script/injects/game/phaser-nineslice.js" } },
+        "action": { "type": "redirect", "redirect": { "extensionPath": "/scripts/injects/game/phaser-nineslice.js" } },
         "condition": {
           "urlFilter": "phaser-nineslice.min.js.*pagespeed.",
           "domains": ["tanktrouble.com"],

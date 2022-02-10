@@ -6,11 +6,11 @@ class GameLoader {
 
 	constructor() {
 		this.hasherScript = document.createElement('script');
-		this.hasherScript.src = chrome.runtime.getURL('script/hasher-sync.js');
+		this.hasherScript.src = chrome.runtime.getURL('scripts/hasher-sync.js');
 		//this.hasherScript.type = 'module';
 
 		this.indexLoader = document.createElement('script');
-		this.indexLoader.src = chrome.runtime.getURL('script/IndexLoader.js');
+		this.indexLoader.src = chrome.runtime.getURL('scripts/IndexLoader.js');
 		this.indexLoader.type = 'module';
 
 		this.extensionData = document.createElement('tanktroubleaddons');

@@ -155,17 +155,17 @@ $bubble-unmoderated: #ffda00;
         }
     }
     .deleted .bubble {
-        pre, mark, a:link, a:visited {
-            opacity: 0.135;
+        pre .litelighterstyle, mark, a:link, a:visited {
+            opacity: 0.2;
         }
         pre {
-            border-color: #000;
+            border-color: #ddd;
         }
         hr {
             background-color: #ddd;
             border-color: #ddd;
         }
-        p img {
+        img {
             opacity: 0.3;
         }
     }

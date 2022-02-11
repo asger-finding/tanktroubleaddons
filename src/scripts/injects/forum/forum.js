@@ -7,13 +7,11 @@
 (function() {
 	const pluginName = 'snarkdown';
 	const tags = {
-		'': ['<em>', '</em>'],
-		_: ['<strong>', '</strong>'],
-		'*': ['<strong>', '</strong>'],
-		'~': ['<s>', '</s>'],
-		'\n': ['<br />'],
-		' ': ['<br />'],
-		'-': ['<hr />']
+		'':   ['<em>', '</em>'],
+		_:    ['<strong>', '</strong>'],
+		'*':  ['<strong>', '</strong>'],
+		'~':  ['<s>', '</s>'],
+		'-':  ['<hr/>']
 	};
 	const whitelistedHref = [
 		'http', 'https', 'mailto'
@@ -34,7 +32,7 @@
 			links     = {},
 			last      = 0,
 			chunk, prev, token, inner, t;
-
+		
 		function tag(token) {
 			let desc  = tags[token[1] || ''];
 			let end   = context[context.length - 1] == token;
@@ -97,9 +95,8 @@
 				}
 				out = out.replace('<a>', `<a href="${encodeAttribute(tkn)}">`);
 				chunk = flush() + '</a>';
-			} else if (token[9]) {
-				chunk = '<a>';
-			}
+			} else if (token[9]) chunk = '<a>';
+		
 			// Headings
 			else if (token[12] || token[14]) {
 				t = 'h' + (token[14] ? token[14].length : (token[13] > '=' ? 1 : 2));
@@ -300,7 +297,7 @@
 			//'Underline':      { start: '<u>',           end: '</u>',     display: 'underline.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			'Strikethrough':    { start: '~~',            end: '~~',       display: 'strikethrough.svg',   type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE,    seperator: true },
 			'Embed image':      { start: '![<caption>](', end: ')',        display: 'image.svg',           type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
-			'Clickable link':   { start: '[',             end: '](<url>)', display: 'link.svg',            type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE,    seperator: true },
+			'Clickable link':   { start: '[<text>][(',    end: ')',        display: 'link.svg',            type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE,    seperator: true },
 			//'Superscript':    { start: '<sup>',         end: '</sup>',   display: 'superscript.svg',     type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			//'Subscript':      { start: '<sub>',         end: '</sub>',   display: 'subscript.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			//'Highlight':      { start: '<mark>',        end: '</mark>',  display: 'highlight.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },

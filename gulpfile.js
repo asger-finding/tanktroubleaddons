@@ -149,7 +149,7 @@ function manifest() {
 
 function clean() {
     // Before building, clean up the the target folder for all previous files.
-    // This is only done when starting the build tasks. This should never be done in watch mode.
+    // This is only done when starting the build tasks. This should never be done while in watch mode.
     if (state.prod) return del([ paths.dist ], { force: true });
     else return del([ paths.build ], { force: true });
 }

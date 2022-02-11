@@ -91,8 +91,10 @@
 
 			// Links
 			else if (token[10]) {
-				let tkn = token[11] || links[prev.toLowerCase()]
-				if (tkn && !(whitelistedHref.includes(tkn.slice(':').toLowerCase()))) tkn = 'javascript:void(0);';
+				let tkn = token[11] || links[prev.toLowerCase()];
+				if (tkn && !whitelistedHref.includes(tkn.toLowerCase().slice(0, tkn.indexOf(':')))) {
+					tkn = 'javascript:void(0);';
+				}
 				out = out.replace('<a>', `<a href="${encodeAttribute(tkn)}">`);
 				chunk = flush() + '</a>';
 			} else if (token[9]) {
@@ -295,13 +297,13 @@
 			'Heading Level 3':  { start: '## ',           end: '',         display: 'heading.svg',         type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			'Bold':             { start: '**',            end: '**',       display: 'bold.svg',            type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			'Italic':           { start: '*',             end: '*',        display: 'italic.svg',          type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
-			//'Underline':        { start: '<u>',           end: '</u>',     display: 'underline.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
+			//'Underline':      { start: '<u>',           end: '</u>',     display: 'underline.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			'Strikethrough':    { start: '~~',            end: '~~',       display: 'strikethrough.svg',   type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE,    seperator: true },
 			'Embed image':      { start: '![<caption>](', end: ')',        display: 'image.svg',           type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			'Clickable link':   { start: '[',             end: '](<url>)', display: 'link.svg',            type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE,    seperator: true },
-			//'Superscript':      { start: '<sup>',         end: '</sup>',   display: 'superscript.svg',     type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
-			//'Subscript':        { start: '<sub>',         end: '</sub>',   display: 'subscript.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
-			//'Highlight':        { start: '<mark>',        end: '</mark>',  display: 'highlight.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
+			//'Superscript':    { start: '<sup>',         end: '</sup>',   display: 'superscript.svg',     type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
+			//'Subscript':      { start: '<sub>',         end: '</sub>',   display: 'subscript.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
+			//'Highlight':      { start: '<mark>',        end: '</mark>',  display: 'highlight.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			'Code':             { start: '`',             end: '`',        display: 'code.svg',            type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			'Code Block':       { start: '```\n',         end: '\n```',    display: 'codeblock.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE,    seperator: true },
 			'Block Quote':      { start: '> ',            end: '',         display: 'blockquote.svg',      type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_AFTER_END                  },
@@ -358,7 +360,7 @@
 						this.preview.add(this.textarea).toggle();
 						let parsed = $.snarkdown(this.textarea.val());
 						if (!parsed.text()) 
-							parsed = $(`<div class="${MDEditor.Constants.PREVIEW_EMPTY_CLASS  }">There is nothing to preview yet!</div>`);
+							parsed = $(`<div class="${MDEditor.Constants.PREVIEW_EMPTY_CLASS  }">Nothing to preview yet...</div>`);
 						
 						this.preview.html(parsed);
 						tool.toggleClass('active');

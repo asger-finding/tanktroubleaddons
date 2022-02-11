@@ -205,8 +205,8 @@
 		}
 
 		static highlight(text, options) {
-			const language = LiteLighter.languages[options.language] || LiteLighter.languages.generic;
-			const style = LiteLighter.styles[options.style] || LiteLighter.styles.light;
+			const language = LiteLighter.languages[options.language?.toLowerCase()] || LiteLighter.languages.generic;
+			const style = LiteLighter.styles[options.style?.toLowerCase()] || LiteLighter.styles.light;
 
 			return LiteLighter._highlight(text, language, style);
 		}

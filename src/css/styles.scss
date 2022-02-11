@@ -80,7 +80,48 @@ $bubble-unmoderated: #ffda00;
     /* Forum bubbles, post composer */
     .bubble {
         .content, .mdeditor-preview {
-            white-space: break-spaces;
+            white-space: pre-wrap;
+
+			pre {
+				border: #ccc 2px solid;
+				background-color: transparent;
+				padding: 10px;
+				border-radius: 6px;
+				white-space: pre-wrap;
+				word-wrap: break-word;
+			}
+			hr {
+				height: 0;
+				border-width: 0;
+				border-top: 2px solid;
+				margin-top: 14px;
+				background-color: #ccc;
+				border-color: #ccc;
+			}
+			a:link {
+				color: #0000EE;
+			}
+			a:visited {
+				color: #551A8B;
+			}
+			blockquote {
+				quotes: '>' '>';
+	
+				p {
+					display: inline;
+				}
+	
+				&::before {
+					color: #ccc;
+					line-height: 0;
+					content: open-quote;
+				}
+			}
+			p img {
+				max-width: 100%;
+				max-height: $markdown-image-maxheight;
+			}
+			
             * {
                 margin-top: 0;
                 margin-bottom: 0;
@@ -97,44 +138,6 @@ $bubble-unmoderated: #ffda00;
         }
         .header ~ .mdeditor-toolbar {
             margin-top: 5px;
-        }
-        pre {
-            border: #ccc 2px solid;
-            background-color: transparent;
-            padding: 10px;
-            border-radius: 6px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-        hr {
-            height: 0;
-            border-width: 0;
-            border-top: 2px solid;
-            background-color: #ccc;
-            border-color: #ccc;
-        }
-        a:link {
-            color: #0000EE;
-        }
-        a:visited {
-            color: #551A8B;
-        }
-        blockquote {
-            quotes: '>' '>';
-
-            p {
-                display: inline;
-            }
-
-            &::before {
-                color: #ccc;
-                line-height: 0;
-                content: open-quote;
-            }
-        }
-        p img {
-            max-width: 100%;
-            max-height: $markdown-image-maxheight;
         }
     }
     /* Forum bubble admin styling */

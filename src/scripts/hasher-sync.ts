@@ -332,7 +332,7 @@ if (nodeData instanceof HTMLElement) {
 			if (match) {
 				done++;
 				const script: HTMLScriptElement = document.createElement('script');
-				script.src = t_url('script/injects/' + match);
+				script.src = t_url('scripts/injects/' + match);
 				document.head.insertBefore(script, document.head.firstChild);
 			}
 

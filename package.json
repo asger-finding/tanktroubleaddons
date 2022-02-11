@@ -11,7 +11,7 @@
     "watch:edge": "gulp watch --state=watch --target=edge",
     "watch:firefox": "gulp watch --state=watch --target=firefox",
     "clean": "gulp annihilation",
-	"lint": "eslint --fix --ext .js,.ts ."
+    "lint": "eslint --fix --ext .js,.ts ."
   },
   "repository": {
     "type": "git",

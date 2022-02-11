@@ -283,7 +283,12 @@
 			SELECTION_BEFORE_START: 5, // Select before md wrapper start
 			SELECTION_AFTER_START: 6,  // Select after md wrapper start
 			SELECTION_BEFORE_END: 7,   // Select before md wrapper end
-			SELECTION_AFTER_END: 8     // Select after md wrapper end
+			SELECTION_AFTER_END: 8,    // Select after md wrapper end
+            TOOLBAR_CLASS: 'mdeditor-toolbar',
+            PREVIEW_CLASS: 'mdeditor-preview',
+			PREVIEW_EMPTY_CLASS: 'mdeditor-preview-empty',
+            TOOL_CLASS: 'mdeditor-toolbar-tool',
+            SEPERATOR_CLASS: 'mdeditor-toolbar-seperator',
 		}
 		static toolbar = {
 			'Preview Markdown': { display: 'preview.svg', type: MDEditor.Constants.PREVIEW, selection: MDEditor.Constants.SELECTION_NONE, seperator: true },
@@ -309,8 +314,8 @@
 				...options
 			};
 			this.textarea = $(element);
-			this.toolbar = $('<div class="mdeditor-toolbar"></div>');
-			this.preview = $('<div class="mdeditor-preview"></div>');
+			this.toolbar = $(`<div class="${ MDEditor.Constants.TOOLBAR_CLASS }"></div>`);
+			this.preview = $(`<div class="${ MDEditor.Constants.PREVIEW_CLASS }"></div>`);
 
 			this.generateTools();
 
@@ -328,7 +333,8 @@
 
 		generateTools() {
 			$.each(MDEditor.toolbar, (name, data) => {
-				const tool = $(`<div class="mdeditor-toolbar-tool"></div>`);
+				const tool = $(`<div class="${ MDEditor.Constants.TOOL_CLASS }"></div>`);
+
 				if (data.display.endsWith('.svg')) {
 					$.get(t_url('assets/svg/' + data.display), function(result) {
 						tool.append(result);
@@ -336,6 +342,7 @@
 				} else {
 					tool.text(data.display);
 				}
+
 				tool.tooltipster({
 					position: 'top'
 				});
@@ -351,15 +358,17 @@
 						this.preview.add(this.textarea).toggle();
 						let parsed = $.snarkdown(this.textarea.val());
 						if (!parsed.text()) 
-							parsed = $('<div class="preview-empty">There is nothing to preview yet!</div>');
+							parsed = $(`<div class="${MDEditor.Constants.PREVIEW_EMPTY_CLASS  }">There is nothing to preview yet!</div>`);
 						
 						this.preview.html(parsed);
 						tool.toggleClass('active');
 					}
 				});
+
 				this.toolbar.append(tool);
-				if (data.seperator) 
-					this.toolbar.append('<div class="toolbar-seperator"></div>');
+				if (data.seperator) {
+					this.toolbar.append(`<div class="${ MDEditor.Constants.SEPERATOR_CLASS }"></div>`);
+				}
 			});
 		}
 

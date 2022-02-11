@@ -82,14 +82,17 @@ $bubble-unmoderated: #ffda00;
         .content, .mdeditor-preview {
             white-space: pre-wrap;
 
+			/* Code block */
 			pre {
 				border: #ccc 2px solid;
 				background-color: transparent;
-				padding: 10px;
+				padding: 8px;
 				border-radius: 6px;
 				white-space: pre-wrap;
 				word-wrap: break-word;
 			}
+
+			/* Horizontal rule */
 			hr {
 				height: 0;
 				border-width: 0;
@@ -98,30 +101,23 @@ $bubble-unmoderated: #ffda00;
 				background-color: #ccc;
 				border-color: #ccc;
 			}
+
+			/* </a> with link */
 			a:link {
 				color: #0000EE;
 			}
+
+			/* </a> with visited link */
 			a:visited {
 				color: #551A8B;
 			}
-			blockquote {
-				quotes: '>' '>';
-	
-				p {
-					display: inline;
-				}
-	
-				&::before {
-					color: #ccc;
-					line-height: 0;
-					content: open-quote;
-				}
-			}
-			p img {
+
+			/* Embedded image */
+			img {
 				max-width: 100%;
 				max-height: $markdown-image-maxheight;
 			}
-			
+
             * {
                 margin-top: 0;
                 margin-bottom: 0;

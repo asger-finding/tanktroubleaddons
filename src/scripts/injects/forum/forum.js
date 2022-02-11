@@ -26,12 +26,12 @@
 	}
 
 	function parse(md) {
-		let tokenizer = /((?:^|\r?\n+)(?:\r?\n---+|\* \*(?: \*)+)\r?\n)|(?:^``` *(\w*)\r?\n([\s\S]*?)\r?\n```$)|((?:(?:^|\r?\n+)(?:\t|  {2,}).+)+\r?\n*)|((?:(?:^|\r?\n)([>*+-]|\d+\.)\s+.*)+)|(?:!\[([^\]]*?)\]\(([^)]+?)\))|(\[)|(\](?:\(([^)]+?)\))?)|(?:(?:^|\r?\n+)([^\s].*)\r?\n(-{3,}|={3,})(?:\r?\n+|$))|(?:(?:^|\r?\n+)(#{1,6})\s*(.+)(?:\r?\n+|$))|(?:`([^`].*?)`)|( {2}\r?\n\r?\n*|\r?\n{2,}|(?<=\W|^|$)(?<![_*])__|__(?=\W|^|$)(?![_*])|(?<=\W|^|$)(?<![_*])\*\*|\*\*(?=\W|^|$)(?!\*\*|[_*])|(?<=\W|^|$)(?<![_*])[_*]|[_*](?=\W|^|$)(?![_*])|~~)|(?:<([^>]+?)>)|<[^>]+>/gm,
-			context   = [],
-			out       = '',
-			links     = {},
-			last      = 0,
-			chunk, prev, token, inner, t;
+		const context = [];
+		const links   = {};
+		let tokenizer = /((?:^|\r?\n+)(?:\r?\n---+|\* \*(?: \*)+)\r?\n)|(?:^``` *(\w*)\r?\n([\s\S]*?)\r?\n```$)|((?:(?:^|\r?\n+)(?:\t|  {2,}).+)+\r?\n*)|((?:(?:^|\r?\n)([>*+-]|\d+\.)\s+.*)+)|(?:!\[([^\]]*?)\]\(([^)]+?)\))|(\[)|(\](?:\(([^)]+?)\))?)|(?:(?:^|\r?\n+)([^\s].*)\r?\n(-{3,}|={3,})(?:\r?\n+|$))|(?:(?:^|\r?\n+)(#{1,6})\s*(.+)(?:\r?\n+|$))|(?:`([^`].*?)`)|( {2}\r?\n\r?\n*|\r?\n{2,}|(?<=\W|^|$)(?<![_*])__|__(?=\W|^|$)(?![_*])|(?<=\W|^|$)(?<![_*])\*\*|\*\*(?=\W|^|$)(?!\*\*|[_*])|(?<=\W|^|$)(?<![_*])[_*]|[_*](?=\W|^|$)(?![_*])|~~)|(?:<([^>]+?)>)|<[^>]+>/gm;
+		let out       = '';
+		let last      = 0;
+		let chunk, prev, token, t;
 		
 		function tag(token) {
 			let desc  = tags[token[1] || ''];
@@ -59,6 +59,7 @@
 			prev      = md.substring(last, token.index);
 			last      = tokenizer.lastIndex;
 			chunk     = token[0];
+			
 			if (prev.match(/[^\\](\\\\)*\\$/)) {
 				// escaped
 			}
@@ -66,20 +67,6 @@
 			// Code/Indent blocks
 			else if ((t = (token[3] || token[4]))) {
 				chunk = '<pre><code' + (token[2] ? ` llang="${token[2].toLowerCase()}"` : '') + '>' + outdent(encodeAttribute(t).replace(/^\n+|\n+$/g, '')) + '</code></pre>';
-			}
-
-			// > Quotes, -* lists
-			else if ((t = token[6])) {
-				if (t.match(/\./)) {
-					token[5] = token[5].replace(/^\d+/gm, '');
-				}
-				inner = parse(outdent(token[5].replace(/^\s*[>*+.-]/gm, '')));
-				if (t === '>') t = 'blockquote';
-				else {
-					t = t.match(/\./) ? 'ol' : 'ul';
-					inner = inner.replace(/^(.*)(\n|$)/gm, '<li>$1</li>');
-				}
-				chunk = '<' + t + '>' + inner + '</' + t + '>';
 			}
 
 			// Images
@@ -303,7 +290,6 @@
 			//'Highlight':      { start: '<mark>',        end: '</mark>',  display: 'highlight.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			'Code':             { start: '`',             end: '`',        display: 'code.svg',            type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			'Code Block':       { start: '```\n',         end: '\n```',    display: 'codeblock.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE,    seperator: true },
-			'Block Quote':      { start: '> ',            end: '',         display: 'blockquote.svg',      type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_AFTER_END                  },
 			'Horizontal Rule':  { start: '\n---\n\n',     end: '',         display: 'horizontal-rule.svg', type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_AFTER_END                  }
 		}
 

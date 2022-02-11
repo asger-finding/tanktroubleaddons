@@ -350,7 +350,7 @@
 						this.preview.empty();
 						this.preview.add(this.textarea).toggle();
 						let parsed = $.snarkdown(this.textarea.val());
-						if (!parsed) 
+						if (!parsed.text()) 
 							parsed = $('<div class="preview-empty">There is nothing to preview yet!</div>');
 						
 						this.preview.html(parsed);

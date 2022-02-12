@@ -5,128 +5,135 @@
  */
 
 (function() {
-	const pluginName = 'snarkdown';
-	const tags = {
-		'':   ['<em>', '</em>'],
-		_:    ['<strong>', '</strong>'],
-		'*':  ['<strong>', '</strong>'],
-		'~':  ['<s>', '</s>'],
-		'-':  ['<hr/>']
-	};
-	const whitelistedHref = [
-		'http', 'https', 'mailto'
-	];
+	class MDParser {
+		static pluginName = 'snarkdown';
 
-	function outdent(str) {
-		return str.replace(RegExp('^' + (str.match(/^(\t| )+/) || '')[0], 'gm'), '');
-	}
-
-	function encodeAttribute(str) {
-		return (str + '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-	}
-
-	function parse(md) {
-		const context = [];
-		const links   = {};
-		let tokenizer = /((?:^|\r?\n+)(?:\r?\n---+|\* \*(?: \*)+)\r?\n)|(?:^``` *(\w*)\r?\n([\s\S]*?)\r?\n```$)|((?:(?:^|\r?\n+)(?:\t|  {2,}).+)+\r?\n*)|((?:(?:^|\r?\n)([>*+-]|\d+\.)\s+.*)+)|(?:!\[([^\]]*?)\]\(([^)]+?)\))|(\[)|(\](?:\(([^)]+?)\))?)|(?:(?:^|\r?\n+)([^\s].*)\r?\n(-{3,}|={3,})(?:\r?\n+|$))|(?:(?:^|\r?\n+)(#{1,6})\s*(.+)(?:\r?\n+|$))|(?:`([^`].*?)`)|( {2}\r?\n\r?\n*|\r?\n{2,}|(?<=\W|^|$)(?<![_*])__|__(?=\W|^|$)(?![_*])|(?<=\W|^|$)(?<![_*])\*\*|\*\*(?=\W|^|$)(?!\*\*|[_*])|(?<=\W|^|$)(?<![_*])[_*]|[_*](?=\W|^|$)(?![_*])|~~)|(?:<([^>]+?)>)|<[^>]+>/gm;
-		let out       = '';
-		let last      = 0;
-		let chunk, prev, token, t;
-		
-		function tag(token) {
-			let desc  = tags[token[1] || ''];
-			let end   = context[context.length - 1] == token;
-
-			if (!desc) return token;
-			if (!desc[1]) return desc[0];
-			end ? context.pop() : context.push(token);
-			
-			return desc[end | 0];
+		static defaults = {
+			tags: {
+				'':   ['<em>', '</em>'],
+				_:    ['<strong>', '</strong>'],
+				'*':  ['<strong>', '</strong>'],
+				'~':  ['<s>', '</s>'],
+				'-':  ['<hr/>']
+			},
+			whitelist: {
+				href: [ 'http', 'https', 'mailto' ]
+			}
 		}
 
-		function flush() {
-			let str   = '';
-			while (context.length) str += tag(context[context.length - 1]);
-			return str;
+		static outdent(string) {
+			return string.replace(RegExp(`^${ (string.match(/^(\t| )+/) || '')[0] }`, 'gm'), '');
 		}
 
-		md = md.replace(/^\[(.+?)\]:\s*(.+)$/gm, (s, name, url) => {
-			links[name.toLowerCase()] = url;
-			return '';
-		}).replace(/^\n+|\n+$/g, '');
+		static encodeAttribute(string) {
+			return string.replace(RegExp(`^${ (string.match(/^(\t| )+/) || '')[0] }`, 'gm'), '');
+		}
 
-		while ((token = tokenizer.exec(md))) {
-			prev      = md.substring(last, token.index);
-			last      = tokenizer.lastIndex;
-			chunk     = token[0];
+		static parse(md) {
+			const context = [];
+			const links   = {};
+			let tokenizer = /((?:^|\r?\n+)(?:\r?\n---+|\* \*(?: \*)+)\r?\n)|(?:^``` *(\w*)\r?\n([\s\S]*?)\r?\n```$)|((?:(?:^|\r?\n+)(?:\t|  {2,}).+)+\r?\n*)|((?:(?:^|\r?\n)([>*+-]|\d+\.)\s+.*)+)|(?:!\[([^\]]*?)\]\(([^)]+?)\))|(\[)|(\](?:\(([^)]+?)\))?)|(?:(?:^|\r?\n+)([^\s].*)\r?\n(-{3,}|={3,})(?:\r?\n+|$))|(?:(?:^|\r?\n+)(#{1,6})\s*(.+)(?:\r?\n+|$))|(?:`([^`].*?)`)|( {2}\r?\n\r?\n*|\r?\n{2,}|(?<=\W|^|$)(?<![_*])__|__(?=\W|^|$)(?![_*])|(?<=\W|^|$)(?<![_*])\*\*|\*\*(?=\W|^|$)(?!\*\*|[_*])|(?<=\W|^|$)(?<![_*])[_*]|[_*](?=\W|^|$)(?![_*])|~~)|(?:<([^>]+?)>)|<[^>]+>/gm;
+			let out       = '';
+			let last      = 0;
+			let chunk, prev, token, t;
 			
-			if (prev.match(/[^\\](\\\\)*\\$/)) {
-				// escaped
+			function tag(token) {
+				let desc  = MDParser.defaults.tags[token[1] || ''];
+				let end   = context[context.length - 1] == token;
+	
+				if (!desc) return token;
+				if (!desc[1]) return desc[0];
+				end ? context.pop() : context.push(token);
+				
+				return desc[end | 0];
 			}
-
-			// Code/Indent blocks
-			else if ((t = (token[3] || token[4]))) {
-				chunk = '<pre><code' + (token[2] ? ` llang="${token[2].toLowerCase()}"` : '') + '>' + outdent(encodeAttribute(t).replace(/^\n+|\n+$/g, '')) + '</code></pre>';
+	
+			function flush() {
+				let str   = '';
+				while (context.length) str += tag(context[context.length - 1]);
+				return str;
 			}
-
-			// Images
-			else if (token[8]) {
-				chunk = `<img src="${encodeAttribute(token[8])}" alt="${encodeAttribute(token[7])}">`;
-			}
-
-			// Links
-			else if (token[10]) {
-				let tkn = token[11] || links[prev.toLowerCase()];
-				if (tkn && !whitelistedHref.includes(tkn.toLowerCase().slice(0, tkn.indexOf(':')))) {
-					tkn = 'javascript:void(0);';
+	
+			md = md.replace(/^\[(.+?)\]:\s*(.+)$/gm, (s, name, url) => {
+				links[name.toLowerCase()] = url;
+				return '';
+			}).replace(/^\n+|\n+$/g, '');
+	
+			while ((token = tokenizer.exec(md))) {
+				prev      = md.substring(last, token.index);
+				last      = tokenizer.lastIndex;
+				chunk     = token[0];
+				
+				if (prev.match(/[^\\](\\\\)*\\$/)) {
+					// escaped
 				}
-				out = out.replace('<a>', `<a href="${encodeAttribute(tkn)}">`);
-				chunk = flush() + '</a>';
-			} else if (token[9]) chunk = '<a>';
-		
-			// Headings
-			else if (token[12] || token[14]) {
-				t = 'h' + (token[14] ? token[14].length : (token[13] > '=' ? 1 : 2));
-				chunk = `<${t}>${ parse(token[12] || token[15], links) }</${t}>`;
+	
+				// Code/Indent blocks
+				else if ((t = (token[3] || token[4]))) {
+					chunk = '<pre><code' + (token[2] ? ` llang="${token[2].toLowerCase()}"` : '') + '>' + MDParser.outdent(MDParser.encodeAttribute(t).replace(/^\n+|\n+$/g, '')) + '</code></pre>';
+				}
+	
+				// Images
+				else if (token[8]) {
+					chunk = `<img src="${ MDParser.encodeAttribute(token[8]) }" alt="${ MDParser.encodeAttribute(token[7]) }">`;
+				}
+	
+				// Links
+				else if (token[10]) {
+					let tkn = token[11] || links[prev.toLowerCase()];
+					if (tkn && !MDParser.defaults.whitelist.href.includes(tkn.toLowerCase().slice(0, tkn.indexOf(':')))) {
+						tkn = 'javascript:void(0);';
+					}
+					out = out.replace('<a>', `<a href="${ MDParser.encodeAttribute(tkn) }">`);
+					chunk = flush() + '</a>';
+				} else if (token[9]) chunk = '<a>';
+			
+				// Headings
+				else if (token[12] || token[14]) {
+					t = 'h' + (token[14] ? token[14].length : (token[13] > '=' ? 1 : 2));
+					chunk = `<${t}>${ parse(token[12] || token[15], links) }</${t}>`;
+				}
+	
+				// `code`:
+				else if (token[16]) {
+					chunk = `<code>${ MDParser.encodeAttribute(token[16]) }</code>`;
+				}
+	
+				// Inline formatting: *em*, **strong** & friends
+				else if (token[17] || token[1]) {
+					chunk = tag(token[17] || '--');
+				}
+				out += prev;
+				out += chunk;
 			}
-
-			// `code`:
-			else if (token[16]) {
-				chunk = `<code>${ encodeAttribute(token[16]) }</code>`;
-			}
-
-			// Inline formatting: *em*, **strong** & friends
-			else if (token[17] || token[1]) {
-				chunk = tag(token[17] || '--');
-			}
-			out += prev;
-			out += chunk;
+			return (out + md.substring(last) + flush()).replace(/^\n+|\n+$/g, '');
 		}
-		return (out + md.substring(last) + flush()).replace(/^\n+|\n+$/g, '');
+
+		static parseAndSanitize(markdown) {
+			const parsed = $('<div>').html(MDParser.parse(markdown
+				.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;')
+				.replace(/"/g, '&quot;')
+				.replace(/'/g, '&#039;')
+			));
+	
+			parsed.find('code').html(function() {
+				let highlighed;
+				const lang = this.getAttribute('llang');
+				if (lang) {
+					highlighed = $.liteLighter(this.innerHTML, { language: lang });
+				}
+				return highlighed || this.innerHTML;
+			});
+			
+			return parsed;
+		}
 	}
 
-	function sanitized(md) {
-		const markdown = $('<div>').html(parse(md
-			.replace(/&/g, '&amp;')
-			.replace(/</g, '&lt;')
-			.replace(/>/g, '&gt;')
-			.replace(/"/g, '&quot;')
-			.replace(/'/g, '&#039;')
-		));
-
-		markdown.find('code').html(function() {
-			let highlighed;
-			const lang = this.getAttribute('llang');
-			if (lang) {
-				highlighed = $.liteLighter(this.innerHTML, { language: lang });
-			}
-			return highlighed || this.innerHTML;
-		});
-		
-		return markdown;
+	$[MDParser.pluginName] = function(markdown) {
+		return MDParser.parseAndSanitize(markdown);
 	}
-
-	$[pluginName] = sanitized;
 })();
 
 (($) => {
@@ -343,7 +350,7 @@
 						this.preview.add(this.textarea).toggle();
 						let parsed = $.snarkdown(this.textarea.val());
 						if (!parsed.text()) 
-							parsed = $(`<div class="${MDEditor.Constants.PREVIEW_EMPTY_CLASS  }">Nothing to preview yet...</div>`);
+							parsed = $(`<div class="${ MDEditor.Constants.PREVIEW_EMPTY_CLASS  }">Nothing to preview yet...</div>`);
 						
 						this.preview.html(parsed);
 						tool.toggleClass('active');

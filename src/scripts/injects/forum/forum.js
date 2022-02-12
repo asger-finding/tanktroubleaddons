@@ -84,7 +84,7 @@
 					if (tkn && !MDParser.defaults.whitelist.href.includes(tkn.toLowerCase().slice(0, tkn.indexOf(':')))) {
 						tkn = 'javascript:void(0);';
 					}
-					out = out.replace('<a>', `<a href="${ MDParser.encodeAttribute(tkn) }">`);
+					out = out.replace('<a>', `<a ${ tkn ? `href="${ MDParser.encodeAttribute(tkn) }"` : '' }>`);
 					chunk = flush() + '</a>';
 				} else if (token[9]) chunk = '<a>';
 			

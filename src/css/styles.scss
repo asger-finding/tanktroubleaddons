@@ -153,7 +153,7 @@ $bubble-unmoderated: #ffda00;
             }
         }
     }
-    .deleted .bubble {
+    .deleted .bubble .content {
         pre .litelighterstyle, mark, a:link, a:visited {
             opacity: 0.2;
         }

@@ -387,7 +387,7 @@
 					break;
 				}
 				case MDEditor.Constants.SELECTION_NONE: {
-					this.textarea.blur();
+					this.textarea.trigger('blur');
 					return;
 				}
 				case MDEditor.Constants.SELECTION_INSIDE: {
@@ -416,7 +416,7 @@
 					break;
 				}
 			}
-			this.textarea.focus();
+			this.textarea.trigger('focus');
 			this.textarea.get(0).setSelectionRange(index.start, index.end);
 		}
 
@@ -1405,7 +1405,7 @@ ForumView.methods({
         editingTextArea.val(thread.message);
         editingTextArea.trigger('input');
     
-        editingTextArea.focus();
+        editingTextArea.trigger('focus');
     },
 
     threadEditFinished: function() {
@@ -1441,7 +1441,7 @@ ForumView.methods({
         editingTextArea.val(reply.message);
         editingTextArea.trigger('input');
 
-        editingTextArea.focus();
+        editingTextArea.trigger('focus');
     },
 
     replyEditFinished: function() {

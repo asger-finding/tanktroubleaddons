@@ -198,8 +198,11 @@
 		}
 
 		static highlight(text, options) {
-			const language = LiteLighter.languages[options.language?.toLowerCase()] || LiteLighter.languages.generic;
+            console.log(options);
+			const language = LiteLighter.languages[options.language?.toLowerCase()] || void 0;
 			const style = LiteLighter.styles[options.style?.toLowerCase()] || LiteLighter.styles.light;
+
+            if (!language) return text;
 
 			return LiteLighter._highlight(text, language, style);
 		}
@@ -296,7 +299,7 @@
 			//'Subscript':      { start: '<sub>',         end: '</sub>',   display: 'subscript.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			//'Highlight':      { start: '<mark>',        end: '</mark>',  display: 'highlight.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
 			'Code':             { start: '`',             end: '`',        display: 'code.svg',            type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE                     },
-			'Code Block':       { start: '```\n',         end: '\n```',    display: 'codeblock.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE,    seperator: true },
+			'Code Block':       { start: '```language\n', end: '\n```',    display: 'codeblock.svg',       type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_INSIDE,    seperator: true },
 			'Horizontal Rule':  { start: '\n---\n\n',     end: '',         display: 'horizontal-rule.svg', type: MDEditor.Constants.MARKDOWN,    selection: MDEditor.Constants.SELECTION_AFTER_END                  }
 		}
 

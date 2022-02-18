@@ -11,7 +11,7 @@
 		static defaults = {
 			tags: {
 				'':   ['<em>', '</em>'],
-				_:    ['<strong>', '</strong>'],
+				'_':    ['<strong>', '</strong>'],
 				'*':  ['<strong>', '</strong>'],
 				'~':  ['<s>', '</s>'],
 				'-':  ['<hr/>']
@@ -49,9 +49,9 @@
 			}
 	
 			function flush() {
-				let str   = '';
-				while (context.length) str += tag(context[context.length - 1]);
-				return str;
+				let string = '';
+				while (context.length) string += tag(context[context.length - 1]);
+				return string;
 			}
 	
 			md = md.replace(/^\[(.+?)\]:\s*(.+)$/gm, (s, name, url) => {
@@ -198,7 +198,6 @@
 		}
 
 		static highlight(text, options) {
-            console.log(options);
 			const language = LiteLighter.languages[options.language?.toLowerCase()] || void 0;
 			const style = LiteLighter.styles[options.style?.toLowerCase()] || LiteLighter.styles.light;
 
@@ -225,29 +224,29 @@
 				}
 			}
 
-			const lvls = [];
+			const levels = [];
 			text = text.replace(/___(?!subtmpl)\w+?___/g, function ($0) {
 				const end = ($0.substr(3, 3) === 'end') ? true : false,
 					tag = (!end ? $0.substr(3) : $0.substr(6)).replace(/_/g, ''),
-					lastTag = lvls.length > 0 ? lvls[lvls.length - 1] : null;
+					lastTag = levels.length > 0 ? levels[levels.length - 1] : null;
 
 				if (!end && (lastTag === null || tag === lastTag || (lastTag != null && language[lastTag].embed != undefined && $.inArray(tag, language[lastTag].embed) >= 0))) {
-					lvls.push(tag);
+					levels.push(tag);
 					return $0;
 				} else if (end && tag === lastTag) {
-					lvls.pop();
+					levels.pop();
 					return $0;
 				}
 				return '';
 			});
-			for (const i in language) {
-				if (Object.hasOwn(language, i)) {
-					text = text.replace(new RegExp(`___end${ i }___`, 'g'), '</span>').replace(new RegExp(`___${ i }___`, 'g'), `<span class="litelighterstyle" style="${ style[language[i].style] }">`);
+			for (const key in language) {
+				if (Object.hasOwn(language, key)) {
+					text = text.replace(new RegExp(`___end${ key }___`, 'g'), '</span>').replace(new RegExp(`___${ key }___`, 'g'), `<span class="litelighterstyle" style="${ style[language[key].style] }">`);
 				}
 			}
 
-			for (const i in language) {
-				if (Object.hasOwn(language, i) && language[i].language !== undefined && LiteLighter.languages[language[i].language] !== undefined) {
+			for (const key in language) {
+				if (Object.hasOwn(language, key) && language[key].language !== undefined && LiteLighter.languages[language[key].language] !== undefined) {
 					text = text.replace(/___subtmpl\d+___/g, function ($tmpl) {
 						const i = parseInt($tmpl.replace(/___subtmpl(\d+)___/, '$1'), 10);
 						return sublangs[i];

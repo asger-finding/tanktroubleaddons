@@ -184,7 +184,8 @@ AIUtils.classMethods({
         let backState = false;
         let leftState = false;
         let rightState = false;
-        const fireState = false;
+        // eslint-disable-next-line prefer-const
+        let fireState = false;
 
 
         // FIXME This code is more or less duplicated in MouseInputManager.js

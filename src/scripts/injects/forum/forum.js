@@ -38,8 +38,8 @@
 			let chunk, prev, token, t;
 			
 			function tag(token) {
-				let desc  = MDParser.defaults.tags[token[1] || ''];
-				let end   = context[context.length - 1] == token;
+				const desc  = MDParser.defaults.tags[token[1] || ''];
+				const end   = context[context.length - 1] == token;
 	
 				if (!desc) return token;
 				if (!desc[1]) return desc[0];
@@ -380,7 +380,7 @@
 		}
 
 		setSelection(selectionType, params) {
-			let index = { start: 0, end: 0 };
+			const index = { start: 0, end: 0 };
 
 			switch (selectionType) {
 				case MDEditor.Constants.SELECTION_ALL: {

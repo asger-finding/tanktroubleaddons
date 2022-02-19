@@ -446,7 +446,7 @@ Game.UILobbyState.methods({
                 // Get all favourites.
                 const playerIds = Users.getAllPlayerIds();
                 let numFavouritesResponses = 0;
-                let numExpectedFavouritesResponses = playerIds.length;
+                const numExpectedFavouritesResponses = playerIds.length;
                 self.favouritePlayerIds = [];
 
                 for (let i = 0; i < playerIds.length; ++i) {

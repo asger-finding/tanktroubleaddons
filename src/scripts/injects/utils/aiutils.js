@@ -184,7 +184,7 @@ AIUtils.classMethods({
         let backState = false;
         let leftState = false;
         let rightState = false;
-        let fireState = false;
+        const fireState = false;
 
 
         // FIXME This code is more or less duplicated in MouseInputManager.js
@@ -245,11 +245,11 @@ AIUtils.classMethods({
     },
 
     getInputToTurnToDirection: function(tank, direction, angleImprecision) {
-        let forwardState = false;
-        let backState = false;
+        const forwardState = false;
+        const backState = false;
         let leftState = false;
         let rightState = false;
-        let fireState = false;
+        const fireState = false;
 
         const relativeToTank = B2DUtils.directionToLocalSpace(tank.getB2DBody(), direction);
         let angle = Math.atan2(relativeToTank.y, relativeToTank.x);

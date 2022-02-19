@@ -1916,7 +1916,7 @@ Game.UIGameState.methods({
             this.debugGraphics.clear();
             this.debugGraphics.lineStyle(2, 0xff0000, 0.9);
             this.debugGraphics.beginFill(0x00ff00, 0.3);
-			let bool = true;
+			const bool = true;
             while(bool)
             {
                 if (body == null)
@@ -1929,7 +1929,7 @@ Game.UIGameState.methods({
 
     _debugDrawB2DBody: function(b2dBody) {
         let fixture = b2dBody.GetFixtureList();
-		let bool = true;
+		const bool = true;
         while(bool)
         {
             if (fixture == null)

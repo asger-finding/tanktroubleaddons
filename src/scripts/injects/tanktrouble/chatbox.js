@@ -846,7 +846,7 @@ TankTrouble.ChatBox = {
             }
 
             // Measure the username and a comma, colon or at.
-            let wordWidth = Utils.measureSVGText(word, {fontFamily: 'Arial', fontWeight: 'bold', fontSize: 12});
+            const wordWidth = Utils.measureSVGText(word, {fontFamily: 'Arial', fontWeight: 'bold', fontSize: 12});
 
             if (wordX + wordWidth > this.chatBody.width()) {
                 wordX = 1;

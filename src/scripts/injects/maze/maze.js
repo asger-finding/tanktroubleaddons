@@ -109,7 +109,7 @@ Maze.constructor('createRandom', function(width, height, playerIds, theme) {
 	const tileProbability = Constants.MAZE.TILE_PROBABILITIES[Math.floor(Math.random() * Constants.MAZE.TILE_PROBABILITIES.length)];
 
 	// Keep creating a new maze until successful.
-	let bool = true;
+	const bool = true;
 	while (bool) {
 		this.tankPositions = [];
 
@@ -212,7 +212,7 @@ Maze.constructor('createSymmetric', function(width, height, playerIds, theme) {
 	const blockHeight = Math.floor(this.height/2);
 
 	// Keep creating a new maze until successful.
-	let bool = true;
+	const bool = true;
 	while (bool) {
 		this.tankPositions = [];
 

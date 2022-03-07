@@ -1,9 +1,4 @@
-if (typeof require === 'function') {
-    var Classy = require('./classy');
-    var Constants = require('./constants');
-}
-
-var MazeThemeManager = Classy.newClass();
+var MazeThemeManager = Classy.newClass(); // eslint-disable-line no-var
 
 MazeThemeManager.classFields({
     preparedThemes: {}

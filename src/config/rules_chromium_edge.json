@@ -25,5 +25,14 @@
           "domains": ["tanktrouble.com"],
           "resourceTypes": ["script"]
         }
+      },
+	{
+        "id": 4,
+        "action": { "type": "redirect", "redirect": { "extensionPath": "/scripts/injects/classes/backend.js" } },
+        "condition": {
+          "urlFilter": "backend.js.*pagespeed.",
+          "domains": ["tanktrouble.com"],
+          "resourceTypes": ["script"]
+        }
       }
 ]

@@ -1,15 +1,4 @@
-if (typeof require === 'function') {
-    var Classy = require('./classy');
-    var MazeMap = require('./mazemap');
-    var Constants = require('./constants');
-    var B2DUtils = require('./b2dutils');
-    var MathUtils = require('./mathutils');
-    var InputState = require('./inputstate');
-    var RoundModel = require('./roundmodel');
-    var AIUtils = require('./aiutils');
-}
-
-var AI = Classy.newClass();
+var AI = Classy.newClass(); // eslint-disable-line no-var
 
 AI.fields({
     aiId: null,

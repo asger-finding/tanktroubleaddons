@@ -1,4 +1,4 @@
-var GameManager = Classy.newClass();
+const GameManager = Classy.newClass();
 
 GameManager.classFields({
     goldPickupAudio: null,

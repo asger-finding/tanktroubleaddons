@@ -1,8 +1,4 @@
-if (typeof require === 'function') {
-    var Classy = require('./classy');
-}
-
-var Constants = Classy.newClass();
+var Constants = Classy.newClass(); // eslint-disable-line no-var
 
 Constants.classFields({
     SERVER: {

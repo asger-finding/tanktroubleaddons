@@ -1,15 +1,9 @@
-if (typeof require === 'function') {
-    var Classy = require('./classy');
-    var Constants = require('./constants');
-    var Box2D = require('./box2d');
-}
-
 // These really only need to be called once, but we do it here
 Box2D.Common.b2Settings.b2_maxTranslation = 8.0;//4.0;
 Box2D.Common.b2Settings.b2_maxTranslationSquared = 64.0;//16.0;
 Box2D.Common.b2Settings.b2_velocityThreshold = 0.0;
 
-var B2DUtils = Classy.newClass().name('B2DUtils');
+var B2DUtils = Classy.newClass().name('B2DUtils'); // eslint-disable-line no-var
 
 B2DUtils.fields({
 

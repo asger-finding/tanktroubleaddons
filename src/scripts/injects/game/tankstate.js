@@ -1,8 +1,4 @@
-if (typeof require === 'function') {
-    var Classy = require('./classy');
-}
-
-var TankState = Classy.newClass().name('TankState');
+var TankState = Classy.newClass().name('TankState'); // eslint-disable-line no-var
 
 TankState.fields({
     data: {} // Store in an object for fast JSON serialization

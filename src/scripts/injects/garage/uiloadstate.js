@@ -1,4 +1,4 @@
-var Garage = Garage || {};
+var Garage = Garage || {}; // eslint-disable-line no-var
 
 Garage.UILoadState = Classy.newClass();
 

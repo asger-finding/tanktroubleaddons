@@ -1,4 +1,4 @@
-var TankTrouble = TankTrouble || {};
+var TankTrouble = TankTrouble || {}; // eslint-disable-line no-var
 
 TankTrouble.VirtualShopOverlay = {
     wrapper: null,

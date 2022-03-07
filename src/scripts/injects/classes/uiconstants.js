@@ -1,4 +1,4 @@
-var UIConstants = Classy.newClass();
+var UIConstants = Classy.newClass(); // eslint-disable-line no-var
 
 UIConstants.classFields({
     SCORE_CATEGORIES: {

@@ -34,11 +34,8 @@
         "@typescript-eslint/no-explicit-any": "off",
         "prefer-const": "error",
         "no-undef": "off",
+        "no-var": "error",
         "no-unused-vars": ["error", { "args": "none" }],
-        "linebreak-style": [
-			"warn",
-			"unix"
-		],
         "@typescript-eslint/no-this-alias": [
             "error",
             {

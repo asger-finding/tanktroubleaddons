@@ -1,12 +1,4 @@
-if (typeof require === 'function') {
-    var Classy = require('./classy');
-    var Constants = require('./constants');
-    var B2DUtils = require('./b2dutils');
-    var InputState = require('./inputstate');
-    var MathUtils = require('./mathutils');
-}
-
-var AIUtils = Classy.newClass();
+var AIUtils = Classy.newClass(); // eslint-disable-line no-var
 
 AIUtils.classMethods({
     checkProtected: function(tankId, gameController) {

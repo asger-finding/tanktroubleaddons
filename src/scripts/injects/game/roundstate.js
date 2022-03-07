@@ -1,15 +1,4 @@
-if (typeof require === 'function') {
-    var Classy = require('./classy');
-    var TankState = require('./tankstate');
-    var ProjectileState = require('./projectilestate');
-    var CollectibleState = require('./collectiblestate');
-    var WeaponState = require('./weaponstate');
-    var UpgradeState = require('./upgradestate');
-    var CounterState = require('./counterstate');
-    var ZoneState = require('./zonestate');
-}
-
-var RoundState = Classy.newClass().name('RoundState');
+var RoundState = Classy.newClass().name('RoundState'); // eslint-disable-line no-var
 
 RoundState.constructor(function() {
 });
@@ -56,7 +45,7 @@ RoundState.methods({
             return this.cachedTankStates;
         }
 
-        var tankStates = [];
+        const tankStates = [];
         for (let i = 0; i < this.data.tankStates.length; ++i) {
             tankStates.push(TankState.withObject(this.data.tankStates[i]));
         }
@@ -80,7 +69,7 @@ RoundState.methods({
             return this.cachedProjectileStates;
         }
 
-        var projectileStates = [];
+        const projectileStates = [];
         for (let i = 0; i < this.data.projectileStates.length; ++i) {
             projectileStates.push(ProjectileState.withObject(this.data.projectileStates[i]));
         }
@@ -104,7 +93,7 @@ RoundState.methods({
             return this.cachedCollectibleStates;
         }
 
-        var collectibleStates = [];
+        const collectibleStates = [];
         for (let i = 0; i < this.data.collectibleStates.length; ++i) {
             collectibleStates.push(CollectibleState.withObject(this.data.collectibleStates[i]));
         }
@@ -129,7 +118,7 @@ RoundState.methods({
             return this.cachedWeaponStates;
         }
 
-        var weaponStates = [];
+        const weaponStates = [];
         for (let i = 0; i < this.data.weaponStates.length; ++i) {
             weaponStates.push(WeaponState.withObject(this.data.weaponStates[i]));
         }
@@ -153,7 +142,7 @@ RoundState.methods({
             return this.cachedUpgradeStates;
         }
 
-        var upgradeStates = [];
+        const upgradeStates = [];
         for (let i = 0; i < this.data.upgradeStates.length; ++i) {
             upgradeStates.push(UpgradeState.withObject(this.data.upgradeStates[i]));
         }
@@ -177,7 +166,7 @@ RoundState.methods({
             return this.cachedCounterStates;
         }
 
-        var counterStates = [];
+        const counterStates = [];
         for (let i = 0; i < this.data.counterStates.length; ++i) {
             counterStates.push(CounterState.withObject(this.data.counterStates[i]));
         }
@@ -201,7 +190,7 @@ RoundState.methods({
             return this.cachedZoneStates;
         }
 
-        var zoneStates = [];
+        const zoneStates = [];
         for (let i = 0; i < this.data.zoneStates.length; ++i) {
             zoneStates.push(ZoneState.withObject(this.data.zoneStates[i]));
         }

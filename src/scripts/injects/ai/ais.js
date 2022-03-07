@@ -1,11 +1,4 @@
-if (typeof require === 'function') {
-    var Classy = require('./classy');
-    var Log = require('./log');
-    var AIManager = require('./aimanager');
-    var Backend = require('./backend');
-}
-
-var AIs = Classy.newClass();
+var AIs = Classy.newClass(); // eslint-disable-line no-var
 
 AIs.classFields({
     // The current AIManager instances.

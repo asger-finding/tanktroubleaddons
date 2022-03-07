@@ -1,4 +1,4 @@
-var Users = Classy.newClass();
+var Users = Classy.newClass(); // eslint-disable-line no-var
 
 Users.classFields({
     authenticatedUsers: {},

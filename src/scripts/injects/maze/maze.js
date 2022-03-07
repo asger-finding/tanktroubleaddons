@@ -1,13 +1,4 @@
-if (typeof require === 'function') {
-	var Classy = require('./classy');
-	var ArrayUtils = require('./arrayutils');
-	var MathUtils = require('./mathutils');
-	var Constants = require('./constants');
-	var MazeThemeManager = require('./mazethememanager');
-	var Log = require('./log');
-	var jKstra = require('jkstra');
-}
-var Maze = Classy.newClass();
+var Maze = Classy.newClass(); // eslint-disable-line no-var
 
 /*
  * Datastructures:

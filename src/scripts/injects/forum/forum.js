@@ -445,7 +445,7 @@
 	};
 })(jQuery);
 
-var ForumModel = Classy.newClass().name('ForumModel');
+const ForumModel = Classy.newClass().name('ForumModel');
 
 ForumModel.constructor(function() {});
 
@@ -1254,7 +1254,7 @@ ForumModel.methods({
     }
 });
 
-var ForumView = Classy.newClass().name('ForumView');
+const ForumView = Classy.newClass().name('ForumView');
 ForumView.constructor(function(model) {
 
     // Store model reference
@@ -2313,7 +2313,7 @@ ForumView.methods({
     }
 });
 
-var Forum = Classy.newClass().name('Forum');
+var Forum = Classy.newClass().name('Forum'); // eslint-disable-line no-var
 
 Forum.fields({
     model: null,

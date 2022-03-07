@@ -26,16 +26,20 @@ class Injects {
 
 	rules:any = [
 		{
-			redirectPath: "/scripts/injects/forum/forum.js",
-			urlFilter: "forum.js.*pagespeed."
+			redirectPath: '/scripts/injects/forum/forum.js',
+			urlFilter: 'forum.js.*pagespeed.'
 		},
 		{
-			redirectPath: "/scripts/injects/game/phaser.js",
-			urlFilter: "phaser.min.js.*pagespeed.",
+			redirectPath: '/scripts/injects/game/phaser.js',
+			urlFilter: 'phaser.min.js.*pagespeed.'
 		},
 		{
-			redirectPath: "/scripts/injects/game/phaser-nineslice.js",
-			urlFilter: "phaser-nineslice.min.js.*pagespeed.",
+			redirectPath: '/scripts/injects/game/phaser-nineslice.js',
+			urlFilter: 'phaser-nineslice.min.js.*pagespeed.'
+		},
+		{
+			redirectPath: '/scripts/injects/classes/backend.js',
+			urlFilter: 'backend.js.*pagespeed.'
 		}
 	];
 	

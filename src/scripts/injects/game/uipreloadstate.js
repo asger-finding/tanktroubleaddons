@@ -1,4 +1,4 @@
-var Game = Game || {};
+var Game = Game || {}; // eslint-disable-line no-var
 
 Game.UIPreloadState = Classy.newClass();
 

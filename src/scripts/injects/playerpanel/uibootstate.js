@@ -1,4 +1,4 @@
-var PlayerPanel = PlayerPanel || {};
+var PlayerPanel = PlayerPanel || {}; // eslint-disable-line no-var
 
 PlayerPanel.UIBootState = Classy.newClass();
 

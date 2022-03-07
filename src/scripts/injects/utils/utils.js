@@ -1,4 +1,4 @@
-var Utils = Classy.newClass();
+var Utils = Classy.newClass(); // eslint-disable-line no-var
 
 Utils.classFields({
     svgMeasurementContainer: null,

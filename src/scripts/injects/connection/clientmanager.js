@@ -1,4 +1,4 @@
-var ClientManager = Classy.newClass();
+var ClientManager = Classy.newClass(); // eslint-disable-line no-var
 
 ClientManager.classFields({
     client: null,

@@ -1,31 +1,4 @@
-if (typeof require === 'function') {
-    var Classy = require('./classy');
-    var Log = require('./log');
-    var IdGenerator = require('./idgenerator');
-    var RoundModel = require('./roundmodel');
-    var Box2D = require('./box2d');
-    var Constants = require('./constants');
-    var Weapon = require('./weapon');
-    var LaserWeapon = require('./laserweapon');
-    var DoubleBarrelWeapon = require('./doublebarrelweapon');
-    var ShotgunWeapon = require('./shotgunweapon');
-    var HomingMissileWeapon = require('./homingmissileweapon');
-    var Upgrade = require('./upgrade');
-    var LaserAimerUpgrade = require('./laseraimerupgrade');
-    var AimerUpgrade = require('./aimerupgrade');
-    var ShieldUpgrade = require('./shieldupgrade');
-    var SpeedBoostUpgrade = require('./speedboostupgrade');
-    var Zone = require('./zone');
-    var Kill = require('./kill');
-    var Pickup = require('./pickup');
-    var WeaponDeactivation = require('./weapondeactivation');
-    var UpgradeUpdate = require('./upgradeupdate');
-    var VictoryAward = require('./victoryaward');
-    var TankState = require('./tankstate');
-    var CollectibleState = require('./collectiblestate');
-}
-
-var RoundController = Classy.newClass();
+var RoundController = Classy.newClass(); // eslint-disable-line no-var
 
 RoundController.fields({
     model: null,

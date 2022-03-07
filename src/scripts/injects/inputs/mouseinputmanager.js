@@ -1,4 +1,4 @@
-var MouseInputManager = InputManager.subclass();
+const MouseInputManager = InputManager.subclass();
 
 MouseInputManager.fields({
     mouseX: 0,

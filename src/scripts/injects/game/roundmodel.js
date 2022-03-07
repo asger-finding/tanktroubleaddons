@@ -1,33 +1,4 @@
-if (typeof require === 'function') {
-    var Classy = require('./classy');
-    var Log = require('./log');
-    //var IdGenerator = require('./idgenerator');
-    var B2DUtils = require('./b2dutils');
-    var Constants = require('./constants');
-    var Tank = require('./tank');
-    var BulletWeapon = require('./bulletweapon');
-    var LaserWeapon = require('./laserweapon');
-    var DoubleBarrelWeapon = require('./doublebarrelweapon');
-    var ShotgunWeapon = require('./shotgunweapon');
-    var HomingMissileWeapon = require('./homingmissileweapon');
-    var Projectile = require('./projectile');
-    var Shotgun = require('./shotgun');
-    var HomingMissile = require('./homingmissile');
-    var Collectible = require('./collectible');
-    var LaserAimerUpgrade = require('./laseraimerupgrade');
-    var SpawnShieldUpgrade = require('./spawnshieldupgrade');
-    var AimerUpgrade = require('./aimerupgrade');
-    var ShieldUpgrade = require('./shieldupgrade');
-    var SpeedBoostUpgrade = require('./speedboostupgrade');
-    var TimerCountdownCounter = require('./timercountdowncounter');
-    var OvertimeCountUpCounter = require('./overtimecountupcounter');
-    var SpawnZone = require('./spawnzone');
-    var RoundState = require('./roundstate');
-    var ChickenOut = require('./chickenout');
-}
-
-
-var RoundModel = Classy.newClass();
+var RoundModel = Classy.newClass(); // eslint-disable-line no-var
 
 
 /*

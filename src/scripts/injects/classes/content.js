@@ -1,4 +1,4 @@
-var Content = Classy.newClass().name('Content');
+var Content = Classy.newClass().name('Content'); // eslint-disable-line no-var
 
 Content.classFields({
     activeTab: null

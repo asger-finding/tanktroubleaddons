@@ -1,9 +1,4 @@
-if (typeof require === 'function') {
-    var Classy = require('./classy');
-    var PlayerState = require('./playerstate');
-}
-
-var GameState = Classy.newClass().name('GameState');
+var GameState = Classy.newClass().name('GameState'); // eslint-disable-line no-var
 
 GameState.constructor(function() {
 

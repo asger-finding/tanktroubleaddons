@@ -1,4 +1,4 @@
-var InputManager = Classy.newClass();
+const InputManager = Classy.newClass();
 
 InputManager.fields({
     playerId: null,

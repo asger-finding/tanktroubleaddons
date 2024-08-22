@@ -1,6 +1,3 @@
-// event to run execute.js content when extension's button is clicked
-chrome.action.onClicked.addListener(execScript);
-
 async function execScript() {
 	const tabId = await getTabId();
 	if (tabId) {
@@ -20,3 +17,6 @@ async function getTabId() {
 	});
 	return (tabs.length > 0) ? tabs[0].id : null;
 }
+
+// event to run execute.js content when extension's button is clicked
+chrome.action.onClicked.addListener(execScript);

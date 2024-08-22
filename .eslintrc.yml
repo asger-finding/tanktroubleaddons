@@ -1,0 +1,66 @@
+parser: '@typescript-eslint/parser'
+
+plugins:
+  - jsdoc
+  - import
+  - '@stylistic'
+
+ignorePatterns:
+  - node_modules/
+  - build/
+  - gulpfile.js
+  - make.mjs
+  - '*.min.js'
+
+extends:
+  - raven
+  - airbnb-typescript/base
+  - plugin:jsdoc/recommended
+  - plugin:@stylistic/disable-legacy
+
+globals:
+  chrome: true
+  docunent: true
+  window: true
+
+env:
+  browser: true
+
+parserOptions:
+  project: ./tsconfig.json
+  sourceType: module
+
+rules:
+  '@stylistic/indent': [error, tab]
+  '@stylistic/semi': [error, always]
+  '@stylistic/no-trailing-spaces': 1
+  # @typescript-eslint/no-throw-literal has been deprecated
+  # in favor of @typescript-eslint/only-throw-error
+  '@typescript-eslint/no-throw-literal': 0
+  '@typescript-eslint/only-throw-error': error
+  comma-dangle: [error, never]
+  space-before-function-paren: [error, never]
+
+  jsdoc/require-jsdoc:
+  - error
+  - require:
+      ArrowFunctionExpression: true
+      ClassExpression: true
+      FunctionDeclaration: true
+      MethodDefinition: true
+  jsdoc/require-param-type: 0
+  jsdoc/require-returns-type: 0
+
+  # Box2D follows a PascalCase naming convention
+  new-cap: [error, { capIsNewExceptionPattern: "(b2dbody|Box2D)\\.." }]
+
+  # for loops and game coordinate variables
+  id-length: [warn, { exceptions: [i, j, k, x, y] }]
+
+  no-trailing-spaces: [error, { ignoreComments: true }]
+  import/extensions: [error, ignorePackages]
+  multiline-comment-style: [error, separate-lines]
+  linebreak-style: 0
+  sort-keys: 0
+  no-labels: 0
+  no-undef: 0

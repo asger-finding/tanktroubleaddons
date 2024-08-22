@@ -13,9 +13,10 @@ Written in TypeScript with a SASS preprocessor, compiled with gulp.
 
 ## Minimum browser version
 
-TankTroubleAddons compiles to ES2020 spec. The minimum browser version required to run this addons must support the ECMAScript 2020 specifications.
+TankTroubleAddons compiles to ES2023 spec. The minimum browser version required to run this addons must support the ECMAScript 2020 specifications.
 See the table below for safe minimum requirements.
 
+<!-- FIXME needs bump -->
 | **Browser** | **Minimum** |
 |-------------|-------------|
 | Chromium    | 84          |
@@ -60,24 +61,3 @@ See the table below for safe minimum requirements.
      1. See [this](https://stackoverflow.com/a/41543650/11452298) or [this](https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension#3744467)!
 
 Happy hacking!
-
-## Useful tools for development
-
-Of course, this all comes down to preference. Your setup is completely up to you!  
-I use Visual Studio Code on Windows with these useful extensions
-
-- ESLint
-- EditorConfig for VS Code
-- Bracket Pair Colorizer 2
-- markdownlint
-- Beautify
-- GitLens
-- YAML
-- Material Icon Theme
-- GitHub Copilot (invite-only)
-
-## Final notes
-
-A heartfelt thank you goes out to everyone in the TankTrouble community.  
-This game has become a huge part of my life and has helped me shape my roadmap for the future.  
-For the many years, thank you. May there be many more to come.

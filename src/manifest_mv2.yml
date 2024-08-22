@@ -1,0 +1,31 @@
+name: __MSG_name__
+description: __MSG_description__
+version: __VERSION__
+default_locale: en
+author: Asger Finding
+manifest_version: 2
+homepage_url: "https://github.com/CommanderAnime/TankTroubleAddons/tree/v2"
+browser_action:
+    default_title: execute.js will run (watch the Chrome DevTools' console)
+content_scripts:
+    - run_at: document_start
+      js: [scripts/index.js]
+      matches: ["*://*.tanktrouble.com/*"]
+
+    - run_at: document_idle
+      js: [scripts/documentidle.js]
+      matches: ["*://*.tanktrouble.com/*"]
+
+    - run_at: document_start
+      css: [css/styles.css]
+      matches: ["*://*.tanktrouble.com/*"]
+background:
+      scripts:
+        - config/rules.js
+permissions:
+    - "*://*.tanktrouble.com/*"
+    - webRequest
+    - webRequestBlocking
+    - storage
+web_accessible_resources:
+    - "*"

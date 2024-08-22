@@ -1,16 +1,24 @@
 {
     "compilerOptions": {
-        "allowJs": true,
-        "checkJs": false,
-        "target": "es2020",
-        "outDir": "./dist",
+        "target": "esnext",
+        "module": "ESNext",
+        "allowSyntheticDefaultImports": true,
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitAny": true,
+        "removeComments": true,
+        "sourceMap": false,
+        "strictPropertyInitialization": false,
+        "outDir": "build",
+        "baseUrl": "."
     },
     "include": [
-        "./src"
+        "src/**/*",
+        "typings/**/*"
     ],
     "exclude": [
-        "./node_modules",
-        "./dist",
-        "./src/**/*.js"
+        "node_modules",
+        "build"
     ]
 }

@@ -49,7 +49,7 @@ if (!customElements.get('player-name')) {
 
 			/**
 			 * Scale the username SVG text when it's in the DOM.
-			 * 
+			 *
 			 * Bounding boxes will first be calculated right when
 			 * it can be rendered.
 			 */

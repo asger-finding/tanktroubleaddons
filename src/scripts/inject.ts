@@ -1,8 +1,12 @@
-declare const main: (...args: unknown[]) => never;
-declare const load_red_infiltration: (...args: unknown[]) => never;
+declare const main: (...args: unknown[]) => void;
+declare const load_red_infiltration: (...args: unknown[]) => void;
 
 (() => {
-	const loadMeta = () => {
+	/**
+	 * Locate the meta element and return it
+	 * @returns HTMLElement
+	 */
+	const getMeta = () => {
 		const metaElement = document.querySelector('tanktroubleaddons');
 
 		if (metaElement instanceof HTMLElement) {
@@ -16,11 +20,18 @@ declare const load_red_infiltration: (...args: unknown[]) => never;
 		throw new DOMException('Extension metadata element not found', 'NOT_FOUND_ERR');
 	};
 
+	/**
+	 * Unload the meta element
+	 */
 	const unloadMeta = () => {
 		const metaElement = document.querySelector('tanktroubleaddons');
 		if (metaElement) metaElement.remove();
 	};
 
+	/**
+	 * Inject a script into the site
+	 * @param src Script source
+	 */
 	const injectScript = (src: string) => {
 		const script = document.createElement('script');
 		script.src = src;
@@ -29,9 +40,14 @@ declare const load_red_infiltration: (...args: unknown[]) => never;
 		document.head.appendChild(script);
 	};
 
-	const meta = loadMeta();
+	const meta = getMeta();
 
 	unloadMeta();
+
+	// console.log(meta.loader);
+
+	// main();
+	// load_red_infiltration();
 
 	eval(meta.loader ?? '');
 

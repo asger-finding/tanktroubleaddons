@@ -100,7 +100,7 @@ const addShare = (threadOrReply, threadOrReplyElement) => {
 	shareAction.append([shareActionStandardImage, shareActionActiveImage]);
 	likeAction.after(shareAction);
 
-	// Replies have a duplicate actions container for 
+	// Replies have a duplicate actions container for
 	// both right and left-facing replies.
 	// So when the share button is appended, there may be multiple
 	// and so we need to realize those instances as well
@@ -181,7 +181,7 @@ const addHyperlinks = (_threadOrReply, threadOrReplyElement) => {
 /**
  * Add extra features to a thread or reply
  * @param threadOrReply Post data
- * @param threadOrReplyElement
+ * @param threadOrReplyElement Post HTMLElement
  */
 const addFeaturesToThreadOrReply = (threadOrReply, threadOrReplyElement) => {
 	insertMultipleCreators(threadOrReply, threadOrReplyElement);
@@ -191,8 +191,8 @@ const addFeaturesToThreadOrReply = (threadOrReply, threadOrReplyElement) => {
 };
 
 /**
- *
- * @param threadOrReply
+ * Handle a thread  or reply
+ * @param threadOrReply Post data
  */
 const handleThreadOrReply = threadOrReply => {
 	if (threadOrReply === null) return;

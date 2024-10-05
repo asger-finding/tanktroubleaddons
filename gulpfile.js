@@ -6,7 +6,6 @@ const changed = require('gulp-changed');
 const rename = require('gulp-rename');
 const gulpif = require('gulp-if');
 const ignore = require('gulp-ignore');
-const swc = require('gulp-swc');
 const postCSS = require('gulp-postcss');
 const gulpsass = require('gulp-sass')(require('sass'));
 const autoprefixer = require('autoprefixer');
@@ -14,6 +13,8 @@ const htmlmin = require('gulp-htmlmin');
 const imagemin = require('gulp-imagemin');
 const jeditor = require('gulp-json-editor');
 const yaml = require('gulp-yaml');
+const esbuild = require('esbuild');
+const through2 = require('through2');
 
 const origin = './src';
 const paths = {
@@ -63,38 +64,36 @@ function mvSpecificFiles(filename) {
 	return basename;
 }
 
+// Esbuild transform function
+function esbuildTransform() {
+	return through2.obj(function (file, _, callback) {
+		esbuild.build({
+			entryPoints: [file.path],
+			bundle: true,
+			write: false,
+			minify: false,
+			loader: {
+				'.js': 'js',
+				'.ts': 'ts'
+			}
+		}).then(result => {
+			file.contents = Buffer.from(result.outputFiles[0].text);
+
+			if (file.extname === '.ts') file.extname = '.js';
+
+			callback(null, file);
+		}).catch(err => {
+			callback(err);
+		});
+	});
+}
+
 function scripts() {
 	return src(paths.files.script)
 		.pipe(changed(state.dest, {extension: '.js'}))
 		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
 		.pipe(ignore(paths.mvExcludeDenominator))
-		.pipe(swc({
-			minify: state.prod,
-			jsc: {
-				parser: {
-					syntax: 'typescript',
-					tsx: false,
-					decorators: true,
-					dynamicImport: true
-				},
-				target: 'esnext',
-				...state.prod
-					? {
-						minify: {
-							mangle: true,
-							compress: { unused: true }
-						}
-					}
-					: {}
-			},
-			module: {
-				type: 'nodenext',
-				strict: true,
-				strictMode: true,
-				lazy: false,
-				noInterop: true
-			}
-		}))
+		.pipe(esbuildTransform())
 		.pipe(dest(state.dest));
 }
 

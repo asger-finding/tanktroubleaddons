@@ -31,6 +31,7 @@
     "autoprefixer": "^10.4.2",
     "chrome-types": "^0.1.299",
     "del": "^6.0.0",
+    "esbuild": "^0.24.0",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-typescript": "^18.0.0",
     "eslint-config-raven": "^1.0.3",
@@ -49,7 +50,11 @@
     "gulp-yaml": "^2.0.4",
     "postcss": "^8.4.5",
     "sass": "^1.49.0",
+    "through2": "^4.0.2",
     "typescript": "^5.5.4",
     "yargs": "^17.3.1"
+  },
+  "dependencies": {
+    "match-sorter": "^6.3.4"
   }
 }

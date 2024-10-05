@@ -1,5 +1,5 @@
 import ProxyHelper from '../utils/proxyHelper.js';
-import matchSorter from '../utils/match-sorter.min.js';
+import {matchSorter} from 'match-sorter';
 
 // TODO: add auto-disappearing chat after timeout
 // TODO: add scroll
@@ -51,7 +51,7 @@ const addMentionAutocomplete = chatInput => {
 				this.#removeExpired();
 
 				const allSymbols = Array.from(this.options.keys());
-				this.matches = matchSorter.matchSorter(allSymbols, term, { keys: [symbol => symbol.description] });
+				this.matches = matchSorter(allSymbols, term, { keys: [symbol => symbol.description] });
 				for (const symbol of allSymbols) {
 					const element = this.options.get(symbol).value;
 

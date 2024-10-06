@@ -50,6 +50,7 @@ rules:
       MethodDefinition: true
   jsdoc/require-param-type: 0
   jsdoc/require-returns-type: 0
+  jsdoc/no-undefined-types: 0
 
   # Box2D follows a PascalCase naming convention
   new-cap: [error, { capIsNewExceptionPattern: "(b2dbody|Box2D)\\.." }]

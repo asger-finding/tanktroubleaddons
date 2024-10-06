@@ -2,10 +2,10 @@ export default class ProxyHelper {
 
 	/**
 	 * Pass a function to a hook with the correct context
-	 * @param context Function context (e.g `window`)
-	 * @param funcName Function identifier in the context
-	 * @param handler Hook to call before the original
-	 * @param attributes Optionally additional descriptors
+	 * @param {object} context Function context (e.g `window`)
+	 * @param {string} funcName Function identifier in the context
+	 * @param {(...args: unknown) => unknown} handler Hook to call before the original
+	 * @param {any[]} attributes Optionally additional descriptors
 	 */
 	static interceptFunction(context, funcName, handler, attributes) {
 		const original = Reflect.get(context, funcName);
@@ -25,7 +25,7 @@ export default class ProxyHelper {
 
 	/**
 	 * Fires when the document is readyState `interactive` or `complete`
-	 * @returns Promise that resolves upon content loaded
+	 * @returns {Promise<void>} Promise that resolves upon content loaded
 	 */
 	static whenContentLoaded() {
 		return new Promise(resolve => {
@@ -36,18 +36,18 @@ export default class ProxyHelper {
 
 	/**
 	 * Fires when the `main()` function is done on TankTrouble.
-	 * @returns Promise that resolves when Content.init() finishes
+	 * @returns {Promise<void>} Promise that resolves when Content.init() finishes
 	 */
 	static whenContentInitialized() {
-		return this.whenContentLoaded().then(() => this.#createGameProxy());
+		return this.whenContentLoaded().then(() => this.#createInitProxy());
 	}
 
 	/**
-	 * Apply a hook to the Content.init function which resolves when the promise ends
-	 * @returns Promise when Content.init has finished
+	 * Apply a hook to Content.init which resolves when the function finishes
+	 * @returns {Promise<void>} Promise which resolves when Content.init has finished
 	 * @private
 	 */
-	static #createGameProxy() {
+	static #createInitProxy() {
 		const functionString = Function.prototype.toString.call(Content.init);
 		const isAlreadyHooked = /hooked-by-userscript/u.test(functionString);
 

@@ -24,9 +24,8 @@ const paths = {
 		script: `${ origin }/**/*.@(js|ts)`,
 		styles: `${ origin }/css/*.@(css|scss)`,
 		html: `${ origin }/html/*.html`,
-		assets: `${ origin }/assets/@(images|svg)/*.@(png|jpg|jpeg|gif|svg)`,
-		json: `${ origin }/**/*.json`,
-		yaml: `${ origin }/**/!(manifest)*.yml`
+		assets: `${ origin }/assets/**/*.@(png|jpg|jpeg|gif|svg)`,
+		json: `${ origin }/**/*.json`
 	},
 	baseBuild: './build',
 	baseDist: './dist',
@@ -91,16 +90,15 @@ function esbuildTransform() {
 function scripts() {
 	return src(paths.files.script)
 		.pipe(changed(state.dest, {extension: '.js'}))
+		.pipe(esbuildTransform())
 		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
 		.pipe(ignore(paths.mvExcludeDenominator))
-		.pipe(esbuildTransform())
 		.pipe(dest(state.dest));
 }
 
 function styles() {
-	const plugins = [
-		autoprefixer()
-	]
+	const plugins = [ autoprefixer() ];
+
 	return src(paths.files.styles)
 		.pipe(changed(state.dest + '/css', {extension: '.css'}))
 		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))

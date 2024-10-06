@@ -1,3 +1,5 @@
+// TODO: add garage-like arrow scroller instead
+
 UIConstants.GAME_ICON_POOL_SIZE = 6;
 UIConstants.GAME_ICON_COUNT = 6;
 UIConstants.GAME_ICON_WIDTH /= 1.9;

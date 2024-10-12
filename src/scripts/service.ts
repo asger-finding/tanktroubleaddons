@@ -20,3 +20,5 @@ async function getTabId() {
 
 // event to run execute.js content when extension's button is clicked
 chrome.action.onClicked.addListener(execScript);
+
+//# hotReload

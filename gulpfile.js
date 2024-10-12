@@ -1,10 +1,12 @@
 const { src, dest, watch: gulpWatch, series, parallel } = require('gulp');
+const { dirname } = require('path');
 const yargs = require('yargs');
 const package = require('./package.json');
 const del = require('del');
+const gulpif = require('gulp-if');
 const changed = require('gulp-changed');
 const rename = require('gulp-rename');
-const gulpif = require('gulp-if');
+const replace = require('gulp-replace');
 const ignore = require('gulp-ignore');
 const postCSS = require('gulp-postcss');
 const gulpsass = require('gulp-sass')(require('sass'));
@@ -40,13 +42,17 @@ const paths = {
 const state = {
 	DEV: 'dev',
 	PRODUCTION: 'production',
-	get default() {
+
+	get _defaultState() {
 		return this.DEV;
 	},
 	get current() {
-		return yargs.argv.state || this[this.DEFAULT];
+		return yargs.argv.state || this[this._defaultState];
 	},
-	get prod() {
+	get isDev() {
+		return this.current === this.DEV;
+	},
+	get isProd() {
 		return this.current === this.PRODUCTION;
 	},
 	get dest() {
@@ -67,14 +73,28 @@ function mvSpecificFiles(filename) {
 function esbuildTransform() {
 	return through2.obj(function (file, _, callback) {
 		esbuild.build({
-			entryPoints: [file.path],
+			stdin: {
+				contents: file.contents.toString(),
+				resolveDir: dirname(file.path),
+				loader: 'ts',
+				sourcefile: file.path,
+			},
 			bundle: true,
 			write: false,
 			minify: false,
+			platform: 'browser',
+			format: 'esm',
 			loader: {
 				'.js': 'js',
 				'.ts': 'ts'
-			}
+			},
+			plugins: [{
+				name: 'bundle-only-node-modules',
+				setup(build) {
+				  const filter = /^(\.\/|\.\.\/)/u;
+				  build.onResolve({ filter }, args => ({ path: args.path, external: true }))
+				}
+			}],
 		}).then(result => {
 			file.contents = Buffer.from(result.outputFiles[0].text);
 
@@ -90,6 +110,7 @@ function esbuildTransform() {
 function scripts() {
 	return src(paths.files.script)
 		.pipe(changed(state.dest, {extension: '.js'}))
+		.pipe(replace('//# hotReload', `console.log('test');`))
 		.pipe(esbuildTransform())
 		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
 		.pipe(ignore(paths.mvExcludeDenominator))
@@ -103,7 +124,7 @@ function styles() {
 		.pipe(changed(state.dest + '/css', {extension: '.css'}))
 		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
 		.pipe(ignore(paths.mvExcludeDenominator))
-		.pipe(gulpsass({ outputStyle: state.prod ? 'compressed' : 'expanded' }))
+		.pipe(gulpsass({ outputStyle: state.isProd ? 'compressed' : 'expanded' }))
 		.pipe(postCSS(plugins))
 		.pipe(dest(state.dest + '/css'));
 }
@@ -113,7 +134,7 @@ function html() {
 		.pipe(changed(state.dest + '/html'))
 		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
 		.pipe(ignore(paths.mvExcludeDenominator))
-		.pipe(gulpif(state.prod, htmlmin({ collapseWhitespace: true })))
+		.pipe(gulpif(state.isProd, htmlmin({ collapseWhitespace: true })))
 		.pipe(dest(state.dest + '/html'));
 }
 
@@ -122,7 +143,7 @@ function images() {
 		.pipe(changed(state.dest + '/assets'))
 		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
 		.pipe(ignore(paths.mvExcludeDenominator))
-		.pipe(gulpif(state.prod, imagemin()))
+		.pipe(gulpif(state.isProd, imagemin()))
 		.pipe(dest(state.dest + '/assets'));
 }
 
@@ -131,7 +152,7 @@ function json() {
 		.pipe(changed(state.dest))
 		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
 		.pipe(ignore(paths.mvExcludeDenominator))
-		.pipe(jeditor(json => {return json}, { beautify: !state.prod }))
+		.pipe(jeditor(json => {return json}, { beautify: !state.isProd }))
 		.pipe(dest(state.dest));
 }
 
@@ -144,14 +165,14 @@ function manifest() {
 		.pipe(jeditor(json => {
 			json.version = package.version;
 			return json;
-		}, { beautify: !state.prod } ))
+		}, { beautify: !state.isProd } ))
 		.pipe(dest(state.dest));
 }
 
 function clean() {
 	// Before building, clean up the the target folder for all previous files.
 	// This is only done when starting the build tasks.
-	if (state.prod) return del([ paths.dist ], { force: true });
+	if (state.isProd) return del([ paths.dist ], { force: true });
 	else return del([ paths.build ], { force: true });
 }
 
@@ -172,7 +193,7 @@ function watch() {
 }
 
 async function broadcast() {
-	console.log('\x1b[35m%s\x1b[0m', `Compiling ${ state.current } version for ${ paths.mvTarget }...`);
+	console.log('\x1b[35m%s\x1b[0m', `Compiling ${ state.current } build for ${ paths.mvTarget }...`);
 	return;
 }
 

@@ -32,7 +32,7 @@ permissions:
     - tabs
     - scripting
     - storage
-host_permissions: ["*://*.tanktrouble.com/*"]
+host_permissions: ["*://*.tanktrouble.com/*", "*://code.jquery.com/*"]
 web_accessible_resources:
     - resources: ["*"]
       matches: ["*://*.tanktrouble.com/*"]

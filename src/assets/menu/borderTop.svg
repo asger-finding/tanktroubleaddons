@@ -5,7 +5,7 @@
             <stop offset="1" stop-color="var(--border-accent-9)"/>
         </linearGradient>
     </defs>
-    <path fill="url(#2e28)" d="M23 0h594v18H23z" style="paint-order:markers stroke fill" transform="matrix(.04209 0 0 1 -.968 0)"/>
-    <path fill-opacity=".3" d="M23 18h594v2.828H23z" style="paint-order:markers stroke fill" transform="matrix(.04209 0 0 1 -.968 0)"/>
-    <path fill="#fff" fill-opacity=".15" d="M23 0h594v2H23z" style="paint-order:markers stroke fill" transform="matrix(.04209 0 0 1 -.968 0)"/>
+    <path fill="url(#2e28)" d="M23 0h594v18H23z" transform="matrix(.04209 0 0 1 -.968 0)"/>
+    <path fill-opacity=".3" d="M23 18h594v2.828H23z" transform="matrix(.04209 0 0 1 -.968 0)"/>
+    <path fill="#fff" fill-opacity=".15" d="M23 0h594v2H23z" transform="matrix(.04209 0 0 1 -.968 0)"/>
 </svg>

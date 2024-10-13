@@ -1,12 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 23 2" style="height: 3.5px; transform: translateY(-9px);">
+<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 23 2" style="height: 3px; transform: translateY(-10px);">
     <defs>
         <linearGradient id="5240" x2="16" y1="241.5" y2="241.5" gradientUnits="userSpaceOnUse">
             <stop offset="0" stop-color="var(--border-accent-2)"/>
             <stop offset="1" stop-color="var(--border-accent-4)"/>
         </linearGradient>
     </defs>
-    <path fill="url(#5240)" d="M0 25h16v433H0z" style="paint-order:markers stroke fill" transform="matrix(-1 0 0 .00462 23 -.115)"/>
-    <path fill-opacity=".3" d="M16 25h2.828v433H16z" style="paint-order:markers stroke fill" transform="matrix(-1 0 0 .00462 23 -.115)"/>
-    <path fill="#fff" fill-opacity=".07" d="m624 25 2 2h-2z" style="paint-order:markers fill stroke" transform="translate(-617 -25)"/>
-    <path fill-opacity=".3" d="m20 25-1.172 1.172V25z" style="paint-order:markers fill stroke" transform="matrix(-1 0 0 1 23 -25)"/>
+    <path fill="url(#5240)" d="M0 25h16v433H0z" transform="matrix(-1 0 0 .00462 23 -.115)"/>
+    <path fill-opacity=".3" d="M16 25h2.828v433H16z" transform="matrix(-1 0 0 .00462 23 -.115)"/>
+    <path fill="#fff" fill-opacity=".07" d="m624 25 2 2h-2z" transform="translate(-617 -25)"/>
+    <path fill-opacity=".3" d="m20 25-1.172 1.172V25z" transform="matrix(-1 0 0 1 23 -25)"/>
 </svg>

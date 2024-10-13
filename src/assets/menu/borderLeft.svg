@@ -5,6 +5,6 @@
             <stop offset="1" stop-color="var(--border-accent-4)"/>
         </linearGradient>
     </defs>
-    <path fill="url(#5040)" d="M0 25h16v433H0z" style="paint-order:markers stroke fill" transform="matrix(1 0 0 .05312 0 -1.328)"/>
-    <path fill-opacity=".3" d="M16 25h2.828v433H16z" style="paint-order:markers stroke fill" transform="matrix(1 0 0 .05312 0 -1.328)"/>
+    <path fill="url(#5040)" d="M0 25h16v433H0z" transform="matrix(1 0 0 .05312 0 -1.328)"/>
+    <path fill-opacity=".3" d="M16 25h2.828v433H16z" transform="matrix(1 0 0 .05312 0 -1.328)"/>
 </svg>

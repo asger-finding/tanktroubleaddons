@@ -13,10 +13,10 @@
             <stop offset="1" stop-color="var(--border-accent-4)"/>
         </linearGradient>
     </defs>
-    <path fill="url(#3550)" d="M0 18 17 0l6 18-7 7z" style="paint-order:markers stroke fill"/>
-    <path fill="url(#2e28)" d="M17 0h6v18z" style="paint-order:markers stroke fill"/>
-    <path fill="url(#5040)" d="M0 18v7h16z" style="paint-order:markers stroke fill"/>
-    <path fill="#fff" fill-opacity=".15" d="m17 0 .666 2H23V0z" style="paint-order:markers stroke fill"/>
-    <path fill="#fff" fill-opacity=".3" d="M17 0 0 18l2 .875z" style="paint-order:markers stroke fill"/>
-    <path fill-opacity=".3" d="m23 18-7 7h4l3-3z" style="paint-order:markers stroke fill"/>
+    <path fill="url(#3550)" d="M0 18 17 0l6 18-7 7z"/>
+    <path fill="url(#2e28)" d="M17 0h6v18z"/>
+    <path fill="url(#5040)" d="M0 18v7h16z"/>
+    <path fill="#fff" fill-opacity=".15" d="m17 0 .666 2H23V0z"/>
+    <path fill="#fff" fill-opacity=".3" d="M17 0 0 18l2 .875z"/>
+    <path fill-opacity=".3" d="m23 18-7 7h4l3-3z"/>
 </svg>

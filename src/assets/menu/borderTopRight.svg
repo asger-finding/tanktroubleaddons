@@ -14,10 +14,10 @@
         </linearGradient>
     </defs>
     <g>
-        <path fill="url(#3063)" d="M0 18 17 0l6 18-7 7z" style="paint-order:markers stroke fill" transform="matrix(-1 0 0 1 23 0)"/>
-        <path fill="url(#2e28)" d="M17 0h6v18z" style="paint-order:markers stroke fill" transform="matrix(-1 0 0 1 23 0)"/>
-        <path fill="url(#5240)" d="M0 18v7h16z" style="paint-order:markers stroke fill" transform="matrix(-1 0 0 1 23 0)"/>
-        <path fill="#fff" fill-opacity=".15" d="m17 0 .666 2H23V0z" style="paint-order:markers stroke fill" transform="matrix(-1 0 0 1 23 0)"/>
+        <path fill="url(#3063)" d="M0 18 17 0l6 18-7 7z" transform="matrix(-1 0 0 1 23 0)"/>
+        <path fill="url(#2e28)" d="M17 0h6v18z" transform="matrix(-1 0 0 1 23 0)"/>
+        <path fill="url(#5240)" d="M0 18v7h16z" transform="matrix(-1 0 0 1 23 0)"/>
+        <path fill="#fff" fill-opacity=".15" d="m17 0 .666 2H23V0z" transform="matrix(-1 0 0 1 23 0)"/>
     </g>
-    <path fill-opacity=".3" d="m23 18-7 7h4l3-3z" style="paint-order:markers stroke fill" transform="matrix(-1 0 0 1 23 0)"/>
+    <path fill-opacity=".3" d="m23 18-7 7h4l3-3z" transform="matrix(-1 0 0 1 23 0)"/>
 </svg>

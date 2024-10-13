@@ -17,26 +17,37 @@
 }
 
 /* Addons menu */
-@keyframes tv-close {
+@keyframes tv-close-wrapper {
 	0% {
 		filter: brightness(1) drop-shadow(0 12px 7px rgba(0, 0, 0, 0.5));
+	}
+	60% {
+		filter: brightness(7) drop-shadow(0 0);
+	}
+	93% {
+		filter: brightness(15) brightness(0.8) drop-shadow(0 0);
+		opacity: 1.0;
+	}
+	100% {
+		opacity: 0.0;
+	}
+}
+
+@keyframes tv-close-body {
+	0% {
 		transform: scale(1, 1);
 	}
 	50% {
 		transform: scale(1, 0.006);
 	}
 	60% {
-		filter: brightness(7) drop-shadow(0 0);
 		transform: scale(1, 0.006);
 	}
 	93% {
-		filter: brightness(15) brightness(0.8) drop-shadow(0 0);
 		transform: scale(0.006, 0.006);
-		opacity: 1.0;
 	}
 	100% {
 		transform: scale(0.0, 0.0);
-		opacity: 0.0;
 	}
 }
 
@@ -54,6 +65,8 @@ html.dark #addons-menu {
 	position: fixed;
 	z-index: 999;
 
+	filter: drop-shadow(0 12px 7px rgba(0, 0, 0, 0.5));
+
 	--lightness: 95%;
 
 	--background-color: color-mix(in oklab, white calc(var(--lightness) - 27%), black);
@@ -68,6 +81,21 @@ html.dark #addons-menu {
 	--border-accent-9: color-mix(in oklab, white calc(var(--lightness) - 22%), black);
     --border-accent-10: color-mix(in oklab, white calc(var(--lightness) - 23%), black);
 
+	&.closing {
+		animation: tv-close-wrapper 1.0s normal;
+
+		.body {
+			animation: tv-close-body 1.0s normal;
+		}
+	}
+	&.opening {
+		animation: tv-close-wrapper 1.0s reverse infinite;
+
+		.body {
+			animation: tv-close-body 1.0s reverse infinite;
+		}
+	}
+
 	.body { 
 		display: grid;
 		position: absolute;
@@ -80,7 +108,6 @@ html.dark #addons-menu {
 			"borderTopLeftBottom content content content borderTopRightBottom"
 			"borderLeft content content content borderRight"
 			"borderBottomLeft borderBottom borderBottom borderBottom borderBottomRight";
-		filter: drop-shadow(0 12px 7px rgba(0, 0, 0, 0.5));
 		animation: none;
 
 		.grid-item {
@@ -101,20 +128,15 @@ html.dark #addons-menu {
 			}
 		}
 
-		&.close {
-			animation: tv-close 1.0s normal;
-		}
-		&.open {
-			animation: tv-close 1.0s reverse infinite;
-		}
 	}
 
 	.header {
-		pointer-events: none;
-		transform: translateX(-50%);
-		position: fixed;
-		top: 10px;
+		position: absolute;
+		top: 8px;
 		left: 50%;
+		transform: translateX(-50%);
+		filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.2));
+		pointer-events: none;
 	}
 
 	.content {
@@ -122,7 +144,9 @@ html.dark #addons-menu {
 		color: #464646;
 		font-weight: bold;
 		font-family: Arial;
-		background: var(--background-color);
+		background-image: url("chrome-extension://__MSG_@@extension_id__/assets/menu/background.png");
+		background-size: contain;
+		background-color: var(--background-color);
 		background-repeat: no-repeat;
 		background-position: center;
 		overflow-y: scroll;

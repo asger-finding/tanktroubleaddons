@@ -1,4 +1,3 @@
-import * as reef from 'reefjs';
 import ProxyHelper from '../utils/proxyHelper.js';
 
 class Menu {
@@ -46,12 +45,12 @@ class Menu {
 		// and transforms in chrome
 		const epsilon = 1.0e-02;
 		if (multiplier < epsilon) {
-			this.body.css('transform', '');
+			this.body.css({ transform: '' });
 
 			return this.#matrixTransform;
 		}
 
-		this.body.css('transform', `matrix3d(1, 0, 0, ${ d1 * multiplier }, 0, 1, 0, ${ d2 * multiplier }, 0, 0, 1, 0, 0, 0, 0, 1);`);
+		this.body.css({ transform: `matrix3d(1, 0, 0, ${ d1 * multiplier }, 0, 1, 0, ${ d2 * multiplier }, 0, 0, 1, 0, 0, 0, 0, 1);` });
 
 		return this.#matrixTransform;
 	}
@@ -79,22 +78,18 @@ class Menu {
 			letterSpacing: 1,
 			paintOrder: 'stroke'
 		});
-		const headerLength = Utils.measureSVGText('TankTroubleAddons', {
-			fontFamily: 'TankTrouble',
-			fontSize: 24
-		});
 
-		const scaleAndTranslate = Utils.getSVGScaleAndTranslateToFit(300, headerLength + 18, 34, 'left');
+		const scaleAndTranslate = Utils.getSVGScaleAndTranslateToFit(300, 312, 34, 'left');
 		this.headerSvg.configure(headerText, { transform: scaleAndTranslate });
 
-		for (let i = 0; i < 15; i++) {
+		for (let i = 0; i < 10; i++) {
 			const theme = $(`
 				<fieldset>
 					<legend>Theme</legend>
-					<label for="radio-1">Light</label>
-					<input type="radio" name="radio-1" id="radio-1">
-					<label for="radio-2">Dark</label>
-					<input type="radio" name="radio-1" id="radio-2">
+					<label for="radio-${i}-1">Light</label>
+					<input type="radio" name="radio-${i}-1" id="radio-${i}-1">
+					<label for="radio-${i}-2">Dark</label>
+					<input type="radio" name="radio-${i}-2" id="radio-${i}-2">
 				  </fieldset>`);
 			theme.find('input').checkboxradio();
 			this.content.append(theme);
@@ -140,7 +135,7 @@ class Menu {
 
 			/** Make overlay transparent */
 			start: () => {
-				this.wrapper.css('opacity', 0.7);
+				this.wrapper.css({ opacity: 0.7 });
 
 				const self = this;
 				$(this.matrixTransform).animate({ multiplier: 1 }, {
@@ -154,7 +149,7 @@ class Menu {
 
 			/** Reset overlay opacity, animate out matrix transform */
 			stop: () => {
-				this.wrapper.css('opacity', '');
+				this.wrapper.css({ opacity: '' });
 
 				const self = this;
 				$(this.matrixTransform).animate({ multiplier: 0 }, {
@@ -244,14 +239,15 @@ class Menu {
 
 	/**
 	 * Show the overlay
-	 * @param {boolean} animate Should the open sequence animate?
+	 * @param {boolean} animate Should the opening sequence animate?
 	 */
 	show(animate = true) {
 		if (animate) {
-			this.body.css('display', 'grid').addClass('open');
-			setTimeout(() => this.body.removeClass('open'), 1_000);
+			this.wrapper.addClass('opening');
+			this.wrapper.css({ display: 'block' });
+			setTimeout(() => this.wrapper.removeClass('opening'), 1_000);
 		} else {
-			this.body.css({ display: 'grid' });
+			this.wrapper.css({ display: 'block' });
 		}
 
 		this.isShowing = true;
@@ -263,10 +259,10 @@ class Menu {
 	 */
 	hide(animate = true) {
 		if (animate) {
-			this.body.addClass('close');
-			setTimeout(() => this.body.removeClass('close').css('display', 'none'), 1_000);
+			this.wrapper.addClass('closing');
+			setTimeout(() => this.wrapper.removeClass('closing').css({ display: 'none' }), 1_000);
 		} else {
-			this.body.css({ display: 'none' });
+			this.wrapper.css({ display: 'none' });
 		}
 
 		this.isShowing = false;

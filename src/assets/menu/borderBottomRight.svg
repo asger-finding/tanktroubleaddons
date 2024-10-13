@@ -1,1 +1,17 @@
-<svg version="1.1" viewBox="0 0 23 20.828" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="none"><defs><linearGradient id="b" x2="16" y1="469.586" y2="469.586" gradientUnits="userSpaceOnUse"><stop stop-color="#525252" offset="0"/><stop stop-color="#404040" offset="1"/></linearGradient><linearGradient id="a" x1="20.0237" x2="20.0237" y1="-464.026" y2="-461.978" gradientUnits="userSpaceOnUse"><stop stop-color="#404040" offset="0"/><stop stop-color="#2e2e2e" offset="1"/></linearGradient></defs><g transform="matrix(-1,0,0,1,23,-459.172)"><path d="m0 459.172v20.828l16-16v-4.828z" fill="url(#b)" stroke-width="5.30917" style="paint-order:markers stroke fill"/><rect transform="scale(1,-1)" x="16" y="-464" width="7" height="2" fill="url(#a)" stroke-width="1.05882" style="paint-order:markers stroke fill"/><path d="m16 464-16 16h23v-16z" fill="#2c2c2c" stroke-width="5.42849" style="paint-order:markers stroke fill"/><rect transform="scale(1,-1)" x="16" y="-462" width="7" height="2.828" fill-opacity=".3" stroke-width="1.25906" style="paint-order:markers stroke fill"/><path transform="matrix(-1,0,0,1,640,0)" d="m624 459.172h2v2.828l-2.00753 2.01325z" fill="#fff" fill-opacity=".2" style="paint-order:markers fill stroke"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 23 20.828">
+    <defs>
+        <linearGradient id="5240" x2="16" y1="469.586" y2="469.586" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="var(--border-accent-2)"/>
+            <stop offset="1" stop-color="var(--border-accent-4)"/>
+        </linearGradient>
+        <linearGradient id="402e" x1="20.024" x2="20.024" y1="-464.026" y2="-461.978" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="var(--border-accent-4)"/>
+            <stop offset="1" stop-color="var(--border-accent-7)"/>
+        </linearGradient>
+    </defs>
+    <path fill="url(#5240)" d="M0 459.172V480l16-16v-4.828z" style="paint-order:markers stroke fill" transform="matrix(-1 0 0 1 23 -459.172)"/>
+    <path fill="url(#402e)" d="M16-464h7v2h-7z" style="paint-order:markers stroke fill" transform="rotate(180 11.5 -229.586)"/>
+    <path fill="#2c2c2c" d="M16 464 0 480h23v-16z" style="paint-order:markers stroke fill" transform="matrix(-1 0 0 1 23 -459.172)"/>
+    <path fill-opacity=".3" d="M16-462h7v2.828h-7z" style="paint-order:markers stroke fill" transform="rotate(180 11.5 -229.586)"/>
+    <path fill="#fff" fill-opacity=".2" d="M624 459.172h2V462l-2.008 2.013z" style="paint-order:markers fill stroke" transform="translate(-617 -459.172)"/>
+</svg>

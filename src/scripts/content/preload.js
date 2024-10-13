@@ -48,6 +48,42 @@ window.Addons = {
 	}
 };
 
+const setWidget = (function*() {
+	yield () => $.widget('custom.iconselectmenu', $.ui.selectmenu, {
+		_renderItem( ul, item ) {
+			const li = $('<li>');
+			const wrapper = $('<div>', { text: item.label });
+
+			if ( item.disabled )li.addClass('ui-state-disabled');
+
+			if (item.element.attr('data-imagesrc')) {
+				$(`<div><img width="26" src="${ item.element.attr('data-imagesrc') }" srcset="${ item.element.attr('data-imagesrcset') }"/></div>`)
+					.addClass('ui-icon')
+					.appendTo(wrapper);
+			}
+
+			if (item.element.attr('data-description')) {
+				$(`<div style="font-size: 0.7em;">${ item.element.attr('data-description') }</div>`)
+					.appendTo(wrapper);
+			}
+
+			return li.append(wrapper).appendTo(ul);
+		}
+	});
+})();
+
+ProxyHelper.interceptFunction($.widget, 'bridge', (original, ...args) => {
+	const result = original(...args);
+
+	const [name] = args;
+	if (name === 'iconselectmenu') {
+		const widgetFunc = setWidget.next();
+		if (!widgetFunc.done) widgetFunc.value();
+	}
+
+	return result;
+});
+
 class Menu {
 	wrapper = $(`<div id="addons-menu"></div>`);
 
@@ -87,6 +123,15 @@ class Menu {
 	}) {
 		this.#matrixTransform = { d1, d2, multiplier };
 
+		// Fix messy antialiasing when mixing svgs
+		// and transforms in chrome
+		const epsilon = 1.0e-02;
+		if (multiplier < epsilon) {
+			this.body.css('transform', '');
+
+			return this.#matrixTransform;
+		}
+
 		this.body.css('transform', `matrix3d(1, 0, 0, ${ d1 * multiplier }, 0, 1, 0, ${ d2 * multiplier }, 0, 0, 1, 0, 0, 0, 0, 1);`);
 
 		return this.#matrixTransform;
@@ -96,6 +141,16 @@ class Menu {
 
 	/** Construct and initialize the overlay */
 	constructor() {
+		this.theme = $(`
+		<fieldset>
+			<legend>Select a theme</legend>
+			<label for="radio-1">Light</label>
+			<input type="radio" name="radio-1" id="radio-1">
+			<label for="radio-2">Dark</label>
+			<input type="radio" name="radio-1" id="radio-2">
+  		</fieldset>`);
+		this.theme.find('input').checkboxradio();
+		this.content.append(this.theme);
 		this.body.append([this.draggable, this.handle, this.content]);
 
 		const border = [
@@ -119,16 +174,26 @@ class Menu {
 
 		// Instantate border images
 		for (const name of [...border, ...draggable, ...handle]) {
-			const image = Addons.addImageWithClasses(
-				$(`<div class="grid-item" style="grid-area: ${name};">`),
-				'',
-				`assets/menu/${name}.svg`
-			);
-			image.find('img').attr('draggable', 'false');
+			fetch(Addons.t_url(`assets/menu/${name}.svg`))
+				.then(res => res.text())
+				// eslint-disable-next-line @typescript-eslint/no-loop-func
+				.then(body => {
+					const image = $(`<div class="grid-item" style="grid-area: ${name};">`).append(body);
 
-			if (draggable.includes(name)) this.draggable.append(image);
-			else if (handle.includes(name)) this.handle.append(image);
-			else this.body.append(image);
+					if (draggable.includes(name)) this.draggable.append(image);
+					else if (handle.includes(name)) this.handle.append(image);
+					else this.body.append(image);
+				});
+			// const image = Addons.addImageWithClasses(
+			// $(`<div class="grid-item" style="grid-area: ${name};">`),
+			// '',
+			// `assets/menu/${name}.svg`
+			// );
+			// image.find('img').attr('draggable', 'false');
+			//
+			// if (draggable.includes(name)) this.draggable.append(image);
+			// else if (handle.includes(name)) this.handle.append(image);
+			// else this.body.append(image);
 		}
 
 		this.draggable.draggable({

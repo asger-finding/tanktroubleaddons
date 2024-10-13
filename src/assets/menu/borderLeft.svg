@@ -1,1 +1,10 @@
-<svg version="1.1" viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="none"><defs><linearGradient id="a" x2="16" y1="241.5" y2="241.5" gradientUnits="userSpaceOnUse"><stop stop-color="#505050" offset="0"/><stop stop-color="#414141" offset="1"/></linearGradient></defs><g transform="matrix(1 0 0 .0531178 0 -1.32794)"><rect y="25" width="16" height="433" fill="url(#a)" stroke-width="23.5536" style="paint-order:markers stroke fill"/><rect x="16" y="25" width="2.82843" height="433" fill-opacity=".3" stroke-width="9.90307" style="paint-order:markers stroke fill"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 23 23">
+    <defs>
+        <linearGradient id="5040" x2="16" y1="241.5" y2="241.5" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="var(--border-accent-3)"/>
+            <stop offset="1" stop-color="var(--border-accent-4)"/>
+        </linearGradient>
+    </defs>
+    <path fill="url(#5040)" d="M0 25h16v433H0z" style="paint-order:markers stroke fill" transform="matrix(1 0 0 .05312 0 -1.328)"/>
+    <path fill-opacity=".3" d="M16 25h2.828v433H16z" style="paint-order:markers stroke fill" transform="matrix(1 0 0 .05312 0 -1.328)"/>
+</svg>

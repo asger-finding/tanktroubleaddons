@@ -47,6 +47,17 @@
 	position: fixed;
 	z-index: 999;
 
+	--border-accent-1: #636363;
+	--border-accent-2: #525252;
+	--border-accent-3: #505050;
+	--border-accent-4: #404040;
+	--border-accent-5: #353535;
+	--border-accent-6: #303030;
+	--border-accent-7: #2e2e2e;
+	--border-accent-8: #2c2c2c;
+	--border-accent-9: #262626;
+	--border-accent-10: #282828;
+
 	.body { 
 		display: grid;
 		position: absolute;
@@ -65,17 +76,17 @@
 		.grid-item {
 			background: var(--background-color);
 
-			img {
+			svg {
 				user-select: none;
 				width: 100%;
 				height: 100%;
 			}
 
-			&[style*="borderTopRight"] {
+			&[style*="borderTopRight;"] {
 				background: linear-gradient(45deg, var(--background-color) 63%, transparent 63%);
 			}
 
-			&[style*="borderTopLeft"] {
+			&[style*="borderTopLeft;"] {
 				background: linear-gradient(315deg, var(--background-color) 63%, transparent 63%);
 			}
 		}
@@ -89,6 +100,7 @@
 	}
 
 	.content {
+		color: white;
 		background: var(--background-color);
 		background-repeat: no-repeat;
 		background-position: center;

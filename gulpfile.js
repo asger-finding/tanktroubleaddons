@@ -89,7 +89,7 @@ const HMRBackground = `// HMR Background Inject
 		if (message === 'hmr') {
 			chrome.tabs.query({ url: "*://*.tanktrouble.com/*" }).then(tabs => {
 				for (const tab of tabs) {
-					chrome.tabs.reload(tab.id)
+					chrome.tabs.reload(tab.id, { bypassCache: true })
 				}
 			});
 		}

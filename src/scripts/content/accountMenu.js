@@ -5,7 +5,12 @@ ProxyHelper.interceptFunction(TankTrouble.AccountOverlay, '_initialize', (origin
 	original(...args);
 
 	TankTrouble.AccountOverlay.accountCreatedText = $('<div></div>');
-	TankTrouble.AccountOverlay.accountCreatedText.insertAfter(TankTrouble.AccountOverlay.accountHeadline);
+	TankTrouble.AccountOverlay.playerIdText = $('<div></div>');
+
+	TankTrouble.AccountOverlay.accountHeadline.after([
+		TankTrouble.AccountOverlay.accountCreatedText,
+		TankTrouble.AccountOverlay.playerIdText
+	]);
 });
 
 ProxyHelper.interceptFunction(TankTrouble.AccountOverlay, 'show', (original, ...args) => {
@@ -17,6 +22,7 @@ ProxyHelper.interceptFunction(TankTrouble.AccountOverlay, 'show', (original, ...
 			const formatted = new Intl.DateTimeFormat('en-GB', { dateStyle: 'full' }).format(created);
 
 			TankTrouble.AccountOverlay.accountCreatedText.text(`Created: ${formatted} (${timeAgo(created)})`);
+			TankTrouble.AccountOverlay.playerIdText.text(`Player ID: #${ result.getPlayerId() }`);
 		}
 	}, () => {}, () => {}, TankTrouble.AccountOverlay.playerId, Caches.getPlayerDetailsCache());
 });

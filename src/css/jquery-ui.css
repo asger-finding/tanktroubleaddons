@@ -990,7 +990,7 @@ a.ui-button:active,
 .ui-button:active,
 .ui-button.ui-state-active:hover {
 	border: 1px solid var(--jq-borderColorActive);
-	background: var(--jq-bgColorActive) url("https://code.jquery.com/ui/1.11.4/themes/smoothness/images/ui-bg_glass_65_ffffff_1x400.png") 50% 50% repeat-x;
+	background: var(--jq-bgColorActive) url("https://code.jquery.com/ui/1.11.4/themes/smoothness/images/ui-bg_glass_75_dadada_1x400.png") 50% 50% repeat-x;
 	font-weight: normal;
 	color: var(--jq-fcActive);
 }

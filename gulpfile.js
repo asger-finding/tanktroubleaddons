@@ -17,6 +17,7 @@ const jeditor = require('gulp-json-editor');
 const yaml = require('gulp-yaml');
 const esbuild = require('esbuild');
 const through2 = require('through2');
+const tinyLr = require('tiny-lr');
 
 const origin = './src';
 const paths = {
@@ -61,6 +62,41 @@ const state = {
 }
 paths.target = yargs.argv.target || 'mv3';
 
+const server = tinyLr({ port: 35729 });
+server.listen(35729, () => {});
+
+const HMRContent = `// HMR Content Inject
+// ==Start==
+(() => {
+	new WebSocket('ws://localhost:35729').addEventListener('message', event => {
+		let data = null;
+		try {
+			data = JSON.parse(event.data);
+		} catch (err) {
+			console.error('JSON.parse failed on data received to HMR'); 
+		}
+		if (data && data.command === 'reload') {
+			chrome.runtime.sendMessage('hmr')
+		}
+	});
+})();
+// ==/End==`;
+
+const HMRBackground = `// HMR Background Inject
+// ==Start==
+(() => {
+	chrome.runtime.onMessage.addListener(message => {
+		if (message === 'hmr') {
+			chrome.tabs.query({ url: "*://*.tanktrouble.com/*" }).then(tabs => {
+				for (const tab of tabs) {
+					chrome.tabs.reload(tab.id)
+				}
+			});
+		}
+	});
+})();
+// ==/End==`;
+
 function mvSpecificFiles(filename) {
 	const [basename, mv] = filename.split('_');
 
@@ -71,7 +107,7 @@ function mvSpecificFiles(filename) {
 
 // Esbuild transform function
 function esbuildTransform() {
-	return through2.obj(function (file, _, callback) {
+	return through2.obj((file, _, callback) => {
 		esbuild.build({
 			stdin: {
 				contents: file.contents.toString(),
@@ -107,14 +143,24 @@ function esbuildTransform() {
 	});
 }
 
+function reload() {
+	return through2.obj((file, _, callback) => {
+		server.changed({ body: { files: [ file.path ] } });
+
+		callback(null, file);
+	});
+}
+
 function scripts() {
 	return src(paths.files.script)
 		.pipe(changed(state.dest, {extension: '.js'}))
-		.pipe(replace('//# hotReload', `console.log('test');`))
+		.pipe(replace('//# HMRContent', HMRContent))
+		.pipe(replace('//# HMRBackground', HMRBackground))
 		.pipe(esbuildTransform())
 		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
 		.pipe(ignore(paths.mvExcludeDenominator))
-		.pipe(dest(state.dest));
+		.pipe(dest(state.dest))
+		.pipe(reload());
 }
 
 function styles() {
@@ -126,7 +172,8 @@ function styles() {
 		.pipe(ignore(paths.mvExcludeDenominator))
 		.pipe(gulpsass({ outputStyle: state.isProd ? 'compressed' : 'expanded' }))
 		.pipe(postCSS(plugins))
-		.pipe(dest(state.dest + '/css'));
+		.pipe(dest(state.dest + '/css'))
+		.pipe(reload());
 }
 
 function html() {
@@ -135,7 +182,8 @@ function html() {
 		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
 		.pipe(ignore(paths.mvExcludeDenominator))
 		.pipe(gulpif(state.isProd, htmlmin({ collapseWhitespace: true })))
-		.pipe(dest(state.dest + '/html'));
+		.pipe(dest(state.dest + '/html'))
+		.pipe(reload());
 }
 
 function images() {
@@ -144,7 +192,8 @@ function images() {
 		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
 		.pipe(ignore(paths.mvExcludeDenominator))
 		.pipe(gulpif(state.isProd, imagemin()))
-		.pipe(dest(state.dest + '/assets'));
+		.pipe(dest(state.dest + '/assets'))
+		.pipe(reload());
 }
 
 function json() {
@@ -153,7 +202,8 @@ function json() {
 		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
 		.pipe(ignore(paths.mvExcludeDenominator))
 		.pipe(jeditor(json => {return json}, { beautify: !state.isProd }))
-		.pipe(dest(state.dest));
+		.pipe(dest(state.dest))
+		.pipe(reload());
 }
 
 function manifest() {
@@ -166,7 +216,8 @@ function manifest() {
 			json.version = package.version;
 			return json;
 		}, { beautify: !state.isProd } ))
-		.pipe(dest(state.dest));
+		.pipe(dest(state.dest))
+		.pipe(reload());
 }
 
 function clean() {

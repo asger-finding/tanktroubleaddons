@@ -11,6 +11,6 @@
     </defs>
     <path fill="url(#5040)" d="M0 459.172V480l16-16v-4.828z" style="paint-order:markers stroke fill" transform="translate(0 -459.172)"/>
     <path fill="url(#402e)" d="M16-464h7v2h-7z" style="paint-order:markers stroke fill" transform="matrix(1 0 0 -1 0 -459.172)"/>
-    <path fill="#262626" d="M16 464 0 480h23v-16z" style="paint-order:markers stroke fill" transform="translate(0 -459.172)"/>
+    <path fill="var(--border-accent-10)" d="M16 464 0 480h23v-16z" style="paint-order:markers stroke fill" transform="translate(0 -459.172)"/>
     <path fill-opacity=".3" d="M16-462h7v2.828h-7z" style="paint-order:markers stroke fill" transform="matrix(1 0 0 -1 0 -459.172)"/>
 </svg>

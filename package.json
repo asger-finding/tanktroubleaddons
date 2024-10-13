@@ -52,10 +52,12 @@
     "postcss": "^8.4.5",
     "sass": "^1.49.0",
     "through2": "^4.0.2",
+    "tiny-lr": "^2.0.0",
     "typescript": "^5.5.4",
     "yargs": "^17.3.1"
   },
   "dependencies": {
-    "match-sorter": "^6.3.4"
+    "match-sorter": "^6.3.4",
+    "reefjs": "^13.0.5"
   }
 }

@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 20.828 20.828">
     <defs>
         <linearGradient id="262c" x1="23" x2="617" y1="471.995" y2="471.995" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="var(--border-accent-9)"/>
+            <stop offset="0" stop-color="var(--border-accent-10)"/>
             <stop offset="1" stop-color="var(--border-accent-8)"/>
         </linearGradient>
         <linearGradient id="40e2" x1="-616.878" x2="-616.878" y1="-463.987" y2="-461.993" gradientUnits="userSpaceOnUse">

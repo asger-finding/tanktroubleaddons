@@ -20,7 +20,7 @@
     {
         "id": 3,
         "priority": 1,
-        "action": { "type": "redirect", "redirect": { "url": "https://code.jquery.com/ui/1.14.0/themes/smoothness/jquery-ui.css" } },
+        "action": { "type": "redirect", "redirect": { "extensionPath": "/css/jquery-ui.css" } },
         "condition": {
             "urlFilter": "https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css",
             "resourceTypes": ["stylesheet"]

@@ -118,3 +118,5 @@ class Addons {
 
 const addon = new Addons();
 addon.load();
+
+//# HMRContent

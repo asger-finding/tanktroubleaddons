@@ -40,23 +40,33 @@
 	}
 }
 
+html.dark #addons-menu {
+	--lightness: 50%;
+
+	.content::-webkit-scrollbar-thumb {
+		background: rgb(255 255 255 / 0.3);
+	}
+}
+
 #addons-menu {
-	--background-color: #1c1c1c;
 	top: 20px;
 	left: 20px;
 	position: fixed;
 	z-index: 999;
 
-	--border-accent-1: #636363;
-	--border-accent-2: #525252;
-	--border-accent-3: #505050;
-	--border-accent-4: #404040;
-	--border-accent-5: #353535;
-	--border-accent-6: #303030;
-	--border-accent-7: #2e2e2e;
-	--border-accent-8: #2c2c2c;
-	--border-accent-9: #262626;
-	--border-accent-10: #282828;
+	--lightness: 95%;
+
+	--background-color: color-mix(in oklab, white calc(var(--lightness) - 27%), black);
+	--border-accent-1: color-mix(in oklab, white calc(var(--lightness)), black);
+    --border-accent-2: color-mix(in oklab, white calc(var(--lightness) - 6%), black);
+    --border-accent-3: color-mix(in oklab, white calc(var(--lightness) - 7%), black);
+    --border-accent-4: color-mix(in oklab, white calc(var(--lightness) - 13%), black);
+    --border-accent-5: color-mix(in oklab, white calc(var(--lightness) - 17%), black);
+    --border-accent-6: color-mix(in oklab, white calc(var(--lightness) - 19%), black);
+    --border-accent-7: color-mix(in oklab, white calc(var(--lightness) - 20%), black);
+    --border-accent-8: color-mix(in oklab, white calc(var(--lightness) - 21%), black);
+	--border-accent-9: color-mix(in oklab, white calc(var(--lightness) - 22%), black);
+    --border-accent-10: color-mix(in oklab, white calc(var(--lightness) - 23%), black);
 
 	.body { 
 		display: grid;
@@ -99,12 +109,40 @@
 		}
 	}
 
+	.header {
+		pointer-events: none;
+		transform: translateX(-50%);
+		position: fixed;
+		top: 10px;
+		left: 50%;
+	}
+
 	.content {
-		color: white;
+		/* FIXME dynamic color! */
+		color: #464646;
+		font-weight: bold;
+		font-family: Arial;
 		background: var(--background-color);
 		background-repeat: no-repeat;
 		background-position: center;
+		overflow-y: scroll;
 		grid-area: content;
+
+		*:last-child {
+			margin-bottom: 8px;
+		}
+
+		&::-webkit-scrollbar {
+			width: 5px;
+		}
+		
+		&::-webkit-scrollbar-track {
+			background: transparent;
+		}
+		
+		&::-webkit-scrollbar-thumb {
+			background: rgb(0 0 0 / 0.3);
+		}
 	}
 }
 

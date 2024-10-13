@@ -6,7 +6,7 @@
         </linearGradient>
         <linearGradient id="2e28" x1="22.536" x2="22.536" y1="-.019" y2="18.076" gradientUnits="userSpaceOnUse">
             <stop offset="0" stop-color="var(--border-accent-7)"/>
-            <stop offset="1" stop-color="var(--border-accent-10)"/>
+            <stop offset="1" stop-color="var(--border-accent-9)"/>
         </linearGradient>
         <linearGradient id="5040" x2="16" y1="21.5" y2="21.5" gradientUnits="userSpaceOnUse">
             <stop offset="0" stop-color="var(--border-accent-3)"/>

@@ -21,28 +21,43 @@
 	/**
 	 * Inject a script into the site
 	 * @param src Script source
+	 * @returns Promise when loaded
 	 */
-	const injectScript = (src: string) => {
+	const injectScript = (src: string): Promise<void> => {
 		const script = document.createElement('script');
 		script.src = src;
 		script.type = 'module';
 
 		document.head.appendChild(script);
+
+		return new Promise<void>(resolve => {
+			/**
+			 * Resolves once script onload is triggered
+			 * @returns voids
+			 */
+			script.onload = () => resolve();
+		});
 	};
 
 	const meta = setMeta();
 
+	// We are just evaluating the code in the meta block
+	// eslint-disable-next-line no-eval
 	eval(meta.loader ?? '');
 
-	injectScript(`${meta.extensionUrl}/scripts/content/preload.js`);
-	injectScript(`${meta.extensionUrl}/scripts/content/patches.js`);
-	injectScript(`${meta.extensionUrl}/scripts/content/playerNameElement.js`);
-	injectScript(`${meta.extensionUrl}/scripts/content/maskUsernames.js`);
-	injectScript(`${meta.extensionUrl}/scripts/content/forum.js`);
-	injectScript(`${meta.extensionUrl}/scripts/content/chat.js`);
-	injectScript(`${meta.extensionUrl}/scripts/content/lobby.js`);
-	injectScript(`${meta.extensionUrl}/scripts/content/gameSettings.js`);
-	injectScript(`${meta.extensionUrl}/scripts/content/deathCount.js`);
-	injectScript(`${meta.extensionUrl}/scripts/content/emporium.js`);
-	injectScript(`${meta.extensionUrl}/scripts/content/accountMenu.js`);
+	Promise.all([
+		injectScript(`${meta.extensionUrl}/scripts/content/preload.js`),
+		injectScript(`${meta.extensionUrl}/scripts/content/patches.js`)
+	]).then(() => {
+		injectScript(`${meta.extensionUrl}/scripts/content/menu.js`);
+		injectScript(`${meta.extensionUrl}/scripts/content/playerNameElement.js`);
+		injectScript(`${meta.extensionUrl}/scripts/content/maskUsernames.js`);
+		injectScript(`${meta.extensionUrl}/scripts/content/forum.js`);
+		injectScript(`${meta.extensionUrl}/scripts/content/chat.js`);
+		injectScript(`${meta.extensionUrl}/scripts/content/lobby.js`);
+		injectScript(`${meta.extensionUrl}/scripts/content/gameSettings.js`);
+		injectScript(`${meta.extensionUrl}/scripts/content/deathCount.js`);
+		injectScript(`${meta.extensionUrl}/scripts/content/emporium.js`);
+		injectScript(`${meta.extensionUrl}/scripts/content/accountMenu.js`);
+	});
 })();

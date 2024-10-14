@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 23 23">
     <defs>
         <linearGradient id="5240" x2="16" y1="241.5" y2="241.5" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="color-mix(in oklab, var(--base-color) 94%, black)"/>
-            <stop offset="1" stop-color="color-mix(in oklab, var(--base-color) 87%, black)"/>
+            <stop offset="0" stop-color="var(--border-accent-2)"/>
+            <stop offset="1" stop-color="var(--border-accent-4)"/>
         </linearGradient>
         <linearGradient id="white" x1="14.853" x2="14.853" y1="457.923" y2="24.835" gradientUnits="userSpaceOnUse">
             <stop offset="0" stop-color="#fff" stop-opacity=".2"/>

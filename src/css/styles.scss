@@ -120,6 +120,16 @@ html.dark {
 	--base-color: hsl(0 0% 95%);
 
 	--background-color: color-mix(in oklab, var(--base-color) 73%, black);
+	--border-accent-1: color-mix(in oklab, var(--base-color) 100%, black);
+    --border-accent-2: color-mix(in oklab, var(--base-color) 94%, black);
+    --border-accent-3: color-mix(in oklab, var(--base-color) 93%, black);
+    --border-accent-4: color-mix(in oklab, var(--base-color) 87%, black);
+    --border-accent-5: color-mix(in oklab, var(--base-color) 83%, black);
+    --border-accent-6: color-mix(in oklab, var(--base-color) 81%, black);
+    --border-accent-7: color-mix(in oklab, var(--base-color) 80%, black);
+    --border-accent-8: color-mix(in oklab, var(--base-color) 79%, black);
+	--border-accent-9: color-mix(in oklab, var(--base-color) 78%, black);
+    --border-accent-10: color-mix(in oklab, var(--base-color) 77%, black);
 
 	&.closing {
 		animation: tv-close-wrapper 1.0s normal;

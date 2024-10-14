@@ -48,9 +48,36 @@ window.Addons = {
 	}
 };
 
-const setWidget = (function*() {
+$.widget("custom.checkboxtoggle", {
+	_create() {
+		const $input = this.element;
+
+		$input.addClass('ui-checkbox-toggle-input ui-widget-header')
+			.wrap('<label class="ui-checkbox-toggle"></label>')
+			.after('<span class="ui-checkbox-toggle-slider"></span>');
+
+		// Set initial state based on checkbox value
+		this._updateToggle();
+
+		// Attach click handler to change state
+		this._on(this.element, {
+			change() {
+				this._updateToggle();
+			}
+		});
+	},
+
+	// Update the switch UI to reflect the checkbox state
+	_updateToggle() {
+		const isChecked = this.element.prop('checked');
+		if (isChecked) this.element.next('.ui-checkbox-toggle-slider').addClass('ui-checkbox-toggle-on');
+		else this.element.next('.ui-checkbox-toggle-slider').removeClass('ui-checkbox-toggle-on');
+	}
+});
+
+const proxyWidget = (function*() {
 	yield () => $.widget('custom.iconselectmenu', $.ui.selectmenu, {
-		_renderItem( ul, item ) {
+		_renderItem(ul, item) {
 			const li = $('<li>');
 			const wrapper = $('<div>', { text: item.label });
 
@@ -77,7 +104,7 @@ ProxyHelper.interceptFunction($.widget, 'bridge', (original, ...args) => {
 
 	const [name] = args;
 	if (name === 'iconselectmenu') {
-		const widgetFunc = setWidget.next();
+		const widgetFunc = proxyWidget.next();
 		if (!widgetFunc.done) widgetFunc.value();
 	}
 

@@ -1,3 +1,41 @@
+html.dark {
+	--jq-widget-header-bg: url("https://download.jqueryui.com/themeroller/images/ui-bg_highlight-soft_75_131313_1x100.png");
+	--jq-widget-button-disabled-hovered-or-active-bg: url("chrome-extension://__MSG_@@extension_id__/assets/jquery-ui/ui-bg-glass-variant-01.png");
+	--jq-widget-hover-or-focus: url("chrome-extension://__MSG_@@extension_id__/assets/jquery-ui/ui-bg-glass-variant-02.png");
+	--jq-widget-active: url("chrome-extension://__MSG_@@extension_id__/assets/jquery-ui/ui-bg-glass-variant-02.png");
+	--jq-widget-highlighted: url("https://download.jqueryui.com/themeroller/images/ui-bg_glass_55_fbf9ee_1x400.png");
+	--jq-widget-errored: url("https://download.jqueryui.com/themeroller/images/ui-bg_glass_95_fef1ec_1x400.png");
+	--jq-bgColorHeader: #212121;
+	--jq-borderColorHeader: #545454;
+	--jq-fcHeader: #222222;
+	--jq-iconColorHeader: #222222;
+	--jq-bgColorContent: #212121;
+	--jq-borderColorContent: #494949;
+	--jq-fcContent: #ffffff;
+	--jq-iconColorContent: #222222;
+	--jq-bgColorDefault: #141414;
+	--jq-borderColorDefault: #323232;
+	--jq-fcDefault: #dcdcdc;
+	--jq-iconColorDefault: #888888;
+	--jq-bgColorHover: #1d1d1d;
+	--jq-borderColorHover: #474747;
+	--jq-fcHover: #ffffff;
+	--jq-iconColorHover: #454545;
+	--jq-bgColorActive: #ffffff;
+	--jq-borderColorActive: #474747;
+	--jq-fcActive: #ffffff;
+	--jq-iconColorActive: #454545;
+	--jq-bgColorHighlight: #fbf9ee;
+	--jq-fcHighlight: #363636;
+	--jq-iconColorHiighligh: #2e83ff;
+	--jq-bgColorError: #fef1ec;
+	--jq-borderColorError: #cd0a0a;
+	--jq-fcError: #cd0a0a;
+	--jq-iconColorErroor: #cd0a0a;
+	--jq-bgColorOverlay: #aaaaaa;
+	--jq-bgColorShadow: #aaaaaa;
+}
+
 @mixin hide {
 	display: none !important
 }
@@ -51,19 +89,31 @@
 	}
 }
 
-html.dark #addons-menu {
-	--lightness: 50%;
+html.dark {
+	fieldset {
+		border-color: #343434;
+		border-style: double;
+	}
 
-	.content::-webkit-scrollbar-thumb {
-		background: rgb(255 255 255 / 0.3);
+	#addons-menu {
+		--lightness: 50%;
+	
+		.content {
+			color: #ffffff;
+
+			&::-webkit-scrollbar-thumb {
+				background: rgb(255 255 255 / 0.08);
+			}
+		}
 	}
 }
+
 
 #addons-menu {
 	top: 20px;
 	left: 20px;
 	position: fixed;
-	z-index: 999;
+	z-index: 99;
 
 	filter: drop-shadow(0 12px 7px rgba(0, 0, 0, 0.5));
 
@@ -140,24 +190,49 @@ html.dark #addons-menu {
 	}
 
 	.content {
-		/* FIXME dynamic color! */
 		color: #464646;
-		font-weight: bold;
 		font-family: Arial;
 		background-image: url("chrome-extension://__MSG_@@extension_id__/assets/menu/background.png");
 		background-size: contain;
 		background-color: var(--background-color);
 		background-repeat: no-repeat;
 		background-position: center;
+		background-blend-mode: soft-light;
 		overflow-y: scroll;
 		grid-area: content;
 
-		*:last-child {
+		fieldset {
+			legend {
+				font-size: 16px;
+				font-weight: bold;
+			}
+
+			font-size: 14px;
+
+			.heading {
+				margin-bottom: 4px;
+			}
+		}
+
+		hr {
+			border: none;
+			border-top: 2px groove rgb(192 192 192 / 1.0);
+		}
+
+		.requires-reload {
+			color: #ff2c2c;
+
+			&::before {
+				content: " ";
+			}
+		}
+
+		> *:last-child {
 			margin-bottom: 8px;
 		}
 
 		&::-webkit-scrollbar {
-			width: 5px;
+			width: 4px;
 		}
 		
 		&::-webkit-scrollbar-track {
@@ -222,7 +297,7 @@ html.dark #addons-menu {
 			scrollbar-gutter: stable;
 			scrollbar-width: thin;
 			white-space: nowrap;
-			z-index: 999;
+			z-index: 99;
 
 			div {
 				border-bottom: 1pt dotted #00a902;
@@ -278,7 +353,7 @@ html.dark #addons-menu {
 	}
 
 	&:is(.opening,.open) form {
-		padding-right: 26px;
+		padding-right: 26px;s
 	}
 
 }

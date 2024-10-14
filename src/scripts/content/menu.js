@@ -1,5 +1,16 @@
 import ProxyHelper from '../utils/proxyHelper.js';
 
+/**
+ * @typedef {object} SectionOptions
+ * @property {string} title Title for the section
+ * @property {string} id Unique id for the section
+ * @property {boolean} requiresReload Does the site need to reload for the change to take effect?
+ */
+
+/**
+ * @typedef {JQuery} Widget
+ */
+
 class Menu {
 	wrapper = $(`<div id="addons-menu"></div>`);
 
@@ -12,6 +23,8 @@ class Menu {
 	header = $('<div class="header"/>');
 
 	content = $('<div class="content"></div>');
+
+	isShowing = false;
 
 	#matrixTransform = {
 		d1: 0,
@@ -55,8 +68,6 @@ class Menu {
 		return this.#matrixTransform;
 	}
 
-	isShowing = false;
-
 	/** Construct and initialize the overlay */
 	constructor() {
 		this.header.svg({
@@ -82,18 +93,6 @@ class Menu {
 		const scaleAndTranslate = Utils.getSVGScaleAndTranslateToFit(300, 312, 34, 'left');
 		this.headerSvg.configure(headerText, { transform: scaleAndTranslate });
 
-		for (let i = 0; i < 10; i++) {
-			const theme = $(`
-				<fieldset>
-					<legend>Theme</legend>
-					<label for="radio-${i}-1">Light</label>
-					<input type="radio" name="radio-${i}-1" id="radio-${i}-1">
-					<label for="radio-${i}-2">Dark</label>
-					<input type="radio" name="radio-${i}-2" id="radio-${i}-2">
-				  </fieldset>`);
-			theme.find('input').checkboxradio();
-			this.content.append(theme);
-		}
 		this.body.append([this.draggable, this.handle, this.header, this.content]);
 
 		const border = [
@@ -267,6 +266,29 @@ class Menu {
 
 		this.isShowing = false;
 	}
+
+	/**
+	 * Create a new content block with options
+	 * @param {SectionOptions} sectionOpts Options for the section
+	 * @param  {Widget[]} widgets JQuery UI widgets
+	 * @returns New section
+	 */
+	// eslint-disable-next-line complexity
+	createSection(sectionOpts, widgets = []) {
+		const wrapper = $(`<fieldset id="${ sectionOpts.id }"></fieldset>`);
+		const legend = $(`<legend>${ sectionOpts.title }</legend>`);
+
+		if (sectionOpts.requiresReload) legend.append('<span class="requires-reload">*</span>');
+
+		wrapper.append(legend);
+
+		for (const widget of widgets) wrapper.append(widget);
+
+		this.content.append(wrapper);
+
+		return wrapper;
+	}
+
 }
 
 window.Addons.menu = new Menu();
@@ -304,6 +326,50 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 	container.append([standard, active]);
 
 	container.insertAfter(TankTrouble.TankInfoBox.infoAchievements);
+
+	const themeWidget = $(`<div>
+		<div class="heading">Theme</div>
+		<label for="radio-1">Normal</label>
+		<input type="radio" name="radio-1" id="radio-1">
+		<label for="radio-2">Dark</label>
+		<input type="radio" name="radio-1" id="radio-2">
+		<hr></hr>
+		<div style="display: grid; grid-template-areas: 'title-1 title-2' 'checkbox-1 checkbox-2'">
+			<div class="heading" style="grid-area: title-1">Classic mouse</div>
+			<input type="checkbox" id="checkbox-1" style="grid-area: checkbox-1">
+			<div class="heading" style="grid-area: title-2">Tinted bullets</div>
+			<input type="checkbox" id="checkbox-1" style="grid-area: checkbox-2">
+		</div>
+	</div>`);
+	themeWidget.find('input[type="radio"]').checkboxradio();
+	themeWidget.find('input[type="checkbox"]').checkboxtoggle();
+
+	const gameWidget = $(`<div>
+		<div class="heading">Game theme</div>
+		<select>
+			<option value='normal' data-imagesrc="https://cdn.tanktrouble.com/RELEASE-2023-09-06-01/assets/images/game/pingTimeNoConnection.png" data-imagesrcset="https://cdn.tanktrouble.com/RELEASE-2023-09-06-01/assets/images/game/pingTimeNoConnection@2x.png 2x" data-description="Selected">Normal</option>
+			<option value='dark'>Dark</option>
+			<option value='3d'>3D</option>
+			<option value='synthwave'>Synthwave</option>
+		</select>
+	</div>`);
+	gameWidget.find('select').iconselectmenu({
+		change: (event, ui) => {
+			console.log(event, ui);
+		}
+	}).iconselectmenu('menuWidget');
+
+	Addons.menu.createSection({
+		title: 'Interface',
+		id: 'theme',
+		requiresReload: false
+	}, [ themeWidget ]);
+
+	Addons.menu.createSection({
+		title: 'Other',
+		id: 'other',
+		requiresReload: false
+	}, [ gameWidget ]);
 });
 
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {

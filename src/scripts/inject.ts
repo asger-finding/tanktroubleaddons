@@ -52,6 +52,7 @@
 		injectScript(`${meta.extensionUrl}/scripts/content/menu.js`);
 		injectScript(`${meta.extensionUrl}/scripts/content/playerNameElement.js`);
 		injectScript(`${meta.extensionUrl}/scripts/content/maskUsernames.js`);
+		injectScript(`${meta.extensionUrl}/scripts/content/classicMouse.js`);
 		injectScript(`${meta.extensionUrl}/scripts/content/forum.js`);
 		injectScript(`${meta.extensionUrl}/scripts/content/chat.js`);
 		injectScript(`${meta.extensionUrl}/scripts/content/lobby.js`);

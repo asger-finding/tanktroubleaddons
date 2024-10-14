@@ -96,7 +96,7 @@ html.dark {
 	}
 
 	#addons-menu {
-		--base-color: hsl(0 0% 50%);
+		--lightness: 50%;
 	
 		.content {
 			color: #ffffff;
@@ -117,19 +117,19 @@ html.dark {
 
 	filter: drop-shadow(0 12px 7px rgba(0, 0, 0, 0.5));
 
-	--base-color: hsl(0 0% 95%);
+	--lightness: 95%;
 
-	--background-color: color-mix(in oklab, var(--base-color) 73%, black);
-	--border-accent-1: color-mix(in oklab, var(--base-color) 100%, black);
-    --border-accent-2: color-mix(in oklab, var(--base-color) 94%, black);
-    --border-accent-3: color-mix(in oklab, var(--base-color) 93%, black);
-    --border-accent-4: color-mix(in oklab, var(--base-color) 87%, black);
-    --border-accent-5: color-mix(in oklab, var(--base-color) 83%, black);
-    --border-accent-6: color-mix(in oklab, var(--base-color) 81%, black);
-    --border-accent-7: color-mix(in oklab, var(--base-color) 80%, black);
-    --border-accent-8: color-mix(in oklab, var(--base-color) 79%, black);
-	--border-accent-9: color-mix(in oklab, var(--base-color) 78%, black);
-    --border-accent-10: color-mix(in oklab, var(--base-color) 77%, black);
+	--background-color: color-mix(in oklab, white calc(var(--lightness) - 27%), black);
+	--border-accent-1: color-mix(in oklab, white calc(var(--lightness)), black);
+    --border-accent-2: color-mix(in oklab, white calc(var(--lightness) - 6%), black);
+    --border-accent-3: color-mix(in oklab, white calc(var(--lightness) - 7%), black);
+    --border-accent-4: color-mix(in oklab, white calc(var(--lightness) - 13%), black);
+    --border-accent-5: color-mix(in oklab, white calc(var(--lightness) - 17%), black);
+    --border-accent-6: color-mix(in oklab, white calc(var(--lightness) - 19%), black);
+    --border-accent-7: color-mix(in oklab, white calc(var(--lightness) - 20%), black);
+    --border-accent-8: color-mix(in oklab, white calc(var(--lightness) - 21%), black);
+	--border-accent-9: color-mix(in oklab, white calc(var(--lightness) - 22%), black);
+    --border-accent-10: color-mix(in oklab, white calc(var(--lightness) - 23%), black);
 
 	&.closing {
 		animation: tv-close-wrapper 1.0s normal;

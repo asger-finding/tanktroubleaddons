@@ -12,7 +12,6 @@ const postCSS = require('gulp-postcss');
 const gulpsass = require('gulp-sass')(require('sass'));
 const autoprefixer = require('autoprefixer');
 const htmlmin = require('gulp-htmlmin');
-const imagemin = require('gulp-imagemin');
 const jeditor = require('gulp-json-editor');
 const yaml = require('gulp-yaml');
 const esbuild = require('esbuild');
@@ -27,7 +26,7 @@ const paths = {
 		script: `${ origin }/**/*.@(js|ts)`,
 		styles: `${ origin }/css/*.@(css|scss)`,
 		html: `${ origin }/html/*.html`,
-		assets: `${ origin }/assets/**/*.@(png|jpg|jpeg|gif|svg)`,
+		assets: `${ origin }/assets/**/*.@(png|avif|jpg|jpeg|gif|svg)`,
 		json: `${ origin }/**/*.json`
 	},
 	baseBuild: './build',
@@ -62,9 +61,6 @@ const state = {
 }
 paths.target = yargs.argv.target || 'mv3';
 
-const server = tinyLr({ port: 35729 });
-server.listen(35729, () => {});
-
 const HMRContent = `// HMR Content Inject
 // ==Start==
 (() => {
@@ -96,6 +92,14 @@ const HMRBackground = `// HMR Background Inject
 	});
 })();
 // ==/End==`;
+
+let server = null;
+async function setupLiveReload() {
+	server = tinyLr({ port: 35729 });
+	server.listen(35729, () => {});
+
+	return;
+}
 
 function mvSpecificFiles(filename) {
 	const [basename, mv] = filename.split('_');
@@ -145,7 +149,7 @@ function esbuildTransform() {
 
 function reload() {
 	return through2.obj((file, _, callback) => {
-		server.changed({ body: { files: [ file.path ] } });
+		if (server) server.changed({ body: { files: [ file.path ] } });
 
 		callback(null, file);
 	});
@@ -191,7 +195,6 @@ function images() {
 		.pipe(changed(state.dest + '/assets'))
 		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
 		.pipe(ignore(paths.mvExcludeDenominator))
-		.pipe(gulpif(state.isProd, imagemin()))
 		.pipe(dest(state.dest + '/assets'))
 		.pipe(reload());
 }
@@ -250,5 +253,5 @@ async function broadcast() {
 
 exports.destroy = destroy;
 exports.build = series(broadcast, clean, parallel(scripts, styles, html, images, json, manifest));
-exports.watch = series(exports.build, watch);
+exports.watch = series(setupLiveReload, exports.build, watch);
 exports.default = exports.build

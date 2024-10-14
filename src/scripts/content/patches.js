@@ -4,6 +4,7 @@
  * @returns Function wrapper
  */
 const bindLogToSprite = spriteName => {
+	// eslint-disable-next-line @typescript-eslint/naming-convention
 	const Sprite = Reflect.get(window, spriteName);
 	if (!Sprite) throw new Error('No sprite in window with name', spriteName);
 

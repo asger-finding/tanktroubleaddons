@@ -3,7 +3,7 @@ const separator = '›';
 
 /**
  * Create a new timestamp string.
- * @returns Formatted timestring in the format of 'HH:MM:SS.mmm' 
+ * @returns Formatted timestring in the format of 'HH:MM:SS.mmm'
  */
 const newTimestamp = (): string => new Date().toISOString()
 	.slice(11, -1);

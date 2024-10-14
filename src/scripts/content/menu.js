@@ -186,9 +186,9 @@ class Menu {
 			handles: { se: this.handle },
 			distance: 0,
 
-			minWidth: 300,
-			maxWidth: 800,
-			minHeight: 130,
+			minWidth: 400,
+			maxWidth: 400,
+			minHeight: 200,
 			maxHeight: 500
 		});
 
@@ -382,3 +382,5 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...arg
 });
 
 ProxyHelper.whenContentInitialized().then(() => Addons.menu.wrapper.appendTo(document.body));
+
+export const _isESmodule = true;

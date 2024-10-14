@@ -65,3 +65,5 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...arg
 		TankTrouble.TankInfoBox.infoDeathsSvg.configure(deathsText, { transform: scaleAndTranslate });
 	}, () => {}, () => {}, playerId, Caches.getPlayerDetailsCache());
 });
+
+export const _isESmodule = true;

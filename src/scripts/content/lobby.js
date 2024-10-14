@@ -21,3 +21,5 @@ UIGameIconImage.prototype.spawn = function(x, y, gameState, favouriteActiveQueue
 		y: UIConstants.ASSET_SCALE / 1.9
 	}, UIConstants.ELEMENT_POP_IN_TIME, Phaser.Easing.Back.Out, true, delay);
 };
+
+export const _isESmodule = true;

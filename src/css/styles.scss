@@ -192,7 +192,7 @@ html.dark {
 	.content {
 		color: #464646;
 		font-family: Arial;
-		background-image: url("chrome-extension://__MSG_@@extension_id__/assets/menu/background.png");
+		background-image: url("chrome-extension://__MSG_@@extension_id__/assets/menu/background.avif");
 		background-size: contain;
 		background-color: var(--background-color);
 		background-repeat: no-repeat;
@@ -353,7 +353,7 @@ html.dark {
 	}
 
 	&:is(.opening,.open) form {
-		padding-right: 26px;s
+		padding-right: 26px;
 	}
 
 }

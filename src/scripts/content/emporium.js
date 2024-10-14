@@ -26,3 +26,5 @@ ProxyHelper.interceptFunction(TankTrouble.VirtualShopOverlay, 'show', (original,
 		}
 	}, () => {}, () => {}, params.playerId, Caches.getCurrencyCache());
 });
+
+export const _isESmodule = true;

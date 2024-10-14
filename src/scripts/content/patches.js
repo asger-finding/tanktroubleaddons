@@ -18,3 +18,5 @@ const bindLogToSprite = spriteName => {
 
 Reflect.set(window, 'UIDiamondSprite', bindLogToSprite('UIDiamondSprite'));
 Reflect.set(window, 'UIGoldSprite', bindLogToSprite('UIGoldSprite'));
+
+export const _isESmodule = true;

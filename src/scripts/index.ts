@@ -1,3 +1,20 @@
+import { setBrowserNamespace } from './common/set-browser-namespace.js';
+import { startSyncStore } from 'webext-sync';
+
+setBrowserNamespace();
+
+startSyncStore().then(async syncStore => {
+	let state = await syncStore.getState();
+
+	syncStore.onChange((newState, prevState) => {
+		state = newState;
+	});
+
+	console.log('Popup loaded! state:', state);
+
+	syncStore.setState({ timesPopupOpened: state.timesPopupOpened+1 });
+});
+
 class Addons {
 
 	metaElement = document.createElement('tanktroubleaddons');
@@ -7,7 +24,7 @@ class Addons {
 	/** Create new addons class */
 	constructor() {
 		this.inject = document.createElement('script');
-		this.inject.src = chrome.runtime.getURL('scripts/inject.js');
+		this.inject.src = browser.runtime.getURL('scripts/inject.js');
 		this.inject.type = 'module';
 	}
 
@@ -65,7 +82,7 @@ class Addons {
 	 * @returns Value to the key
 	 */
 	static get(keys: Array<string>) {
-		return chrome.storage.local.get(keys);
+		return browser.storage.local.get(keys);
 	}
 
 	/**
@@ -76,7 +93,7 @@ class Addons {
 	 */
 	static getWithFallback(key: string, fallback: any) {
 		return new Promise<string>(resolve => {
-			chrome.storage.local.get(key, result => {
+			browser.storage.local.get(key, result => {
 				resolve(result[key] ?? fallback);
 			});
 		});
@@ -88,7 +105,7 @@ class Addons {
 	 * @param value Value
 	 */
 	static set(key: string, value: string): void {
-		chrome.storage.local.set({ [key]: value });
+		browser.storage.local.set({ [key]: value });
 	}
 
 	/**
@@ -107,7 +124,7 @@ class Addons {
 			const releaseVersion = coreText.slice(1, coreText.indexOf('/content.php'));
 			const data = coreText.slice(coreText.indexOf('/content.php') + 14);
 
-			this.metaElement.dataset.extensionUrl = chrome.runtime.getURL('').slice(0, -1);
+			this.metaElement.dataset.extensionUrl = browser.runtime.getURL('').slice(0, -1);
 			this.metaElement.dataset.release = releaseVersion;
 			this.metaElement.dataset.data = data;
 			this.metaElement.dataset.loader = loader;

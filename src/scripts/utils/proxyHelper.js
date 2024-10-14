@@ -87,3 +87,5 @@ export default class ProxyHelper {
 	}
 
 }
+
+export const _isESmodule = true;

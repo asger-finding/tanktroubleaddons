@@ -2,6 +2,7 @@
     "compilerOptions": {
         "target": "esnext",
         "module": "ESNext",
+        "moduleResolution": "Node",
         "allowSyntheticDefaultImports": true,
         "strict": true,
         "noUnusedLocals": true,
@@ -11,11 +12,14 @@
         "sourceMap": false,
         "strictPropertyInitialization": false,
         "outDir": "build",
-        "baseUrl": "."
+        "baseUrl": ".",
+        "paths": {
+            "*": ["@types/*"]
+        }
     },
     "include": [
         "src/**/*",
-        "typings/**/*"
+        "@types/**/*"
     ],
     "exclude": [
         "node_modules",

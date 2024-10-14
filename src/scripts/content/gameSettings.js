@@ -62,3 +62,5 @@ ProxyHelper.whenContentLoaded().then(() => {
 		}
 	};
 });
+
+export const _isESmodule = true;

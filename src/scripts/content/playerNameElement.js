@@ -64,3 +64,5 @@ if (!customElements.get('player-name')) {
 
 		});
 }
+
+export const _isESmodule = true;

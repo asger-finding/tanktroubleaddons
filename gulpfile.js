@@ -20,14 +20,14 @@ const tinyLr = require('tiny-lr');
 
 const origin = './src';
 const paths = {
-	manifest: `${ origin }/manifest*.yml`,
+	manifest: `${origin}/manifest*.yml`,
 	mvExcludeDenominator: '**/DELETEME.*',
 	files: {
-		script: `${ origin }/**/*.@(js|ts)`,
-		styles: `${ origin }/css/*.@(css|scss)`,
-		html: `${ origin }/html/*.html`,
-		assets: `${ origin }/assets/**/*.@(png|avif|jpg|jpeg|gif|svg)`,
-		json: `${ origin }/**/*.json`
+		script: `${origin}/**/*.@(js|ts)`,
+		styles: `${origin}/css/*.@(css|scss)`,
+		html: `${origin}/html/*.html`,
+		assets: `${origin}/assets/**/*.@(png|avif|jpg|jpeg|gif|svg)`,
+		json: `${origin}/**/*.json`
 	},
 	baseBuild: './build',
 	baseDist: './dist',
@@ -35,8 +35,8 @@ const paths = {
 	dist: './dist',
 	set target(target) {
 		this.mvTarget = target;
-		this.build = `${ this.baseBuild }/${ target }`;
-		this.dist = `${ this.baseDist }/${ target }`;
+		this.build = `${this.baseBuild}/${target}`;
+		this.dist = `${this.baseDist}/${target}`;
 	}
 }
 const state = {
@@ -64,6 +64,8 @@ paths.target = yargs.argv.target || 'mv3';
 const HMRContent = `// HMR Content Inject
 // ==Start==
 (() => {
+	if (!('browser' in self)) self.browser = self.chrome
+
 	new WebSocket('ws://localhost:35729').addEventListener('message', event => {
 		let data = null;
 		try {
@@ -72,7 +74,7 @@ const HMRContent = `// HMR Content Inject
 			console.error('JSON.parse failed on data received to HMR'); 
 		}
 		if (data && data.command === 'reload') {
-			chrome.runtime.sendMessage('hmr')
+			browser.runtime.sendMessage('hmr')
 		}
 	});
 })();
@@ -81,11 +83,13 @@ const HMRContent = `// HMR Content Inject
 const HMRBackground = `// HMR Background Inject
 // ==Start==
 (() => {
-	chrome.runtime.onMessage.addListener(message => {
+	if (!('browser' in self)) self.browser = self.chrome
+
+	browser.runtime.onMessage.addListener(message => {
 		if (message === 'hmr') {
-			chrome.tabs.query({ url: "*://*.tanktrouble.com/*" }).then(tabs => {
+			browser.tabs.query({ url: "*://*.tanktrouble.com/*" }).then(tabs => {
 				for (const tab of tabs) {
-					chrome.tabs.reload(tab.id, { bypassCache: true })
+					browser.tabs.reload(tab.id, { bypassCache: true })
 				}
 			});
 		}
@@ -96,7 +100,7 @@ const HMRBackground = `// HMR Background Inject
 let server = null;
 async function setupLiveReload() {
 	server = tinyLr({ port: 35729 });
-	server.listen(35729, () => {});
+	server.listen(35729, () => { });
 
 	return;
 }
@@ -111,30 +115,45 @@ function mvSpecificFiles(filename) {
 
 // Esbuild transform function
 function esbuildTransform() {
-	return through2.obj((file, _, callback) => {
-		esbuild.build({
+	return through2.obj(async (file, _, callback) => {
+		const config = {
 			stdin: {
 				contents: file.contents.toString(),
 				resolveDir: dirname(file.path),
 				loader: 'ts',
 				sourcefile: file.path,
 			},
-			bundle: true,
+			bundle: false,
 			write: false,
 			minify: false,
+			metafile: true,
 			platform: 'browser',
 			format: 'esm',
 			loader: {
 				'.js': 'js',
 				'.ts': 'ts'
 			},
+		};
+
+		// If file is type module (capable of using import statements),
+		// then we only need to pack node_modules, else we pack everything
+		const { metafile } = await esbuild.build(config);
+		let isModule = Object.values(metafile.outputs)
+			.some(({ exports }) => exports.includes('_isESmodule'));
+
+		esbuild.build({
+			...config,
+			bundle: true,
+			metafile: false,
 			plugins: [{
 				name: 'bundle-only-node-modules',
 				setup(build) {
-				  const filter = /^(\.\/|\.\.\/)/u;
-				  build.onResolve({ filter }, args => ({ path: args.path, external: true }))
+					build.onResolve({ filter: /[\s\S]*/ }, ({ path }) => {
+						const external = isModule ? /^(\.\/|\.\.\/)/u.test(path) : false;
+						return { external };
+					})
 				}
-			}],
+			}]
 		}).then(result => {
 			file.contents = Buffer.from(result.outputFiles[0].text);
 
@@ -149,7 +168,7 @@ function esbuildTransform() {
 
 function reload() {
 	return through2.obj((file, _, callback) => {
-		if (server) server.changed({ body: { files: [ file.path ] } });
+		if (server) server.changed({ body: { files: [file.path] } });
 
 		callback(null, file);
 	});
@@ -157,22 +176,22 @@ function reload() {
 
 function scripts() {
 	return src(paths.files.script)
-		.pipe(changed(state.dest, {extension: '.js'}))
+		.pipe(changed(state.dest, { extension: '.js' }))
 		.pipe(replace('//# HMRContent', HMRContent))
 		.pipe(replace('//# HMRBackground', HMRBackground))
 		.pipe(esbuildTransform())
-		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
+		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path)))
 		.pipe(ignore(paths.mvExcludeDenominator))
 		.pipe(dest(state.dest))
 		.pipe(reload());
 }
 
 function styles() {
-	const plugins = [ autoprefixer() ];
+	const plugins = [autoprefixer()];
 
 	return src(paths.files.styles)
-		.pipe(changed(state.dest + '/css', {extension: '.css'}))
-		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
+		.pipe(changed(state.dest + '/css', { extension: '.css' }))
+		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path)))
 		.pipe(ignore(paths.mvExcludeDenominator))
 		.pipe(gulpsass({ outputStyle: state.isProd ? 'compressed' : 'expanded' }))
 		.pipe(postCSS(plugins))
@@ -183,7 +202,7 @@ function styles() {
 function html() {
 	return src(paths.files.html)
 		.pipe(changed(state.dest + '/html'))
-		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
+		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path)))
 		.pipe(ignore(paths.mvExcludeDenominator))
 		.pipe(gulpif(state.isProd, htmlmin({ collapseWhitespace: true })))
 		.pipe(dest(state.dest + '/html'))
@@ -193,7 +212,7 @@ function html() {
 function images() {
 	return src(paths.files.assets)
 		.pipe(changed(state.dest + '/assets'))
-		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
+		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path)))
 		.pipe(ignore(paths.mvExcludeDenominator))
 		.pipe(dest(state.dest + '/assets'))
 		.pipe(reload());
@@ -202,23 +221,23 @@ function images() {
 function json() {
 	return src(paths.files.json)
 		.pipe(changed(state.dest))
-		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
+		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path)))
 		.pipe(ignore(paths.mvExcludeDenominator))
-		.pipe(jeditor(json => {return json}, { beautify: !state.isProd }))
+		.pipe(jeditor(json => { return json }, { beautify: !state.isProd }))
 		.pipe(dest(state.dest))
 		.pipe(reload());
 }
 
 function manifest() {
 	return src(paths.manifest)
-		.pipe(changed(state.dest, {extension: '.json'}))
-		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path) ))
+		.pipe(changed(state.dest, { extension: '.json' }))
+		.pipe(rename(path => (path.basename = mvSpecificFiles(path.basename), path)))
 		.pipe(ignore(paths.mvExcludeDenominator))
 		.pipe(yaml({ schema: 'DEFAULT_FULL_SCHEMA' }))
 		.pipe(jeditor(json => {
 			json.version = package.version;
 			return json;
-		}, { beautify: !state.isProd } ))
+		}, { beautify: !state.isProd }))
 		.pipe(dest(state.dest))
 		.pipe(reload());
 }
@@ -226,17 +245,17 @@ function manifest() {
 function clean() {
 	// Before building, clean up the the target folder for all previous files.
 	// This is only done when starting the build tasks.
-	if (state.isProd) return del([ paths.dist ], { force: true });
-	else return del([ paths.build ], { force: true });
+	if (state.isProd) return del([paths.dist], { force: true });
+	else return del([paths.build], { force: true });
 }
 
 function destroy() {
 	// Remove the build and distribution folders.
-	return del([ paths.baseDist, paths.baseBuild ], { force: true });
+	return del([paths.baseDist, paths.baseBuild], { force: true });
 }
 
 function watch() {
-	console.log('\x1b[35m%s\x1b[0m', `Now watching the ${ paths.mvTarget } build for changes...`);
+	console.log('\x1b[35m%s\x1b[0m', `Now watching the ${paths.mvTarget} build for changes...`);
 
 	gulpWatch(paths.files.script, scripts);
 	gulpWatch(paths.files.styles, styles);
@@ -247,7 +266,7 @@ function watch() {
 }
 
 async function broadcast() {
-	console.log('\x1b[35m%s\x1b[0m', `Compiling ${ state.current } build for ${ paths.mvTarget }...`);
+	console.log('\x1b[35m%s\x1b[0m', `Compiling ${state.current} build for ${paths.mvTarget}...`);
 	return;
 }
 

@@ -26,3 +26,5 @@ export const timeAgo = date => {
 
 	return 'now';
 };
+
+export const _isESmodule = true;

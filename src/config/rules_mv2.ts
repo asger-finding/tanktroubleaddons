@@ -1,3 +1,7 @@
+import { setBrowserNamespace } from '../scripts/common/set-browser-namespace.js';
+
+setBrowserNamespace();
+
 const rules: Array<{
 	redirectPath: string;
 	urlFilter: RegExp
@@ -7,8 +11,8 @@ const rules: Array<{
  *
  */
 const setupWebRequestListener = () => {
-	chrome.webRequest.onBeforeRequest.addListener(details => {
-		for (const rule of rules) if (rule.urlFilter.test(details.url)) return { redirectUrl: chrome.runtime.getURL(rule.redirectPath) };
+	browser.webRequest.onBeforeRequest.addListener(details => {
+		for (const rule of rules) if (rule.urlFilter.test(details.url)) return { redirectUrl: browser.runtime.getURL(rule.redirectPath) };
 
 		return {};
 	}, {

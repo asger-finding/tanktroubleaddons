@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CommanderAnime/TankTroubleAddons.git"
+    "url": "git+https://github.com/asger-finding/TankTroubleAddons.git"
   },
   "author": "Asger Finding",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/CommanderAnime/TankTroubleAddons/issues"
+    "url": "https://github.com/asger-finding/TankTroubleAddons/issues"
   },
-  "homepage": "https://github.com/CommanderAnime/TankTroubleAddons#readme",
+  "homepage": "https://github.com/asger-finding/TankTroubleAddons#readme",
   "devDependencies": {
     "@stylistic/eslint-plugin": "^2.6.4",
     "@swc/cli": "^0.4.0",
@@ -30,7 +30,7 @@
     "@typescript-eslint/parser": "^7.18.0",
     "autoprefixer": "^10.4.2",
     "chrome-types": "^0.1.299",
-    "del": "^6.0.0",
+    "del": "^6.1.1",
     "esbuild": "^0.24.0",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-typescript": "^18.0.0",
@@ -41,7 +41,6 @@
     "gulp-htmlmin": "^5.0.1",
     "gulp-if": "^3.0.0",
     "gulp-ignore": "^3.0.0",
-    "gulp-imagemin": "^7.1.0",
     "gulp-json-editor": "^2.5.6",
     "gulp-postcss": "^9.0.1",
     "gulp-rename": "^2.0.0",
@@ -58,6 +57,6 @@
   },
   "dependencies": {
     "match-sorter": "^6.3.4",
-    "reefjs": "^13.0.5"
+    "webext-sync": "^2.0.4"
   }
 }

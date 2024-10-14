@@ -521,3 +521,5 @@ ProxyHelper.whenContentInitialized().then(() => {
 		characterData: false
 	});
 });
+
+export const _isESmodule = true;

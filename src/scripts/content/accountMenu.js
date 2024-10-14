@@ -26,3 +26,5 @@ ProxyHelper.interceptFunction(TankTrouble.AccountOverlay, 'show', (original, ...
 		}
 	}, () => {}, () => {}, TankTrouble.AccountOverlay.playerId, Caches.getPlayerDetailsCache());
 });
+
+export const _isESmodule = true;

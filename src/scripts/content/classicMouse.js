@@ -100,3 +100,5 @@ Tank.method('update', function() {
 		this.b2dbody.SetAngularVelocity(this.rotationSpeed * (this.rotationSpeedMultiplier || 1));
 	}
 });
+
+export const _isESmodule = true;

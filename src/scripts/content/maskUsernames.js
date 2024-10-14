@@ -69,3 +69,5 @@ const transformUsername = playerDetails => {
 };
 
 Utils.classMethod('maskUnapprovedUsername', playerDetails => transformUsername(playerDetails));
+
+export const _isESmodule = true;

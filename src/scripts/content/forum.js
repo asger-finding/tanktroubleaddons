@@ -243,3 +243,5 @@ ForumModel.method('getSelectedThread', function(...args) {
 
 	return result;
 });
+
+export const _isESmodule = true;

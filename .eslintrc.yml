@@ -38,6 +38,13 @@ rules:
   # in favor of @typescript-eslint/only-throw-error
   '@typescript-eslint/no-throw-literal': 0
   '@typescript-eslint/only-throw-error': error
+  '@typescript-eslint/naming-convention':
+  - error
+  - selector: variable
+    format: [strictCamelCase]
+    filter:
+      regex: '^(_isESmodule)$'
+      match: false
   comma-dangle: [error, never]
   space-before-function-paren: [error, never]
 

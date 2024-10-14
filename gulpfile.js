@@ -5,7 +5,7 @@ const package = require('./package.json');
 const del = require('del');
 const gulpif = require('gulp-if');
 const changed = require('gulp-changed');
-const postCss = require('gulp-postcss');
+const postCSS = require('gulp-postcss');
 const gulpsass = require('gulp-sass')(require('sass'));
 const autoprefixer = require('autoprefixer');
 const htmlmin = require('gulp-htmlmin');
@@ -261,7 +261,7 @@ const styles = () => {
 		.pipe(changed(`${ state.dest }/css`, { extension: '.css' }))
 		.pipe(excludeFiles())
 		.pipe(gulpsass({ outputStyle: state.isProd ? 'compressed' : 'expanded' }))
-		.pipe(postCss(plugins))
+		.pipe(postCSS(plugins))
 		.pipe(dest(`${ state.dest }/css`))
 		.pipe(hotReload());
 };

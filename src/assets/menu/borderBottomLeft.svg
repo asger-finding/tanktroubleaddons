@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 23 20.828">
     <defs>
         <linearGradient id="5040" x1="-.013" x2="16.027" y1="460.444" y2="460.444" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="var(--border-accent-3)"/>
-            <stop offset="1" stop-color="var(--border-accent-4)"/>
+            <stop offset="0" stop-color="color-mix(in oklab, var(--base-color) 93%, black)"/>
+            <stop offset="1" stop-color="color-mix(in oklab, var(--base-color) 87%, black)"/>
         </linearGradient>
         <linearGradient id="402e" x1="20.823" x2="20.823" y1="-463.992" y2="-461.998" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="var(--border-accent-4)"/>
-            <stop offset="1" stop-color="var(--border-accent-7)"/>
+            <stop offset="0" stop-color="color-mix(in oklab, var(--base-color) 87%, black)"/>
+            <stop offset="1" stop-color="color-mix(in oklab, var(--base-color) 80%, black)"/>
         </linearGradient>
     </defs>
     <path fill="url(#5040)" d="M0 459.172V480l16-16v-4.828z" transform="translate(0 -459.172)"/>
     <path fill="url(#402e)" d="M16-464h7v2h-7z" transform="matrix(1 0 0 -1 0 -459.172)"/>
-    <path fill="var(--border-accent-10)" d="M16 464 0 480h23v-16z" transform="translate(0 -459.172)"/>
+    <path fill="color-mix(in oklab, var(--base-color) 77%, black)" d="M16 464 0 480h23v-16z" transform="translate(0 -459.172)"/>
     <path fill-opacity=".3" d="M16-462h7v2.828h-7z" transform="matrix(1 0 0 -1 0 -459.172)"/>
 </svg>

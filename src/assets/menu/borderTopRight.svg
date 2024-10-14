@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 23 25">
     <defs>
         <linearGradient id="3063" x1="18.87" x2="6.274" y1="3.941" y2="21.12" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="var(--border-accent-6)"/>
-            <stop offset="1" stop-color="var(--border-accent-1)"/>
+            <stop offset="0" stop-color="color-mix(in oklab, var(--base-color) 81%, black)"/>
+            <stop offset="1" stop-color="color-mix(in oklab, var(--base-color) 100%, black)"/>
         </linearGradient>
         <linearGradient id="2e28" x1="23.023" x2="23.023" y1=".002" y2="18.009" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="var(--border-accent-7)"/>
-            <stop offset="1" stop-color="var(--border-accent-9)"/>
+            <stop offset="0" stop-color="color-mix(in oklab, var(--base-color) 80%, black)"/>
+            <stop offset="1" stop-color="color-mix(in oklab, var(--base-color) 78%, black)"/>
         </linearGradient>
         <linearGradient id="5240" x2="16" y1="31.5" y2="31.5" gradientTransform="translate(0 -10)" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="var(--border-accent-2)"/>
-            <stop offset="1" stop-color="var(--border-accent-4)"/>
+            <stop offset="0" stop-color="color-mix(in oklab, var(--base-color) 94%, black)"/>
+            <stop offset="1" stop-color="color-mix(in oklab, var(--base-color) 87%, black)"/>
         </linearGradient>
     </defs>
     <g>

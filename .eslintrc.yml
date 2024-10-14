@@ -8,19 +8,17 @@ plugins:
 ignorePatterns:
   - node_modules/
   - build/
-  - gulpfile.js
-  - make.mjs
-  - '*.min.js'
+  - dist/
 
 extends:
   - raven
-  - airbnb-typescript/base
+  - '@kesills/airbnb-typescript/base'
   - plugin:jsdoc/recommended
   - plugin:@stylistic/disable-legacy
 
 globals:
   chrome: true
-  docunent: true
+  document: true
   window: true
 
 env:
@@ -38,15 +36,15 @@ rules:
   # in favor of @typescript-eslint/only-throw-error
   '@typescript-eslint/no-throw-literal': 0
   '@typescript-eslint/only-throw-error': error
+  '@stylistic/comma-dangle': [error, never]
+  '@stylistic/space-before-function-paren': [error, never]
   '@typescript-eslint/naming-convention':
   - error
   - selector: variable
-    format: [strictCamelCase]
+    format: [camelCase]
     filter:
       regex: '^(_isESmodule)$'
       match: false
-  comma-dangle: [error, never]
-  space-before-function-paren: [error, never]
 
   jsdoc/require-jsdoc:
   - error

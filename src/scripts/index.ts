@@ -12,7 +12,7 @@ startSyncStore().then(async syncStore => {
 
 	console.log('Popup loaded! state:', state);
 
-	syncStore.setState({ timesPopupOpened: state.timesPopupOpened+1 });
+	syncStore.setState({ timesPopupOpened: state.timesPopupOpened + 1 });
 });
 
 class Addons {

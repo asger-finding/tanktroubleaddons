@@ -12,7 +12,7 @@ import ProxyHelper from '../utils/proxyHelper.js';
  */
 
 class Menu {
-	wrapper = $(`<div id="addons-menu"></div>`);
+	wrapper = $('<div id="addons-menu"></div>');
 
 	body = $('<div class="body">');
 
@@ -368,7 +368,7 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 	Addons.menu.createSection({
 		title: 'Other',
 		id: 'other',
-		requiresReload: false
+		requiresReload: true
 	}, [ gameWidget ]);
 });
 

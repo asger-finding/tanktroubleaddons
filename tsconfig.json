@@ -13,11 +13,13 @@
         "strictPropertyInitialization": false,
         "outDir": "build",
         "baseUrl": ".",
+        "allowJs": true,
         "paths": {
             "*": ["@types/*"]
         }
     },
     "include": [
+        "gulpfile.js",
         "src/**/*",
         "@types/**/*"
     ],

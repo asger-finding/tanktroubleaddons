@@ -1,5 +1,3 @@
-
-/* eslint-disable max-classes-per-file */
 import ProxyHelper from '../utils/proxyHelper.js';
 
 // Preload functions
@@ -10,7 +8,7 @@ window.Addons = {
 	 * @param {string} url Path to file
 	 * @returns Url to concate
 	 */
-	t_url: url => `${ window.addons.extensionUrl }/${ url }`,
+	t_url: url => `${ window.addons.extensionUrl }${ url }`,
 
 	/**
 	 * Derived from Utils.addImageWithClasses
@@ -43,12 +41,17 @@ window.Addons = {
 	 * TODO: Events on change
 	 * TODO: Interactions with menu
 	 */
-	store: class {
-
+	store: {
+		get() {
+			
+		},
+		set() {
+			
+		}
 	}
 };
 
-$.widget("custom.checkboxtoggle", {
+$.widget('custom.checkboxtoggle', {
 	_create() {
 		const $input = this.element;
 
@@ -110,5 +113,3 @@ ProxyHelper.interceptFunction($.widget, 'bridge', (original, ...args) => {
 
 	return result;
 });
-
-export const _isESmodule = true;

@@ -67,7 +67,7 @@ paths.target = yargs.argv.target || 'mv3';
 const contentHMR = `// HMR Content Inject
 // ==Start==
 (() => {
-	if (!('browser' in self)) self.browser = self.chrome
+	if (!('browser' in self)) self.browser = self.chrome;
 
 	new WebSocket('ws://localhost:35729').addEventListener('message', event => {
 		let data = null;
@@ -76,7 +76,7 @@ const contentHMR = `// HMR Content Inject
 		} catch (err) {
 			console.error('JSON.parse failed on data received to HMR'); 
 		}
-		if (data && data.command === 'reload') {
+		if (data !== null && data.command === 'reload') {
 			browser.runtime.sendMessage('hmr')
 		}
 	});
@@ -86,16 +86,23 @@ const contentHMR = `// HMR Content Inject
 const backgroundHMR = `// HMR Background Inject
 // ==Start==
 (() => {
-	if (!('browser' in self)) self.browser = self.chrome
+	if (!('browser' in self)) self.browser = self.chrome;
+
+	const reloadTankTrouble = () => browser.tabs.query({ url: "*://*.tanktrouble.com/*" }).then(tabs => {
+		for (const tab of tabs) browser.tabs.reload(tab.id, { bypassCache: true })
+	});
+
+	// Keep extension active
+	const keepAlive = () => setInterval(browser.runtime.getPlatformInfo, 20_000);
+	browser.runtime.onStartup.addListener(keepAlive);
+	keepAlive();
+
+	browser.runtime.onInstalled.addListener((details) => {
+		if (details.reason === browser.runtime.OnInstalledReason.UPDATE) reloadTankTrouble();
+	});
 
 	browser.runtime.onMessage.addListener(message => {
-		if (message === 'hmr') {
-			browser.tabs.query({ url: "*://*.tanktrouble.com/*" }).then(tabs => {
-				for (const tab of tabs) {
-					browser.tabs.reload(tab.id, { bypassCache: true })
-				}
-			});
-		}
+		if (message === 'hmr') reloadTankTrouble();
 	});
 })();
 // ==/End==`;
@@ -214,8 +221,8 @@ const insertHotModuleReload = () => new Transform({
 
 	transform(file, _enc, callback) {
 		file.contents = Buffer.from(String(file.contents)
-			.replace('//# HMRContent', backgroundHMR)
-			.replace('//# HMRBackground', contentHMR)
+			.replace('//# HMRContent', contentHMR)
+			.replace('//# HMRBackground', backgroundHMR)
 		);
 
 		callback(null, file);

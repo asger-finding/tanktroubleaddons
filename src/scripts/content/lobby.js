@@ -90,8 +90,8 @@ UIGameIconImage = function(game) {
 	this.scale.set(0.0, 0.0);
 	this.kill();
 	this.log = Log.create('UIGameIconImage');
-}
-;
+};
+
 UIGameIconImage.prototype = Object.create(Phaser.Image.prototype);
 UIGameIconImage.prototype.constructor = UIGameIconImage;
 UIGameIconImage.prototype.update = function() {
@@ -102,15 +102,15 @@ UIGameIconImage.prototype.update = function() {
 		icon.name?.update();
 		icon.icon?.update();
 	}
-}
-;
+};
+
 UIGameIconImage.prototype.getTankIcons = function() {
 	return this.icons.reduce((acc, { playerId, icon, name, placement }) => {
 		if (playerId !== null) acc.push({ icon, name, placement });
 		return acc;
 	}, []);
-}
-;
+};
+
 UIGameIconImage.prototype.spawn = function(x, y, gameState, favouriteActiveQueuedCounts) {
 	this.reset(x, y);
 	this.gameId = gameState.getId();
@@ -238,14 +238,13 @@ UIGameIconImage.prototype.remove = function() {
 	this.tankNameGroup.callAll('remove');
 	this.tankIcons = {};
 	this.icons = [];
-}
-;
+};
+
 UIGameIconImage.prototype.retire = function() {
 	this.kill();
 	this.tankPlaceholderGroup.callAll('retire');
 	this.tankIconGroup.callAll('retire');
 	this.tankNameGroup.callAll('retire');
-}
-;
+};
 
 export const _isESmodule = true;

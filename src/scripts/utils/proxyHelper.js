@@ -4,7 +4,7 @@ export default class ProxyHelper {
 	 * Pass a function to a hook with the correct context
 	 * @param {object} context Function context (e.g `window`)
 	 * @param {string} funcName Function identifier in the context
-	 * @param {(...args: unknown) => unknown} handler Hook to call before the original
+	 * @param {(original: Function, ...args?: unknown) => unknown} handler Hook to call before the original
 	 * @param {any[]} attributes Optionally additional descriptors
 	 */
 	static interceptFunction(context, funcName, handler, attributes) {

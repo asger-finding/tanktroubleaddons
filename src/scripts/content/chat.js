@@ -1,5 +1,5 @@
 import ProxyHelper from '../utils/proxyHelper.js';
-import {matchSorter} from 'match-sorter';
+import { matchSorter } from 'match-sorter';
 
 // TODO: add auto-disappearing chat after timeout
 // TODO: add scroll

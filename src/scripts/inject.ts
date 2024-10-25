@@ -31,6 +31,7 @@
 		injectScript(`${meta.extensionUrl}scripts/content/preload.js`),
 		injectScript(`${meta.extensionUrl}scripts/content/patches.js`)
 	]).then(() => {
+		injectScript(`${meta.extensionUrl}scripts/content/statisticsSnippet.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/menu.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/playerNameElement.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/maskUsernames.js`);

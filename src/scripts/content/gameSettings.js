@@ -32,7 +32,8 @@ QualityManager.QUALITY_VALUES[QualityManager.QUALITY_SETTINGS.MINIMUM] = {
 	'spawn zone inverse unstable particle probability': 1.0,
 	'spawn zone num collapse particles': 10
 };
-UIConstants.SETTINGS_QUALITY_MAX_OPTION_HEIGHT = 200;
+
+UIConstants.classField('SETTINGS_QUALITY_MAX_OPTION_HEIGHT', 200);
 
 ProxyHelper.whenContentLoaded().then(() => {
 	ProxyHelper.interceptFunction(TankTrouble.SettingsBox, 'init', (original, ...args) => {

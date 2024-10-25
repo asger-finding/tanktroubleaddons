@@ -60,11 +60,13 @@ const createPolygon = (points, width = 1, height = 1, rotation = Math.PI / point
 	return normalizedVertices;
 };
 
-UIConstants.GAME_ICON_TANK_COUNT = UIConstants.TANK_POOL_SIZE;
-UIConstants.GAME_ICON_POOL_SIZE = 6;
-UIConstants.GAME_ICON_COUNT = 6;
-UIConstants.GAME_ICON_WIDTH /= 1.9;
-UIConstants.GAME_ICON_HEIGHT /= 1.9;
+UIConstants.classFields({
+	GAME_ICON_TANK_COUNT: UIConstants.TANK_POOL_SIZE,
+	GAME_ICON_POOL_SIZE: 6,
+	GAME_ICON_COUNT: 6,
+	GAME_ICON_WIDTH: UIConstants.GAME_ICON_WIDTH / 1.7,
+	GAME_ICON_HEIGHT: UIConstants.GAME_ICON_HEIGHT / 1.7
+});
 
 UIGameIconImage = function(game) {
 	Phaser.Image.call(this, game, 0, 0, 'gameicon');
@@ -75,16 +77,13 @@ UIGameIconImage = function(game) {
 	this.icons = [];
 
 	this.tankPlaceholderGroup = this.game.add.group(this);
-	for (let i = 0; i < UIConstants.GAME_ICON_TANK_COUNT; ++i)
-		this.tankPlaceholderGroup.add(new UIPlaceholderIconImage(this.game, UIConstants.TANK_ICON_SIZES.SMALL));
-
 	this.tankIconGroup = this.game.add.group(this);
-	for (let i = 0; i < UIConstants.GAME_ICON_TANK_COUNT; ++i)
-		this.tankIconGroup.add(new UITankIconImage(this.game, true, UIConstants.TANK_ICON_SIZES.SMALL));
-
 	this.tankNameGroup = this.game.add.group(this);
-	for (let i = 0; i < UIConstants.GAME_ICON_TANK_COUNT; ++i)
+	for (let i = 0; i < UIConstants.GAME_ICON_TANK_COUNT; ++i) {
+		this.tankPlaceholderGroup.add(new UIPlaceholderIconImage(this.game, UIConstants.TANK_ICON_SIZES.SMALL));
+		this.tankIconGroup.add(new UITankIconImage(this.game, true, UIConstants.TANK_ICON_SIZES.SMALL));
 		this.tankNameGroup.add(new UITankIconNameGroup(this.game, UIConstants.TANK_ICON_WIDTH_SMALL, true));
+	}
 
 	this.removeTween = null;
 	this.scale.set(0.0, 0.0);

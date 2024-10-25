@@ -1,8 +1,8 @@
 
-UIConstants.CLASSIC_MOUSE_INPUT = {
+UIConstants.classField('CLASSIC_MOUSE_INPUT', {
 	ROTATION_DEAD_ANGLE: 0.1,
 	POSITION_DEAD_DISTANCE: 180
-};
+});
 
 // eslint-disable-next-line complexity
 MouseInputManager.method('update', function() {

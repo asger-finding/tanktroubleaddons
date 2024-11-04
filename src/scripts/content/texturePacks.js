@@ -85,10 +85,12 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, buffer) {
 
 		// Resize to 1x if the game is in low-fi
 		if (is1x) {
+			const { width, height } = bmp;
+			bmp.close();
 			bmp = await createImageBitmap(blob, {
-				resizeWidth: bmp.width / 2,
-				resizeHeight: bmp.height / 2,
-				resizeQuality: 'high'
+				resizeWidth: width / 2,
+				resizeHeight: height / 2,
+				resizeQuality: 'pixelated'
 			});
 		}
 

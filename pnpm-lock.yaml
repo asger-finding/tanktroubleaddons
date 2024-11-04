@@ -11,12 +11,21 @@ importers:
       '@kesills/eslint-config-airbnb-typescript':
         specifier: ^20.0.0
         version: 20.0.0(@stylistic/eslint-plugin@2.6.4(eslint@8.57.0)(typescript@5.5.4))(@typescript-eslint/eslint-plugin@8.9.0(@typescript-eslint/parser@8.9.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(@typescript-eslint/parser@8.9.0(eslint@8.57.0)(typescript@5.5.4))(eslint-config-airbnb-base@15.0.0(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.9.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0))(eslint@8.57.0))(eslint@8.57.0)(typescript@5.5.4)
+      fflate:
+        specifier: ^0.8.2
+        version: 0.8.2
       match-sorter:
         specifier: ^6.3.4
         version: 6.3.4
+      maxrects-packer:
+        specifier: ^2.7.3
+        version: 2.7.3
       webext-sync:
         specifier: ^2.0.4
         version: 2.0.4
+      wrap-svg-text:
+        specifier: ^0.0.7
+        version: 0.0.7
     devDependencies:
       '@stylistic/eslint-plugin':
         specifier: ^2.6.4
@@ -1197,6 +1206,9 @@ packages:
     resolution: {integrity: sha512-CzbClwlXAuiRQAlUyfqPgvPoNKTckTPGfwZV4ZdAhVcP2lh9KUxJg2b5GkE7XbjKQ3YJnQ9z6D9ntLAlB+tP8g==}
     engines: {node: '>=0.8.0'}
 
+  fflate@0.8.2:
+    resolution: {integrity: sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==}
+
   file-entry-cache@6.0.1:
     resolution: {integrity: sha512-7Gps/XWymbLk2QLYK4NzpMOrYjMhdIxXuIvy2QBsLE6ljuodKvdkWs/cpyJJ3CVIVpH0Oi1Hvg1ovbMzLdFBBg==}
     engines: {node: ^10.12.0 || >=12.0.0}
@@ -1879,6 +1891,9 @@ packages:
   matchdep@2.0.0:
     resolution: {integrity: sha512-LFgVbaHIHMqCRuCZyfCtUOq9/Lnzhi7Z0KFUE2fhD54+JN2jLh3hC02RLkqauJ3U4soU6H1J3tfj/Byk7GoEjA==}
     engines: {node: '>= 0.10.0'}
+
+  maxrects-packer@2.7.3:
+    resolution: {integrity: sha512-bG6qXujJ1QgttZVIH4WDanhoJtvbud/xP/XPyf6A69C9RdA61BM4TomFALCq2nrTa+tARRIBB4LuIFsnUQU2wA==}
 
   merge-stream@2.0.0:
     resolution: {integrity: sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w==}
@@ -2786,6 +2801,10 @@ packages:
   wrap-ansi@7.0.0:
     resolution: {integrity: sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==}
     engines: {node: '>=10'}
+
+  wrap-svg-text@0.0.7:
+    resolution: {integrity: sha512-GpgioUEuu5mkCCGC9bmAkEK4J5kvmYHH5plyxA0yR+1LCDf18PDgkwnULqbjruqX/23y2TvR6Yng0gY9hsMwxg==}
+    engines: {node: '>=10.14.1', npm: '>=6.4.1'}
 
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
@@ -4139,6 +4158,8 @@ snapshots:
     dependencies:
       websocket-driver: 0.7.4
 
+  fflate@0.8.2: {}
+
   file-entry-cache@6.0.1:
     dependencies:
       flat-cache: 3.2.0
@@ -4895,6 +4916,8 @@ snapshots:
       stack-trace: 0.0.10
     transitivePeerDependencies:
       - supports-color
+
+  maxrects-packer@2.7.3: {}
 
   merge-stream@2.0.0: {}
 
@@ -5907,6 +5930,8 @@ snapshots:
       ansi-styles: 4.3.0
       string-width: 4.2.3
       strip-ansi: 6.0.1
+
+  wrap-svg-text@0.0.7: {}
 
   wrappy@1.0.2: {}
 

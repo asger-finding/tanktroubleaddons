@@ -210,7 +210,7 @@ class Menu {
 	 * @param {number} y y-position
 	 * @returns d1 and d2 values for a matrix3d() css function
 	 */
-	// eslint-disable-next-line class-methods-use-this
+	// eslint-disable-next-line class-methods-use-this, @typescript-eslint/class-methods-use-this
 	#calculate3DDistort(x, y) {
 		const halfWidth = window.innerWidth / 2;
 		const halfHeight = window.innerHeight / 2;
@@ -358,6 +358,29 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 			console.log(event, ui);
 		}
 	}).iconselectmenu('menuWidget');
+
+	const texturePack = $(`
+	<div class="heading">Texturepack from File</div>`);
+	const label = $('<label for="texturepackpicker" class="custom-file-upload">Load</label>');
+	const picker = $('<input type="file" id="texturepackpicker" accept=".zip" style="display: none;"/>');
+
+	const fileReader = new FileReader();
+	fileReader.addEventListener('load', () => {
+		const data = fileReader.result;
+		GameManager.getGame()?.load.addTexturePack('game', data);
+	});
+
+	picker.on('change', () => {
+		const [file] = picker.prop('files');
+		if (file) {
+			fileReader.readAsArrayBuffer(file);
+			label.text(file.name);
+		}
+	});
+
+	label.button();
+	label.append(picker);
+	gameWidget.append(['<hr>', texturePack, label, picker]);
 
 	Addons.menu.createSection({
 		title: 'Interface',

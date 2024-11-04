@@ -50,7 +50,10 @@
   },
   "dependencies": {
     "@kesills/eslint-config-airbnb-typescript": "^20.0.0",
+    "fflate": "^0.8.2",
     "match-sorter": "^6.3.4",
-    "webext-sync": "^2.0.4"
+    "maxrects-packer": "^2.7.3",
+    "webext-sync": "^2.0.4",
+    "wrap-svg-text": "^0.0.7"
   }
 }

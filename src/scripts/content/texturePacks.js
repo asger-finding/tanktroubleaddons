@@ -150,6 +150,7 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, buffer) {
 	packer.reset();
 };
 
+// FIXME: temporary hack
 const gamePreloadStage = Game.UIPreloadState.getMethod('preload');
 Game.UIPreloadState.method('preload', function(...args) {
 	const result = gamePreloadStage.apply(this, ...args);
@@ -165,14 +166,6 @@ Game.UIPreloadState.method('preload', function(...args) {
 		});
 
 		fileReader.readAsArrayBuffer(file);
-	}
-
-	if (this.game.device.pixelRatio > 1) {
-		this.load.image('tankiconplaceholderaddons-small', Addons.t_url('assets/lobby/placeholder-140@2x.png'));
-		this.load.image('tankiconplaceholderaddons-large', Addons.t_url('assets/lobby/placeholder-320@2x.png'));
-	} else {
-		this.load.image('tankiconplaceholderaddons-small', Addons.t_url('assets/lobby/placeholder-140.png'));
-		this.load.image('tankiconplaceholderaddons-large', Addons.t_url('assets/lobby/placeholder-320.png'));
 	}
 
 	return result;

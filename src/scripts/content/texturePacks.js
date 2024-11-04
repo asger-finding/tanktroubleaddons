@@ -22,7 +22,7 @@ const packer = new MaxRectsPacker(2048, 2048, 2, {
 /**
  * Unzip an arraybuffer
  * @param {ArrayBuffer} buffer Zip file arrayBuffer
- * @returns {Promise<Unzipped>} Promise for unzipped file
+ * @returns {Promise<import('fflate').Unzipped>} Promise for unzipped file
  */
 const decodeZipFromArrayBuffer = buffer => new Promise((resolve, reject) => {
 	const zipFile = new Uint8Array(buffer);
@@ -79,11 +79,14 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, buffer) {
 	]);
 
 	await Promise.all(Object.keys(files).map(async fileName => {
+		if (!fileName.endsWith('.png')) return;
+
 		// Load the image into buffer
-		const blob = new Blob([files[fileName]], { type: 'image/png' });
+		const file = files[fileName];
+		const blob = new Blob([file], { type: 'image/png' });
 		let bmp = await createImageBitmap(blob);
 
-		// Resize to 1x if the game is in low-fi
+		// Resize to 1x if the user has low pixel density
 		if (is1x) {
 			const { width, height } = bmp;
 			bmp.close();
@@ -108,6 +111,13 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, buffer) {
 	}));
 
 	const bin = packer.bins[packer.bins.length - 1];
+
+	// Assume that no images were packed
+	// Thus, we reset the spritesheet
+	if (!bin) {
+		// FIXME: logic to reload the game entirely
+		return;
+	}
 
 	const canvas = document.createElement('canvas');
 	canvas.width = spritesheet.width;

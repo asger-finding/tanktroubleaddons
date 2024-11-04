@@ -24,7 +24,7 @@ const paths = {
 		script: `${origin}/**/*.@(js|ts)`,
 		styles: [`${origin}/css/styles.scss`, `${origin}/css/*.css`],
 		html: `${origin}/html/*.html`,
-		assets: `${origin}/assets/**/*.@(png|avif|jpg|jpeg|gif|svg)`,
+		assets: `${origin}/assets/**/*.@(png|avif|jpg|jpeg|gif|svg|zip)`,
 		json: `${origin}/**/*.json`
 	},
 	baseBuild: './build',

@@ -23,11 +23,6 @@ Key features include:
 This repository contains the source code for TankTroubleAddons v2.  
 For legacy TankTroubleAddons, see [turtlesteak/TankTroubleAddonsFinale](https://github.com/turtlesteak/TankTroubleAddonsFinale)
 
-## Minimum browser version
-
-TankTroubleAddons compiles to ES2023 spec. The minimum browser version required to run this addons must support the ECMAScript 2023 specifications.
-See the table below for safe minimum requirements.
-
 ## To-do
 
 - Ensure support for all major platforms
@@ -36,10 +31,17 @@ See the table below for safe minimum requirements.
 
 ## Build instructions
 
-Requirements:
+### Requirements
+
 - Browser (Chromium, Firefox or Webkit)
 - nvm or node >= 16
 - pnpm (our package manager)
+
+### Minimum browser version
+
+TankTroubleAddons compiles to ES2023 spec. The minimum browser version required to run this addons must support the ECMAScript 2023 specifications.
+
+### Instructions
 
 1. Fork/clone this repository
 2. Navigate to the root of the repository

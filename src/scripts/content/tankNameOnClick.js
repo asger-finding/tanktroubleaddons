@@ -10,9 +10,11 @@ Game.UIGameState.method('create', function(...args) {
 		for (const tankNameSprite of boundToTank) tankNameSprite.retire();
 
 		const tankNameSprite = this.tankNameGroup.getFirstExists(false);
-		if (tankNameSprite) tankNameSprite.spawn(target);
+		if (target && tankNameSprite) tankNameSprite.spawn(target);
 	};
 
 	this.tankGroup.onChildInputUp.add(onMouseUp, this);
 
 });
+
+export const _isESmodule = true;

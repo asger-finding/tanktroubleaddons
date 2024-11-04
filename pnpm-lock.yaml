@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@kesills/eslint-config-airbnb-typescript':
-        specifier: ^20.0.0
-        version: 20.0.0(@stylistic/eslint-plugin@2.6.4(eslint@8.57.0)(typescript@5.5.4))(@typescript-eslint/eslint-plugin@8.9.0(@typescript-eslint/parser@8.9.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(@typescript-eslint/parser@8.9.0(eslint@8.57.0)(typescript@5.5.4))(eslint-config-airbnb-base@15.0.0(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.9.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0))(eslint@8.57.0))(eslint@8.57.0)(typescript@5.5.4)
       fflate:
         specifier: ^0.8.2
         version: 0.8.2
@@ -23,10 +20,10 @@ importers:
       webext-sync:
         specifier: ^2.0.4
         version: 2.0.4
-      wrap-svg-text:
-        specifier: ^0.0.7
-        version: 0.0.7
     devDependencies:
+      '@kesills/eslint-config-airbnb-typescript':
+        specifier: ^20.0.0
+        version: 20.0.0(@stylistic/eslint-plugin@2.6.4(eslint@8.57.0)(typescript@5.5.4))(@typescript-eslint/eslint-plugin@8.9.0(@typescript-eslint/parser@8.9.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(@typescript-eslint/parser@8.9.0(eslint@8.57.0)(typescript@5.5.4))(eslint-config-airbnb-base@15.0.0(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.9.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0))(eslint@8.57.0))(eslint@8.57.0)(typescript@5.5.4)
       '@stylistic/eslint-plugin':
         specifier: ^2.6.4
         version: 2.6.4(eslint@8.57.0)(typescript@5.5.4)
@@ -2915,10 +2912,6 @@ packages:
   wrap-ansi@7.0.0:
     resolution: {integrity: sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==}
     engines: {node: '>=10'}
-
-  wrap-svg-text@0.0.7:
-    resolution: {integrity: sha512-GpgioUEuu5mkCCGC9bmAkEK4J5kvmYHH5plyxA0yR+1LCDf18PDgkwnULqbjruqX/23y2TvR6Yng0gY9hsMwxg==}
-    engines: {node: '>=10.14.1', npm: '>=6.4.1'}
 
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
@@ -6115,8 +6108,6 @@ snapshots:
       ansi-styles: 4.3.0
       string-width: 4.2.3
       strip-ansi: 6.0.1
-
-  wrap-svg-text@0.0.7: {}
 
   wrappy@1.0.2: {}
 

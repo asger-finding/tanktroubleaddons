@@ -1,4 +1,4 @@
-# **TankTroubleAddons v2**
+# TankTroubleAddons
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-21262d.svg?&style=flat-square&logo=google-chrome&logoColor=c9d1d9)](https://chrome.google.com/webstore/detail/tanktroubleaddons/iaahklbbofakekcbhbjnpjbgaadhedhm)
 <!--
@@ -8,32 +8,51 @@
 [![Opera Addons](https://img.shields.io/badge/Opera-21262d.svg?&style=flat-square&logo=opera&logoColor=c9d1d9)]()
 -->
 
-TankTroubleAddons v2, a complete rewrite of the original addons compatible with the obligatory migration to Manifest V3. (Thanks, Google!)  
-Written in TypeScript with a SASS preprocessor, compiled with gulp.
+TankTroubleAddons is the all-encompassing extension for your TankTrouble needs.
+
+With 30+ additions, Addons implements key features to the game, enhancing your user experience and the game itself.
+
+Key features include:
+
+- Dark theme
+- Texture packs
+- Classic-isque mouse control
+- IronVault integration
+- Forum, chat, game, lobby, emporium, player *and* admin quality-of-life improvements
+
+This repository contains the source code for TankTroubleAddons v2.  
+For legacy TankTroubleAddons, see [turtlesteak/TankTroubleAddonsFinale](https://github.com/turtlesteak/TankTroubleAddonsFinale)
 
 ## Minimum browser version
 
 TankTroubleAddons compiles to ES2023 spec. The minimum browser version required to run this addons must support the ECMAScript 2023 specifications.
 See the table below for safe minimum requirements.
 
-## To-do's
+## To-do
 
-- Compile extension for support on all major browsers.
-- Add to Chrome Webstore, Firefox, Safari and Opera
+- Ensure support for all major platforms
+- Add to Chrome Webstore, Firefox add-ons, Safari extensions and Opera add-ons
+- Complete [Features checklist](https://github.com/CommanderAnime/TankTroubleAddons/issues/1) before full release
 
-- [x] [Features checklist](https://github.com/CommanderAnime/TankTroubleAddons/issues/1)
+## Build instructions
 
-## Installing and running for development **(chromium-only)**
+Requirements:
+- Browser (Chromium, Firefox or Webkit)
+- nvm or node >= 16
+- pnpm (our package manager)
 
-1. Fork/clone this repository.
-2. Make sure your Node.js version is >= 16.x, checking with `node -v` in your terminal!
-3. Navigate to your cloned repository, then run `npm install` to install the project's necessary dependencies.
-4. **Compiling for development**
-   - `npm run build:dev` — compile dev extensions for all platforms.
-   - `npm run build:watch` — for development and watch for file changes in src. Append `:` + your browser to watch to the end to watch a specific platform.
-   - `npm run build:prod` — and minify for a production build
-   - `npm run clean` — delete the build and distribution folders
-5. **Running TankTroubleAddons in your browser**
+1. Fork/clone this repository
+2. Navigate to the root of the repository
+3. Run `pnpm install` and wait for install
+4. **Watching/compiling the extension**
+   - `pnpm run dev` — defaults to manifest v3.  
+     Compiles a dev build (no minification) and watches for changes.  
+     Run `pnpm run dev:mv2` or `pnpm run dev:mv3` to target a specific manifest version
+   - `pnpm run build:dev`: compile a dev build for all platforms
+   - `pnpm run build:prod`: compile a production (minified) build for all platforms
+   - `pnpm run clean`: delete the build and dist folders
+   - `pnpm run lint`: run eslint on the project
+5. **Installing TankTroubleAddons in your browser**
    - **Chromium browsers (Chrome, Edge, Opera)**
      1. Go to one of the following  
        [chrome://extensions/](chrome://extensions) (Chrome)  
@@ -49,6 +68,6 @@ See the table below for safe minimum requirements.
      3. Press the `Load Temporary Add-on...` button.
      4. Select the manifest.json file in your folder of need.
    - **Safari**
-     1. See [this](https://stackoverflow.com/a/41543650/11452298) or [this](https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension#3744467)!
+     1. See [here](https://stackoverflow.com/a/41543650/11452298) or [here](https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension#3744467)!
 
 Happy hacking!

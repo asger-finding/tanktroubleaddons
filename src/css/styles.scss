@@ -1,57 +1,10 @@
-html.dark {
-	--jq-widget-header-bg: url("https://download.jqueryui.com/themeroller/images/ui-bg_highlight-soft_75_131313_1x100.png");
-	--jq-widget-button-disabled-hovered-or-active-bg: url("chrome-extension://__MSG_@@extension_id__/assets/jquery-ui/ui-bg-glass-variant-01.png");
-	--jq-widget-hover-or-focus: url("chrome-extension://__MSG_@@extension_id__/assets/jquery-ui/ui-bg-glass-variant-02.png");
-	--jq-widget-active: url("chrome-extension://__MSG_@@extension_id__/assets/jquery-ui/ui-bg-glass-variant-02.png");
-	--jq-widget-highlighted: url("https://download.jqueryui.com/themeroller/images/ui-bg_glass_55_fbf9ee_1x400.png");
-	--jq-widget-errored: url("https://download.jqueryui.com/themeroller/images/ui-bg_glass_95_fef1ec_1x400.png");
-	--jq-bgColorHeader: #212121;
-	--jq-borderColorHeader: #545454;
-	--jq-fcHeader: #222222;
-	--jq-iconColorHeader: #222222;
-	--jq-bgColorContent: #212121;
-	--jq-borderColorContent: #494949;
-	--jq-fcContent: #ffffff;
-	--jq-iconColorContent: #222222;
-	--jq-bgColorDefault: #141414;
-	--jq-borderColorDefault: #323232;
-	--jq-fcDefault: #dcdcdc;
-	--jq-iconColorDefault: #888888;
-	--jq-bgColorHover: #1d1d1d;
-	--jq-borderColorHover: #474747;
-	--jq-fcHover: #ffffff;
-	--jq-iconColorHover: #454545;
-	--jq-bgColorActive: #ffffff;
-	--jq-borderColorActive: #474747;
-	--jq-fcActive: #ffffff;
-	--jq-iconColorActive: #454545;
-	--jq-bgColorHighlight: #fbf9ee;
-	--jq-fcHighlight: #363636;
-	--jq-iconColorHiighligh: #2e83ff;
-	--jq-bgColorError: #fef1ec;
-	--jq-borderColorError: #cd0a0a;
-	--jq-fcError: #cd0a0a;
-	--jq-iconColorErroor: #cd0a0a;
-	--jq-bgColorOverlay: #aaaaaa;
-	--jq-bgColorShadow: #aaaaaa;
-}
+@use 'dark.scss';
+
+$font-stack: Arial, verdana;
+$max-safe-integer: 2147483647;
 
 @mixin hide {
 	display: none !important
-}
-
-// Wide, premium-emulating content width
-#content {
-	max-width: 1884px !important;
-	width: calc(100%) !important;
-}
-
-.horizontalAdSlot,
-.verticalAdSlot,
-#leftBanner,
-#rightBanner,
-#topBanner {
-	@include hide;
 }
 
 /* Addons menu */
@@ -89,23 +42,18 @@ html.dark {
 	}
 }
 
-html.dark {
-	fieldset {
-		border-color: #343434;
-		border-style: double;
-	}
+.horizontalAdSlot,
+.verticalAdSlot,
+#leftBanner,
+#rightBanner,
+#topBanner {
+	@include hide;
+}
 
-	#addons-menu {
-		--lightness: 50%;
-	
-		.content {
-			color: #ffffff;
-
-			&::-webkit-scrollbar-thumb {
-				background: rgb(255 255 255 / 0.08);
-			}
-		}
-	}
+// Wide content
+#content {
+	max-width: 1884px !important;
+	width: calc(100%) !important;
 }
 
 
@@ -138,6 +86,7 @@ html.dark {
 			animation: tv-close-body 1.0s normal;
 		}
 	}
+
 	&.opening {
 		animation: tv-close-wrapper 1.0s reverse infinite;
 
@@ -177,7 +126,6 @@ html.dark {
 				background: linear-gradient(315deg, var(--background-color) 63%, transparent 63%);
 			}
 		}
-
 	}
 
 	.header {
@@ -190,8 +138,8 @@ html.dark {
 	}
 
 	.content {
-		color: #464646;
-		font-family: Arial;
+		color: rgb(70 70 70 / 1.0);
+		font-family: $font-stack;
 		background-image: url("chrome-extension://__MSG_@@extension_id__/assets/menu/background.avif");
 		background-size: contain;
 		background-color: var(--background-color);
@@ -202,12 +150,12 @@ html.dark {
 		grid-area: content;
 
 		fieldset {
+			font-size: 14px;
+
 			legend {
 				font-size: 16px;
 				font-weight: bold;
 			}
-
-			font-size: 14px;
 
 			.heading {
 				margin-bottom: 4px;
@@ -220,7 +168,7 @@ html.dark {
 		}
 
 		.requires-reload {
-			color: #ff2c2c;
+			color: rgb(255 44 44 / 1.0);
 
 			&::before {
 				content: " ";
@@ -254,8 +202,9 @@ html.dark {
 /* Statistics sidebar snippet */
 #statisticsSnippet {
 	display: inline-block !important;
-	/* TankTrouble's selectors override it with a solid colour */
-	background: linear-gradient(to bottom,#eee,#ccc) !important;
+
+	/* Selectors will override it with a solid colour if unset */
+	background: linear-gradient(to bottom, rgb(238 238 238 / 1.0), rgb(204 204 204 / 1.0)) !important;
 
 	#onlinePlayerCount {
 		font-size: 40px;
@@ -268,7 +217,6 @@ html.dark {
 
 /* Chat improvements */
 #chat {
-
 	body {
 		/* Scrollbar */
 		scrollbar-gutter: stable;
@@ -276,16 +224,13 @@ html.dark {
 	}
 
 	form {
-
 		width: fit-content;
 
 		.autocomplete-dropdown {
-
-			background-color: #00ff02;
+			background-color: rgb(0 169 0 / 1.0);
 			border-radius: 3px;
 			top: 0;
-			filter: drop-shadow(0 0 3px rgb(0 0 0 / 70%));
-			font-family: Arial, verdana;
+			font-family: $font-stack;
 			margin-top: 25px;
 			max-height: 120px;
 			max-width: 200px;
@@ -293,14 +238,15 @@ html.dark {
 			overflow-y: scroll;
 			padding: 4px 2px;
 			position: absolute;
-			scrollbar-color: #00a902 transparent;
+			scrollbar-color: rgb(0 169 0 / 1.0) transparent;
 			scrollbar-gutter: stable;
 			scrollbar-width: thin;
 			white-space: nowrap;
 			z-index: 99;
+			filter: drop-shadow(0 0 3px rgb(0 0 0 / 70%));
 
 			div {
-				border-bottom: 1pt dotted #00a902;
+				border-bottom: 1pt dotted rgb(0 169 0 / 1.0);
 				cursor: pointer;
 				display: none;
 				margin-bottom: 2px;
@@ -339,7 +285,7 @@ html.dark {
 		.autocomplete-caret-mirror {
 			background: transparent;
 			color: transparent;
-			font-family: Arial, verdana;
+			font-family: $font-stack;
 			font-size: inherit;
 			font-weight: bold;
 			height: 0;
@@ -347,7 +293,7 @@ html.dark {
 			opacity: 0;
 			padding: 1px 2px;
 			pointer-events: none;
-			z-index: -2147483647;
+			z-index: -$max-safe-integer;
 		}
 
 	}
@@ -371,8 +317,8 @@ player-name {
 /* Forum improvements */
 @keyframes highlight-post {
 	50% {
-		border: #a0e900 2px solid;
-		background-color: #dcffcc;
+		border: rgb(160 233 0 / 1.0) 2px solid;
+		background-color: rgb(220 255 204 / 1.0);
 	}
 }
 .forum {
@@ -439,5 +385,4 @@ player-name {
 			}
 		}
 	}
-
 }

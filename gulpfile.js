@@ -6,7 +6,7 @@ const del = require('del');
 const gulpif = require('gulp-if');
 const changed = require('gulp-changed');
 const postCSS = require('gulp-postcss');
-const gulpsass = require('gulp-sass')(require('sass'));
+const sass = require('gulp-sass')(require('sass-embedded'));
 const autoprefixer = require('autoprefixer');
 const htmlmin = require('gulp-htmlmin');
 const jeditor = require('gulp-json-editor');
@@ -22,7 +22,7 @@ const paths = {
 	excludePattern: '**/DELETEME.*',
 	files: {
 		script: `${origin}/**/*.@(js|ts)`,
-		styles: `${origin}/css/*.@(css|scss)`,
+		styles: [`${origin}/css/styles.scss`, `${origin}/css/*.css`],
 		html: `${origin}/html/*.html`,
 		assets: `${origin}/assets/**/*.@(png|avif|jpg|jpeg|gif|svg)`,
 		json: `${origin}/**/*.json`
@@ -267,7 +267,10 @@ const styles = () => {
 	return src(paths.files.styles)
 		.pipe(changed(`${ state.dest }/css`, { extension: '.css' }))
 		.pipe(excludeFiles())
-		.pipe(gulpsass({ outputStyle: state.isProd ? 'compressed' : 'expanded' }))
+		.pipe(sass({
+			silenceDeprecations: ['legacy-js-api'],
+			outputStyle: state.isProd ? 'compressed' : 'expanded'
+		}))
 		.pipe(postCSS(plugins))
 		.pipe(dest(`${ state.dest }/css`))
 		.pipe(hotReload());

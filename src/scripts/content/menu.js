@@ -359,8 +359,9 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 		}
 	}).iconselectmenu('menuWidget');
 
+	// TODO: texture pack from dropdown with option for File selector
 	const texturePack = $(`
-	<div class="heading">Texturepack from File</div>`);
+	<div class="heading">Texture pack from file ...</div>`);
 	const label = $('<label for="texturepackpicker" class="custom-file-upload">Load</label>');
 	const picker = $('<input type="file" id="texturepackpicker" accept=".zip" style="display: none;"/>');
 

@@ -1,6 +1,9 @@
 import { MaxRectsPacker } from 'maxrects-packer';
 import { unzip } from 'fflate';
 
+// FIXME: if a texture pack is loaded while in the game, textures break
+// reload/rejoin the game or prompt a "are you sure?" if the user
+// selects a new texture pack while in a game
 
 /**
  * Frames in the format { [frameName: string]: url as string }
@@ -44,6 +47,13 @@ const loadSpritesheet = source => new Promise(resolve => {
 });
 
 /**
+ * Check if a file ending follows the @2x convention
+ * @param {string} urlOrFile String to match
+ * @returns Does the string end in @2x.<anyextension>
+ */
+const is2xFileEnding = urlOrFile => /@2x\.[a-zA-Z0-9]+$/u.test(urlOrFile);
+
+/**
  * Load texture pack from arraybuffer into an already-loaded sprite atlas, overriding textures in it
  * @param {string} atlasKey key
  * @param {ArrayBuffer} buffer Zip file arrayBuffer
@@ -60,6 +70,7 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, buffer) {
 
 	const data = this.cache._cache.image[atlasKey];
 	const { url: sourceURL, frameData } = data;
+	const is1x = !is2xFileEnding(sourceURL);
 
 	// Decode the zip file and render the original sprite sheet in parallel
 	const [files, spritesheet] = await Promise.all([
@@ -69,7 +80,17 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, buffer) {
 
 	await Promise.all(Object.keys(files).map(async fileName => {
 		// Load the image into buffer
-		const bmp = await createImageBitmap(new Blob([files[fileName]], { type: 'image/png' }));
+		const blob = new Blob([files[fileName]], { type: 'image/png' });
+		let bmp = await createImageBitmap(blob);
+
+		// Resize to 1x if the game is in low-fi
+		if (is1x) {
+			bmp = await createImageBitmap(blob, {
+				resizeWidth: bmp.width / 2,
+				resizeHeight: bmp.height / 2,
+				resizeQuality: 'high'
+			});
+		}
 
 		// Create frame name from file name
 		const [ext] = (fileName.match(/\.(?:[^.]*?)(?=\?|#|$)/u) ?? ['']);

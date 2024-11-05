@@ -167,9 +167,9 @@ const esbuildTransform = () => new Transform({
 				loader: 'ts',
 				sourcefile: file.path
 			},
+			minify: state.isProd,
 			bundle: false,
 			write: false,
-			minify: false,
 			metafile: true,
 			platform: 'browser',
 			format: 'esm',
@@ -249,7 +249,7 @@ const hotReload = () => new Transform({
  */
 const scripts = () => src(paths.files.script)
 	.pipe(changed(state.dest, { extension: '.js' }))
-	.pipe(insertHotModuleReload())
+	.pipe(gulpif(state.isDev, insertHotModuleReload()))
 	.pipe(esbuildTransform())
 	.pipe(excludeFiles())
 	.pipe(dest(state.dest))

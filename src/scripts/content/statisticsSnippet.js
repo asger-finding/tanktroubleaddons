@@ -1,4 +1,5 @@
 import ProxyHelper from '../utils/proxyHelper.js';
+import { get, set } from '../common/store.js';
 
 TankTrouble.Statistics.STATISTICS_SETTINGS = {
 	LOCAL: 'local',
@@ -26,6 +27,7 @@ TankTrouble.Statistics.handleStatisticsChange = function(change = 1) {
 
 	this.statisticsType.text(this.STATISTICS_VALUES[this.current].DESCRIPTION);
 	this._updateStatistics();
+	set('statisticsState', this.current);
 };
 
 ProxyHelper.interceptFunction(TankTrouble.Statistics, 'init', (original, ...args) => {
@@ -38,9 +40,11 @@ ProxyHelper.interceptFunction(TankTrouble.Statistics, 'init', (original, ...args
 	TankTrouble.Statistics.gameCount = $('<div id="onlineGameCount">');
 	TankTrouble.Statistics.statisticsType = $('<div class="managedNavigation"></div>');
 
-	TankTrouble.Statistics.current = TankTrouble.Statistics.STATISTICS_SETTINGS.GLOBAL;
-	TankTrouble.Statistics.handleStatisticsChange(0);
-	TankTrouble.Statistics.statisticsType.on('mouseup', () => TankTrouble.Statistics.handleStatisticsChange(1));
+	get('statisticsState').then(state => {
+		TankTrouble.Statistics.current = state;
+		TankTrouble.Statistics.handleStatisticsChange(0);
+		TankTrouble.Statistics.statisticsType.on('mouseup', () => TankTrouble.Statistics.handleStatisticsChange(1));
+	});
 
 	TankTrouble.Statistics.content.append([
 		TankTrouble.Statistics.header,

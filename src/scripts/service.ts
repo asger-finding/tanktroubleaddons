@@ -7,7 +7,8 @@ const defaultState = {
 	theme: 'normal',
 	gameTheme: 'normal',
 	classicMouse: true,
-	tintedBullets: false
+	tintedBullets: false,
+	statisticsState: 'global'
 };
 
 startSyncStore(defaultState).then(async syncStore => {

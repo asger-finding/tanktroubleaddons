@@ -1,3 +1,4 @@
+import { get, set } from '../common/store.js';
 import ProxyHelper from '../utils/proxyHelper.js';
 
 /**
@@ -324,46 +325,86 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 	});
 
 	container.append([standard, active]);
-
 	container.insertAfter(TankTrouble.TankInfoBox.infoAchievements);
 
-	const themeWidget = $(`<div>
-		<div class="heading">Theme</div>
+	const interfaceWidget = $('<div></div>');
+	const themeHeading = $('<div class="heading">Theme</div>');
+	const themeSelect = $(`
 		<label for="radio-1">Normal</label>
-		<input type="radio" name="radio-1" id="radio-1">
+		<input type="radio" name="radio-1" id="radio-1" value="normal">
 		<label for="radio-2">Dark</label>
-		<input type="radio" name="radio-1" id="radio-2">
-		<hr></hr>
-		<div style="display: grid; grid-template-areas: 'title-1 title-2' 'checkbox-1 checkbox-2'">
-			<div class="heading" style="grid-area: title-1">Classic mouse</div>
-			<input type="checkbox" id="checkbox-1" style="grid-area: checkbox-1">
-			<div class="heading" style="grid-area: title-2">Tinted bullets</div>
-			<input type="checkbox" id="checkbox-1" style="grid-area: checkbox-2">
-		</div>
-	</div>`);
-	themeWidget.find('input[type="radio"]').checkboxradio();
-	themeWidget.find('input[type="checkbox"]').checkboxtoggle();
+		<input type="radio" name="radio-1" id="radio-2" value="dark">
+	`);
+	const checkboxWrapper = $('<div style="display: grid; grid-template-areas: \'title-1 title-2\' \'checkbox-1 checkbox-2\'"></div>');
+	const classicMouseCheckbox = $(`
+		<div class="heading" style="grid-area: title-1">Classic mouse</div>
+		<input type="checkbox" id="checkbox-1" style="grid-area: checkbox-1">
+	`);
+	const tintedBulletsCheckbox = $(`
+		<div class="heading" style="grid-area: title-2">Tinted bullets</div>
+		<input type="checkbox" id="checkbox-1" style="grid-area: checkbox-2">	
+	`);
 
-	const gameWidget = $(`<div>
-		<div class="heading">Game theme</div>
-		<select>
-			<option value='normal' data-imagesrc="https://cdn.tanktrouble.com/RELEASE-2023-09-06-01/assets/images/game/pingTimeNoConnection.png" data-imagesrcset="https://cdn.tanktrouble.com/RELEASE-2023-09-06-01/assets/images/game/pingTimeNoConnection@2x.png 2x" data-description="Selected">Normal</option>
-			<option value='dark'>Dark</option>
-			<option value='3d'>3D</option>
-			<option value='synthwave'>Synthwave</option>
-		</select>
-	</div>`);
-	gameWidget.find('select').iconselectmenu({
-		change: (event, ui) => {
-			console.log(event, ui);
-		}
-	}).iconselectmenu('menuWidget');
+	checkboxWrapper.append([classicMouseCheckbox, tintedBulletsCheckbox]);
+	interfaceWidget.append([themeHeading, themeSelect, '<hr>', checkboxWrapper]);
 
+	get('theme').then(theme => {
+		themeSelect.filter(`input[type="radio"][value="${theme}"]`).prop('checked', true);
+
+		themeSelect.filter('input[type="radio"]')
+			.checkboxradio();
+
+		// Attach a change event listener
+		themeSelect.filter('input[type="radio"]').on('change', ({ target }) => {
+			const $target = $(target);
+			if ($target.is(':checked')) set('theme', $target.val());
+		});
+	});
+
+	get('classicMouse').then(classicMouse => {
+		classicMouseCheckbox.filter('input[type="checkbox"]')
+			.prop('checked', classicMouse)
+			.checkboxtoggle({
+				// eslint-disable-next-line jsdoc/require-jsdoc
+				change: (_event, { item }) => set('classicMouse', item.value)
+			});
+	});
+	get('tintedBullets').then(tintedBullets => {
+		tintedBulletsCheckbox.filter('input[type="checkbox"]')
+			.prop('checked', tintedBullets)
+			.checkboxtoggle({
+				// eslint-disable-next-line jsdoc/require-jsdoc
+				change: (_event, { item }) => set('tintedBullets', item.value)
+			});
+	});
+
+	const otherWidget = $('<div></div>');
+	const gameThemeHeading = $('<div class="heading">Game theme</div>');
+	const gameThemeSelect = $(`
+	<select>
+		<option value='normal' data-imagesrc="https://cdn.tanktrouble.com/RELEASE-2023-09-06-01/assets/images/game/pingTimeNoConnection.png" data-imagesrcset="https://cdn.tanktrouble.com/RELEASE-2023-09-06-01/assets/images/game/pingTimeNoConnection@2x.png 2x" data-description="Selected">Normal</option>
+		<option value='dark'>Dark</option>
+		<option value='3d'>3D</option>
+		<option value='synthwave'>Synthwave</option>
+	</select>`);
 	// TODO: texture pack from dropdown with option for File selector
-	const texturePack = $(`
-	<div class="heading">Texture pack from file ...</div>`);
+	const texturePackHeading = $('<div class="heading">Texture pack from file ...</div>');
 	const label = $('<label for="texturepackpicker" class="custom-file-upload">Load</label>');
 	const picker = $('<input type="file" id="texturepackpicker" accept=".zip" style="display: none;"/>');
+
+	label.append(picker);
+	otherWidget.append([gameThemeHeading, gameThemeSelect, '<hr>', texturePackHeading, label, picker]);
+
+	get('gameTheme').then(theme => {
+		gameThemeSelect.val(theme);
+
+		gameThemeSelect.iconselectmenu({
+			// eslint-disable-next-line jsdoc/require-jsdoc
+			change: (_event, { item }) => set('gameTheme', item.value)
+		}).iconselectmenu('menuWidget');
+	});
+
+	label.button();
 
 	const fileReader = new FileReader();
 	fileReader.addEventListener('load', () => {
@@ -379,21 +420,17 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 		}
 	});
 
-	label.button();
-	label.append(picker);
-	gameWidget.append(['<hr>', texturePack, label, picker]);
-
 	Addons.menu.createSection({
 		title: 'Interface',
 		id: 'theme',
 		requiresReload: false
-	}, [ themeWidget ]);
+	}, [ interfaceWidget ]);
 
 	Addons.menu.createSection({
 		title: 'Other',
 		id: 'other',
 		requiresReload: true
-	}, [ gameWidget ]);
+	}, [ otherWidget ]);
 });
 
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {

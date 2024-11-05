@@ -47,12 +47,12 @@ rules:
       match: false
 
   jsdoc/require-jsdoc:
-  - error
-  - require:
-      ArrowFunctionExpression: true
-      ClassExpression: true
-      FunctionDeclaration: true
-      MethodDefinition: true
+    - error
+    - require:
+        ArrowFunctionExpression: true
+        ClassExpression: true
+        FunctionDeclaration: true
+        MethodDefinition: true
   jsdoc/require-param-type: 0
   jsdoc/require-returns-type: 0
   jsdoc/no-undefined-types: 0

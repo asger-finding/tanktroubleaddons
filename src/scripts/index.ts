@@ -1,6 +1,8 @@
 import { setBrowserNamespace } from './common/set-browser-namespace.js';
+import { setupStoreHandler } from './common/store.js';
 
 setBrowserNamespace();
+setupStoreHandler();
 
 class Addons {
 

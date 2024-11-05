@@ -32,30 +32,12 @@ window.Addons = {
 
 		container.append(image);
 		return container;
-	},
-
-	/**
-	 * Store object for TankTroubleAddons.
-	 *
-	 * TODO: IPC to content script
-	 * TODO: Events on change
-	 * TODO: Interactions with menu
-	 */
-	store: {
-		get() {
-			
-		},
-		set() {
-			
-		}
 	}
 };
 
 $.widget('custom.checkboxtoggle', {
 	_create() {
-		const $input = this.element;
-
-		$input.addClass('ui-checkbox-toggle-input ui-widget-header')
+		this.element.addClass('ui-checkbox-toggle-input ui-widget-header')
 			.wrap('<label class="ui-checkbox-toggle"></label>')
 			.after('<span class="ui-checkbox-toggle-slider"></span>');
 
@@ -64,8 +46,14 @@ $.widget('custom.checkboxtoggle', {
 
 		// Attach click handler to change state
 		this._on(this.element, {
-			change() {
+			change(event) {
 				this._updateToggle();
+
+				const item = {
+					value: this.element.prop('checked'),
+					disabled: this.element.prop('disabled')
+				};
+				this._trigger('change', event, { item });
 			}
 		});
 	},

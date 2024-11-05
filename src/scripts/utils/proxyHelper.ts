@@ -1,13 +1,22 @@
+type SomeObject = { [key: string]: unknown };
+type SomeFunction = (...args: unknown[]) => unknown;
+type InterceptHandler = (original: SomeFunction, ...args: unknown[]) => unknown;
+
+// eslint-disable-next-line @typescript-eslint/naming-convention, init-declarations
+declare const Content: {
+	init: (...args: unknown[]) => unknown;
+};
+
 export default class ProxyHelper {
 
 	/**
 	 * Pass a function to a hook with the correct context
 	 * @param {object} context Function context (e.g `window`)
-	 * @param {string} funcName Function identifier in the context
-	 * @param {(original: Function, ...args?: unknown) => unknown} handler Hook to call before the original
+	 * @param funcName Function identifier in the context
+	 * @param handler Hook to call before the original
 	 * @param {any[]} attributes Optionally additional descriptors
 	 */
-	static interceptFunction(context, funcName, handler, attributes) {
+	static interceptFunction(context: SomeObject, funcName: string, handler: InterceptHandler, attributes?: SomeObject) {
 		const original = Reflect.get(context, funcName);
 		if (typeof original !== 'function') throw new Error('Item passed is not typeof function');
 
@@ -18,19 +27,19 @@ export default class ProxyHelper {
 			 * @param args Arguments passed from outside
 			 * @returns Original function return value
 			 */
-			value: (...args) => handler(original.bind(context), ...args),
+			value: (...args: unknown[]) => handler(original.bind(context), ...args),
 			...attributes
 		});
 	}
 
 	/**
 	 * Fires when the document is readyState `interactive` or `complete`
-	 * @returns {Promise<void>} Promise that resolves upon content loaded
+	 * @returns Promise that resolves upon content loaded
 	 */
 	static whenContentLoaded() {
-		return new Promise(resolve => {
+		return new Promise<void>(resolve => {
 			if (document.readyState === 'interactive' || document.readyState === 'complete') resolve();
-			else document.addEventListener('DOMContentLoaded', () => resolve());
+			else addEventListener('DOMContentLoaded', () => resolve());
 		});
 	}
 
@@ -51,14 +60,11 @@ export default class ProxyHelper {
 		const functionString = Function.prototype.toString.call(Content.init);
 		const isAlreadyHooked = /hooked-by-userscript/u.test(functionString);
 
-		return new Promise(resolve => {
+		return new Promise<void>(resolve => {
 			if (isAlreadyHooked) {
-				const eventListener = document.addEventListener('content-initialized', () => {
-					document.removeEventListener('content-initialized', eventListener);
-					resolve();
-				});
+				addEventListener('content-initialized', () => resolve(), { once: true, passive: true });
 			} else {
-				const event = new Event('content-initialized');
+				const event = new CustomEvent('content-initialized');
 
 				const { init } = Content;
 				Reflect.defineProperty(Content, 'init', {
@@ -67,7 +73,7 @@ export default class ProxyHelper {
 					 * @param args Arguments passed from outside
 					 * @returns Original function return value
 					 */
-					value: (...args) => {
+					value: (...args: unknown[]) => {
 						// Hack that will add the string to
 						// the return of toString so we can
 						// lookup if it's already hooked
@@ -76,7 +82,7 @@ export default class ProxyHelper {
 
 						const result = init(...args);
 
-						document.dispatchEvent(event);
+						dispatchEvent(event);
 						resolve();
 						return result;
 					},

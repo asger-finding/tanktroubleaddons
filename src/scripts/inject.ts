@@ -29,6 +29,7 @@
 
 	Promise.all([
 		injectScript(`${meta.extensionUrl}scripts/content/preload.js`),
+		injectScript(`${meta.extensionUrl}scripts/content/theme.js`),
 		injectScript(`${meta.extensionUrl}scripts/content/patches.js`)
 	]).then(() => {
 		injectScript(`${meta.extensionUrl}scripts/content/statisticsSnippet.js`);

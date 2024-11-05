@@ -4,17 +4,17 @@ import { startSyncStore } from 'webext-sync';
 setBrowserNamespace();
 
 const defaultState = {
-	storeVersion: 1,
-	timesPopupOpened: 0
+	theme: 'normal',
+	gameTheme: 'normal',
+	classicMouse: true,
+	tintedBullets: false
 };
 
 startSyncStore(defaultState).then(async syncStore => {
 	let state = await syncStore.getState();
 
-	syncStore.onChange((newState, prevState) => {
+	syncStore.onChange(newState => {
 		state = newState;
-
-		console.log('Times popup opened:', state.timesPopupOpened);
 	});
 
 	console.log('Background loaded! state: ', state);

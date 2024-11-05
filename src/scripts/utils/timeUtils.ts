@@ -1,4 +1,4 @@
-const ranges = {
+const ranges: { [key in Intl.RelativeTimeFormatUnit]?: number } = {
 	years: 3600 * 24 * 365,
 	months: (365 * 3600 * 24) / 12,
 	weeks: 3600 * 24 * 7,
@@ -13,14 +13,14 @@ const ranges = {
  * @param date Date object
  * @returns Time ago
  */
-export const timeAgo = date => {
+export const timeAgo = (date: Date) => {
 	const formatter = new Intl.RelativeTimeFormat('en');
 	const secondsElapsed = (date.getTime() - Date.now()) / 1000;
 
-	for (const key in ranges) {
-		if (ranges[key] < Math.abs(secondsElapsed)) {
-			const delta = secondsElapsed / ranges[key];
-			return formatter.format(Math.ceil(delta), key);
+	for (const [key, range] of Object.entries(ranges)) {
+		if (range < Math.abs(secondsElapsed)) {
+			const delta = secondsElapsed / range;
+			return formatter.format(Math.ceil(delta), key as Intl.RelativeTimeFormatUnit);
 		}
 	}
 

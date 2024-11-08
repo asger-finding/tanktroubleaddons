@@ -1,5 +1,7 @@
+@use "sass:map";
 @use 'dark.scss';
 
+$assets: "chrome-extension://__MSG_@@extension_id__/assets";
 $font-stack: Arial, verdana;
 $max-safe-integer: 2147483647;
 
@@ -7,29 +9,38 @@ $max-safe-integer: 2147483647;
 	display: none !important
 }
 
-::-webkit-scrollbar {
-	width: 15px
-  }
-  
-::-webkit-scrollbar-track {
-	background-color: #ececec
-  }
-  
-::-webkit-scrollbar-thumb {
-	height: 50px;
-	background-color: #ccc;
-	border-radius: 2px;
-	-webkit-transition: 1s;
-	transition: 1s
-  }
-  
-::-webkit-scrollbar-thumb:hover {
-	background-color: #ddd
-  }
-  
-::-webkit-scrollbar-corner {
-	background-color: #fff
-  }
+@mixin generate-images($styles-map) {
+	@each $selector, $settings in $styles-map {
+		$width: map.get($settings, width);
+		$height: map.get($settings, height);
+		$selectors: map.get($settings, selectors);
+
+		// Base style for the combined selectors
+		#{$selector} {
+			width: 0 !important;
+			height: 0 !important;
+			padding: $height 0 0 $width;
+		}
+
+		// Generate styles for each state in selectors
+		@each $state, $state-filename in $selectors {
+			#{$selector}#{$state} {
+				background-image: image-set(
+					url("#{$assets}/#{$state-filename}.png") 1x,
+					url("#{$assets}/#{$state-filename}@2x.png") 2x
+				);
+			}
+		}
+	}
+}
+
+[data-color-scheme="dark"] {
+	color-scheme: dark;
+}
+
+[data-color-scheme="light"] {
+	color-scheme: light;
+}
 
 /* Addons menu */
 @keyframes tv-close-wrapper {
@@ -72,6 +83,21 @@ $max-safe-integer: 2147483647;
 #rightBanner,
 #topBanner {
 	@include hide;
+}
+
+#navigation {
+	$tab-styles: (
+		'#garageTab img': (
+			width: 120px,
+			height: 60px,
+			selectors: (
+				".selected": "header/tab5Selected",
+				".deselected": "header/tab5"
+			)
+		)
+	);
+
+	@include generate-images($tab-styles);
 }
 
 // Wide content

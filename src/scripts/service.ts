@@ -4,7 +4,10 @@ import { startSyncStore } from 'webext-sync';
 setBrowserNamespace();
 
 const defaultState = {
-	theme: 'normal',
+	theme: {
+		classToken: 'normal',
+		colorScheme: 'light'
+	},
 	gameTheme: 'normal',
 	classicMouse: true,
 	tintedBullets: false,

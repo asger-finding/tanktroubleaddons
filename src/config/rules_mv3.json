@@ -25,5 +25,14 @@
             "urlFilter": "https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css",
             "resourceTypes": ["stylesheet"]
         }
+    },
+    {
+        "id": 4,
+        "priority": 1,
+        "action": { "type": "redirect", "redirect": { "extensionPath": "/assets/snippets/downloadOnTheAppStore.svg" } },
+        "condition": {
+            "urlFilter": "https://cdn.tanktrouble.com/RELEASE-*/assets/images/snippets/downloadOnTheAppStore.svg",
+            "resourceTypes": ["image"]
+        }
     }
 ]

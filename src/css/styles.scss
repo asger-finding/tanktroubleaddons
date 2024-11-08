@@ -5,6 +5,10 @@ $assets: "chrome-extension://__MSG_@@extension_id__/assets";
 $font-stack: Arial, verdana;
 $max-safe-integer: 2147483647;
 
+@function asset($path) {
+	@return url(#{$assets + $path});
+}
+
 @mixin hide {
 	display: none !important
 }
@@ -26,8 +30,8 @@ $max-safe-integer: 2147483647;
 		@each $state, $state-filename in $selectors {
 			#{$selector}#{$state} {
 				background-image: image-set(
-					url("#{$assets}/#{$state-filename}.png") 1x,
-					url("#{$assets}/#{$state-filename}@2x.png") 2x
+					asset("/#{$state-filename}.png") 1x,
+					asset("/#{$state-filename}@2x.png") 2x
 				);
 			}
 		}
@@ -190,7 +194,7 @@ $max-safe-integer: 2147483647;
 	.content {
 		color: rgb(70 70 70 / 1.0);
 		font-family: $font-stack;
-		background-image: url("chrome-extension://__MSG_@@extension_id__/assets/menu/background.avif");
+		background-image: asset("/menu/background.avif");
 		background-size: contain;
 		background-color: var(--background-color);
 		background-repeat: no-repeat;
@@ -436,17 +440,3 @@ player-name {
 		}
 	}
 }
-
-#garageTab .deselected,
-#garageTab .selected {
-		width: 0;
-		height: 0;
-		padding: 60px 0 0 120px;
-		background-image: -webkit-image-set(url(chrome-extension://__MSG_@@extension_id__/assets/header/tab5SelectedLight.png) 1x, url(chrome-extension://__MSG_@@extension_id__/assets/header/tab5SelectedLight@2x.png) 2x);
-		background-image: image-set(url(chrome-extension://__MSG_@@extension_id__/assets/header/tab5SelectedLight.png) 1x, url(chrome-extension://__MSG_@@extension_id__/assets/header/tab5SelectedLight@2x.png) 2x)
-		}
-	
-#garageTab .deselected {
-		background-image: -webkit-image-set(url(chrome-extension://__MSG_@@extension_id__/assets/header/tab5Light.png) 1x, url(chrome-extension://__MSG_@@extension_id__/assets/header/tab5Light@2x.png) 2x);
-		background-image: image-set(url(chrome-extension://__MSG_@@extension_id__/assets/header/tab5Light.png) 1x, url(chrome-extension://__MSG_@@extension_id__/assets/header/tab5Light@2x.png) 2x)
-	}

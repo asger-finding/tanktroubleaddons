@@ -5,8 +5,12 @@ $body-color: rgb(26 26 26);
 $primary-font-color: rgb(255 255 255);
 $snippet-accent-light: rgb(41 41 41);
 $snippet-accent-dark: rgb(32 32 32);
-$tooltipster-accent-light: #333333;
-$tooltipster-accent-dark: #191919;
+$tooltipster-accent-light: rgb(51 51 51);
+$tooltipster-accent-dark: rgb(25 25 25);
+
+@function asset($path) {
+	@return url(#{$assets + $path});
+}
 
 @mixin generate-images($styles-map) {
 	@each $selector, $settings in $styles-map {
@@ -25,8 +29,8 @@ $tooltipster-accent-dark: #191919;
 		@each $state, $state-filename in $selectors {
 			#{$selector}#{$state} {
 				background-image: image-set(
-					url("#{$assets}/#{$state-filename}.png") 1x,
-					url("#{$assets}/#{$state-filename}@2x.png") 2x
+					asset("/#{$state-filename}.png") 1x,
+					asset("/#{$state-filename}@2x.png") 2x
 				);
 			}
 		}
@@ -35,9 +39,9 @@ $tooltipster-accent-dark: #191919;
 
 html.dark {
 	--jq-widget-header-bg: url("https://download.jqueryui.com/themeroller/images/ui-bg_highlight-soft_75_131313_1x100.png");
-	--jq-widget-button-disabled-hovered-or-active-bg: url(#{$assets + "/jquery-ui/ui-bg-glass-variant-01.png"});
-	--jq-widget-hover-or-focus: url(#{$assets + "/jquery-ui/ui-bg-glass-variant-02.png"});
-	--jq-widget-active: url(#{$assets + "/jquery-ui/ui-bg-glass-variant-02.png"});
+	--jq-widget-button-disabled-hovered-or-active-bg: asset("/jquery-ui/ui-bg-glass-variant-01.png");
+	--jq-widget-hover-or-focus: asset("/jquery-ui/ui-bg-glass-variant-02.png");
+	--jq-widget-active: asset("/jquery-ui/ui-bg-glass-variant-02.png");
 	--jq-widget-highlighted: url("https://download.jqueryui.com/themeroller/images/ui-bg_glass_55_fbf9ee_1x400.png");
 	--jq-widget-errored: url("https://download.jqueryui.com/themeroller/images/ui-bg_glass_95_fef1ec_1x400.png");
 	--jq-bgColorHeader: rgb(33 33 33);
@@ -106,7 +110,7 @@ html.dark {
 	}
 
 	.tooltipster-default {
-		box-shadow: 0 12px 14px 0 rgba(0, 0, 0, .25);
+		box-shadow: 0 12px 14px 0 rgba(0 0 0 / 0.25);
 		border-radius: 5px;
 		background: linear-gradient(to bottom, $tooltipster-accent-light, $tooltipster-accent-dark);
 		color: rgb(236 236 236) !important
@@ -136,8 +140,8 @@ html.dark {
 	#settings .content,
 	#shopItemsContainer .shopItem,
 	#tankinfo .content {
-		background: linear-gradient(to bottom, #242424 10%, #101010 90%);
-		color: #e3e3e3;
+		background: linear-gradient(to bottom, rgb(36 36 36) 10%, rgb(16 16 16) 90%);
+		color: rgb(227 227 227);
 	}
 
 	#createReplyButton:disabled,
@@ -147,8 +151,8 @@ html.dark {
 	#shopItemsContainer .shopItem .medium.buy:disabled,
 	.box.noselect .content,
 	.virtualShop.centre > div .shopItem.info .purchaseOption .medium.buy:disabled {
-		background: linear-gradient(to bottom, #333 10%, #191919 90%);
-		color: #fff;
+		background: linear-gradient(to bottom, rgb(51 51 51) 10%, rgb(25 25 25) 90%);
+		color: rgb(255 255 255);
 	}
 
 	#overlay {
@@ -156,7 +160,7 @@ html.dark {
 		.messages .message,
 		.shopItem {
 			color: $primary-font-color;
-			background: linear-gradient(to bottom, #242424 10%, #101010 90%) !important;
+			background: linear-gradient(to bottom, rgb(36 36 36) 10%, rgb(16 16 16) 90%) !important;
 		}
 
 		.messages .message .headers {
@@ -164,29 +168,29 @@ html.dark {
 		}
 	
 		.messages .message.important {
-			background: linear-gradient(to bottom, #427fff, #0014ab) !important;
+			background: linear-gradient(to bottom, rgb(66 127 255), rgb(0 20 171)) !important;
 		}
 
 		.achievements .achievement.unlockedAndSeen {
-			background: linear-gradient(rgb(184, 152, 48), rgb(75 60 14)) !important;
+			background: linear-gradient(rgb(184 152 48), rgb(75 60 14)) !important;
 		}
 	}
 
 	.box .tab.bottom {
-		background: linear-gradient(-45deg, #101010 70%, #242424 300%) !important;
+		background: linear-gradient(-45deg, rgb(16 16 16) 70%, rgb(36 36 36) 300%) !important;
 	}
 
 	.box .tab.topRight {
-		background: linear-gradient(-45deg, #101010 -300%, #242424 30%) !important;
+		background: linear-gradient(-45deg, rgb(16 16 16) -300%, rgb(36 36 36) 30%) !important;
 	}
 
 	.box .tab.left,
 	.box .tab.right {
-		background: linear-gradient(-45deg, #101010 -400%, #242424 90%) !important;
+		background: linear-gradient(-45deg, rgb(16 16 16) -400%, rgb(36 36 36) 90%) !important;
 	}
 
 	button.disabled {
-		background: linear-gradient(to bottom, #333, #191919);
+		background: linear-gradient(to bottom, rgb(51 51 51), rgb(25 25 25));
 	}
 
 	.buttonGroup div:not(:last-child) button {
@@ -194,25 +198,21 @@ html.dark {
 	}
 
 	.newsPost .wrapper .disk {
-		color: #000
+		color: rgb(0 0 0);
 	}
 
 	#newsPost-29 .wrapper .content .bubble,
 	#newsPost-39 .wrapper .content .bubble {
-		background-color: #363636;
-		border-color: #1e1e1e
-	}
-
-	#newsPost-51 .wrapper .header {
-		background: linear-gradient(45deg, #0175ff 0, #87bcea 40%, #0175ff 100%);
+		background-color: rgb(54 54 54);
+		border-color: rgb(30 30 30);
 	}
 
 	#newsPost-54 .story {
-		background-color: #363636;
+		background-color: rgb(54 54 54);
 	}
 
 	#newsPost-74 .facts {
-		background-color: #363636;
+		background-color: rgb(54 54 54);
 	}
 
 	.ui-state-focus,
@@ -221,38 +221,47 @@ html.dark {
 	.ui-widget-content .ui-state-hover,
 	.ui-widget-header .ui-state-focus,
 	.ui-widget-header .ui-state-hover {
-		background-image: linear-gradient(#1c1c1c 25%, #181818 75%);
+		background-image: linear-gradient(rgb(28 28 28) 25%, rgb(24 24 24) 75%);
 		color: $primary-font-color;
-		border: 1px solid #161616;
+		border-color: rgb(22 22 22);
 	}
 
-	#chat.user .content form {
-		background: #008603;
-	}
+	#chat {
+		$chat-normal-bg: rgb(34 34 34);
+		$chat-user-bg: rgb(0 45 3);
+		$chat-global-bg: rgb(31 47 61); 
 
-	#chat.global .content form {
-		background: #4483a7;
-	}
+		form {
+			background-color: $chat-normal-bg;
 
-	#chat .content form {
-		background-color: #222;
-		color: #e6e6e6;
-	}
+			textarea {
+				color: rgb(230 230 230);
+			}
 
-	#chat .content form textarea {
-		color: #e6e6e6;
+			.autocomplete-dropdown {
+				background-color: $chat-user-bg;
+				scrollbar-color: $chat-user-bg transparent;
+			}
+		}
+
+		&.user form {
+			background-color: $chat-user-bg
+		}
+		&.global form {
+			background-color: $chat-global-bg
+		}
 	}
 
 	body:not(.premium) {
 		#header {
-			background-image: url(#{$assets + "/header/background.png"}) !important
+			background-image: asset("/header/background.png") !important;
 		}
 
 		@media (min-device-pixel-ratio:2),
 		(min-resolution:192dpi),
 		(min-resolution:2dppx) {
 			#header {
-				background-image: url(#{$assets + "/header/background@2x.png"}) !important
+				background-image: asset("/header/background@2x.png") !important;
 			}
 		}
 	}
@@ -323,62 +332,59 @@ html.dark {
 		);
 
 		#newsPost-25 .content {
-			background-image: url(#{$assets + "/news/getimage13.png"}) !important;
+			background-image: assset("/news/getimage13.png") !important;
 		}
 
 		@include generate-images($tab-styles);
 	}
 
 	.forum {
-		color: #fafafa;
+		color: $primary-font-color;
 
 		.bubble {
 			color: $primary-font-color;
-			background: #202020;
-			border-color: #161616;
+			background: rgb(32 32 32);
+			border-color: rgb(22 22 22);
 
 			.details {
-				color: #999;
+				color: rgb(153 153 153);
 			}
 		}
 		
 		.deleted .bubble {
-			color: #ccc;
-			border-color: #232323;
-			background: #161616;
+			color: rgb(204 204 204);
+			background: rgb(22 22 22);
+			border-color: rgb(35 35 35);
 
 			.details {
-				color: #ccc;
+				color: rgb(204 204 204);
 			}
 		}
 
+		.compose .bubble,
 		.editing .bubble {
-			background: #202020;
-		}
-
-		.compose .bubble {
-			background: #202020;
+			background: rgb(32 32 32);
 		}
 		
 		.approvable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble,
 		.deletable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble,
 		.bannable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble {
-			border-color: #6b560c;
-			background: #18150a;
+			border-color: rgb(107 86 12);
+			background: rgb(24 21 10);
 		}
 		
 		.thread.selectable:not(.editing) .bubble:hover {
-			background: #161616;
+			background: rgb(22 22 22);
 		}
 		
 		.thread.selectable.approvable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble:hover,
 		.thread.selectable.deletable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble:hover,
 		.thread.selectable.bannable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble:hover {
-			background: #26200c;
+			background: rgb(38 32 12);
 		}
 		
 		.thread.selectable.deleted .bubble:hover {
-			background: #101010;
+			background: rgb(16 16 16);
 		}
 
 		$paginator-styles: (

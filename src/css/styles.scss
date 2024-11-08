@@ -1,10 +1,49 @@
+@use "sass:map";
 @use 'dark.scss';
 
+$assets: "chrome-extension://__MSG_@@extension_id__/assets";
 $font-stack: Arial, verdana;
 $max-safe-integer: 2147483647;
 
+@function asset($path) {
+	@return url(#{$assets + $path});
+}
+
 @mixin hide {
 	display: none !important
+}
+
+@mixin generate-images($styles-map) {
+	@each $selector, $settings in $styles-map {
+		$width: map.get($settings, width);
+		$height: map.get($settings, height);
+		$selectors: map.get($settings, selectors);
+
+		// Base style for the combined selectors
+		#{$selector} {
+			width: 0 !important;
+			height: 0 !important;
+			padding: $height 0 0 $width;
+		}
+
+		// Generate styles for each state in selectors
+		@each $state, $state-filename in $selectors {
+			#{$selector}#{$state} {
+				background-image: image-set(
+					asset("/#{$state-filename}.png") 1x,
+					asset("/#{$state-filename}@2x.png") 2x
+				);
+			}
+		}
+	}
+}
+
+[data-color-scheme="dark"] {
+	color-scheme: dark;
+}
+
+[data-color-scheme="light"] {
+	color-scheme: light;
 }
 
 /* Addons menu */
@@ -48,6 +87,21 @@ $max-safe-integer: 2147483647;
 #rightBanner,
 #topBanner {
 	@include hide;
+}
+
+#navigation {
+	$tab-styles: (
+		'#garageTab img': (
+			width: 120px,
+			height: 60px,
+			selectors: (
+				".selected": "header/tab5Selected",
+				".deselected": "header/tab5"
+			)
+		)
+	);
+
+	@include generate-images($tab-styles);
 }
 
 // Wide content
@@ -140,7 +194,7 @@ $max-safe-integer: 2147483647;
 	.content {
 		color: rgb(70 70 70 / 1.0);
 		font-family: $font-stack;
-		background-image: url("chrome-extension://__MSG_@@extension_id__/assets/menu/background.avif");
+		background-image: asset("/menu/background.avif");
 		background-size: contain;
 		background-color: var(--background-color);
 		background-repeat: no-repeat;

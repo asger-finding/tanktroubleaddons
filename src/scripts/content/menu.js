@@ -331,9 +331,9 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 	const themeHeading = $('<div class="heading">Theme</div>');
 	const themeSelect = $(`
 		<label for="radio-1">Normal</label>
-		<input type="radio" name="radio-1" id="radio-1" value="normal">
+		<input type="radio" name="radio-1" id="radio-1" value="normal" data-set-color-scheme="light">
 		<label for="radio-2">Dark</label>
-		<input type="radio" name="radio-1" id="radio-2" value="dark">
+		<input type="radio" name="radio-1" id="radio-2" value="dark" data-set-color-scheme="dark">
 	`);
 	const checkboxWrapper = $('<div style="display: grid; grid-template-areas: \'title-1 title-2\' \'checkbox-1 checkbox-2\'"></div>');
 	const classicMouseCheckbox = $(`
@@ -349,7 +349,8 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 	interfaceWidget.append([themeHeading, themeSelect, '<hr>', checkboxWrapper]);
 
 	get('theme').then(theme => {
-		themeSelect.filter(`input[type="radio"][value="${theme}"]`).prop('checked', true);
+		const { classToken } = theme;
+		themeSelect.filter(`input[type="radio"][value="${classToken}"]`).prop('checked', true);
 
 		themeSelect.filter('input[type="radio"]')
 			.checkboxradio();
@@ -357,7 +358,11 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 		// Attach a change event listener
 		themeSelect.filter('input[type="radio"]').on('change', ({ target }) => {
 			const $target = $(target);
-			if ($target.is(':checked')) set('theme', $target.val());
+			if ($target.is(':checked')) {
+				const newTheme = $target.val();
+				const colorScheme = $target.attr('data-set-color-scheme');
+				set('theme', { classToken: newTheme, colorScheme });
+			}
 		});
 	});
 

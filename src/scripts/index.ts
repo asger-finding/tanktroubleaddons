@@ -9,7 +9,6 @@ class Addons {
 	inject: HTMLScriptElement;
 
 	meta = <{
-		theme: string;
 		extensionUrl: string;
 		release: string;
 		data: string;
@@ -26,10 +25,6 @@ class Addons {
 	 * Load the extension into the website
 	 */
 	public load() {
-		Addons.getWithFallback('theme', 'dark').then(theme => {
-			this.meta.theme = theme;
-		});
-
 		Addons.waitForLoader().then(loader => {
 			const code = String(loader.textContent);
 			loader.textContent = '';

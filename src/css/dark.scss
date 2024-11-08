@@ -1,55 +1,93 @@
-/* Dark theme styling */
+@use "sass:map";
+
+$assets: "chrome-extension://__MSG_@@extension_id__/assets/darktheme";
+$body-color: rgb(26 26 26);
+$primary-font-color: rgb(255 255 255);
+$snippet-accent-light: rgb(41 41 41);
+$snippet-accent-dark: rgb(32 32 32);
+$tooltipster-accent-light: rgb(51 51 51);
+$tooltipster-accent-dark: rgb(25 25 25);
+
+@function asset($path) {
+	@return url(#{$assets + $path});
+}
+
+@mixin generate-images($styles-map) {
+	@each $selector, $settings in $styles-map {
+		$width: map.get($settings, width);
+		$height: map.get($settings, height);
+		$selectors: map.get($settings, selectors);
+
+		// Base style for the combined selectors
+		#{$selector} {
+			width: 0 !important;
+			height: 0 !important;
+			padding: $height 0 0 $width;
+		}
+
+		// Generate styles for each state in selectors
+		@each $state, $state-filename in $selectors {
+			#{$selector}#{$state} {
+				background-image: image-set(
+					asset("/#{$state-filename}.png") 1x,
+					asset("/#{$state-filename}@2x.png") 2x
+				);
+			}
+		}
+	}
+}
+
 html.dark {
 	--jq-widget-header-bg: url("https://download.jqueryui.com/themeroller/images/ui-bg_highlight-soft_75_131313_1x100.png");
-	--jq-widget-button-disabled-hovered-or-active-bg: url("chrome-extension://__MSG_@@extension_id__/assets/jquery-ui/ui-bg-glass-variant-01.png");
-	--jq-widget-hover-or-focus: url("chrome-extension://__MSG_@@extension_id__/assets/jquery-ui/ui-bg-glass-variant-02.png");
-	--jq-widget-active: url("chrome-extension://__MSG_@@extension_id__/assets/jquery-ui/ui-bg-glass-variant-02.png");
+	--jq-widget-button-disabled-hovered-or-active-bg: asset("/jquery-ui/ui-bg-glass-variant-01.png");
+	--jq-widget-hover-or-focus: asset("/jquery-ui/ui-bg-glass-variant-02.png");
+	--jq-widget-active: asset("/jquery-ui/ui-bg-glass-variant-02.png");
 	--jq-widget-highlighted: url("https://download.jqueryui.com/themeroller/images/ui-bg_glass_55_fbf9ee_1x400.png");
 	--jq-widget-errored: url("https://download.jqueryui.com/themeroller/images/ui-bg_glass_95_fef1ec_1x400.png");
-	--jq-bgColorHeader: #212121;
-	--jq-borderColorHeader: #545454;
-	--jq-fcHeader: #222222;
-	--jq-iconColorHeader: #222222;
-	--jq-bgColorContent: #212121;
-	--jq-borderColorContent: #494949;
-	--jq-fcContent: #ffffff;
-	--jq-iconColorContent: #222222;
-	--jq-bgColorDefault: #141414;
-	--jq-borderColorDefault: #323232;
-	--jq-fcDefault: #dcdcdc;
-	--jq-iconColorDefault: #888888;
-	--jq-bgColorHover: #1d1d1d;
-	--jq-borderColorHover: #474747;
-	--jq-fcHover: #ffffff;
-	--jq-iconColorHover: #454545;
-	--jq-bgColorActive: #ffffff;
-	--jq-borderColorActive: #474747;
-	--jq-fcActive: #ffffff;
-	--jq-iconColorActive: #454545;
-	--jq-bgColorHighlight: #fbf9ee;
-	--jq-fcHighlight: #363636;
-	--jq-iconColorHiighligh: #2e83ff;
-	--jq-bgColorError: #fef1ec;
-	--jq-borderColorError: #cd0a0a;
-	--jq-fcError: #cd0a0a;
-	--jq-iconColorErroor: #cd0a0a;
-	--jq-bgColorOverlay: #aaaaaa;
-	--jq-bgColorShadow: #aaaaaa;
+	--jq-bgColorHeader: rgb(33 33 33);
+	--jq-borderColorHeader: rgb(84 84 84);
+	--jq-fcHeader: rgb(34 34 34);
+	--jq-iconColorHeader: rgb(34 34 34);
+	--jq-bgColorContent: rgb(33 33 33);
+	--jq-borderColorContent: rgb(73 73 73);
+	--jq-fcContent: rgb(255 255 255);
+	--jq-iconColorContent: rgb(34 34 34);
+	--jq-bgColorDefault: rgb(20 20 20);
+	--jq-borderColorDefault: rgb(50 50 50);
+	--jq-fcDefault: rgb(220 220 220);
+	--jq-iconColorDefault: rgb(136 136 136);
+	--jq-bgColorHover: rgb(29 29 29);
+	--jq-borderColorHover: rgb(71 71 71);
+	--jq-fcHover: rgb(255 255 255);
+	--jq-iconColorHover: rgb(69 69 69);
+	--jq-bgColorActive: rgb(255 255 255);
+	--jq-borderColorActive: rgb(71 71 71);
+	--jq-fcActive: rgb(255 255 255);
+	--jq-iconColorActive: rgb(69 69 69);
+	--jq-bgColorHighlight: rgb(251 249 238);
+	--jq-fcHighlight: rgb(54 54 54);
+	--jq-iconColorHiighligh: rgb(46 131 255);
+	--jq-bgColorError: rgb(254 241 236);
+	--jq-borderColorError: rgb(205 10 10);
+	--jq-fcError: rgb(205 10 10);
+	--jq-iconColorErroor: rgb(205 10 10);
+	--jq-bgColorOverlay: rgb(170 170 170);
+	--jq-bgColorShadow: rgb(170 170 170);
 
 	#addons-menu {
 		--lightness: 50%;
-	
+
 		.content {
-			color: rgb(255 255 255 / 1.0);
+			color: rgb(255 255 255);
 
 			fieldset {
-				border-color: rgb(52 52 52 / 1.0);
+				border-color: rgb(52 52 52);
 				border-style: double;
 			}
 
 			hr {
 				border: none;
-				border-top: double rgb(52 52 52 / 1.0);
+				border-top: double rgb(52 52 52);
 			}
 
 			&::-webkit-scrollbar-thumb {
@@ -57,4 +95,413 @@ html.dark {
 			}
 		}
 	}
+
+	body {
+		color: $primary-font-color;
+		background: $body-color;
+	}
+
+	#content {
+		color: $primary-font-color;
+	}
+
+	#version {
+		color: rgb(82  82 82);
+	}
+
+	.tooltipster-default {
+		box-shadow: 0 12px 14px 0 rgba(0 0 0 / 0.25);
+		border-radius: 5px;
+		background: linear-gradient(to bottom, $tooltipster-accent-light, $tooltipster-accent-dark);
+		color: rgb(236 236 236) !important
+	}
+
+	.tooltipster-arrow-left span,
+	.tooltipster-arrow-right span {
+		background: linear-gradient(-45deg,$tooltipster-accent-dark -100%, $tooltipster-accent-light 200%);
+	}
+
+	.tooltipster-arrow-top span,
+	.tooltipster-arrow-top-right span,
+	.tooltipster-arrow-top-left span {
+		background: $tooltipster-accent-dark;
+	}
+
+	#secondaryContent .snippet,
+	#tertiaryContent .snippet,
+	#statisticsSnippet.snippet,
+	.newsPost .wrapper {
+		background: linear-gradient(to bottom, $snippet-accent-light, $snippet-accent-dark) !important;
+		color: $primary-font-color;
+	}
+
+	#adduser .content,
+	#goldShopItemsContainer .shopItem,
+	#settings .content,
+	#shopItemsContainer .shopItem,
+	#tankinfo .content {
+		background: linear-gradient(to bottom, rgb(36 36 36) 10%, rgb(16 16 16) 90%);
+		color: rgb(227 227 227);
+	}
+
+	#createReplyButton:disabled,
+	#createThreadButton:disabled,
+	#overlay * button:disabled,
+	#overlay .messages.centre > form .rowContent .medium.tooltipstered:disabled,
+	#shopItemsContainer .shopItem .medium.buy:disabled,
+	.box.noselect .content,
+	.virtualShop.centre > div .shopItem.info .purchaseOption .medium.buy:disabled {
+		background: linear-gradient(to bottom, rgb(51 51 51) 10%, rgb(25 25 25) 90%);
+		color: rgb(255 255 255);
+	}
+
+	#overlay {
+		.achievement,
+		.messages .message,
+		.shopItem {
+			color: $primary-font-color;
+			background: linear-gradient(to bottom, rgb(36 36 36) 10%, rgb(16 16 16) 90%) !important;
+		}
+
+		.messages .message .headers {
+			border-bottom-color: rgb(255 255 255);
+		}
+	
+		.messages .message.important {
+			background: linear-gradient(to bottom, rgb(66 127 255), rgb(0 20 171)) !important;
+		}
+
+		.achievements .achievement.unlockedAndSeen {
+			background: linear-gradient(rgb(184 152 48), rgb(75 60 14)) !important;
+		}
+	}
+
+	.box .tab.bottom {
+		background: linear-gradient(-45deg, rgb(16 16 16) 70%, rgb(36 36 36) 300%) !important;
+	}
+
+	.box .tab.topRight {
+		background: linear-gradient(-45deg, rgb(16 16 16) -300%, rgb(36 36 36) 30%) !important;
+	}
+
+	.box .tab.left,
+	.box .tab.right {
+		background: linear-gradient(-45deg, rgb(16 16 16) -400%, rgb(36 36 36) 90%) !important;
+	}
+
+	button.disabled {
+		background: linear-gradient(to bottom, rgb(51 51 51), rgb(25 25 25));
+	}
+
+	.buttonGroup div:not(:last-child) button {
+		border-right-color: rgb(51 51 51 / 0.25);
+	}
+
+	.newsPost .wrapper .disk {
+		color: rgb(0 0 0);
+	}
+
+	#newsPost-29 .wrapper .content .bubble,
+	#newsPost-39 .wrapper .content .bubble {
+		background-color: rgb(54 54 54);
+		border-color: rgb(30 30 30);
+	}
+
+	#newsPost-54 .story {
+		background-color: rgb(54 54 54);
+	}
+
+	#newsPost-74 .facts {
+		background-color: rgb(54 54 54);
+	}
+
+	.ui-state-focus,
+	.ui-state-hover,
+	.ui-widget-content .ui-state-focus,
+	.ui-widget-content .ui-state-hover,
+	.ui-widget-header .ui-state-focus,
+	.ui-widget-header .ui-state-hover {
+		background-image: linear-gradient(rgb(28 28 28) 25%, rgb(24 24 24) 75%);
+		color: $primary-font-color;
+		border-color: rgb(22 22 22);
+	}
+
+	#chat {
+		$chat-normal-bg: rgb(34 34 34);
+		$chat-user-bg: rgb(0 45 3);
+		$chat-global-bg: rgb(31 47 61); 
+
+		form {
+			background-color: $chat-normal-bg;
+
+			textarea {
+				color: rgb(230 230 230);
+			}
+
+			.autocomplete-dropdown {
+				background-color: $chat-user-bg;
+				scrollbar-color: $chat-user-bg transparent;
+			}
+		}
+
+		&.user form {
+			background-color: $chat-user-bg
+		}
+		&.global form {
+			background-color: $chat-global-bg
+		}
+	}
+
+	body:not(.premium) {
+		#header {
+			background-image: asset("/header/background.png") !important;
+		}
+
+		@media (min-device-pixel-ratio:2),
+		(min-resolution:192dpi),
+		(min-resolution:2dppx) {
+			#header {
+				background-image: asset("/header/background@2x.png") !important;
+			}
+		}
+	}
+
+	#navigation {
+		$tab-styles: (
+			'#gameTab img': (
+				width: 320px,
+				height: 60px,
+				selectors: (
+					".selected": "header/tab1Selected",
+					".deselected": "header/tab1"
+				)
+			),
+			'#shopTab img': (
+				width: 120px,
+				height: 60px,
+				selectors: (
+					".selected": "header/tab2Selected",
+					".deselected": "header/tab2"
+				)
+			),
+			'#newsTab img': (
+				width: 120px,
+				height: 60px,
+				selectors: (
+					".selected": "header/tab3Selected",
+					".deselected": "header/tab3"
+				)
+			),
+			'#forumTab img': (
+				width: 120px,
+				height: 60px,
+				selectors: (
+					".selected": "header/tab4Selected",
+					".deselected": "header/tab4"
+				)
+			),
+			'#garageTab img': (
+				width: 120px,
+				height: 60px,
+				selectors: (
+					".selected": "header/tab5Selected",
+					".deselected": "header/tab5"
+				)
+			)
+		);
+
+		@include generate-images($tab-styles);
+	}
+
+	#newsPostsWrapper {
+		$tab-styles: (
+			'.newsPost img.pointer': (
+				width: 33px,
+				height: 20px,
+				selectors: (
+					"": "news/getimage"
+				)
+			),
+			'#newsPost-54 .original img': (
+				width: 200px,
+				height: 161px,
+				selectors: (
+					"": "news/getimage2"
+				)
+			)
+		);
+
+		#newsPost-25 .content {
+			background-image: assset("/news/getimage13.png") !important;
+		}
+
+		@include generate-images($tab-styles);
+	}
+
+	.forum {
+		color: $primary-font-color;
+
+		.bubble {
+			color: $primary-font-color;
+			background: rgb(32 32 32);
+			border-color: rgb(22 22 22);
+
+			.details {
+				color: rgb(153 153 153);
+			}
+		}
+		
+		.deleted .bubble {
+			color: rgb(204 204 204);
+			background: rgb(22 22 22);
+			border-color: rgb(35 35 35);
+
+			.details {
+				color: rgb(204 204 204);
+			}
+		}
+
+		.compose .bubble,
+		.editing .bubble {
+			background: rgb(32 32 32);
+		}
+		
+		.approvable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble,
+		.deletable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble,
+		.bannable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble {
+			border-color: rgb(107 86 12);
+			background: rgb(24 21 10);
+		}
+		
+		.thread.selectable:not(.editing) .bubble:hover {
+			background: rgb(22 22 22);
+		}
+		
+		.thread.selectable.approvable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble:hover,
+		.thread.selectable.deletable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble:hover,
+		.thread.selectable.bannable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble:hover {
+			background: rgb(38 32 12);
+		}
+		
+		.thread.selectable.deleted .bubble:hover {
+			background: rgb(16 16 16);
+		}
+
+		$paginator-styles: (
+			".button.back img": (
+				width: 77px,
+				height: 45px,
+				selectors: (
+					".active": "forum/backActive",
+					".standard": "forum/back"
+				)
+			),
+			".action.like img": (
+				width: 30px,
+				height: 30px,
+				selectors: (
+					".active": "forum/likeActive",
+					".standard": "forum/like"
+				)
+			),
+			".action.share img": (
+				width: 30px,
+				height: 30px,
+				selectors: (
+					".active": "forum/shareActive",
+					".standard": "forum/share"
+				)
+			),
+			".other .button.page img[src*=page0]": (
+				width: 37px,
+				height: 45px,
+				selectors: (
+					".active": "forum/page0Active",
+					".standard": "forum/page0",
+					".selected.active": "forum/page0SelectedActive",
+					".selected": "forum/page0Selected"
+				)
+			),
+			".other .button.page img[src*=page1]": (
+				width: 41px,
+				height: 45px,
+				selectors: (
+					".active": "forum/page1Active",
+					".standard": "forum/page1",
+					".selected.active": "forum/page1SelectedActive",
+					".selected": "forum/page1Selected"
+				)
+			),
+			".other .button.page img[src*=page2]": (
+				width: 37px,
+				height: 45px,
+				selectors: (
+					".active": "forum/page2Active",
+					".standard": "forum/page2",
+					".selected.active": "forum/page2SelectedActive",
+					".selected": "forum/page2Selected"
+				)
+			),
+			".other .button.page img[src*=page3]": (
+				width: 39px,
+				height: 45px,
+				selectors: (
+					".active": "forum/page3Active",
+					".standard": "forum/page3",
+					".selected.active": "forum/page3SelectedActive",
+					".selected": "forum/page3Selected"
+				)
+			),
+			".other .button.page img[src*=page4]": (
+				width: 32px,
+				height: 45px,
+				selectors: (
+					".active": "forum/page4Active",
+					".standard": "forum/page4",
+					".selected.active": "forum/page4SelectedActive",
+					".selected": "forum/page4Selected"
+				)
+			),
+			".other .button.page img[src*=page5]": (
+				width: 40px,
+				height: 45px,
+				selectors: (
+					".active": "forum/page5Active",
+					".standard": "forum/page5",
+					".selected.active": "forum/page5SelectedActive",
+					".selected": "forum/page5Selected"
+				)
+			),
+			".newest .button.page.newest img": (
+				width: 51px,
+				height: 45px,
+				selectors: (
+					".standard": "forum/pageNewest",
+					".active": "forum/pageNewestActive",
+					".selected": "forum/pageNewestSelected",
+					".selected.active": "forum/pageNewestSelectedActive"
+				)
+			),
+			".oldest .button.page.oldest img": (
+				width: 51px,
+				height: 45px,
+				selectors: (
+					".standard": "forum/pageOldest",
+					".active": "forum/pageOldestActive",
+					".selected": "forum/pageOldestSelected",
+					".selected.active": "forum/pageOldestSelectedActive"
+				)
+			),
+			".ellipsis img:not([style*='width: 0px'])": (
+				width: 36px,
+				height: 45px,
+				selectors: (
+					"": "forum/ellipsis"
+				)
+			)
+		);
+	
+		@include generate-images($paginator-styles);
+	}
+
 }

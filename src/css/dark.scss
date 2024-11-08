@@ -39,9 +39,9 @@ $tooltipster-accent-dark: rgb(25 25 25);
 
 html.dark {
 	--jq-widget-header-bg: url("https://download.jqueryui.com/themeroller/images/ui-bg_highlight-soft_75_131313_1x100.png");
-	--jq-widget-button-disabled-hovered-or-active-bg: asset("/jquery-ui/ui-bg-glass-variant-01.png");
-	--jq-widget-hover-or-focus: asset("/jquery-ui/ui-bg-glass-variant-02.png");
-	--jq-widget-active: asset("/jquery-ui/ui-bg-glass-variant-02.png");
+	--jq-widget-button-disabled-hovered-or-active-bg: #{asset("/jquery-ui/ui-bg-glass-variant-01.png")};
+	--jq-widget-hover-or-focus: #{asset("/jquery-ui/ui-bg-glass-variant-02.png")};
+	--jq-widget-active: #{asset("/jquery-ui/ui-bg-glass-variant-02.png")};
 	--jq-widget-highlighted: url("https://download.jqueryui.com/themeroller/images/ui-bg_glass_55_fbf9ee_1x400.png");
 	--jq-widget-errored: url("https://download.jqueryui.com/themeroller/images/ui-bg_glass_95_fef1ec_1x400.png");
 	--jq-bgColorHeader: rgb(33 33 33);
@@ -129,9 +129,12 @@ html.dark {
 
 	#secondaryContent .snippet,
 	#tertiaryContent .snippet,
-	#statisticsSnippet.snippet,
-	.newsPost .wrapper {
+	#statisticsSnippet.snippet {
+		color: $primary-font-color;
 		background: linear-gradient(to bottom, $snippet-accent-light, $snippet-accent-dark) !important;
+	}
+	.newsPost .wrapper {
+		background: linear-gradient(to bottom, $snippet-accent-light, $snippet-accent-dark);
 		color: $primary-font-color;
 	}
 
@@ -323,6 +326,13 @@ html.dark {
 				)
 			),
 			'#newsPost-54 .original img': (
+				width: 200px,
+				height: 161px,
+				selectors: (
+					"": "news/getimage2"
+				)
+			),
+			'newwsPost-85 .img.sketch': (
 				width: 200px,
 				height: 161px,
 				selectors: (

@@ -116,8 +116,9 @@ UIGameIconImage.prototype.spawn = function(x, y, gameState, favouriteActiveQueue
 	this.mode = gameState.getMode();
 	this.ranked = gameState.getRanked();
 	this.playerStates = gameState.getPlayerStates();
-	this.iconPlacements = createPolygon(gameState.getMaxActivePlayerCount(), 280, 190);
 	this.favouriteActiveQueuedCounts = favouriteActiveQueuedCounts;
+	this.iconPlacements = createPolygon(gameState.getMaxActivePlayerCount(), 140 * Math.max(this.game.device.pixelRatio), 95 * Math.max(this.game.device.pixelRatio));
+
 	this._updateUI();
 	const delay = 50 + (Math.random() * 200);
 	if (this.removeTween) this.removeTween.stop();
@@ -132,7 +133,7 @@ UIGameIconImage.prototype.refresh = function(gameState, favouriteActiveQueuedCou
 	this.mode = gameState.getMode();
 	this.ranked = gameState.getRanked();
 	this.playerStates = gameState.getPlayerStates();
-	this.iconPlacements = createPolygon(gameState.getMaxActivePlayerCount(), 280, 190);
+	this.iconPlacements = createPolygon(gameState.getMaxActivePlayerCount(), 140 * Math.max(this.game.device.pixelRatio), 95 * Math.max(this.game.device.pixelRatio));
 	this.favouriteActiveQueuedCounts = favouriteActiveQueuedCounts;
 	this._updateUI();
 };
@@ -147,7 +148,8 @@ UIGameIconImage.prototype.addPlaceholder = function(placement) {
 			placement
 		});
 
-		tankPlaceholderSprite.spawn(placement.x - 140, placement.y - 120, placement.flipped, true, this.iconsScale);
+		const size = Math.max(this.game.device.pixelRatio);
+		tankPlaceholderSprite.spawn(placement.x - (70 * size), placement.y - (60 * size), placement.flipped, true, this.iconsScale);
 	}
 };
 
@@ -218,8 +220,9 @@ UIGameIconImage.prototype._updateUI = function() {
 				placement
 			});
 
-			tankIconSprite.spawn(placement.x - 140, placement.y - 120, playerState.getPlayerId(), placement.flipped, true, this.iconsScale);
-			tankNameSprite.spawn(placement.x - 140, placement.y - (40 * (1 / this.iconsScale)), playerState.getPlayerId(), this.iconsScale, this.ranked);
+			const size = Math.max(this.game.device.pixelRatio);
+			tankIconSprite.spawn(placement.x - (70 * size), placement.y - (60 * size), playerState.getPlayerId(), placement.flipped, true, this.iconsScale);
+			tankNameSprite.spawn(placement.x - (70 * size), placement.y - ((20 * size) * (1 / this.iconsScale)), playerState.getPlayerId(), this.iconsScale, this.ranked);
 		}
 	}
 };

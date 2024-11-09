@@ -205,43 +205,77 @@ const handleThreadOrReply = threadOrReply => {
 
 		addFeaturesToThreadOrReply(threadOrReply, threadOrReplyElement);
 		threadOrReply.html[key] = threadOrReplyElement;
-		threadOrReply.html.backup = html;
+		threadOrReply.html._backup = html;
 	} else if (html instanceof $) {
 		// For some reason, the post breaks if it's already
 		// been parsed through here. Therefore, we pull
 		// from the backup html we set, and re-apply the changes
-		const threadOrReplyElement = $($.parseHTML(threadOrReply.html.backup));
+		const threadOrReplyElement = $($.parseHTML(threadOrReply.html._backup));
 
 		addFeaturesToThreadOrReply(threadOrReply, threadOrReplyElement);
 		threadOrReply.html[key] = threadOrReplyElement;
 	}
 };
 
-const threadListChanged = ForumView.getMethod('threadListChanged');
-ForumView.method('threadListChanged', function(...args) {
-	const threadList = args.shift();
-	for (const thread of threadList) handleThreadOrReply(thread);
+/**
+ * Infer post type from <any>
+ * @param item Post item
+ * @returns Type or null if undefined
+ */
+const getPostType = item => {
+	if (typeof item === 'number') return 'postId';
+	if (item instanceof Array) return 'postList';
+	if (item instanceof Object) return 'post';
+	return null;
+};
 
-	const result = threadListChanged.apply(this, [threadList, ...args]);
-	return result;
+/**
+ * Handle an incoming post item (proxy handler)
+ * @param {...any} args Function arguments
+ */
+// eslint-disable-next-line complexity
+const postHandler = (...args) => {
+	const [postItem] = args;
+	const { model } = Forum.getInstance();
+
+	switch (getPostType(postItem)) {
+		case 'postId':
+			// Both thread and reply with id might exist
+			// but the chances are very slim so we ignore that
+			handleThreadOrReply(model.getThreadById(postItem) || model.getReplyById(postItem));
+			break;
+		case 'postList':
+			for (const post of postItem) handleThreadOrReply(post);
+			break;
+		case 'post':
+			handleThreadOrReply(postItem);
+			break;
+		default:
+			break;
+	}
+};
+
+const proxy = new Proxy({}, {
+	get(_target, prop) {
+		if (/(?:thread|reply)/ui.test(prop)) return postHandler;
+		return () => {};
+	},
+	set(_target, _prop, value) {
+		return value;
+	}
 });
 
-const replyListChanged = ForumView.getMethod('replyListChanged');
-ForumView.method('replyListChanged', function(...args) {
-	const replyList = args.shift();
-	for (const thread of replyList) handleThreadOrReply(thread);
+const { getInstance } = Forum;
+Forum.classMethod('getInstance', function(...args) {
+	const hadInstance = Boolean(Forum.instance);
+	const instance = getInstance.apply(this, args);
 
-	const result = replyListChanged.apply(this, [replyList, ...args]);
-	return result;
-});
+	if (!hadInstance) {
+		instance.model.threadListChangeListeners =  [proxy, ...instance.model.threadListChangeListeners];
+		instance.model.replyListChangeListeners =  [proxy, ...instance.model.replyListChangeListeners];
+	}
 
-const getSelectedThread = ForumModel.getMethod('getSelectedThread');
-ForumModel.method('getSelectedThread', function(...args) {
-	const result = getSelectedThread.apply(this, [...args]);
-
-	handleThreadOrReply(result);
-
-	return result;
+	return instance;
 });
 
 export const _isESmodule = true;

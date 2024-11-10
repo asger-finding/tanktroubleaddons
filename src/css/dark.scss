@@ -3,6 +3,7 @@
 $assets: "chrome-extension://__MSG_@@extension_id__/assets/darktheme";
 $body-color: rgb(26 26 26);
 $primary-font-color: rgb(255 255 255);
+$button-color: rgb(255 255 255);
 $snippet-accent-light: rgb(41 41 41);
 $snippet-accent-dark: rgb(32 32 32);
 $tooltipster-accent-light: rgb(51 51 51);
@@ -110,21 +111,19 @@ html.dark {
 	}
 
 	.tooltipster-default {
-		box-shadow: 0 12px 14px 0 rgba(0 0 0 / 0.25);
-		border-radius: 5px;
+		color: rgb(236 236 236) !important;
 		background: linear-gradient(to bottom, $tooltipster-accent-light, $tooltipster-accent-dark);
-		color: rgb(236 236 236) !important
-	}
 
-	.tooltipster-arrow-left span,
-	.tooltipster-arrow-right span {
-		background: linear-gradient(-45deg,$tooltipster-accent-dark -100%, $tooltipster-accent-light 200%);
-	}
+		.tooltipster-arrow-left span,
+		.tooltipster-arrow-right span {
+			background: linear-gradient(-45deg,$tooltipster-accent-dark -100%, $tooltipster-accent-light 200%);
+		}
 
-	.tooltipster-arrow-top span,
-	.tooltipster-arrow-top-right span,
-	.tooltipster-arrow-top-left span {
-		background: $tooltipster-accent-dark;
+		.tooltipster-arrow-top span,
+		.tooltipster-arrow-top-right span,
+		.tooltipster-arrow-top-left span {
+			background: $tooltipster-accent-dark;
+		}
 	}
 
 	#secondaryContent .snippet,
@@ -134,8 +133,8 @@ html.dark {
 		background: linear-gradient(to bottom, $snippet-accent-light, $snippet-accent-dark) !important;
 	}
 	.newsPost .wrapper {
-		background: linear-gradient(to bottom, $snippet-accent-light, $snippet-accent-dark);
 		color: $primary-font-color;
+		background: linear-gradient(to bottom, $snippet-accent-light, $snippet-accent-dark);
 	}
 
 	#adduser .content,
@@ -143,19 +142,18 @@ html.dark {
 	#settings .content,
 	#shopItemsContainer .shopItem,
 	#tankinfo .content {
-		background: linear-gradient(to bottom, rgb(36 36 36) 10%, rgb(16 16 16) 90%);
 		color: rgb(227 227 227);
+		background: linear-gradient(to bottom, rgb(36 36 36) 10%, rgb(16 16 16) 90%);
 	}
 
 	#createReplyButton:disabled,
 	#createThreadButton:disabled,
-	#overlay * button:disabled,
 	#overlay .messages.centre > form .rowContent .medium.tooltipstered:disabled,
 	#shopItemsContainer .shopItem .medium.buy:disabled,
 	.box.noselect .content,
 	.virtualShop.centre > div .shopItem.info .purchaseOption .medium.buy:disabled {
+		color: $button-color;
 		background: linear-gradient(to bottom, rgb(51 51 51) 10%, rgb(25 25 25) 90%);
-		color: rgb(255 255 255);
 	}
 
 	#overlay {
@@ -224,8 +222,8 @@ html.dark {
 	.ui-widget-content .ui-state-hover,
 	.ui-widget-header .ui-state-focus,
 	.ui-widget-header .ui-state-hover {
-		background-image: linear-gradient(rgb(28 28 28) 25%, rgb(24 24 24) 75%);
 		color: $primary-font-color;
+		background-image: linear-gradient(rgb(28 28 28) 25%, rgb(24 24 24) 75%);
 		border-color: rgb(22 22 22);
 	}
 
@@ -379,8 +377,8 @@ html.dark {
 		.approvable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble,
 		.deletable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble,
 		.bannable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble {
-			border-color: rgb(107 86 12);
 			background: rgb(24 21 10);
+			border-color: rgb(107 86 12);
 		}
 		
 		.thread.selectable:not(.editing) .bubble:hover {

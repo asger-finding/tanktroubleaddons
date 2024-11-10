@@ -1,64 +1,9 @@
 import UIPlaceholderIconImage from './uiplaceholdericonimage.js';
+import { createPolygon } from '../utils/mathUtils.js';
 
 // TODO: add garage-like arrow scroller instead
 
-/**
- * @typedef {object} Polygon
- * @property {number} x Title for the section
- * @property {number} y Unique id for the section
- * @property {boolean} flipped Does the site need to reload for the change to take effect?
- */
-
-/**
- * Rounds a float to the nearest decimal point `precision`
- * @param {number} value Value to round
- * @param {number} precision Integer: decimals to round to
- * @returns {number} Rounded float
- */
-const roundToPrecision = (value, precision = 6) => {
-	const factor = Math.pow(10, precision);
-	return Math.round(value * factor) / factor;
-};
-
-/**
- * Generate a polygon with n amount of points and transform it as given
- * @param points Amount of points to add
- * @param width Width of the returned polygon
- * @param height Height of the returned polygon
- * @param rotation Rotation translation
- * @returns {Polygon} New polygon
- */
-const createPolygon = (points, width = 1, height = 1, rotation = Math.PI / points + Math.PI / 2) => {
-	const vertices = [];
-
-	for (let i = 0; i < points; i++) {
-		const angle = (i * (2 * Math.PI / points)) + rotation;
-		const x = Math.cos(angle);
-		const y = Math.sin(angle);
-		vertices.push([x, y]);
-	}
-
-	// Find the min and max for both x and y
-	const xValues = vertices.map(([x]) => x);
-	const yValues = vertices.map(([, y]) => y);
-
-	const minX = Math.min(...xValues);
-	const maxX = Math.max(...xValues);
-	const minY = Math.min(...yValues);
-	const maxY = Math.max(...yValues);
-
-	const normalizedVertices = vertices.map(([x, y]) => {
-		const normalizedX = (x - minX) / (maxX - minX);
-		const normalizedY = (y - minY) / (maxY - minY);
-		return {
-			x: roundToPrecision(normalizedX * width, 6),
-			y: roundToPrecision(normalizedY * height, 6),
-			flipped: normalizedX > 0.5
-		};
-	});
-
-	return normalizedVertices;
-};
+const resolutionScale = UIUtils.getLoadedAssetResolutionScale(devicePixelRatio);
 
 UIConstants.classFields({
 	GAME_ICON_TANK_COUNT: UIConstants.TANK_POOL_SIZE,
@@ -67,6 +12,15 @@ UIConstants.classFields({
 	GAME_ICON_WIDTH: UIConstants.GAME_ICON_WIDTH / 1.7,
 	GAME_ICON_HEIGHT: UIConstants.GAME_ICON_HEIGHT / 1.7
 });
+
+/**
+ * @typedef {object} Polygon
+ * @property {number} x Title for the section
+ * @property {number} y Unique id for the section
+ * @property {boolean} flipped Does the site need to reload for the change to take effect?
+ */
+
+
 
 UIGameIconImage = function(game) {
 	Phaser.Image.call(this, game, 0, 0, 'gameicon');
@@ -116,9 +70,8 @@ UIGameIconImage.prototype.spawn = function(x, y, gameState, favouriteActiveQueue
 	this.mode = gameState.getMode();
 	this.ranked = gameState.getRanked();
 	this.playerStates = gameState.getPlayerStates();
+	this.iconPlacements = createPolygon(gameState.getMaxActivePlayerCount(), 140 * resolutionScale, 95 * resolutionScale);
 	this.favouriteActiveQueuedCounts = favouriteActiveQueuedCounts;
-	this.iconPlacements = createPolygon(gameState.getMaxActivePlayerCount(), 140 * Math.max(this.game.device.pixelRatio), 95 * Math.max(this.game.device.pixelRatio));
-
 	this._updateUI();
 	const delay = 50 + (Math.random() * 200);
 	if (this.removeTween) this.removeTween.stop();
@@ -133,7 +86,7 @@ UIGameIconImage.prototype.refresh = function(gameState, favouriteActiveQueuedCou
 	this.mode = gameState.getMode();
 	this.ranked = gameState.getRanked();
 	this.playerStates = gameState.getPlayerStates();
-	this.iconPlacements = createPolygon(gameState.getMaxActivePlayerCount(), 140 * Math.max(this.game.device.pixelRatio), 95 * Math.max(this.game.device.pixelRatio));
+	this.iconPlacements = createPolygon(gameState.getMaxActivePlayerCount(), 140 * resolutionScale, 95 * resolutionScale);
 	this.favouriteActiveQueuedCounts = favouriteActiveQueuedCounts;
 	this._updateUI();
 };
@@ -148,8 +101,7 @@ UIGameIconImage.prototype.addPlaceholder = function(placement) {
 			placement
 		});
 
-		const size = Math.max(this.game.device.pixelRatio);
-		tankPlaceholderSprite.spawn(placement.x - (70 * size), placement.y - (60 * size), placement.flipped, true, this.iconsScale);
+		tankPlaceholderSprite.spawn(placement.x - 70 * resolutionScale, placement.y - 60 * resolutionScale, placement.flipped, true, this.iconsScale);
 	}
 };
 
@@ -168,8 +120,7 @@ UIGameIconImage.prototype._updateUI = function() {
 		: Math.exp(-0.4 * (this.iconPlacements.length - 5));
 
 	const shift = this.icons.length;
-	for (let i = 0; i < this.iconPlacements.length - shift; i++)
-		this.addPlaceholder(this.iconPlacements[i + shift]);
+	for (let i = 0; i < this.iconPlacements.length - shift; i++) this.addPlaceholder(this.iconPlacements[i + shift]);
 
 	for (let i = 0; i < this.icons.length; i++) {
 		const icon = this.icons[i];
@@ -184,8 +135,7 @@ UIGameIconImage.prototype._updateUI = function() {
 
 			this.icons.splice(i);
 
-			for (let j = this.icons.length; j < this.iconPlacements.length; j++)
-				this.addPlaceholder(this.iconPlacements[j]);
+			for (let j = this.icons.length; j < this.iconPlacements.length; j++) this.addPlaceholder(this.iconPlacements[j]);
 		}
 	}
 
@@ -220,9 +170,8 @@ UIGameIconImage.prototype._updateUI = function() {
 				placement
 			});
 
-			const size = Math.max(this.game.device.pixelRatio);
-			tankIconSprite.spawn(placement.x - (70 * size), placement.y - (60 * size), playerState.getPlayerId(), placement.flipped, true, this.iconsScale);
-			tankNameSprite.spawn(placement.x - (70 * size), placement.y - ((20 * size) * (1 / this.iconsScale)), playerState.getPlayerId(), this.iconsScale, this.ranked);
+			tankIconSprite.spawn(placement.x - 70 * resolutionScale, placement.y - 60 * resolutionScale, playerState.getPlayerId(), placement.flipped, true, this.iconsScale);
+			tankNameSprite.spawn(placement.x - 70 * resolutionScale, placement.y - (20 * resolutionScale * (1 / this.iconsScale)), playerState.getPlayerId(), this.iconsScale, this.ranked);
 		}
 	}
 };

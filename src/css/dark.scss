@@ -318,7 +318,7 @@ html.dark {
 		$tab-styles: (
 			'.newsPost img.pointer': (
 				width: 33px,
-				height: 20px,
+				height: 29px,
 				selectors: (
 					"": "news/getimage"
 				)
@@ -330,7 +330,7 @@ html.dark {
 					"": "news/getimage2"
 				)
 			),
-			'newwsPost-85 .img.sketch': (
+			'#newsPost-85 img.sketch': (
 				width: 200px,
 				height: 161px,
 				selectors: (
@@ -340,7 +340,7 @@ html.dark {
 		);
 
 		#newsPost-25 .content {
-			background-image: assset("/news/getimage13.png") !important;
+			background-image: asset("/news/getimage13.png") !important;
 		}
 
 		@include generate-images($tab-styles);

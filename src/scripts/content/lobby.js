@@ -13,15 +13,6 @@ UIConstants.classFields({
 	GAME_ICON_HEIGHT: UIConstants.GAME_ICON_HEIGHT / 1.7
 });
 
-/**
- * @typedef {object} Polygon
- * @property {number} x Title for the section
- * @property {number} y Unique id for the section
- * @property {boolean} flipped Does the site need to reload for the change to take effect?
- */
-
-
-
 UIGameIconImage = function(game) {
 	Phaser.Image.call(this, game, 0, 0, 'gameicon');
 	this.anchor.setTo(0.5, 0.5);

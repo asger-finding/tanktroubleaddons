@@ -38,7 +38,7 @@ $tooltipster-accent-dark: rgb(25 25 25);
 	}
 }
 
-html.dark {
+:root.dark {
 	--jq-widget-header-bg: url("https://download.jqueryui.com/themeroller/images/ui-bg_highlight-soft_75_131313_1x100.png");
 	--jq-widget-button-disabled-hovered-or-active-bg: #{asset("/jquery-ui/ui-bg-glass-variant-01.png")};
 	--jq-widget-hover-or-focus: #{asset("/jquery-ui/ui-bg-glass-variant-02.png")};
@@ -74,6 +74,9 @@ html.dark {
 	--jq-iconColorErroor: rgb(205 10 10);
 	--jq-bgColorOverlay: rgb(170 170 170);
 	--jq-bgColorShadow: rgb(170 170 170);
+
+	--highlight-post-background-color: rgb(42 63 32 / 1.0);
+	--highlight-post-border-color: rgb(80 108 0 / 1.0);
 
 	#addons-menu {
 		--lightness: 50%;

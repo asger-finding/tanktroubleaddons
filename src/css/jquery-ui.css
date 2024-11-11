@@ -11,6 +11,11 @@
 	--jq-widget-active: url("https://download.jqueryui.com/themeroller/images/ui-bg_glass_75_dadada_1x400.png");
 	--jq-widget-highlighted: url("https://download.jqueryui.com/themeroller/images/ui-bg_glass_55_fbf9ee_1x400.png");
 	--jq-widget-errored: url("https://download.jqueryui.com/themeroller/images/ui-bg_glass_95_fef1ec_1x400.png");
+	--jq-ui-icon-primary: url("https://code.jquery.com/ui/1.11.4/themes/smoothness/images/ui-icons_222222_256x240.png");
+	--jq-ui-icon-accent: url("https://code.jquery.com/ui/1.11.4/themes/smoothness/images/ui-icons_888888_256x240.png");
+	--jq-ui-icon-action: url("https://code.jquery.com/ui/1.11.4/themes/smoothness/images/ui-icons_454545_256x240.png");;
+	--jq-ui-icon-highlight: url("https://code.jquery.com/ui/1.11.4/themes/smoothness/images/ui-icons_2e83ff_256x240.png");
+	--jq-ui-icon-error: url("https://code.jquery.com/ui/1.11.4/themes/smoothness/images/ui-icons_cd0a0a_256x240.png");
 
 	--jq-bgColorHeader: #cccccc;
 	--jq-borderColorHeader: #aaaaaa;
@@ -1076,27 +1081,27 @@ a.ui-button:active,
 }
 .ui-icon,
 .ui-widget-content .ui-icon {
-	background-image: url("https://code.jquery.com/ui/1.11.4/themes/smoothness/images/ui-icons_222222_256x240.png");
+	background-image: var(--jq-ui-icon-primary);
 }
 .ui-widget-header .ui-icon {
-	background-image: url("https://code.jquery.com/ui/1.11.4/themes/smoothness/images/ui-icons_222222_256x240.png");
+	background-image: var(--jq-ui-icon-primary);
 }
 .ui-state-default .ui-icon {
-	background-image: url("https://code.jquery.com/ui/1.11.4/themes/smoothness/images/ui-icons_888888_256x240.png");
+	background-image: var(--jq-ui-icon-accent);
 }
 .ui-state-hover .ui-icon,
 .ui-state-focus .ui-icon {
-	background-image: url("https://code.jquery.com/ui/1.11.4/themes/smoothness/images/ui-icons_454545_256x240.png");
+	background-image: var(--jq-ui-icon-action);
 }
 .ui-state-active .ui-icon {
-	background-image: url("https://code.jquery.com/ui/1.11.4/themes/smoothness/images/ui-icons_454545_256x240.png");
+	background-image: var(--jq-ui-icon-action);
 }
 .ui-state-highlight .ui-icon {
-	background-image: url("https://code.jquery.com/ui/1.11.4/themes/smoothness/images/ui-icons_2e83ff_256x240.png");
+	background-image: var(--jq-ui-icon-highlight);
 }
 .ui-state-error .ui-icon,
 .ui-state-error-text .ui-icon {
-	background-image: url("https://code.jquery.com/ui/1.11.4/themes/smoothness/images/ui-icons_cd0a0a_256x240.png");
+	background-image: var(--jq-ui-icon-error);
 }
 
 /* positioning */

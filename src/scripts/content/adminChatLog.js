@@ -24,6 +24,12 @@ import ProxyHelper from '../utils/proxyHelper.js';
  */
 
 /**
+ * @typedef {((message: ChatLogMessage) => boolean)} ChatLogFilter
+ * Function that evalues a ChatLogMessage and returns true or false
+ * depending on whether it should be included
+ */
+
+/**
  * Enum for message types
  * @readonly
  * @enum {string}
@@ -44,7 +50,8 @@ const MESSAGE_TYPES = {
 const FILTERS = {
 	...MESSAGE_TYPES,
 	ALL: 'all',
-	IN_GAME_ONLY: 'in-game-only'
+	IN_GAME_ONLY: 'in-game-only',
+	MULTIPLE_SENDERS: 'multiple-users'
 };
 
 const dbName = 'addons';
@@ -246,12 +253,12 @@ const getChatMessagesByPlayerId = async(adminId, playerId, offset, limit, cacheD
  * @param {number} offset Offset in the chat messages list to start from
  * @param {number} limit Total number of messages to fetch
  * @param {IDBDatabase} cacheDb IndexedDB database to cache to
- * @param {string} filterType Type of message to filter by (e.g., MESSAGE_TYPES.GLOBAL)
+ * @param {(ChatLogMessage) => boolean} filter Type of message to filter by (e.g., MESSAGE_TYPES.GLOBAL)
  * @returns {AsyncGenerator<ChatLogMessage[], void, unknown>} Generator yielding batches of chat messages
  * @yields Chat logs that match filter
  */
 // eslint-disable-next-line max-params
-async function* fetchFilteredChatMessages(adminId, playerId, offset, limit, cacheDb, filterType) {
+async function* fetchFilteredChatMessages2(adminId, playerId, offset, limit, cacheDb, filter) {
 	const fetchedMessages = [];
 	let currentOffset = offset;
 
@@ -261,37 +268,71 @@ async function* fetchFilteredChatMessages(adminId, playerId, offset, limit, cach
 
 		if (!messagesBatch.length) break;
 
-		const filteredBatch = messagesBatch.filter(msg => msg.type === filterType);
-
 		// Add filtered messages to the result set
+		const filteredBatch = messagesBatch.filter(msg => filter(msg));
 		fetchedMessages.push(...filteredBatch);
 
-		// If we’ve met the limit, yield the result
+		// If we’ve met the desired limit, yield the result
 		if (fetchedMessages.length >= limit) {
 			yield fetchedMessages.slice(0, limit);
 			return;
 		}
 
-		// Update the offset for the next batch
+		// Update offset for the next batch
 		currentOffset += messagesBatch.length;
 	}
 
-	// Yield remaining messages if fewer than limit
+	// Yield remaining messages if there
+	// were fewer matches than the limit
 	yield fetchedMessages;
+}
+
+/**
+ *
+ * @param adminId
+ * @param playerId
+ * @param offset
+ * @param limit
+ * @param cacheDb
+ * @param filter
+ */
+async function* fetchFilteredChatMessages(adminId, playerId, offset, limit, cacheDb, filter) {
+	let currentOffset = offset;
+	let totalFetched = 0;
+
+	while (totalFetched < limit) {
+		// Fetch messages in batches
+		const messagesBatch = await getChatMessagesByPlayerId(adminId, playerId, currentOffset, limit, cacheDb);
+
+		if (!messagesBatch.length) break;
+
+		// Filter the current batch based on the provided filter function
+		const filteredBatch = messagesBatch.filter(filter);
+
+		// If we have filtered messages, yield them immediately for progressive rendering
+		if (filteredBatch.length) {
+			yield filteredBatch.slice(0, limit - totalFetched);
+			totalFetched += filteredBatch.length;
+		}
+
+		// Update the offset for the next request
+		currentOffset += messagesBatch.length;
+	}
 }
 
 /**
  * Render a chatlog object to a HTMLElement
  * @param {ChatLogMessage} chatMessage Message content
+ * @param {string} adminId Admin playerId
  * @returns {HTMLDivElement} Chatlog element
  */
-const renderChatMessage = chatMessage => {
+const renderChatMessage = (chatMessage, adminId) => {
 	const { serverName, gameId } = chatMessage;
 
 	const wrapper = document.createElement('div');
 	wrapper.classList.add('chatMessage', 'listItem', 'first');
-	wrapper.id = `chatMessage-${ serverName }${ gameId ? `-${ gameId }` : '' }-${ chatMessage.id }`;
-	wrapper.dataset.id = chatMessage.id;
+	wrapper.id = `chatMessage-${ serverName }${ gameId ? `-${ gameId }` : '' }-${ chatMessage.messageId }`;
+	wrapper.dataset.id = chatMessage.messageId;
 	wrapper.dataset.serverName = serverName;
 	wrapper.dataset.gameId = gameId;
 
@@ -299,14 +340,159 @@ const renderChatMessage = chatMessage => {
 	expandButton.classList.add('expand', 'small');
 	expandButton.type = 'button';
 	expandButton.tabIndex = '-1';
+	expandButton.innerText = '+';
 
 	expandButton.addEventListener('click', () => {
-		TankTrouble.AdminChatLogOverlay._getChatMessagesByTime(chatMessage.id, chatMessage.created, contextServerName, contextGameId);
+		TankTrouble.AdminChatLogOverlay._getChatMessagesByTime(chatMessage.messageId, chatMessage.created, serverName, gameId);
 	});
 
-	wrapper.append(expandButton);
+	const details = document.createElement('div');
+	details.classList.add('details');
+
+	const time = document.createElement('span');
+	time.classList.add('time');
+	time.innerText = new Date(chatMessage.created * 1000)
+		.toISOString()
+		.slice(0, -8)
+		.replace(/[TtZz]/gu, ' ');
+
+	const server = document.createTextNode(`${ serverName } `);
+
+	let usernames = document.createElement('span');
+	AdminUtils.createPlayerNamesWithLookupByPlayerIds(chatMessage.senders, adminId, result => {
+		// eslint-disable-next-line prefer-destructuring
+		usernames = result[0];
+	});
+
+	const colon = document.createTextNode(': ');
+
+	const message = document.createElement('span');
+	message.classList.add('message');
+	message.innerText = chatMessage.message;
+
+	if (chatMessage.type === MESSAGE_TYPES.GLOBAL) message.classList.add('global');
+	else if (chatMessage.type === MESSAGE_TYPES.USER) message.classList.add('private');
+
+	details.append(time, server, usernames, colon, message);
+	wrapper.append(expandButton, details);
 
 	return wrapper;
+};
+
+/**
+ *
+ * @param {number} offset
+ * @param {number} limit
+ * @param filter
+ * @param {number} page
+ * @returns {chatMessage[]} Array of filtered chat messages
+ */
+// eslint-disable-next-line complexity
+TankTrouble.AdminChatLogOverlay.filterAndRenderMessages = async function(offset, limit, filter = FILTERS.ALL, page = 0) {
+	const disabled = this.wrapper.find(`:not(.navigation):not(.paginator) button, .paginator button[data-page="${ page }"]`);
+	disabled.prop('disabled', true);
+
+	this.chatMessages.empty();
+
+	const loadingMessage = $('<div class="subHeader"><span class="ui-icon ui-icon-alert"></span>Loading messages . . .</div>')
+		.css('display', 'inline-block')
+		.insertAfter(this.messageTypeFilter);
+
+	/** @type {ChatLogFilter} */
+	let messageFilter = () => true;
+
+	switch (filter) {
+		case FILTERS.LOCAL:
+			/** @type {ChatLogFilter} */
+			messageFilter = ({ type }) => type === MESSAGE_TYPES.LOCAL;
+			break;
+		case FILTERS.GLOBAL:
+			/** @type {ChatLogFilter} */
+			messageFilter = ({ type }) => type === MESSAGE_TYPES.GLOBAL;
+			break;
+		case FILTERS.USER:
+			/** @type {ChatLogFilter} */
+			messageFilter = ({ type }) => type === MESSAGE_TYPES.USER;
+			break;
+		case FILTERS.IN_GAME_ONLY:
+			/** @type {ChatLogFilter} */
+			messageFilter = ({ gameId }) => gameId !== null;
+			break;
+		case FILTERS.MULTIPLE_SENDERS:
+			/** @type {ChatLogFilter} */
+			messageFilter = ({ senders }) => senders.length > 1;
+			break;
+		case FILTERS.ALL:
+		default:
+			break;
+	}
+
+	const [playerId] = this.playerIds;
+
+	const messageGenerator = fetchFilteredChatMessages(
+		this.adminId,
+		playerId,
+		offset,
+		limit,
+		Addons.chatlogDb,
+		messageFilter
+	);
+
+	const messages = [];
+	for await (const incomingMessages of messageGenerator) {
+		// Render each batch of new messages as they arrive
+		incomingMessages.reverse().forEach(newMessage => {
+			messages.push(newMessage);
+
+			const chatMessage = renderChatMessage(newMessage, this.adminId);
+			this.chatMessages.append(chatMessage);
+		});
+	}
+
+	loadingMessage.remove();
+	this._updateButtonsAndDividers();
+
+	return messages;
+};
+
+/**
+ *
+ * @param lastOffset
+ * @param nextOffset
+ * @param pageIndex
+ * @param limit
+ * @param callback
+ */
+const createVariablePaginator = (lastOffset, nextOffset, pageIndex, limit, callback) => {
+	const page = Math.max(1, pageIndex);
+	const paginator = $('<div class="paginator"/>');
+
+	if (page > 1) {
+		$(`<button class='small' type='button' data-page='${ page - 1 }' tabindex='-1'>${ page - 1 }</div>`)
+			.appendTo(paginator)
+			.on('click', () => {
+				callback(lastOffset, limit, page - 1);
+			});
+	}
+
+	$(`<button class='small' type='button' data-page='${ page }' tabindex='-1' disabled="true">${ page }</div>`)
+		.appendTo(paginator);
+
+	$(`<button class='small' type='button' data-page='${ page + 1 }' tabindex='-1'>${ page + 1 }</div>`)
+		.appendTo(paginator)
+		.on('click', () => {
+			callback(nextOffset, limit, page + 1);
+		});
+
+	$('<div class="subHeader">. . .</div>')
+		.appendTo(paginator)
+		.css({
+			marginLeft: '10px',
+			display: 'inline-block',
+			verticalAlign: 'text-top'
+		});
+
+	return paginator;
 };
 
 openMessagesDatabase().then(async cacheDb => {
@@ -324,22 +510,41 @@ openMessagesDatabase().then(async cacheDb => {
 		overlay.messageTypeFilter.append(`<option value="${ FILTERS.IN_GAME_ONLY }">Local sent in game</option>`);
 		overlay.messageTypeFilter.append(`<option value="${ FILTERS.GLOBAL }">Global chat</option>`);
 		overlay.messageTypeFilter.append(`<option value="${ FILTERS.USER }">User chat</option>`);
+		overlay.messageTypeFilter.append(`<option value="${ FILTERS.MULTIPLE_SENDERS }">Multiple senders</option>`);
 
 		overlay.messageTypeFilter.insertAfter(overlay.header);
 
-		let offset = 0;
 		overlay.messageTypeFilter.change(async() => {
-			const shift = offset;
-			offset += 50;
-
-			const adminId = '3162693';
-			const playerId = '3162693';
-			const limit = 50;
-
-			const messageGenerator = fetchFilteredChatMessages(adminId, playerId, shift, limit, Addons.chatlogDb, overlay.messageTypeFilter.val());
-
-			for await (const messages of messageGenerator) messages.forEach(message => renderChatMessage(message));
+			overlay._getChatMessagesByPlayerIds(0, 50, 0, 0);
 		});
+	});
+
+	ProxyHelper.interceptFunction(TankTrouble.AdminChatLogOverlay, '_getChatMessagesByPlayerIds', async(original, ...args) => {
+		const overlay = TankTrouble.AdminChatLogOverlay;
+
+		if (overlay.messageTypeFilter.val() === FILTERS.ALL) {
+			original(...args);
+		} else {
+			const [offset, limit, , lastOffset] = args;
+			let [,, page] = args;
+			page ??= 0;
+
+			const messages = await overlay.filterAndRenderMessages(offset, limit, overlay.messageTypeFilter.val(), page);
+			const lastMessage = messages[messages.length - 1];
+			const [playerId] = overlay.playerIds;
+			const { count } = await makeServerRequest(overlay.adminId, [playerId], 0, 1);
+			const offsetToNextPage = count - lastMessage.messageIndex + 1;
+
+			const topPaginator = createVariablePaginator(lastOffset, offsetToNextPage, page, limit, (newOffset, newLimit, newPage) => {
+				overlay._getChatMessagesByPlayerIds(newOffset, newLimit, newPage, offset);
+			});
+			overlay.topPaginator.replaceWith(topPaginator);
+			overlay.topPaginator = topPaginator;
+
+			const bottomPaginator = topPaginator.clone(true);
+			overlay.bottomPaginator.replaceWith(bottomPaginator);
+			overlay.bottomPaginator = bottomPaginator;
+		}
 	});
 });
 

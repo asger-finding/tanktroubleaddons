@@ -133,6 +133,10 @@ $tooltipster-accent-dark: rgb(25 25 25);
 		.tooltipster-arrow-top-left span {
 			background: $tooltipster-accent-dark;
 		}
+
+		.tooltipster-arrow-bottom span {
+			background: $tooltipster-accent-light;
+		}
 	}
 
 	#secondaryContent .snippet,
@@ -141,7 +145,7 @@ $tooltipster-accent-dark: rgb(25 25 25);
 		color: $primary-font-color;
 		background: linear-gradient(to bottom, $snippet-accent-light, $snippet-accent-dark) !important;
 	}
-	.newsPost .wrapper {
+	.newsPost.standard .wrapper {
 		color: $primary-font-color;
 		background: linear-gradient(to bottom, $snippet-accent-light, $snippet-accent-dark);
 	}
@@ -417,8 +421,10 @@ $tooltipster-accent-dark: rgb(25 25 25);
 				width: 30px,
 				height: 30px,
 				selectors: (
+					".standard": "forum/like",
 					".active": "forum/likeActive",
-					".standard": "forum/like"
+					".selected": "forum/likeSelected",
+					".selected.active": "forum/likeSelectedActive"
 				)
 			),
 			".action.share img": (

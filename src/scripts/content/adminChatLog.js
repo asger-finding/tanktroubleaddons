@@ -87,14 +87,18 @@ const openMessagesDatabase = () => new Promise((resolve, reject) => {
  * @param {ChatLogMessage} chatMessage Chat log message item
  * @returns {Promise<void>} Promise when done
  */
-const addMessage = (db, chatMessage) => new Promise((resolve, reject) => {
+const addMessage = (db, chatMessage) => new Promise(resolve => {
 	const transaction = db.transaction([storeName], 'readwrite');
 	const store = transaction.objectStore(storeName);
 	const request = store.add(chatMessage);
 
 	/* eslint-disable jsdoc/require-jsdoc */
 	request.onsuccess = () => resolve();
-	request.onerror = event => reject(event.target.error);
+
+	// Likely, the error is for if the item
+	// already exists in the IndexedDB store.
+	// In that case, we ignore and carry on.
+	request.onerror = () => resolve();
 	/* eslint-enable jsdoc/require-jsdoc */
 });
 
@@ -129,7 +133,7 @@ const chunk = array => {
  * @param {string} adminId Admin playerId
  * @param {string[]} playerIds playerIds
  * @param {number} offset Chat messages offset
- * @param {number} limit Limit of returned messages
+ * @param {number} limit Amount of messages
  * @returns {object | null} Data or null
  */
 const makeServerRequest = (adminId, playerIds, offset, limit) => fetch($.jsonRPC.endPoint, {
@@ -147,7 +151,7 @@ const makeServerRequest = (adminId, playerIds, offset, limit) => fetch($.jsonRPC
  * @param {string} adminId Admin playerId
  * @param {string} playerId playerId to match against
  * @param {number} offset Offset/shift in their list of chat messages to get messages by
- * @param {number} limit Limit of returned messages
+ * @param {number} limit Amount of messages
  * @param {IDBDatabase} cacheDb IndexedDB database to cache to
  * @returns {ChatLogMessage[]} List of transformed chat messages
  */
@@ -155,13 +159,13 @@ const requestAndCache = async(adminId, playerId, offset, limit, cacheDb) => {
 	const messageList = await makeServerRequest(adminId, [playerId], offset, limit);
 	if (messageList === null) return [];
 
-	const { chatMessages, count } = messageList;
+	const { chatMessages, count: total } = messageList;
 	return chatMessages.map((chatMessage, index) => {
 		const { id: messageId, created, senders, recipients, serverName, gameId, message } = chatMessage;
 
 		// We can determine the message number from
-		// the message count and index of the message
-		const messageIndex = count - index - offset - 1;
+		// the message total and index of the message
+		const messageIndex = total - index - offset - 1;
 
 		let type = MESSAGE_TYPES.LOCAL;
 		if (chatMessage.globalChat) type = MESSAGE_TYPES.GLOBAL;
@@ -184,11 +188,12 @@ const requestAndCache = async(adminId, playerId, offset, limit, cacheDb) => {
  * Check the cache map for gaps in message indices
  * @param {IDBDatabase} db Database object
  * @param {number} messageIndex Message index to start search on
+ * @param {string} playerId Player identifier
  * @param {number} offset Offset of first message
- * @param {number} limit How far back to look for gaps
+ * @param {number} limit Amount of messages
  * @returns {[ChatLogMessage[], Record<number, number>]} Gaps map with their absolute offset
  */
-const findCacheGaps = (db, messageIndex, offset, limit) => new Promise((resolve, reject) => {
+const findCacheGaps = (db, messageIndex, playerId, offset, limit) => new Promise((resolve, reject) => {
 	const transaction = db.transaction([storeName], 'readonly');
 	const store = transaction.objectStore(storeName);
 
@@ -205,6 +210,12 @@ const findCacheGaps = (db, messageIndex, offset, limit) => new Promise((resolve,
 	/* eslint-disable jsdoc/require-jsdoc */
 	request.onsuccess = async event => {
 		const cursor = event.target.result;
+
+		if (cursor && !cursor.value.senders.includes(playerId)) {
+			cursor.continue();
+			return;
+		}
+
 		if (cursor && cursor.value.messageIndex >= bottom) {
 			cacheRange.add(cursor.value.messageIndex);
 			matches.push(cursor.value);
@@ -223,18 +234,26 @@ const findCacheGaps = (db, messageIndex, offset, limit) => new Promise((resolve,
 });
 
 /**
+ * Get the chat message count total of a player
+ * @param {string} adminId Admin playerId
+ * @param {string} playerId Target playerId
+ * @returns {Promise<number>} Total messages sent
+ */
+const getChatTotal = (adminId, playerId) => makeServerRequest(adminId, [playerId], 0, 1).then(({ count }) => Number(count));
+
+/**
  * Get chat messages by playerIds.
  * @param {string} adminId Admin playerId
  * @param {string} playerId playerId to match against
  * @param {number} offset Offset/shift in their list of chat messages to get messages by
- * @param {number} limit Limit of returned messages
+ * @param {number} limit Amount of messages
  * @param {IDBDatabase} cacheDb IndexedDB database to cache to
  * @returns {Promise<object[]>} Chat message data
  */
 const getChatMessagesByPlayerId = async(adminId, playerId, offset, limit, cacheDb) => {
-	const { count } = await makeServerRequest(adminId, [playerId], 0, 1);
-	const firstMessageIndex = count - offset;
-	const [cached, gaps] = await findCacheGaps(cacheDb, firstMessageIndex, offset, limit);
+	const total = await getChatTotal(adminId, playerId);
+	const firstMessageIndex = total - offset;
+	const [cached, gaps] = await findCacheGaps(cacheDb, firstMessageIndex, playerId, offset, limit);
 
 	const missing = gaps.flatMap(([gapOffset, gapLimit]) => requestAndCache(adminId, playerId, gapOffset, gapLimit, cacheDb));
 	const fetched = await Promise.all(missing);
@@ -245,63 +264,25 @@ const getChatMessagesByPlayerId = async(adminId, playerId, offset, limit, cacheD
 	return messages;
 };
 
-
 /**
  * Generator function to fetch chat messages by playerIds with a filter for message type.
  * @param {string} adminId Admin playerId
  * @param {string} playerId playerId to match against
  * @param {number} offset Offset in the chat messages list to start from
- * @param {number} limit Total number of messages to fetch
+ * @param {number} limit Amount of messages to fetch
  * @param {IDBDatabase} cacheDb IndexedDB database to cache to
  * @param {(ChatLogMessage) => boolean} filter Type of message to filter by (e.g., MESSAGE_TYPES.GLOBAL)
  * @returns {AsyncGenerator<ChatLogMessage[], void, unknown>} Generator yielding batches of chat messages
  * @yields Chat logs that match filter
  */
 // eslint-disable-next-line max-params
-async function* fetchFilteredChatMessages2(adminId, playerId, offset, limit, cacheDb, filter) {
-	const fetchedMessages = [];
-	let currentOffset = offset;
-
-	while (fetchedMessages.length < limit) {
-		// eslint-disable-next-line no-await-in-loop
-		const messagesBatch = await getChatMessagesByPlayerId(adminId, playerId, currentOffset, limit, cacheDb);
-
-		if (!messagesBatch.length) break;
-
-		// Add filtered messages to the result set
-		const filteredBatch = messagesBatch.filter(msg => filter(msg));
-		fetchedMessages.push(...filteredBatch);
-
-		// If we’ve met the desired limit, yield the result
-		if (fetchedMessages.length >= limit) {
-			yield fetchedMessages.slice(0, limit);
-			return;
-		}
-
-		// Update offset for the next batch
-		currentOffset += messagesBatch.length;
-	}
-
-	// Yield remaining messages if there
-	// were fewer matches than the limit
-	yield fetchedMessages;
-}
-
-/**
- *
- * @param adminId
- * @param playerId
- * @param offset
- * @param limit
- * @param cacheDb
- * @param filter
- */
 async function* fetchFilteredChatMessages(adminId, playerId, offset, limit, cacheDb, filter) {
 	let currentOffset = offset;
 	let totalFetched = 0;
 
 	while (totalFetched < limit) {
 		// Fetch messages in batches
+		// eslint-disable-next-line no-await-in-loop
 		const messagesBatch = await getChatMessagesByPlayerId(adminId, playerId, currentOffset, limit, cacheDb);
 
 		if (!messagesBatch.length) break;
@@ -324,9 +305,9 @@ async function* fetchFilteredChatMessages(adminId, playerId, offset, limit, cach
  * Render a chatlog object to a HTMLElement
  * @param {ChatLogMessage} chatMessage Message content
  * @param {string} adminId Admin playerId
- * @returns {HTMLDivElement} Chatlog element
+ * @returns {Promise<HTMLDivElement>} Chatlog element
  */
-const renderChatMessage = (chatMessage, adminId) => {
+const renderChatMessage = async(chatMessage, adminId) => {
 	const { serverName, gameId } = chatMessage;
 
 	const wrapper = document.createElement('div');
@@ -358,10 +339,29 @@ const renderChatMessage = (chatMessage, adminId) => {
 
 	const server = document.createTextNode(`${ serverName } `);
 
-	let usernames = document.createElement('span');
-	AdminUtils.createPlayerNamesWithLookupByPlayerIds(chatMessage.senders, adminId, result => {
-		// eslint-disable-next-line prefer-destructuring
-		usernames = result[0];
+	const senders = await new Promise(resolve => {
+		if (!chatMessage.senders.length) {
+			resolve(document.createElement('span'));
+			return;
+		}
+
+		AdminUtils.createPlayerNamesWithLookupByPlayerIds(chatMessage.senders, adminId, result => {
+			resolve(result[0]);
+		});
+	});
+
+	const directedToIcon = document.createTextNode('');
+	const recipients = await new Promise(resolve => {
+		if (!chatMessage.recipients.length) {
+			resolve(document.createElement('span'));
+			return;
+		}
+
+		AdminUtils.createPlayerNamesWithLookupByPlayerIds(chatMessage.recipients, adminId, result => {
+			if (chatMessage.recipients.length) directedToIcon.textContent = ' @ ';
+
+			resolve(result[0]);
+		});
 	});
 
 	const colon = document.createTextNode(': ');
@@ -373,25 +373,22 @@ const renderChatMessage = (chatMessage, adminId) => {
 	if (chatMessage.type === MESSAGE_TYPES.GLOBAL) message.classList.add('global');
 	else if (chatMessage.type === MESSAGE_TYPES.USER) message.classList.add('private');
 
-	details.append(time, server, usernames, colon, message);
+	details.append(time, server, senders, directedToIcon, recipients, colon, message);
 	wrapper.append(expandButton, details);
 
 	return wrapper;
 };
 
 /**
- *
- * @param {number} offset
- * @param {number} limit
- * @param filter
- * @param {number} page
- * @returns {chatMessage[]} Array of filtered chat messages
+ * Filter message from user selection. Render to chat log, then return array of filtered messages
+ * @param {number} offset Chat log index offset
+ * @param {number} limit Amount of messages to render
+ * @param {typeof FILTERS} filter Filter identitifier
+ * @returns {Promise<chatMessage[]>} Array of filtered chat messages
  */
 // eslint-disable-next-line complexity
-TankTrouble.AdminChatLogOverlay.filterAndRenderMessages = async function(offset, limit, filter = FILTERS.ALL, page = 0) {
-	const disabled = this.wrapper.find(`:not(.navigation):not(.paginator) button, .paginator button[data-page="${ page }"]`);
-	disabled.prop('disabled', true);
-
+TankTrouble.AdminChatLogOverlay.filterAndRenderMessages = async function(offset, limit, filter) {
+	this.wrapper.find(':not(.navigation):not(.paginator) button, .paginator button').prop('disabled', true);
 	this.chatMessages.empty();
 
 	const loadingMessage = $('<div class="subHeader"><span class="ui-icon ui-icon-alert"></span>Loading messages . . .</div>')
@@ -424,7 +421,7 @@ TankTrouble.AdminChatLogOverlay.filterAndRenderMessages = async function(offset,
 			break;
 		case FILTERS.ALL:
 		default:
-			break;
+			throw new Error('TankTrouble.AdminChatLogOverlay.filterAndRenderMessages was not provided a valid filter');
 	}
 
 	const [playerId] = this.playerIds;
@@ -441,12 +438,11 @@ TankTrouble.AdminChatLogOverlay.filterAndRenderMessages = async function(offset,
 	const messages = [];
 	for await (const incomingMessages of messageGenerator) {
 		// Render each batch of new messages as they arrive
-		incomingMessages.reverse().forEach(newMessage => {
+		Promise.all(incomingMessages.reverse().map(newMessage => {
 			messages.push(newMessage);
 
-			const chatMessage = renderChatMessage(newMessage, this.adminId);
-			this.chatMessages.append(chatMessage);
-		});
+			return renderChatMessage(newMessage, this.adminId);
+		})).then(messageElements => this.chatMessages.append(...messageElements));
 	}
 
 	loadingMessage.remove();
@@ -456,33 +452,36 @@ TankTrouble.AdminChatLogOverlay.filterAndRenderMessages = async function(offset,
 };
 
 /**
- *
- * @param lastOffset
- * @param nextOffset
- * @param pageIndex
- * @param limit
- * @param callback
+ * Create a paginator which can offset by a variable amount instead of fixed
+ * @param {number?} lastOffset Offset to last page (if any)
+ * @param {number} nextOffset Offset to next page
+ * @param {number} pageIndex Index of current page
+ * @param {number} limit Limit to callback
+ * @param {(newOffset: number, newLimit: number, newPage: number) => void} callback Callback function
+ * @returns {JQuery} Paginator element
  */
 const createVariablePaginator = (lastOffset, nextOffset, pageIndex, limit, callback) => {
-	const page = Math.max(1, pageIndex);
+	const pageName = pageIndex + 1;
 	const paginator = $('<div class="paginator"/>');
 
-	if (page > 1) {
-		$(`<button class='small' type='button' data-page='${ page - 1 }' tabindex='-1'>${ page - 1 }</div>`)
+	if (lastOffset !== null) {
+		$(`<button class='small' type='button' data-page='${ pageIndex - 1 }' tabindex='-1'>${ pageName - 1 }</div>`)
 			.appendTo(paginator)
 			.on('click', () => {
-				callback(lastOffset, limit, page - 1);
+				callback(lastOffset, limit, pageIndex - 1);
 			});
 	}
 
-	$(`<button class='small' type='button' data-page='${ page }' tabindex='-1' disabled="true">${ page }</div>`)
+	$(`<button class='small' type='button' data-page='${ pageIndex }' tabindex='-1' disabled="true">${ pageName }</div>`)
 		.appendTo(paginator);
 
-	$(`<button class='small' type='button' data-page='${ page + 1 }' tabindex='-1'>${ page + 1 }</div>`)
-		.appendTo(paginator)
-		.on('click', () => {
-			callback(nextOffset, limit, page + 1);
-		});
+	if (nextOffset !== null) {
+		$(`<button class='small' type='button' data-page='${ pageIndex + 1 }' tabindex='-1'>${ pageName + 1 }</div>`)
+			.appendTo(paginator)
+			.on('click', () => {
+				callback(nextOffset, limit, pageIndex + 1);
+			});
+	}
 
 	$('<div class="subHeader">. . .</div>')
 		.appendTo(paginator)
@@ -504,7 +503,7 @@ openMessagesDatabase().then(async cacheDb => {
 
 		original(args);
 
-		overlay.messageTypeFilter = $('<select name="filter"/>');
+		overlay.messageTypeFilter = $('<select name="filter" class="messagefilterselector"/>');
 		overlay.messageTypeFilter.append(`<option value="${ FILTERS.ALL }">Show all</option>`);
 		overlay.messageTypeFilter.append(`<option value="${ FILTERS.LOCAL }">Local chat</option>`);
 		overlay.messageTypeFilter.append(`<option value="${ FILTERS.IN_GAME_ONLY }">Local sent in game</option>`);
@@ -514,29 +513,48 @@ openMessagesDatabase().then(async cacheDb => {
 
 		overlay.messageTypeFilter.insertAfter(overlay.header);
 
+		overlay.filteredPageIndices = new Map();
+
 		overlay.messageTypeFilter.change(async() => {
+			const topPaginator = $('<div></div>');
+			overlay.topPaginator.replaceWith(topPaginator);
+			overlay.topPaginator = topPaginator;
+
+			const bottomPaginator = topPaginator.clone(true);
+			overlay.bottomPaginator.replaceWith(bottomPaginator);
+			overlay.bottomPaginator = bottomPaginator;
+
+			overlay.filteredPageIndices.clear();
+			overlay.filteredPageIndices.set(0, 0);
 			overlay._getChatMessagesByPlayerIds(0, 50, 0, 0);
 		});
 	});
 
+	// eslint-disable-next-line complexity
 	ProxyHelper.interceptFunction(TankTrouble.AdminChatLogOverlay, '_getChatMessagesByPlayerIds', async(original, ...args) => {
 		const overlay = TankTrouble.AdminChatLogOverlay;
 
 		if (overlay.messageTypeFilter.val() === FILTERS.ALL) {
 			original(...args);
 		} else {
-			const [offset, limit, , lastOffset] = args;
-			let [,, page] = args;
-			page ??= 0;
+			const [offset, limit] = args;
+			const page = args[2] ?? 0;
 
 			const messages = await overlay.filterAndRenderMessages(offset, limit, overlay.messageTypeFilter.val(), page);
-			const lastMessage = messages[messages.length - 1];
-			const [playerId] = overlay.playerIds;
-			const { count } = await makeServerRequest(overlay.adminId, [playerId], 0, 1);
-			const offsetToNextPage = count - lastMessage.messageIndex + 1;
+			const total = await getChatTotal(overlay.adminId, overlay.playerIds[0]);
+			const firstMessage = messages.at(0);
+			const lastMessage = messages.at(-1);
 
-			const topPaginator = createVariablePaginator(lastOffset, offsetToNextPage, page, limit, (newOffset, newLimit, newPage) => {
-				overlay._getChatMessagesByPlayerIds(newOffset, newLimit, newPage, offset);
+			if (!firstMessage) return;
+
+			const offsetToLastPage = overlay.filteredPageIndices.get(page - 1) ?? null;
+			const offsetToNextPage = messages.length < limit
+				? null
+				: total - lastMessage.messageIndex + 1;
+			overlay.filteredPageIndices.set(page + 1, offsetToNextPage);
+
+			const topPaginator = createVariablePaginator(offsetToLastPage, offsetToNextPage, page, limit, (newOffset, newLimit, newPage) => {
+				overlay._getChatMessagesByPlayerIds(newOffset, newLimit, newPage);
 			});
 			overlay.topPaginator.replaceWith(topPaginator);
 			overlay.topPaginator = topPaginator;

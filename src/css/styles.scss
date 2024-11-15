@@ -279,6 +279,14 @@ $max-safe-integer: 2147483647;
 	}
 }
 
+#overlay {
+	.admin {
+		select.messagefilterselector {
+			margin-bottom: 10px;
+		}
+	}
+}
+
 /* Chat improvements */
 #chat {
 	body {

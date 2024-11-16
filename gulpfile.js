@@ -353,7 +353,7 @@ const destroy = () => del([paths.baseDist, paths.baseBuild], { force: true });
  * Sends reload signal through LiveReload server.
  */
 const watch = () => {
-	console.log('\x1b[35m%s\x1b[0m', `# watching the ${paths.mvTarget} build for changes . . .`);
+	process.stdout.write(`\x1b[35m# watching the ${paths.mvTarget} build for changes\x1b[0m . . .\n`);
 
 	gulpWatch(paths.files.script, scripts);
 	gulpWatch(paths.files.styles, styles);
@@ -367,7 +367,7 @@ const watch = () => {
  * Broadcast the process arguments
  */
 const broadcast = async() => {
-	console.log('\x1b[35m%s\x1b[0m', `# compiling ${state.current} build for ${paths.mvTarget} . . .`);
+	process.stdout.write(`\x1b[35m# compiling ${state.current} build for ${paths.mvTarget}\x1b[0m\n . . .`);
 };
 
 exports.destroy = destroy;

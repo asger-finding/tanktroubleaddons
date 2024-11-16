@@ -703,4 +703,86 @@ openMessagesDatabase().then(async cacheDb => {
 	});
 });
 
+/**
+ * Limit date range inputs so that they don't overlap negatively
+ */
+const limitDateRange = () => {
+	const overlay = TankTrouble.AdminStatisticsOverlay;
+
+	overlay.startDate.datepicker('option', 'maxDate', overlay.endDate.datepicker('getDate'));
+	overlay.endDate.datepicker('option', 'minDate', overlay.startDate.datepicker('getDate'));
+};
+
+ProxyHelper.interceptFunction(TankTrouble.AdminStatisticsOverlay, '_initialize', (original, ...args) => {
+	const overlay = TankTrouble.AdminStatisticsOverlay;
+
+	if (overlay.initialized) return;
+
+	original(...args);
+
+	overlay.customRangeWrapper = $('<div></div>').css({ 'width': 'fit-content' });
+
+	overlay.startDate = $('<input type="text">').datepicker({
+		maxDate: 0,
+		onSelect: overlay._getStatistics
+	});
+	overlay.endDate = $('<input type="text">').datepicker({
+		maxDate: 0,
+		onSelect: overlay._getStatistics
+	});
+
+	const startDateDefault = new Date();
+	const endDateDefault = new Date();
+
+	startDateDefault.setMonth(endDateDefault.getMonth() - 1);
+
+	overlay.startDate.datepicker('setDate', startDateDefault);
+	overlay.endDate.datepicker('setDate', endDateDefault);
+
+	overlay.startDate.hide();
+	overlay.endDate.hide();
+
+	overlay.customRangeWrapper.append(['<hr></hr>', overlay.startDate, overlay.endDate]);
+	overlay.period.append("<option value='custom'>Custom timerange</option>");
+	overlay.period.after(overlay.customRangeWrapper);
+});
+
+ProxyHelper.interceptFunction(TankTrouble.AdminStatisticsOverlay, '_getStatistics', (original, ...args) => {
+	const overlay = TankTrouble.AdminStatisticsOverlay;
+
+	if (overlay.period.val() === 'custom') {
+		limitDateRange();
+
+		overlay.forumStatistics.html('<div class="subHeader">Loading...</div>');
+		overlay.adminStatistics.empty();
+
+		overlay.startDate.show();
+		overlay.endDate.show();
+
+		// Get min/max time
+		const minTime = Math.floor(overlay.startDate.datepicker('getDate').getTime() / 1000);
+		const maxTime = Math.floor(overlay.endDate.datepicker('getDate').getTime() / 1000);
+
+		// Something went wrong ...
+		if (minTime > maxTime) return;
+
+		// Set html
+		Backend.getInstance().getAdminStatistics(result => {
+			if (typeof (result) == 'object') {
+				overlay.forumStatistics.html(result.forumHtml);
+				overlay.adminStatistics.html(result.adminHtml);
+			} else {
+				overlay._handleError(result);
+			}
+		}, (result) => {
+			overlay._handleError(result);
+		}, null, overlay.adminId, minTime, maxTime);
+	} else {
+		overlay.startDate.hide();
+		overlay.endDate.hide();
+
+		original(...args);
+	}
+});
+
 export const _isESmodule = true;

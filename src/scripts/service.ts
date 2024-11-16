@@ -3,6 +3,7 @@ import { startSyncStore } from 'webext-sync';
 
 setBrowserNamespace();
 
+// Default store config
 const defaultState = {
 	theme: {
 		classToken: 'normal',
@@ -14,15 +15,7 @@ const defaultState = {
 	statisticsState: 'global'
 };
 
-startSyncStore(defaultState).then(async syncStore => {
-	let state = await syncStore.getState();
-
-	syncStore.onChange(newState => {
-		state = newState;
-	});
-
-	console.log('Background loaded! state: ', state);
-});
+startSyncStore(defaultState);
 
 /**
  * Get the tab id of the focused tab

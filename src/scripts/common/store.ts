@@ -1,6 +1,5 @@
-/* eslint-disable jsdoc/require-jsdoc */
 /* eslint-disable init-declarations */
-import { Callback, listen, dispatchMessage, once } from './ipcBridge.js';
+import { Callback, dispatchMessage, listen, once } from './ipcBridge.js';
 import { SyncStoreOptions } from 'webext-sync';
 import { setBrowserNamespace } from '../common/set-browser-namespace.js';
 
@@ -38,6 +37,7 @@ export let onStateChange: (cb: Callback) => void;
 /** Handle read/write requests on the main side */
 export let setupStoreHandler: () => void;
 
+/* eslint-disable jsdoc/require-jsdoc */
 if (!browser.runtime) {
 	// We are in an inject script, which doesn't
 	// have access to the runtime or storage
@@ -153,3 +153,4 @@ if (!browser.runtime) {
 
 	});
 }
+/* eslint-enable jsdoc/require-jsdoc */

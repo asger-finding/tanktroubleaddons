@@ -5,6 +5,11 @@ Game.UIGameState.method('create', function(...args) {
 	this.tankGroup.inputEnableChildren = true;
 	this.tankGroup.setAllChildren('inputEnabled', true);
 
+	/**
+	 * Handle Phaser mouseup event to show username
+	 * @param signal Tank sprite
+	 * @param signal.playerId Tank playerId attribute
+	 */
 	const onMouseUp = ({ playerId: target }) => {
 		const boundToTank = this.tankNameGroup.children.filter(({ playerId }) => playerId === target);
 		for (const tankNameSprite of boundToTank) tankNameSprite.retire();

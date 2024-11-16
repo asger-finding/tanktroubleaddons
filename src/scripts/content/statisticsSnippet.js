@@ -1,5 +1,5 @@
-import ProxyHelper from '../utils/proxyHelper.js';
 import { get, set } from '../common/store.js';
+import ProxyHelper from '../utils/proxyHelper.js';
 
 TankTrouble.Statistics.STATISTICS_SETTINGS = {
 	LOCAL: 'local',

@@ -31,3 +31,5 @@ onStateChange(change => {
 		setTheme(classToken, prevClassToken, colorScheme);
 	}
 });
+
+export const _isESmodule = true;

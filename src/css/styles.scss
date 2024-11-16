@@ -428,6 +428,10 @@ player-name {
 		}
 	}
 
+	.unmoderated .bubble {
+		filter: drop-shadow(0 0 8px rgba(255 188 0 / 0.6));
+	}
+
 	.tank {
 		position: absolute;
 

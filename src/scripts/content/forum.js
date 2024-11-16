@@ -179,6 +179,31 @@ const addHyperlinks = (_threadOrReply, threadOrReplyElement) => {
 };
 
 /**
+ * Check the latest three replies of a forum thread
+ * and highlight the thread if any of them are unmoderated
+ * @param threadOrReply Post data
+ * @param threadOrReplyElement Parsed post element
+ */
+const addUnmoderatedHighlight = (threadOrReply, threadOrReplyElement) => {
+	const { hasAnyReplies } = threadOrReply;
+	if (hasAnyReplies) {
+		if (Users.getHighestGmLevel() < UIConstants.ADMIN_LEVEL_DELETE_THREAD_OR_REPLY) return;
+
+		Backend.getInstance().getForumReplies(result => {
+			if (typeof result === 'object') {
+				if (!result.result) return;
+
+				const { replies } = result.result.data;
+				const hasUnmoderatedReplies = replies.some(reply => reply.moderatedBy === null);
+
+				if (hasUnmoderatedReplies) threadOrReplyElement.addClass('unmoderated');
+				else threadOrReplyElement.removeClass('unmoderated');
+			}
+		}, null, null, threadOrReply.id, Number.MAX_SAFE_INTEGER, 'older', 0, 3);
+	}
+};
+
+/**
  * Add extra features to a thread or reply
  * @param threadOrReply Post data
  * @param threadOrReplyElement Post HTMLElement
@@ -188,6 +213,7 @@ const addFeaturesToThreadOrReply = (threadOrReply, threadOrReplyElement) => {
 	addLastEdited(threadOrReply, threadOrReplyElement);
 	addShare(threadOrReply, threadOrReplyElement);
 	addHyperlinks(threadOrReply, threadOrReplyElement);
+	addUnmoderatedHighlight(threadOrReply, threadOrReplyElement);
 };
 
 /**

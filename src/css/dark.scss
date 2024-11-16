@@ -361,6 +361,7 @@ $tooltipster-accent-dark: rgb(25 25 25);
 
 	.forum {
 		color: $primary-font-color;
+		
 
 		.bubble {
 			color: $primary-font-color;
@@ -380,6 +381,10 @@ $tooltipster-accent-dark: rgb(25 25 25);
 			.details {
 				color: rgb(204 204 204);
 			}
+		}
+
+		.unmoderated .bubble {
+			filter: drop-shadow(0 0 8px rgba(255 188 0 / 0.4));
 		}
 
 		.compose .bubble,

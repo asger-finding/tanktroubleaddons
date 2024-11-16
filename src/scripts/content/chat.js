@@ -499,9 +499,14 @@ const escapeBadCharacters = () => {
 	ProxyHelper.interceptFunction(TankTrouble.ChatBox, '_sendChat', (original, ...args) => {
 		const message = args.pop();
 
-		const decoded = decode(message, { mode: 'replacement' }).replaceAll('\uFFFD', '?');
+		try {
+			decode(message, { mode: 'fatal' }).replaceAll('\uFFFD', '?');
 
-		return original(decoded, ...args);
+			original(message, ...args);
+		} catch {
+			Utils.updateTooltip(TankTrouble.ChatBox.chatInput, 'Failed to send chat');
+			setTimeout(() => Utils.updateTooltip(TankTrouble.ChatBox.chatInput, ''), 1_500);
+		}
 	});
 };
 
@@ -514,6 +519,13 @@ ProxyHelper.whenContentInitialized().then(() => {
 	preventServerChangeChatClear();
 	escapeBadCharacters();
 	addMentionAutocomplete(chatInput);
+
+	TankTrouble.ChatBox.chatInput.tooltipster({
+		position: 'right',
+		theme: 'tooltipster-error',
+		offsetX: 5,
+		trigger: 'custom'
+	});
 
 	// Allow more characters in the chat input
 	chatInput.setAttribute('maxlength', '255');

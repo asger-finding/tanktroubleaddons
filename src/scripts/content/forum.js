@@ -196,8 +196,8 @@ const addUnmoderatedHighlight = (threadOrReply, threadOrReplyElement) => {
 				const { replies } = result.result.data;
 				const hasUnmoderatedReplies = replies.some(reply => reply.moderatedBy === null);
 
-				if (hasUnmoderatedReplies) threadOrReplyElement.addClass('unmoderated');
-				else threadOrReplyElement.removeClass('unmoderated');
+				if (hasUnmoderatedReplies) threadOrReplyElement.attr('data-unmoderated', 'true');
+				else threadOrReplyElement.attr('data-unmoderated', '');
 			}
 		}, null, null, threadOrReply.id, Number.MAX_SAFE_INTEGER, 'older', 0, 3);
 	}

@@ -1,4 +1,5 @@
 import ProxyHelper from '../utils/proxyHelper.js';
+import { decode } from 'iso-8859-15';
 import { matchSorter } from 'match-sorter';
 
 // TODO: add auto-disappearing chat after timeout
@@ -491,6 +492,19 @@ const preventServerChangeChatClear = () => {
 	});
 };
 
+/**
+ * Replace non-ISO-8859-15-compliant characters with a question mark
+ */
+const escapeBadCharacters = () => {
+	ProxyHelper.interceptFunction(TankTrouble.ChatBox, '_sendChat', (original, ...args) => {
+		const message = args.pop();
+
+		const decoded = decode(message, { mode: 'replacement' }).replaceAll('\uFFFD', '?');
+
+		return original(decoded, ...args);
+	});
+};
+
 ProxyHelper.whenContentInitialized().then(() => {
 	/* eslint-disable prefer-destructuring */
 	const chatBody = TankTrouble.ChatBox.chatBody[0];
@@ -498,6 +512,7 @@ ProxyHelper.whenContentInitialized().then(() => {
 	/* eslint-enable prefer-destructuring*/
 
 	preventServerChangeChatClear();
+	escapeBadCharacters();
 	addMentionAutocomplete(chatInput);
 
 	// Allow more characters in the chat input

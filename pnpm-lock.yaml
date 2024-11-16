@@ -11,6 +11,9 @@ importers:
       fflate:
         specifier: ^0.8.2
         version: 0.8.2
+      iso-8859-15:
+        specifier: ^3.0.4
+        version: 3.0.4
       match-sorter:
         specifier: ^6.3.4
         version: 6.3.4
@@ -1738,6 +1741,9 @@ packages:
 
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
+
+  iso-8859-15@3.0.4:
+    resolution: {integrity: sha512-m6AoT0yLybown6BsySKueuNMEUUdxiYimpnCd4xt+knc0YQlvfxfvkJvyZ0D6UzpEoB2DCSY8Zw3XVGsRATqGA==}
 
   isobject@2.1.0:
     resolution: {integrity: sha512-+OUdGJlgjOBZDfxnDjYYG6zp487z0JGNQq3cYQYg5f5hKR+syHMsaztzGeml/4kGG55CSpKSpWTY+jYGgsHLgA==}
@@ -4856,6 +4862,8 @@ snapshots:
   isarray@2.0.5: {}
 
   isexe@2.0.0: {}
+
+  iso-8859-15@3.0.4: {}
 
   isobject@2.1.0:
     dependencies:

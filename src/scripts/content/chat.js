@@ -500,7 +500,7 @@ const escapeBadCharacters = () => {
 		const message = args.pop();
 
 		try {
-			decode(message, { mode: 'fatal' }).replaceAll('\uFFFD', '?');
+			decode(message, { mode: 'fatal' });
 
 			original(message, ...args);
 		} catch {

@@ -272,18 +272,31 @@ const getChatMessagesByPlayerId = async(adminId, playerId, offset, limit, cacheD
  * @param {number} limit Amount of messages to fetch
  * @param {IDBDatabase} cacheDb IndexedDB database to cache to
  * @param {(ChatLogMessage) => boolean} filter Type of message to filter by (e.g., MESSAGE_TYPES.GLOBAL)
+ * @param {AbortSignal} abortSignal Signal if we need to drop process early
+ * @param {number?} fetchLimit How many messages to fetch at once
  * @returns {AsyncGenerator<ChatLogMessage[], void, unknown>} Generator yielding batches of chat messages
  * @yields Chat logs that match filter
  */
 // eslint-disable-next-line max-params
-async function* fetchFilteredChatMessages(adminId, playerId, offset, limit, cacheDb, filter) {
+async function* fetchFilteredChatMessages(
+	adminId,
+	playerId,
+	offset,
+	limit,
+	cacheDb,
+	filter,
+	abortSignal = new AbortController().signal,
+	fetchLimit = limit
+) {
 	let currentOffset = offset;
 	let totalFetched = 0;
 
 	while (totalFetched < limit) {
+		if (abortSignal.aborted) break;
+
 		// Fetch messages in batches
 		// eslint-disable-next-line no-await-in-loop
-		const messagesBatch = await getChatMessagesByPlayerId(adminId, playerId, currentOffset, limit, cacheDb);
+		const messagesBatch = await getChatMessagesByPlayerId(adminId, playerId, currentOffset, fetchLimit, cacheDb);
 
 		if (!messagesBatch.length) break;
 
@@ -494,6 +507,45 @@ const createVariablePaginator = (lastOffset, nextOffset, pageIndex, limit, callb
 	return paginator;
 };
 
+/**
+ *
+ * @param {string} adminId Admin playerId
+ * @param {string} playerId playerId to look up
+ * @param {IDBDatabase} cacheDb Chat log database
+ * @param {AbortController} abortSignal Event if process should abort
+ * @param {(playerId: string) => void} newPlayerIdCallback Callback for new unique player id
+ * @returns {Promise<string[]>} playerId result array
+ */
+const makeAltLookup = async(adminId, playerId, cacheDb, abortSignal, newPlayerIdCallback) => {
+	const total = await getChatTotal(adminId, playerId);
+	const messageGenerator = fetchFilteredChatMessages(
+		adminId,
+		playerId,
+		0,
+		total,
+		cacheDb,
+		({ senders }) => senders.length > 1,
+		abortSignal,
+		1000
+	);
+
+	const uniques = new Set();
+	for await (const incomingMessages of messageGenerator) {
+		// Render each batch of new messages as they arrive
+		incomingMessages.reverse().forEach(({ senders }) => {
+			for (const sender of senders) {
+				const before = uniques.size;
+				uniques.add(sender);
+				const after = uniques.size;
+
+				if (after > before) newPlayerIdCallback(sender);
+			}
+		});
+	}
+
+	return Array.from(uniques);
+};
+
 openMessagesDatabase().then(async cacheDb => {
 	Addons.chatlogDb = cacheDb;
 
@@ -563,6 +615,91 @@ openMessagesDatabase().then(async cacheDb => {
 			overlay.bottomPaginator.replaceWith(bottomPaginator);
 			overlay.bottomPaginator = bottomPaginator;
 		}
+	});
+
+	ProxyHelper.interceptFunction(TankTrouble.AdminPlayerLookupOverlay, '_update', (original, ...args) => {
+		const overlay = TankTrouble.AdminPlayerLookupOverlay;
+
+		original(...args);
+
+		ProxyHelper.interceptFunction(overlay.details, 'append', (scopedAppend, ...appendArgs) => {
+			scopedAppend(...appendArgs);
+
+			const chatlogButton = overlay.details.find('.section button:contains("Chat log")');
+
+			// Admin has access to chat log
+			if (chatlogButton.length) {
+				const abort = new AbortController();
+
+				const section = chatlogButton.parent();
+				const adminAltLookupButton = $('<button class="small" type="button" tabindex="-1">Alternative accounts</button>');
+				const fetchingIcon = $('<span class="ui-icon ui-icon-arrowthickstop-1-s"></span>').css('vertical-align', 'bottom');
+				const altAccountDialog = $('<div></div>').dialog({
+					autoOpen: false,
+					minWidth: 600,
+					width: 600,
+					title: 'Loading alternative accounts . . .',
+
+					/** Preprocessing */
+					open() {
+						$(this).append(fetchingIcon);
+						$(this).parent().css('zIndex', 1001);
+					},
+
+					/** Signal for close */
+					close() { abort.abort(); },
+
+					buttons: [
+						{
+							text: 'Copy id + username',
+							click() {
+								const text = $(this)
+									.children()
+									.map(function() {
+										const playerId = $(this).attr('data-id');
+										if (typeof playerId === 'undefined') return null;
+
+										return `${ playerId }: ${ $(this).text() }`;
+									})
+									.get();
+
+								ClipboardManager.copy(text.join('\n'));
+							}
+						},
+						{
+							text: 'Copy usernames',
+							click() {
+								const text = this.innerText.trim().split(' ').join('\n');
+								ClipboardManager.copy(text);
+							}
+						}
+					]
+				});
+
+				adminAltLookupButton.on('mouseup', async() => {
+					altAccountDialog.dialog('open');
+
+					await makeAltLookup(
+						overlay.adminId,
+						overlay.playerId,
+						Addons.chatlogDb,
+						abort.signal,
+						playerId => {
+							AdminUtils.createPlayerNamesWithLookupByPlayerIds([playerId], overlay.adminId, username => {
+								username.attr('data-id', playerId);
+								fetchingIcon.before([username, ' ']);
+							});
+						}
+					);
+
+					fetchingIcon.remove();
+
+					if (!abort.signal.aborted) altAccountDialog.dialog({ title: 'Loaded all chat history' });
+				});
+
+				section.append([adminAltLookupButton]);
+			}
+		});
 	});
 });
 

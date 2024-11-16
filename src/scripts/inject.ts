@@ -46,6 +46,6 @@
 		injectScript(`${meta.extensionUrl}scripts/content/texturePacks.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/emporium.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/accountMenu.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/adminChatLog.js`);
+		injectScript(`${meta.extensionUrl}scripts/content/adminOverlays.js`);
 	});
 })();

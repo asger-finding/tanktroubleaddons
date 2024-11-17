@@ -1,16 +1,13 @@
+import UIGameIconScrollerGroup from './uigameiconscrollergroup.js';
 import UIPlaceholderIconImage from './uiplaceholdericonimage.js';
 import { createPolygon } from '../utils/mathUtils.js';
-
-// TODO: add garage-like arrow scroller instead
 
 const resolutionScale = UIUtils.getLoadedAssetResolutionScale(devicePixelRatio);
 
 UIConstants.classFields({
 	GAME_ICON_TANK_COUNT: UIConstants.TANK_POOL_SIZE,
 	GAME_ICON_POOL_SIZE: 6,
-	GAME_ICON_COUNT: 6,
-	GAME_ICON_WIDTH: UIConstants.GAME_ICON_WIDTH / 1.7,
-	GAME_ICON_HEIGHT: UIConstants.GAME_ICON_HEIGHT / 1.7
+	GAME_ICON_COUNT: 6
 });
 
 UIGameIconImage = function(game) {
@@ -56,7 +53,9 @@ UIGameIconImage.prototype.getTankIcons = function() {
 };
 
 UIGameIconImage.prototype.spawn = function(x, y, gameState, favouriteActiveQueuedCounts) {
-	this.reset(x, y);
+	if (x !== 0) return this.retire();
+
+	this.reset(0, y);
 	this.gameId = gameState.getId();
 	this.mode = gameState.getMode();
 	this.ranked = gameState.getRanked();
@@ -68,8 +67,8 @@ UIGameIconImage.prototype.spawn = function(x, y, gameState, favouriteActiveQueue
 	if (this.removeTween) this.removeTween.stop();
 
 	this.game.add.tween(this.scale).to({
-		x: UIConstants.ASSET_SCALE / 1.7,
-		y: UIConstants.ASSET_SCALE / 1.7
+		x: UIConstants.ASSET_SCALE,
+		y: UIConstants.ASSET_SCALE
 	}, UIConstants.ELEMENT_POP_IN_TIME, Phaser.Easing.Back.Out, true, delay);
 };
 
@@ -188,5 +187,43 @@ UIGameIconImage.prototype.retire = function() {
 	this.tankIconGroup.callAll('retire');
 	this.tankNameGroup.callAll('retire');
 };
+
+const createLobby = Game.UILobbyState.getMethod('create');
+Game.UILobbyState.method('create', function(...args) {
+	createLobby.apply(this, ...args);
+
+	this.gameIconScroller = this.gameIconGroup.add(new UIGameIconScrollerGroup(
+		this.game,
+		UIConstants.GAME_ICON_WIDTH,
+		UIConstants.GAME_ICON_HEIGHT,
+		UIConstants.GAMEICON_SCROLL_SPEED
+	));
+
+	let done = false;
+	ClientManager.getClient().addEventListener((_self, evt) => {
+		switch (evt) {
+			case TTClient.EVENTS.GAME_LIST_CHANGED:
+				if (done) return;
+				done = true;
+				// eslint-disable-next-line no-case-declarations
+				const gameIcons = [];
+				for (let i = 0; i < 4; i++) {
+					gameIcons.push(this.gameIconGroup.getFirstExists(false));
+					const gameIcon = gameIcons[i];
+
+					gameIcon.spawn(0, UIConstants.GAME_ICON_Y, ClientManager.getClient().getAvailableGameStates()[i % ClientManager.getClient().games.length], 0);
+				}
+				this.gameIconScroller.spawn(
+					0,
+					140,
+					gameIcons,
+					1000
+				);
+				break;
+			default:
+				break;
+		}
+	}, this);
+});
 
 export const _isESmodule = true;

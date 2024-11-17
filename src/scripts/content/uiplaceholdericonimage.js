@@ -1,18 +1,3 @@
-const gamePreloadStage = Game.UIPreloadState.getMethod('preload');
-Game.UIPreloadState.method('preload', function(...args) {
-	const result = gamePreloadStage.apply(this, ...args);
-
-	if (this.game.device.pixelRatio > 1) {
-		this.load.image('tankiconplaceholderaddons-small', Addons.t_url('assets/lobby/placeholder-140@2x.png'));
-		this.load.image('tankiconplaceholderaddons-large', Addons.t_url('assets/lobby/placeholder-320@2x.png'));
-	} else {
-		this.load.image('tankiconplaceholderaddons-small', Addons.t_url('assets/lobby/placeholder-140.png'));
-		this.load.image('tankiconplaceholderaddons-large', Addons.t_url('assets/lobby/placeholder-320.png'));
-	}
-
-	return result;
-});
-
 /**
  * Creates new tank placeholder icon sprite
  * @param game Phaser.Game

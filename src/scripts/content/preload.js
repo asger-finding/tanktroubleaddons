@@ -35,6 +35,28 @@ window.Addons = {
 	}
 };
 
+const gamePreloadStage = Game.UIPreloadState.getMethod('preload');
+Game.UIPreloadState.method('preload', function(...args) {
+	const result = gamePreloadStage.apply(this, ...args);
+
+	GameManager.getGame().load.removeFile('image', 'gameiconplaceholder');
+	this.load.image('gameiconplaceholder', Addons.t_url('assets/lobby/game.png'));
+
+	if (this.game.device.pixelRatio > 1) {
+		this.load.image('tankiconplaceholderaddons-small', Addons.t_url('assets/lobby/placeholder-140@2x.png'));
+		this.load.image('tankiconplaceholderaddons-large', Addons.t_url('assets/lobby/placeholder-320@2x.png'));
+		this.load.image('leftarrow', Addons.t_url('assets/lobby/leftArrow@2x.png'));
+		this.load.image('rightarrow', Addons.t_url('assets/lobby/rightArrow@2x.png'));
+	} else {
+		this.load.image('tankiconplaceholderaddons-small', Addons.t_url('assets/lobby/placeholder-140.png'));
+		this.load.image('tankiconplaceholderaddons-large', Addons.t_url('assets/lobby/placeholder-320.png'));
+		this.load.image('leftarrow', Addons.t_url('assets/lobby/leftArrow.png'));
+		this.load.image('rightarrow', Addons.t_url('assets/lobby/rightArrow.png'));
+	}
+
+	return result;
+});
+
 $.widget('custom.checkboxtoggle', {
 	_create() {
 		this.element.addClass('ui-checkbox-toggle-input ui-widget-header')

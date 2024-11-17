@@ -26,6 +26,12 @@ export const roundToPrecision = (value: number, precision = 6): number => {
  * @returns New polygon
  */
 export const createPolygon = (points: number, width = 1, height = 1, rotation = Math.PI / points + Math.PI / 2): PolygonPoint[] => {
+	if (points === 2) {
+		return [
+			{ x: 0, y: height / 2, flipped: false },
+			{ x: width, y: height / 2, flipped: true }
+		];
+	}
 	const vertices = [];
 
 	for (let i = 0; i < points; i++) {

@@ -40,7 +40,6 @@ export default function UIGameIconScrollerGroup(game, itemWidth, itemHeight, max
 	// Create right arrow.
 	this.rightArrow = this.add(new UIScrollerArrowImage(game, 'right', this._scrollRight, this._releaseScroll, this));
 
-	this.addTween = null;
 	this.removeTween = null;
 
 	// Disable scroller.
@@ -59,18 +58,18 @@ UIGameIconScrollerGroup.prototype.update = function() {
 
 	for (const item of this.gameIcons) item.position.x += this.velocity;
 
-	// Sort game icons right to left
-	this.gameIcons = this.gameIcons.sort((firstItem, secondItem) => firstItem.position.x - secondItem.position.x);
-
 	if (!this.scrolling) {
 		let { velocity } = this;
 
+		const targetX = this.velocity > 0
+			? this.gameIcons.at(0)?.x ?? 0
+			: this.gameIcons.findLast(({ position }) => position.x < this.game.width).x ?? this.game.width;
+
 		const gridDistanceDiff = this.velocity > 0
-			? (this.gameIconSpacing / 2) - this.gameIcons.at(0).x
-			: this.game.width - (this.gameIconSpacing / 2) - this.gameIcons.findLast(({ position }) => position.x < this.game.width).x;
+			? (this.gameIconSpacing / 2) - targetX
+			: this.game.width - (this.gameIconSpacing / 2) - targetX;
 
 		velocity += gridDistanceDiff / 3;
-
 		velocity = Math.min(Math.abs(velocity), this.maxScrollSpeed) * Math.sign(velocity);
 
 		for (const item of this.gameIcons) item.position.x += velocity;
@@ -81,7 +80,7 @@ UIGameIconScrollerGroup.prototype.update = function() {
 	// Apply drag to velocity
 	this.velocity *= UIConstants.LOBBY_SCROLL_DRAG;
 
-	// if (!this.scrolling) return;
+	this._sortIcons();
 
 	// Carousel logic
 	if (this.velocity > 0) {
@@ -92,14 +91,20 @@ UIGameIconScrollerGroup.prototype.update = function() {
 			newGameIcon.position.x = 0;
 
 			newGameIcon.scale.set(UIConstants.ASSET_SCALE);
-			this.addTween = this.game.add.tween(newGameIcon.scale).from({ x: 0, y: 0 }, 150, Phaser.Easing.Cubic.InOut, true);
+			this.game.add.tween(newGameIcon.scale).from({
+				x: 0,
+				y: 0
+			}, UIConstants.ELEMENT_POP_IN_TIME, Phaser.Easing.Cubic.InOut, true);
 
 			// Pan out scrolled-out game icon
 			const toRemove = this.gameIcons.reduce((acc, obj) =>
 				Math.abs(this.game.width - (this.gameIconSpacing / 2) - obj.x) < Math.abs(this.game.width - (this.gameIconSpacing / 2) - acc.x) ? obj : acc
 			);
 			toRemove.scale.set(0, 0);
-			this.removeTween = this.game.add.tween(toRemove.scale).from({ x: UIConstants.ASSET_SCALE, y: UIConstants.ASSET_SCALE }, 200, Phaser.Easing.Cubic.InOut, true);
+			this.removeTween = this.game.add.tween(toRemove.scale).from({
+				x: UIConstants.ASSET_SCALE,
+				y: UIConstants.ASSET_SCALE
+			}, UIConstants.ELEMENT_GLIDE_OUT_TIME, Phaser.Easing.Cubic.InOut, true);
 
 			this.leftArrow.releaseClick();
 		}
@@ -111,14 +116,20 @@ UIGameIconScrollerGroup.prototype.update = function() {
 			newGameIcon.position.x = this.gameIcons.at(-1).position.x + this.gameIconSpacing;
 
 			newGameIcon.scale.set(UIConstants.ASSET_SCALE);
-			this.addTween = this.game.add.tween(newGameIcon.scale).from({ x: 0, y: 0 }, 150, Phaser.Easing.Cubic.InOut, true);
+			this.game.add.tween(newGameIcon.scale).from({
+				x: 0,
+				y: 0
+			}, UIConstants.ELEMENT_POP_IN_TIME, Phaser.Easing.Cubic.InOut, true);
 
 			// Pan out scrolled-out game icon
 			const toRemove = this.gameIcons.reduce((acc, obj) =>
 				Math.abs((this.gameIconSpacing / 2) - obj.x) < Math.abs((this.gameIconSpacing / 2) - acc.x) ? obj : acc
 			);
 			toRemove.scale.set(0, 0);
-			this.removeTween = this.game.add.tween(toRemove.scale).from({ x: UIConstants.ASSET_SCALE, y: UIConstants.ASSET_SCALE }, 200, Phaser.Easing.Cubic.InOut, true);
+			this.removeTween = this.game.add.tween(toRemove.scale).from({
+				x: UIConstants.ASSET_SCALE,
+				y: UIConstants.ASSET_SCALE
+			}, UIConstants.ELEMENT_GLIDE_OUT_TIME, Phaser.Easing.Cubic.InOut, true);
 
 			this.rightArrow.releaseClick();
 		}
@@ -133,7 +144,7 @@ UIGameIconScrollerGroup.prototype.postUpdate = function() {
 };
 
 // eslint-disable-next-line max-params
-UIGameIconScrollerGroup.prototype.spawn = function(x, y, items) {
+UIGameIconScrollerGroup.prototype.spawn = function(x, y) {
 	if (this.removeTimeout) {
 		clearTimeout(this.removeTimeout);
 		this.removeTimeout = null;
@@ -142,20 +153,65 @@ UIGameIconScrollerGroup.prototype.spawn = function(x, y, items) {
 	// Revive and place the group.
 	this.exists = true;
 	this.visible = true;
-	this.position.setTo(x, y);
-
-	this.gameIconSpacing = (this.game.width / 3);
-
-	// Distribute game icons
-	for (let i = 0; i < items.length; i++) {
-		const item = items[i];
-		item.position.setTo(this.gameIconSpacing * i + (this.gameIconSpacing / 2), item.position.y);
-	}
-
-	this.gameIcons = items;
+	this.position.set(x, y);
 
 	this.leftArrow.spawn(this.itemWidth / 2 - UIConstants.LOBBY_BUTTON_SCROLL_OFFSET, 0);
 	this.rightArrow.spawn(this.game.width - this.itemWidth / 2 + UIConstants.LOBBY_BUTTON_SCROLL_OFFSET, 0);
+
+	this.redistributeGameIcons(0);
+};
+
+UIGameIconScrollerGroup.prototype.addGameIcon = function(newGameIcon) {
+	this._sortIcons();
+
+	const xPosition = this.gameIcons.length
+		? this.gameIcons.at(-1)?.position.x + this.gameIconSpacing
+		: this.gameIconSpacing / 2;
+	newGameIcon.position.set(xPosition, newGameIcon.position.y);
+
+	this.gameIcons = [...this.gameIcons, newGameIcon];
+
+	this._gameIconsListChanged();
+};
+
+UIGameIconScrollerGroup.prototype.removeGameIcon = function(gameIcon) {
+	this._sortIcons();
+
+	const index = this.gameIcons.indexOf(gameIcon);
+	if (index !== -1) this.gameIcons.splice(index, 1);
+
+	gameIcon.remove();
+
+	if (this.gameIcons.length > 3) {
+		// Shift all game icons after to the left to fill the gap
+		for (const gameIconAfter of this.gameIcons.slice(index)) {
+			gameIconAfter.position.subtract(this.gameIconSpacing, 0);
+			this.game.add.tween(gameIconAfter.scale).from({
+				x: 0,
+				y: 0
+			}, 150, Phaser.Easing.Cubic.InOut, true);
+		}
+	}
+
+	this._gameIconsListChanged();
+};
+
+UIGameIconScrollerGroup.prototype.redistributeGameIcons = function(gameIconCount) {
+	// Distribute evenly
+	this.gameIconSpacing = (this.game.width / Math.min(Math.max(gameIconCount, 1), 3));
+};
+
+UIGameIconScrollerGroup.prototype._gameIconsListChanged = function() {
+	console.log(this.gameIcons.length);
+
+	const visible = this.gameIcons.length > 3;
+	this.leftArrow.visible = visible;
+	this.rightArrow.visible = visible;
+};
+
+UIGameIconScrollerGroup.prototype._sortIcons = function() {
+	// Sort game icons right to left
+	this.gameIcons = this.gameIcons.sort((firstItem, secondItem) => firstItem.position.x - secondItem.position.x);
 };
 
 UIGameIconScrollerGroup.prototype._scrollLeft = function() {

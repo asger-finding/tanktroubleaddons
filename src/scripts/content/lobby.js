@@ -8,7 +8,7 @@ UIConstants.classFields({
 	GAME_ICON_TANK_COUNT: UIConstants.TANK_POOL_SIZE,
 	GAME_ICON_POOL_SIZE: 6,
 	GAME_ICON_COUNT: 6,
-	JOIN_GAME_BUTTON_Y: 80 * devicePixelRatio
+	GAME_ICON_JOIN_GAME_BUTTON_Y: 130 * devicePixelRatio
 });
 
 UIGameIconImage = function(game) {
@@ -28,7 +28,7 @@ UIGameIconImage = function(game) {
 		this.tankNameGroup.add(new UITankIconNameGroup(this.game, UIConstants.TANK_ICON_WIDTH_SMALL, true));
 	}
 
-	this.gameButton = this.addChild(new UIGameButtonGroup(this.game, null, null));
+	this.gameButton = this.addChild(new UIGameButtonGroup(this.game, null, null, true));
 
 	this.removeTween = null;
 	this.scale.set(0.0, 0.0);
@@ -74,7 +74,7 @@ UIGameIconImage.prototype.spawn = function(x, y, gameState, favouriteActiveQueue
 
 	this.gameButton.joinGameCb = joinGameCb;
 	this.gameButton.joinGameCbContext = lobbyCtx;
-	this.gameButton.spawn(0, UIConstants.JOIN_GAME_BUTTON_Y, gameState, favouriteActiveQueuedCounts);
+	this.gameButton.spawn(0, UIConstants.GAME_ICON_JOIN_GAME_BUTTON_Y, gameState, favouriteActiveQueuedCounts, !lobbyCtx.joiningGame);
 
 	this.game.add.tween(this.scale).to({
 		x: UIConstants.ASSET_SCALE,
@@ -210,35 +210,68 @@ Game.UILobbyState.method('create', function(...args) {
 	));
 });
 
-const lobbyclientEventHandler = Game.UILobbyState.getMethod('_clientEventHandler');
+const lobbyClientEventHandler = Game.UILobbyState.getMethod('_clientEventHandler');
+// eslint-disable-next-line complexity
 Game.UILobbyState.method('_clientEventHandler', (...args) => {
 	const [self, evt] = args;
 	if (evt === TTClient.EVENTS.GAME_LIST_CHANGED) {
+		console.log(TTClient.EVENTS.GAME_LIST_CHANGED);
+
+		self._updateGameButtons();
+
 		const gameStates = ClientManager.getClient().getAvailableGameStates();
 		const numGames = gameStates.length;
 
 		self.allGamesActive = numGames === Constants.SERVER.MAX_GAME_COUNT;
 		self.allGamesFull = true;
+
+		const currentGameIds = Object.keys(self.gameIcons);
+		const newGameIds = gameStates.map(gameState => gameState.getId());
+		const gameIconsNoLongerNeeded = currentGameIds.filter(gameId => !newGameIds.includes(gameId));
+
+		const gameIconScroller = self.gameIconScroller.getFirstExists(false);
+		if (gameIconScroller) {
+			self.gameIconScroller.spawn(
+				0,
+				140
+			);
+		}
+
+		// Retire closed games icons
+		for (const gameIconSpriteId of gameIconsNoLongerNeeded) {
+			self.gameIconScroller.removeGameIcon(self.gameIcons[gameIconSpriteId].icon);
+
+			self.gameIcons[gameIconSpriteId].icon.retire();
+			self.gameIcons[gameIconSpriteId].button.retire();
+			self.gameIconPlacementsTaken[self.gameIcons[gameIconSpriteId].placement] = false;
+			delete self.gameIcons[gameIconSpriteId];
+		}
+
+		self.gameIconScroller.redistributeGameIcons(gameStates.length);
+
 		for (const gameState of gameStates) {
 			if (gameState.getPlayerStates().length < gameState.getMaxActivePlayerCount() + Constants.GAME.MAX_QUEUED_PLAYERS) self.allGamesFull = false;
 
-			self._updateGameButtons();
+			const counts = self._countFavouritesActiveAndQueuedInGame(gameState);
 
-			const gameIconSprite = self.gameIconGroup.getFirstExists(false);
-			if (gameIconSprite) {
-				self.gameIcons[gameState.getId()] = { icon: gameIconSprite, button: gameIconSprite.gameButton, placement: 0 };
-				const counts = self._countFavouritesActiveAndQueuedInGame(gameState);
-				gameIconSprite.spawn(0, UIConstants.GAME_ICON_Y, gameState, counts, self._joinGame.bind(self));
+			const isAlreadyInserted = gameState.getId() in self.gameIcons;
+			if (isAlreadyInserted) {
+				self.gameIcons[gameState.getId()].icon.refresh(gameState, counts);
+				self.gameIcons[gameState.getId()].button.refresh(counts);
+			} else {
+				const gameIconSprite = self.gameIconGroup.getFirstExists(false);
+				if (gameIconSprite) {
+					const newGameIcon = { icon: gameIconSprite, button: gameIconSprite.gameButton, placement: 0 };
+					self.gameIcons[gameState.getId()] = newGameIcon;
+					gameIconSprite.spawn(0, UIConstants.GAME_ICON_Y, gameState, counts, self._joinGame.bind(self), self);
+
+					self.gameIconScroller.addGameIcon(newGameIcon.icon);
+					newGameIcon.button.refresh(counts);
+				}
 			}
 		}
-
-		self.gameIconScroller.spawn(
-			0,
-			140,
-			Object.values(self.gameIcons).map(details => details.icon)
-		);
 	} else {
-		lobbyclientEventHandler(...args);
+		lobbyClientEventHandler(...args);
 	}
 });
 

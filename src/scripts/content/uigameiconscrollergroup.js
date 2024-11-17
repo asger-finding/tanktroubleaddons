@@ -32,6 +32,7 @@ export default function UIGameIconScrollerGroup(game, itemWidth, itemHeight, max
 	this.gameIcons = [];
 	this.scrolling = false;
 	this.velocity = 0.0;
+	this.removeTween = null;
 	this.removeTimeout = null;
 
 	// Create left arrow.
@@ -39,8 +40,6 @@ export default function UIGameIconScrollerGroup(game, itemWidth, itemHeight, max
 
 	// Create right arrow.
 	this.rightArrow = this.add(new UIScrollerArrowImage(game, 'right', this._scrollRight, this._releaseScroll, this));
-
-	this.removeTween = null;
 
 	// Disable scroller.
 	this.exists = false;
@@ -154,6 +153,12 @@ UIGameIconScrollerGroup.prototype.spawn = function(x, y) {
 	this.exists = true;
 	this.visible = true;
 	this.position.set(x, y);
+
+	// Reset state.
+	this.gameIcons = [];
+	this.scrolling = false;
+	this.velocity = 0.0;
+	this.removeTween = null;
 
 	this.leftArrow.spawn(this.itemWidth / 2 - UIConstants.LOBBY_BUTTON_SCROLL_OFFSET, 0);
 	this.rightArrow.spawn(this.game.width - this.itemWidth / 2 + UIConstants.LOBBY_BUTTON_SCROLL_OFFSET, 0);

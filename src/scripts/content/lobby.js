@@ -7,7 +7,8 @@ const resolutionScale = UIUtils.getLoadedAssetResolutionScale(devicePixelRatio);
 UIConstants.classFields({
 	GAME_ICON_TANK_COUNT: UIConstants.TANK_POOL_SIZE,
 	GAME_ICON_POOL_SIZE: 6,
-	GAME_ICON_COUNT: 6
+	GAME_ICON_COUNT: 6,
+	JOIN_GAME_BUTTON_Y: 80 * devicePixelRatio
 });
 
 UIGameIconImage = function(game) {
@@ -26,6 +27,8 @@ UIGameIconImage = function(game) {
 		this.tankIconGroup.add(new UITankIconImage(this.game, true, UIConstants.TANK_ICON_SIZES.SMALL));
 		this.tankNameGroup.add(new UITankIconNameGroup(this.game, UIConstants.TANK_ICON_WIDTH_SMALL, true));
 	}
+
+	this.gameButton = this.addChild(new UIGameButtonGroup(this.game, null, null));
 
 	this.removeTween = null;
 	this.scale.set(0.0, 0.0);
@@ -52,8 +55,11 @@ UIGameIconImage.prototype.getTankIcons = function() {
 	}, []);
 };
 
-UIGameIconImage.prototype.spawn = function(x, y, gameState, favouriteActiveQueuedCounts) {
-	if (x !== 0) return this.retire();
+UIGameIconImage.prototype.spawn = function(x, y, gameState, favouriteActiveQueuedCounts, joinGameCb, lobbyCtx) {
+	if (x !== 0) {
+		this.retire();
+		return;
+	}
 
 	this.reset(0, y);
 	this.gameId = gameState.getId();
@@ -65,6 +71,10 @@ UIGameIconImage.prototype.spawn = function(x, y, gameState, favouriteActiveQueue
 	this._updateUI();
 	const delay = 50 + (Math.random() * 200);
 	if (this.removeTween) this.removeTween.stop();
+
+	this.gameButton.joinGameCb = joinGameCb;
+	this.gameButton.joinGameCbContext = lobbyCtx;
+	this.gameButton.spawn(0, UIConstants.JOIN_GAME_BUTTON_Y, gameState, favouriteActiveQueuedCounts);
 
 	this.game.add.tween(this.scale).to({
 		x: UIConstants.ASSET_SCALE,
@@ -198,32 +208,38 @@ Game.UILobbyState.method('create', function(...args) {
 		UIConstants.GAME_ICON_HEIGHT,
 		UIConstants.GAMEICON_SCROLL_SPEED
 	));
+});
 
-	let done = false;
-	ClientManager.getClient().addEventListener((_self, evt) => {
-		switch (evt) {
-			case TTClient.EVENTS.GAME_LIST_CHANGED:
-				if (done) return;
-				done = true;
-				// eslint-disable-next-line no-case-declarations
-				const gameIcons = [];
-				for (let i = 0; i < 4; i++) {
-					gameIcons.push(this.gameIconGroup.getFirstExists(false));
-					const gameIcon = gameIcons[i];
+const lobbyclientEventHandler = Game.UILobbyState.getMethod('_clientEventHandler');
+Game.UILobbyState.method('_clientEventHandler', (...args) => {
+	const [self, evt] = args;
+	if (evt === TTClient.EVENTS.GAME_LIST_CHANGED) {
+		const gameStates = ClientManager.getClient().getAvailableGameStates();
+		const numGames = gameStates.length;
 
-					gameIcon.spawn(0, UIConstants.GAME_ICON_Y, ClientManager.getClient().getAvailableGameStates()[i % ClientManager.getClient().games.length], 0);
-				}
-				this.gameIconScroller.spawn(
-					0,
-					140,
-					gameIcons,
-					1000
-				);
-				break;
-			default:
-				break;
+		self.allGamesActive = numGames === Constants.SERVER.MAX_GAME_COUNT;
+		self.allGamesFull = true;
+		for (const gameState of gameStates) {
+			if (gameState.getPlayerStates().length < gameState.getMaxActivePlayerCount() + Constants.GAME.MAX_QUEUED_PLAYERS) self.allGamesFull = false;
+
+			self._updateGameButtons();
+
+			const gameIconSprite = self.gameIconGroup.getFirstExists(false);
+			if (gameIconSprite) {
+				self.gameIcons[gameState.getId()] = { icon: gameIconSprite, button: gameIconSprite.gameButton, placement: 0 };
+				const counts = self._countFavouritesActiveAndQueuedInGame(gameState);
+				gameIconSprite.spawn(0, UIConstants.GAME_ICON_Y, gameState, counts, self._joinGame.bind(self));
+			}
 		}
-	}, this);
+
+		self.gameIconScroller.spawn(
+			0,
+			140,
+			Object.values(self.gameIcons).map(details => details.icon)
+		);
+	} else {
+		lobbyclientEventHandler(...args);
+	}
 });
 
 export const _isESmodule = true;

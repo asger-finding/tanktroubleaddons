@@ -32,7 +32,6 @@ export default function UIGameIconScrollerGroup(game, itemWidth, itemHeight, max
 	this.gameIcons = [];
 	this.scrolling = false;
 	this.velocity = 0.0;
-	this.removeTween = null;
 	this.removeTimeout = null;
 
 	// Create left arrow.
@@ -72,14 +71,27 @@ UIGameIconScrollerGroup.prototype.update = function() {
 		velocity = Math.min(Math.abs(velocity), this.maxScrollSpeed) * Math.sign(velocity);
 
 		for (const item of this.gameIcons) item.position.x += velocity;
-
-		if (this.removeTween) this.removeTween.reverse = true;
 	}
 
 	// Apply drag to velocity
 	this.velocity *= UIConstants.LOBBY_SCROLL_DRAG;
 
 	this._sortIcons();
+
+	for (const gameIcon of this.gameIcons) {
+		const distFromLeft = gameIcon.x;
+		const distFromRight = this.game.width - gameIcon.x;
+		const nearest = Math.min(distFromLeft, distFromRight);
+
+		const pxDistanceToScaleDown = this.gameIconSpacing / 2;
+		const pxBorderMargin = 30;
+		const linearScale = Math.max(Math.min((nearest - pxBorderMargin) / pxDistanceToScaleDown, 1), 0);
+		// eslint-disable-next-line new-cap
+		const scale = Phaser.Easing.Cubic.InOut(linearScale);
+
+		const isTweening = this.game.tweens.isTweening(gameIcon.scale);
+		if (!isNaN(scale) && !isTweening) gameIcon.scale.set(scale);
+	}
 
 	// Carousel logic
 	if (this.velocity > 0) {
@@ -89,22 +101,6 @@ UIGameIconScrollerGroup.prototype.update = function() {
 			const newGameIcon = this.gameIcons.at(-1);
 			newGameIcon.position.x = 0;
 
-			newGameIcon.scale.set(UIConstants.ASSET_SCALE);
-			this.game.add.tween(newGameIcon.scale).from({
-				x: 0,
-				y: 0
-			}, UIConstants.ELEMENT_POP_IN_TIME, Phaser.Easing.Cubic.InOut, true);
-
-			// Pan out scrolled-out game icon
-			const toRemove = this.gameIcons.reduce((acc, obj) =>
-				Math.abs(this.game.width - (this.gameIconSpacing / 2) - obj.x) < Math.abs(this.game.width - (this.gameIconSpacing / 2) - acc.x) ? obj : acc
-			);
-			toRemove.scale.set(0, 0);
-			this.removeTween = this.game.add.tween(toRemove.scale).from({
-				x: UIConstants.ASSET_SCALE,
-				y: UIConstants.ASSET_SCALE
-			}, UIConstants.ELEMENT_GLIDE_OUT_TIME, Phaser.Easing.Cubic.InOut, true);
-
 			this.leftArrow.releaseClick();
 		}
 	} else if (this.velocity < 0) {
@@ -113,22 +109,6 @@ UIGameIconScrollerGroup.prototype.update = function() {
 			// Insert new at left to fill void
 			const newGameIcon = this.gameIcons.at(0);
 			newGameIcon.position.x = this.gameIcons.at(-1).position.x + this.gameIconSpacing;
-
-			newGameIcon.scale.set(UIConstants.ASSET_SCALE);
-			this.game.add.tween(newGameIcon.scale).from({
-				x: 0,
-				y: 0
-			}, UIConstants.ELEMENT_POP_IN_TIME, Phaser.Easing.Cubic.InOut, true);
-
-			// Pan out scrolled-out game icon
-			const toRemove = this.gameIcons.reduce((acc, obj) =>
-				Math.abs((this.gameIconSpacing / 2) - obj.x) < Math.abs((this.gameIconSpacing / 2) - acc.x) ? obj : acc
-			);
-			toRemove.scale.set(0, 0);
-			this.removeTween = this.game.add.tween(toRemove.scale).from({
-				x: UIConstants.ASSET_SCALE,
-				y: UIConstants.ASSET_SCALE
-			}, UIConstants.ELEMENT_GLIDE_OUT_TIME, Phaser.Easing.Cubic.InOut, true);
 
 			this.rightArrow.releaseClick();
 		}
@@ -158,7 +138,6 @@ UIGameIconScrollerGroup.prototype.spawn = function(x, y) {
 	this.gameIcons = [];
 	this.scrolling = false;
 	this.velocity = 0.0;
-	this.removeTween = null;
 
 	this.leftArrow.spawn(this.itemWidth / 2 - UIConstants.LOBBY_BUTTON_SCROLL_OFFSET, 0);
 	this.rightArrow.spawn(this.game.width - this.itemWidth / 2 + UIConstants.LOBBY_BUTTON_SCROLL_OFFSET, 0);
@@ -207,8 +186,6 @@ UIGameIconScrollerGroup.prototype.redistributeGameIcons = function(gameIconCount
 };
 
 UIGameIconScrollerGroup.prototype._gameIconsListChanged = function() {
-	console.log(this.gameIcons.length);
-
 	const visible = this.gameIcons.length > 3;
 	this.leftArrow.visible = visible;
 	this.rightArrow.visible = visible;

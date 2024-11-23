@@ -63,4 +63,19 @@ export const createPolygon = (points: number, width = 1, height = 1, rotation = 
 	return normalizedVertices;
 };
 
+/**
+ * JS adaptation of the CSS `justify-content: space-around;` property, to space things evenly on the x-axis
+ * @param width Width of container
+ * @param items Item count
+ * @returns Item points
+ */
+export const spaceAround = (width: number, items: number) => {
+	if (items <= 0) return [];
+
+	const totalSpacing = width / items;
+	const halfSpacing = totalSpacing / 2;
+
+	return Array.from({ length: items }, (_, i) => halfSpacing + i * totalSpacing);
+};
+
 export const _isESmodule = true;

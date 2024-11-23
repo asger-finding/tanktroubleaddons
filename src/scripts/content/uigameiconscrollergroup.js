@@ -1,9 +1,16 @@
+import { spaceAround } from '../utils/mathUtils.js';
+
 UIConstants.classFields({
+	GAME_ICON_SCROLL_SPEED: 10 * devicePixelRatio,
+	GAME_ICON_MARGIN_FROM_BORDER: 30 * devicePixelRatio,
 	LOBBY_MAX_DRAG_SPEED: 850 * devicePixelRatio,
 	LOBBY_SNAP_DISTANCE_TO_SPEED_SCALE: 8,
 	LOBBY_SCROLL_DRAG: 0.9,
-	GAMEICON_SCROLL_SPEED: 10 * devicePixelRatio,
-	LOBBY_BUTTON_SCROLL_OFFSET: 60 * devicePixelRatio
+	LOBBY_BUTTON_SCROLL_OFFSET: 60 * devicePixelRatio,
+
+	NO_GAMES_FONT_SIZE: 48 * devicePixelRatio,
+	NO_GAMES_STROKE_WIDTH: 4 * devicePixelRatio,
+	NO_GAMES_Y: 80 * devicePixelRatio
 });
 
 /**
@@ -40,6 +47,18 @@ export default function UIGameIconScrollerGroup(game, itemWidth, itemHeight, max
 	// Create right arrow.
 	this.rightArrow = this.add(new UIScrollerArrowImage(game, 'right', this._scrollRight, this._releaseScroll, this));
 
+	// Create no games text.
+	this.noGamesText = this.add(new Phaser.Text(game, 0, UIConstants.NO_GAMES_Y, 'No games (╯°□°）╯︵ ┻━┻', {
+		font: `${ UIConstants.NO_GAMES_FONT_SIZE }px Arial`,
+		fontWeight: 'bold',
+		fill: '#000000',
+		stroke: '#ffffff',
+		strokeThickness: UIConstants.NO_GAMES_STROKE_WIDTH
+	}));
+	this.noGamesText.anchor.setTo(0.5, 0.5);
+	this.noGamesText.scale.set(UIConstants.ASSET_SCALE);
+	this.noGamesText.position.set(this.game.width / 2.0, UIConstants.NO_GAMES_Y);
+
 	// Disable scroller.
 	this.exists = false;
 	this.visible = false;
@@ -61,11 +80,11 @@ UIGameIconScrollerGroup.prototype.update = function() {
 
 		const targetX = this.velocity > 0
 			? this.gameIcons.at(0)?.x ?? 0
-			: this.gameIcons.findLast(({ position }) => position.x < this.game.width).x ?? this.game.width;
+			: this.gameIcons.findLast(({ position }) => position.x < this.game.width)?.x ?? this.game.width;
 
 		const gridDistanceDiff = this.velocity > 0
-			? (this.gameIconSpacing / 2) - targetX
-			: this.game.width - (this.gameIconSpacing / 2) - targetX;
+			? (this.iconSpacing / 2) - targetX
+			: this.game.width - (this.iconSpacing / 2) - targetX;
 
 		velocity += gridDistanceDiff / 3;
 		velocity = Math.min(Math.abs(velocity), this.maxScrollSpeed) * Math.sign(velocity);
@@ -83,12 +102,15 @@ UIGameIconScrollerGroup.prototype.update = function() {
 		const distFromRight = this.game.width - gameIcon.x;
 		const nearest = Math.min(distFromLeft, distFromRight);
 
-		const pxDistanceToScaleDown = this.gameIconSpacing / 2;
-		const pxBorderMargin = 30;
-		const linearScale = Math.max(Math.min((nearest - pxBorderMargin) / pxDistanceToScaleDown, 1), 0);
+		const scaleMaxDistance = this.iconSpacing / 2;
+		const scaleFactor = Math.max(Math.min((nearest - UIConstants.GAME_ICON_MARGIN_FROM_BORDER) / scaleMaxDistance, 1), 0);
 		// eslint-disable-next-line new-cap
-		const scale = Phaser.Easing.Cubic.InOut(linearScale);
+		const scale = Phaser.Easing.Cubic.InOut(scaleFactor);
 
+		// Hide icons that are just spawning in
+		gameIcon.visible = !(gameIcon.x === 0 || gameIcon.x === this.game.width);
+
+		// Scale icons if they are near the edge
 		const isTweening = this.game.tweens.isTweening(gameIcon.scale);
 		if (!isNaN(scale) && !isTweening) gameIcon.scale.set(scale);
 	}
@@ -96,7 +118,7 @@ UIGameIconScrollerGroup.prototype.update = function() {
 	// Carousel logic
 	if (this.velocity > 0) {
 		const firstFromRight = this.gameIcons.at(0);
-		if (firstFromRight.x > this.gameIconSpacing) {
+		if (firstFromRight.x > this.iconSpacing) {
 			// Insert new at right to fill void
 			const newGameIcon = this.gameIcons.at(-1);
 			newGameIcon.position.x = 0;
@@ -105,10 +127,10 @@ UIGameIconScrollerGroup.prototype.update = function() {
 		}
 	} else if (this.velocity < 0) {
 		const firstFromLeft = this.gameIcons.findLast(({ position }) => position.x < this.game.width);
-		if (firstFromLeft.position.x < this.game.width - this.gameIconSpacing) {
+		if (firstFromLeft.position.x < this.game.width - this.iconSpacing) {
 			// Insert new at left to fill void
 			const newGameIcon = this.gameIcons.at(0);
-			newGameIcon.position.x = this.gameIcons.at(-1).position.x + this.gameIconSpacing;
+			newGameIcon.position.x = this.gameIcons.at(-1).position.x + this.iconSpacing;
 
 			this.rightArrow.releaseClick();
 		}
@@ -122,7 +144,6 @@ UIGameIconScrollerGroup.prototype.postUpdate = function() {
 	Phaser.Group.prototype.postUpdate.call(this);
 };
 
-// eslint-disable-next-line max-params
 UIGameIconScrollerGroup.prototype.spawn = function(x, y) {
 	if (this.removeTimeout) {
 		clearTimeout(this.removeTimeout);
@@ -142,20 +163,15 @@ UIGameIconScrollerGroup.prototype.spawn = function(x, y) {
 	this.leftArrow.spawn(this.itemWidth / 2 - UIConstants.LOBBY_BUTTON_SCROLL_OFFSET, 0);
 	this.rightArrow.spawn(this.game.width - this.itemWidth / 2 + UIConstants.LOBBY_BUTTON_SCROLL_OFFSET, 0);
 
-	this.redistributeGameIcons(0);
+	this._gameIconsListChanged(0);
 };
 
 UIGameIconScrollerGroup.prototype.addGameIcon = function(newGameIcon) {
 	this._sortIcons();
 
-	const xPosition = this.gameIcons.length
-		? this.gameIcons.at(-1)?.position.x + this.gameIconSpacing
-		: this.gameIconSpacing / 2;
-	newGameIcon.position.set(xPosition, newGameIcon.position.y);
+	this.gameIcons.push(newGameIcon);
 
-	this.gameIcons = [...this.gameIcons, newGameIcon];
-
-	this._gameIconsListChanged();
+	this._disableAndDistributeGameIcons();
 };
 
 UIGameIconScrollerGroup.prototype.removeGameIcon = function(gameIcon) {
@@ -164,31 +180,39 @@ UIGameIconScrollerGroup.prototype.removeGameIcon = function(gameIcon) {
 	const index = this.gameIcons.indexOf(gameIcon);
 	if (index !== -1) this.gameIcons.splice(index, 1);
 
-	gameIcon.remove();
-
-	if (this.gameIcons.length > 3) {
-		// Shift all game icons after to the left to fill the gap
-		for (const gameIconAfter of this.gameIcons.slice(index)) {
-			gameIconAfter.position.subtract(this.gameIconSpacing, 0);
-			this.game.add.tween(gameIconAfter.scale).from({
-				x: 0,
-				y: 0
-			}, 150, Phaser.Easing.Cubic.InOut, true);
-		}
-	}
-
-	this._gameIconsListChanged();
+	this._disableAndDistributeGameIcons();
 };
 
-UIGameIconScrollerGroup.prototype.redistributeGameIcons = function(gameIconCount) {
+UIGameIconScrollerGroup.prototype._disableAndDistributeGameIcons = function() {
+	this._gameIconsListChanged();
+	this._calculateIconSpacing(this.gameIcons.length);
+
+	this.scrolling = true;
+	this.velocity = 0.0;
+
+	const coordinates = spaceAround(this.game.width, Math.min(this.gameIcons.length, 3));
+
+	Promise.all(this.gameIcons.map((gameIcon, i) => new Promise(resolve => {
+		const tween = this.game.add.tween(gameIcon.position).to({
+			x: coordinates[i]
+		}, 300, Phaser.Easing.Cubic.InOut, true);
+		tween.onComplete.add(resolve);
+	}))).then(() => { this.scrolling = false; });
+};
+
+UIGameIconScrollerGroup.prototype._calculateIconSpacing = function(gameIconCount) {
 	// Distribute evenly
-	this.gameIconSpacing = (this.game.width / Math.min(Math.max(gameIconCount, 1), 3));
+	this.iconSpacing = (this.game.width / Math.min(Math.max(gameIconCount, 1), 3));
 };
 
 UIGameIconScrollerGroup.prototype._gameIconsListChanged = function() {
-	const visible = this.gameIcons.length > 3;
-	this.leftArrow.visible = visible;
-	this.rightArrow.visible = visible;
+	const noGames = this.gameIcons.length === 0;
+	this.noGamesText.exists = noGames;
+	this.noGamesText.visible = noGames;
+
+	const arrowsVisible = this.gameIcons.length > 3;
+	this.leftArrow.visible = arrowsVisible;
+	this.rightArrow.visible = arrowsVisible;
 };
 
 UIGameIconScrollerGroup.prototype._sortIcons = function() {

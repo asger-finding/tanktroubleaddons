@@ -206,7 +206,7 @@ Game.UILobbyState.method('create', function(...args) {
 		this.game,
 		UIConstants.GAME_ICON_WIDTH,
 		UIConstants.GAME_ICON_HEIGHT,
-		UIConstants.GAMEICON_SCROLL_SPEED
+		UIConstants.GAME_ICON_SCROLL_SPEED
 	));
 });
 
@@ -215,8 +215,6 @@ const lobbyClientEventHandler = Game.UILobbyState.getMethod('_clientEventHandler
 Game.UILobbyState.method('_clientEventHandler', (...args) => {
 	const [self, evt] = args;
 	if (evt === TTClient.EVENTS.GAME_LIST_CHANGED) {
-		console.log(TTClient.EVENTS.GAME_LIST_CHANGED);
-
 		self._updateGameButtons();
 
 		const gameStates = ClientManager.getClient().getAvailableGameStates();
@@ -241,13 +239,11 @@ Game.UILobbyState.method('_clientEventHandler', (...args) => {
 		for (const gameIconSpriteId of gameIconsNoLongerNeeded) {
 			self.gameIconScroller.removeGameIcon(self.gameIcons[gameIconSpriteId].icon);
 
-			self.gameIcons[gameIconSpriteId].icon.retire();
-			self.gameIcons[gameIconSpriteId].button.retire();
+			self.gameIcons[gameIconSpriteId].icon.remove();
+			self.gameIcons[gameIconSpriteId].button.remove();
 			self.gameIconPlacementsTaken[self.gameIcons[gameIconSpriteId].placement] = false;
 			delete self.gameIcons[gameIconSpriteId];
 		}
-
-		self.gameIconScroller.redistributeGameIcons(gameStates.length);
 
 		for (const gameState of gameStates) {
 			if (gameState.getPlayerStates().length < gameState.getMaxActivePlayerCount() + Constants.GAME.MAX_QUEUED_PLAYERS) self.allGamesFull = false;

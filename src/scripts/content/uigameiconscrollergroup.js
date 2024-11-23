@@ -10,7 +10,7 @@ UIConstants.classFields({
 
 	NO_GAMES_FONT_SIZE: 48 * devicePixelRatio,
 	NO_GAMES_STROKE_WIDTH: 4 * devicePixelRatio,
-	NO_GAMES_Y: 80 * devicePixelRatio
+	NO_GAMES_Y: 200 * devicePixelRatio
 });
 
 /**
@@ -48,13 +48,13 @@ export default function UIGameIconScrollerGroup(game, itemWidth, itemHeight, max
 	this.rightArrow = this.add(new UIScrollerArrowImage(game, 'right', this._scrollRight, this._releaseScroll, this));
 
 	// Create no games text.
-	this.noGamesText = this.add(new Phaser.Text(game, 0, UIConstants.NO_GAMES_Y, 'No games (╯°□°）╯︵ ┻━┻', {
+	this.noGamesText = this.game.add.text(0, UIConstants.NO_GAMES_Y, 'No games (╯°□°）╯︵ ┻━┻', {
 		font: `${ UIConstants.NO_GAMES_FONT_SIZE }px Arial`,
 		fontWeight: 'bold',
 		fill: '#000000',
 		stroke: '#ffffff',
 		strokeThickness: UIConstants.NO_GAMES_STROKE_WIDTH
-	}));
+	});
 	this.noGamesText.anchor.setTo(0.5, 0.5);
 	this.noGamesText.scale.set(UIConstants.ASSET_SCALE);
 	this.noGamesText.position.set(this.game.width / 2.0, UIConstants.NO_GAMES_Y);
@@ -62,6 +62,7 @@ export default function UIGameIconScrollerGroup(game, itemWidth, itemHeight, max
 	// Disable scroller.
 	this.exists = false;
 	this.visible = false;
+	this.noGamesText.kill();
 }
 
 UIGameIconScrollerGroup.prototype = Object.create(Phaser.Group.prototype);
@@ -163,7 +164,7 @@ UIGameIconScrollerGroup.prototype.spawn = function(x, y) {
 	this.leftArrow.spawn(this.itemWidth / 2 - UIConstants.LOBBY_BUTTON_SCROLL_OFFSET, 0);
 	this.rightArrow.spawn(this.game.width - this.itemWidth / 2 + UIConstants.LOBBY_BUTTON_SCROLL_OFFSET, 0);
 
-	this._gameIconsListChanged(0);
+	this._gameIconsListChanged();
 };
 
 UIGameIconScrollerGroup.prototype.addGameIcon = function(newGameIcon) {
@@ -207,8 +208,8 @@ UIGameIconScrollerGroup.prototype._calculateIconSpacing = function(gameIconCount
 
 UIGameIconScrollerGroup.prototype._gameIconsListChanged = function() {
 	const noGames = this.gameIcons.length === 0;
-	this.noGamesText.exists = noGames;
-	this.noGamesText.visible = noGames;
+	if (noGames) this.noGamesText.revive();
+	else this.noGamesText.kill();
 
 	const arrowsVisible = this.gameIcons.length > 3;
 	this.leftArrow.visible = arrowsVisible;
@@ -242,6 +243,7 @@ UIGameIconScrollerGroup.prototype.remove = function() {
 		self.visible = false;
 	}, UIConstants.ELEMENT_GLIDE_OUT_TIME);
 
+	this.noGamesText.kill();
 	this.leftArrow.remove();
 	this.rightArrow.remove();
 };
@@ -249,6 +251,7 @@ UIGameIconScrollerGroup.prototype.remove = function() {
 UIGameIconScrollerGroup.prototype.retire = function() {
 	this.exists = false;
 	this.visible = false;
-	this.leftArrow.kill();
-	this.rightArrow.kill();
+	this.noGamesText.kill();
+	this.leftArrow.retire();
+	this.rightArrow.retire();
 };

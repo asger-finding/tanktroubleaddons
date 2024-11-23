@@ -65,7 +65,8 @@ UIGameIconImage.prototype.spawn = function(x, y, gameState, favouriteActiveQueue
 	this.gameId = gameState.getId();
 	this.mode = gameState.getMode();
 	this.ranked = gameState.getRanked();
-	this.playerStates = gameState.getPlayerStates();
+	this.playerStates = gameState.getPlayerStates()
+		.sort((first, sec) => new Date(first.getEnqueueTime()) - new Date(sec.getEnqueueTime()));
 	this.iconPlacements = createPolygon(gameState.getMaxActivePlayerCount(), 140 * resolutionScale, 95 * resolutionScale);
 	this.favouriteActiveQueuedCounts = favouriteActiveQueuedCounts;
 	this._updateUI();
@@ -91,7 +92,7 @@ UIGameIconImage.prototype.refresh = function(gameState, favouriteActiveQueuedCou
 	this._updateUI();
 };
 
-UIGameIconImage.prototype.addPlaceholder = function(placement) {
+UIGameIconImage.prototype._addPlaceholder = function(placement) {
 	const tankPlaceholderSprite = this.tankPlaceholderGroup.getFirstExists(false);
 	if (tankPlaceholderSprite) {
 		this.icons.push({
@@ -120,7 +121,7 @@ UIGameIconImage.prototype._updateUI = function() {
 		: Math.exp(-0.4 * (this.iconPlacements.length - 5));
 
 	const shift = this.icons.length;
-	for (let i = 0; i < this.iconPlacements.length - shift; i++) this.addPlaceholder(this.iconPlacements[i + shift]);
+	for (let i = 0; i < this.iconPlacements.length - shift; i++) this._addPlaceholder(this.iconPlacements[i + shift]);
 
 	for (let i = 0; i < this.icons.length; i++) {
 		const icon = this.icons[i];
@@ -135,7 +136,7 @@ UIGameIconImage.prototype._updateUI = function() {
 
 			this.icons.splice(i);
 
-			for (let j = this.icons.length; j < this.iconPlacements.length; j++) this.addPlaceholder(this.iconPlacements[j]);
+			for (let j = this.icons.length; j < this.iconPlacements.length; j++) this._addPlaceholder(this.iconPlacements[j]);
 		}
 	}
 

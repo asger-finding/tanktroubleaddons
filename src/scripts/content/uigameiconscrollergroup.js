@@ -14,26 +14,19 @@ UIConstants.classFields({
 });
 
 /**
- *
- * @param game
- * @param itemWidth
- * @param itemHeight
- * @param maxScrollSpeed
- * @param spawnFunction
- * @param removeFunction
- * @param context
+ * Create a new game icon scroller.
+ * @param game Phaser game instance
+ * @param itemWidth Game icon width
+ * @param itemHeight Game icon height
+ * @param maxScrollSpeed Scroll speed
  */
-// eslint-disable-next-line max-params
-export default function UIGameIconScrollerGroup(game, itemWidth, itemHeight, maxScrollSpeed, spawnFunction, removeFunction, context) {
+export default function UIGameIconScrollerGroup(game, itemWidth, itemHeight, maxScrollSpeed) {
 	// Call super.
 	Phaser.Group.call(this, game, null);
 
 	this.itemWidth = itemWidth;
 	this.itemHeight = itemHeight;
 	this.maxScrollSpeed = maxScrollSpeed;
-	this.spawnFunction = spawnFunction;
-	this.removeFunction = removeFunction;
-	this.context = context;
 
 	// State.
 	this.leftMargin = 0.0;

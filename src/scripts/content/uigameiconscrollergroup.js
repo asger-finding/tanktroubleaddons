@@ -292,3 +292,5 @@ UIGameIconScrollerGroup.prototype.retire = function() {
 	this.leftArrow.remove();
 	this.rightArrow.remove();
 };
+
+export const _isESmodule = true;

@@ -98,8 +98,9 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, buffer) {
 		}
 
 		// Create frame name from file name
-		const [ext] = (fileName.match(/\.(?:[^.]*?)(?=\?|#|$)/u) ?? ['']);
-		const frameName = fileName.slice(0, -ext.length);
+		const basename = fileName.split('/').at(-1);
+		const [ext] = (basename.match(/\.(?:[^.]*?)(?=\?|#|$)/u) ?? ['']);
+		const frameName = basename.slice(0, -ext.length);
 
 		// Load into image packer
 		packer.add({
@@ -145,7 +146,7 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, buffer) {
 			frameData.addFrame(new Phaser.Frame(
 				frameData._frames.length,
 				rect.x,
-				rect.y + originalSpritesheet.height,
+				rect.y + spritesheet.height,
 				rect.width,
 				rect.height,
 				rect.frameName

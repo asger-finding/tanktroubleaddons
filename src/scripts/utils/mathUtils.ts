@@ -26,6 +26,12 @@ export const roundToPrecision = (value: number, precision = 6): number => {
  * @returns New polygon
  */
 export const createPolygon = (points: number, width = 1, height = 1, rotation = Math.PI / points + Math.PI / 2): PolygonPoint[] => {
+	if (points === 2) {
+		return [
+			{ x: 0, y: height / 2, flipped: false },
+			{ x: width, y: height / 2, flipped: true }
+		];
+	}
 	const vertices = [];
 
 	for (let i = 0; i < points; i++) {
@@ -56,5 +62,21 @@ export const createPolygon = (points: number, width = 1, height = 1, rotation = 
 
 	return normalizedVertices;
 };
+
+/**
+ * JS adaptation of the CSS `justify-content: space-around;` property, to space things evenly on the x-axis
+ * @param width Width of container
+ * @param items Item count
+ * @returns Item points
+ */
+export const spaceAround = (width: number, items: number) => {
+	if (items <= 0) return { leftMargin: 0, spacing: 0 };
+
+	const spacing = width / items;
+	const leftMargin = spacing / 2;
+
+	return { leftMargin, spacing };
+};
+
 
 export const _isESmodule = true;

@@ -1,7 +1,6 @@
+import UIGameIconScrollerGroup from './uigameiconscrollergroup.js';
 import UIPlaceholderIconImage from './uiplaceholdericonimage.js';
 import { createPolygon } from '../utils/mathUtils.js';
-
-// TODO: add garage-like arrow scroller instead
 
 const resolutionScale = UIUtils.getLoadedAssetResolutionScale(devicePixelRatio);
 
@@ -9,8 +8,7 @@ UIConstants.classFields({
 	GAME_ICON_TANK_COUNT: UIConstants.TANK_POOL_SIZE,
 	GAME_ICON_POOL_SIZE: 6,
 	GAME_ICON_COUNT: 6,
-	GAME_ICON_WIDTH: UIConstants.GAME_ICON_WIDTH / 1.7,
-	GAME_ICON_HEIGHT: UIConstants.GAME_ICON_HEIGHT / 1.7
+	GAME_ICON_JOIN_GAME_BUTTON_Y: 130 * devicePixelRatio
 });
 
 UIGameIconImage = function(game) {
@@ -29,6 +27,8 @@ UIGameIconImage = function(game) {
 		this.tankIconGroup.add(new UITankIconImage(this.game, true, UIConstants.TANK_ICON_SIZES.SMALL));
 		this.tankNameGroup.add(new UITankIconNameGroup(this.game, UIConstants.TANK_ICON_WIDTH_SMALL, true));
 	}
+
+	this.gameButton = this.addChild(new UIGameButtonGroup(this.game, null, null, true));
 
 	this.removeTween = null;
 	this.scale.set(0.0, 0.0);
@@ -55,21 +55,26 @@ UIGameIconImage.prototype.getTankIcons = function() {
 	}, []);
 };
 
-UIGameIconImage.prototype.spawn = function(x, y, gameState, favouriteActiveQueuedCounts) {
+UIGameIconImage.prototype.spawn = function(x, y, gameState, favouriteActiveQueuedCounts, joinGameCb, lobbyCtx) {
 	this.reset(x, y);
 	this.gameId = gameState.getId();
 	this.mode = gameState.getMode();
 	this.ranked = gameState.getRanked();
-	this.playerStates = gameState.getPlayerStates();
+	this.playerStates = gameState.getPlayerStates().sort((first, sec) => first.getQueued() - sec.getQueued());
 	this.iconPlacements = createPolygon(gameState.getMaxActivePlayerCount(), 140 * resolutionScale, 95 * resolutionScale);
 	this.favouriteActiveQueuedCounts = favouriteActiveQueuedCounts;
 	this._updateUI();
-	const delay = 50 + (Math.random() * 200);
+
 	if (this.removeTween) this.removeTween.stop();
 
+	this.gameButton.joinGameCb = joinGameCb;
+	this.gameButton.joinGameCbContext = lobbyCtx;
+	this.gameButton.spawn(0, UIConstants.GAME_ICON_JOIN_GAME_BUTTON_Y, gameState, favouriteActiveQueuedCounts, !lobbyCtx.joiningGame);
+
+	const delay = 50 + (Math.random() * 200);
 	this.game.add.tween(this.scale).to({
-		x: UIConstants.ASSET_SCALE / 1.7,
-		y: UIConstants.ASSET_SCALE / 1.7
+		x: UIConstants.ASSET_SCALE,
+		y: UIConstants.ASSET_SCALE
 	}, UIConstants.ELEMENT_POP_IN_TIME, Phaser.Easing.Back.Out, true, delay);
 };
 
@@ -82,7 +87,7 @@ UIGameIconImage.prototype.refresh = function(gameState, favouriteActiveQueuedCou
 	this._updateUI();
 };
 
-UIGameIconImage.prototype.addPlaceholder = function(placement) {
+UIGameIconImage.prototype._addPlaceholder = function(placement) {
 	const tankPlaceholderSprite = this.tankPlaceholderGroup.getFirstExists(false);
 	if (tankPlaceholderSprite) {
 		this.icons.push({
@@ -111,7 +116,7 @@ UIGameIconImage.prototype._updateUI = function() {
 		: Math.exp(-0.4 * (this.iconPlacements.length - 5));
 
 	const shift = this.icons.length;
-	for (let i = 0; i < this.iconPlacements.length - shift; i++) this.addPlaceholder(this.iconPlacements[i + shift]);
+	for (let i = 0; i < this.iconPlacements.length - shift; i++) this._addPlaceholder(this.iconPlacements[i + shift]);
 
 	for (let i = 0; i < this.icons.length; i++) {
 		const icon = this.icons[i];
@@ -120,13 +125,15 @@ UIGameIconImage.prototype._updateUI = function() {
 		const tankStillInGame = this.playerStates.some(playerState => icon.playerId === playerState.getPlayerId());
 		if (!tankStillInGame) {
 			for (let j = i; j < this.iconPlacements.length; j++) {
+				if (!this.icons[j]) continue;
+
 				this.icons[j].icon?.remove();
 				this.icons[j].name?.remove();
 			}
 
 			this.icons.splice(i);
 
-			for (let j = this.icons.length; j < this.iconPlacements.length; j++) this.addPlaceholder(this.iconPlacements[j]);
+			for (let j = this.icons.length; j < this.iconPlacements.length; j++) this._addPlaceholder(this.iconPlacements[j]);
 		}
 	}
 
@@ -188,5 +195,99 @@ UIGameIconImage.prototype.retire = function() {
 	this.tankIconGroup.callAll('retire');
 	this.tankNameGroup.callAll('retire');
 };
+
+const createLobby = Game.UILobbyState.getMethod('create');
+Game.UILobbyState.method('create', function(...args) {
+	createLobby.apply(this, ...args);
+
+	this.gameIconScroller = this.gameIconGroup.add(new UIGameIconScrollerGroup(
+		this.game,
+		UIConstants.GAME_ICON_WIDTH,
+		UIConstants.GAME_ICON_HEIGHT,
+		UIConstants.GAME_ICON_SCROLL_SPEED
+	));
+});
+
+const lobbyClientEventHandler = Game.UILobbyState.getMethod('_clientEventHandler');
+// eslint-disable-next-line complexity
+Game.UILobbyState.method('_clientEventHandler', (...args) => {
+	const [self, evt] = args;
+	if (evt === TTClient.EVENTS.GAME_LIST_CHANGED) {
+		self._updateGameButtons();
+
+		const gameStates = ClientManager.getClient().getAvailableGameStates();
+		const numGames = gameStates.length;
+
+		self.allGamesActive = numGames === Constants.SERVER.MAX_GAME_COUNT;
+		self.allGamesFull = true;
+
+		const currentGameIds = Object.keys(self.gameIcons);
+		const newGameIds = gameStates.map(gameState => gameState.getId());
+		const gameIconsNoLongerNeeded = currentGameIds.filter(gameId => !newGameIds.includes(gameId));
+
+		const gameIconScroller = self.gameIconScroller.getFirstExists(false);
+		if (gameIconScroller) {
+			self.gameIconScroller.spawn(
+				0,
+				140
+			);
+		}
+
+		// Retire closed games icons
+		for (const gameIconSpriteId of gameIconsNoLongerNeeded) {
+			self.gameIconScroller.removeGameIcon(self.gameIcons[gameIconSpriteId].icon);
+
+			self.gameIcons[gameIconSpriteId].icon.remove();
+			self.gameIcons[gameIconSpriteId].button.remove();
+			self.gameIconPlacementsTaken[self.gameIcons[gameIconSpriteId].placement] = false;
+			self.gameIconPlacementsTaken[self.gameIcons[gameIconSpriteId].placement] = false;
+			delete self.gameIcons[gameIconSpriteId];
+		}
+
+		for (const gameState of gameStates) {
+			if (gameState.getPlayerStates().length < gameState.getMaxActivePlayerCount() + Constants.GAME.MAX_QUEUED_PLAYERS) self.allGamesFull = false;
+
+			const counts = self._countFavouritesActiveAndQueuedInGame(gameState);
+
+			const isAlreadyInserted = gameState.getId() in self.gameIcons;
+			if (isAlreadyInserted) {
+				self.gameIcons[gameState.getId()].icon.refresh(gameState, counts);
+				self.gameIcons[gameState.getId()].button.refresh(counts);
+			} else {
+				const gameIconSprite = self.gameIconGroup.getFirstExists(false);
+				if (gameIconSprite) {
+					const newGameIcon = { icon: gameIconSprite, button: gameIconSprite.gameButton, placement: 0 };
+					self.gameIcons[gameState.getId()] = newGameIcon;
+
+					// Add to spawn queue
+					self.gameIconScroller.enqueueGameIcon(newGameIcon.icon, [gameState, counts, self._joinGame.bind(self), self]);
+
+					newGameIcon.button.refresh(counts);
+				}
+			}
+		}
+
+		// Spawn enqueued game icons
+		for (const { icon } of Object.values(self.gameIcons)) self.gameIconScroller.spawnGameIcon(icon);
+	} else {
+		lobbyClientEventHandler(...args);
+	}
+});
+
+Game.UILobbyState.method('_onSizeChangeHandler', function() {
+	this.log.debug('SIZE CHANGE!');
+
+	// Move offline message.
+	this.disconnectedIconGroup.position.set(this.game.width / 2.0, UIConstants.DISCONNECTED_ICON_Y);
+
+	// Move random and create game buttons.
+	this.randomGameButton.x = this.game.width / 3.0;
+	this.randomGameInfo.x = this.game.width / 3.0;
+	this.createGameButton.x = this.game.width / 3.0 * 2.0;
+	this.createGameInfo.x = this.game.width / 3.0 * 2.0;
+	this.localGameButton.x = this.game.width / 2.0;
+
+	this.gameIconScroller.onSizeChangeHandler();
+});
 
 export const _isESmodule = true;

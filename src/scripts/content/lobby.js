@@ -56,27 +56,22 @@ UIGameIconImage.prototype.getTankIcons = function() {
 };
 
 UIGameIconImage.prototype.spawn = function(x, y, gameState, favouriteActiveQueuedCounts, joinGameCb, lobbyCtx) {
-	if (x !== 0) {
-		this.retire();
-		return;
-	}
-
-	this.reset(0, y);
+	this.reset(x, y);
 	this.gameId = gameState.getId();
 	this.mode = gameState.getMode();
 	this.ranked = gameState.getRanked();
-	this.playerStates = gameState.getPlayerStates()
-		.sort((first, sec) => new Date(first.getEnqueueTime()) - new Date(sec.getEnqueueTime()));
+	this.playerStates = gameState.getPlayerStates().sort((first, sec) => first.getQueued() - sec.getQueued());
 	this.iconPlacements = createPolygon(gameState.getMaxActivePlayerCount(), 140 * resolutionScale, 95 * resolutionScale);
 	this.favouriteActiveQueuedCounts = favouriteActiveQueuedCounts;
 	this._updateUI();
-	const delay = 50 + (Math.random() * 200);
+
 	if (this.removeTween) this.removeTween.stop();
 
 	this.gameButton.joinGameCb = joinGameCb;
 	this.gameButton.joinGameCbContext = lobbyCtx;
 	this.gameButton.spawn(0, UIConstants.GAME_ICON_JOIN_GAME_BUTTON_Y, gameState, favouriteActiveQueuedCounts, !lobbyCtx.joiningGame);
 
+	const delay = 50 + (Math.random() * 200);
 	this.game.add.tween(this.scale).to({
 		x: UIConstants.ASSET_SCALE,
 		y: UIConstants.ASSET_SCALE
@@ -130,6 +125,8 @@ UIGameIconImage.prototype._updateUI = function() {
 		const tankStillInGame = this.playerStates.some(playerState => icon.playerId === playerState.getPlayerId());
 		if (!tankStillInGame) {
 			for (let j = i; j < this.iconPlacements.length; j++) {
+				if (!this.icons[j]) continue;
+
 				this.icons[j].icon?.remove();
 				this.icons[j].name?.remove();
 			}
@@ -243,6 +240,7 @@ Game.UILobbyState.method('_clientEventHandler', (...args) => {
 			self.gameIcons[gameIconSpriteId].icon.remove();
 			self.gameIcons[gameIconSpriteId].button.remove();
 			self.gameIconPlacementsTaken[self.gameIcons[gameIconSpriteId].placement] = false;
+			self.gameIconPlacementsTaken[self.gameIcons[gameIconSpriteId].placement] = false;
 			delete self.gameIcons[gameIconSpriteId];
 		}
 
@@ -260,16 +258,36 @@ Game.UILobbyState.method('_clientEventHandler', (...args) => {
 				if (gameIconSprite) {
 					const newGameIcon = { icon: gameIconSprite, button: gameIconSprite.gameButton, placement: 0 };
 					self.gameIcons[gameState.getId()] = newGameIcon;
-					gameIconSprite.spawn(0, UIConstants.GAME_ICON_Y, gameState, counts, self._joinGame.bind(self), self);
 
-					self.gameIconScroller.addGameIcon(newGameIcon.icon);
+					// Add to spawn queue
+					self.gameIconScroller.enqueueGameIcon(newGameIcon.icon, [gameState, counts, self._joinGame.bind(self), self]);
+
 					newGameIcon.button.refresh(counts);
 				}
 			}
 		}
+
+		// Spawn enqueued game icons
+		for (const { icon } of Object.values(self.gameIcons)) self.gameIconScroller.spawnGameIcon(icon);
 	} else {
 		lobbyClientEventHandler(...args);
 	}
+});
+
+Game.UILobbyState.method('_onSizeChangeHandler', function() {
+	this.log.debug('SIZE CHANGE!');
+
+	// Move offline message.
+	this.disconnectedIconGroup.position.set(this.game.width / 2.0, UIConstants.DISCONNECTED_ICON_Y);
+
+	// Move random and create game buttons.
+	this.randomGameButton.x = this.game.width / 3.0;
+	this.randomGameInfo.x = this.game.width / 3.0;
+	this.createGameButton.x = this.game.width / 3.0 * 2.0;
+	this.createGameInfo.x = this.game.width / 3.0 * 2.0;
+	this.localGameButton.x = this.game.width / 2.0;
+
+	this.gameIconScroller.onSizeChangeHandler();
 });
 
 export const _isESmodule = true;

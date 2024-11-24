@@ -70,12 +70,13 @@ export const createPolygon = (points: number, width = 1, height = 1, rotation = 
  * @returns Item points
  */
 export const spaceAround = (width: number, items: number) => {
-	if (items <= 0) return [];
+	if (items <= 0) return { leftMargin: 0, spacing: 0 };
 
-	const totalSpacing = width / items;
-	const halfSpacing = totalSpacing / 2;
+	const spacing = width / items;
+	const leftMargin = spacing / 2;
 
-	return Array.from({ length: items }, (_, i) => halfSpacing + i * totalSpacing);
+	return { leftMargin, spacing };
 };
+
 
 export const _isESmodule = true;

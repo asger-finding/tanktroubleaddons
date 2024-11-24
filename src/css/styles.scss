@@ -366,6 +366,10 @@ $max-safe-integer: 2147483647;
 			padding: 1px 2px;
 			pointer-events: none;
 			z-index: -$max-safe-integer;
+
+			span {
+				display: none;
+			}
 		}
 
 	}

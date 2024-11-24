@@ -242,8 +242,8 @@ $tooltipster-accent-dark: rgb(25 25 25);
 
 	#chat {
 		$chat-normal-bg: rgb(34 34 34);
-		$chat-user-bg: rgb(0 45 3);
-		$chat-global-bg: rgb(31 47 61); 
+		$chat-user-bg: rgb(0, 60, 4);
+		$chat-global-bg: rgb(41, 64, 84); 
 
 		form {
 			background-color: $chat-normal-bg;
@@ -255,6 +255,10 @@ $tooltipster-accent-dark: rgb(25 25 25);
 			.autocomplete-dropdown {
 				background-color: $chat-user-bg;
 				scrollbar-color: $chat-user-bg transparent;
+
+				div {
+					border-bottom-color:rgb(0, 112, 0);
+				}
 			}
 		}
 

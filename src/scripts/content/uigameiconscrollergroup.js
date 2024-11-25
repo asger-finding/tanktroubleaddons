@@ -10,7 +10,7 @@ UIConstants.classFields({
 
 	NO_GAMES_FONT_SIZE: 48 * devicePixelRatio,
 	NO_GAMES_STROKE_WIDTH: 4 * devicePixelRatio,
-	NO_GAMES_Y: 200 * devicePixelRatio
+	NO_GAMES_Y: 140 * devicePixelRatio
 });
 
 /**
@@ -208,6 +208,8 @@ UIGameIconScrollerGroup.prototype.onSizeChangeHandler = function() {
 	this.gameIcons.forEach((gameIcon, i) => {
 		gameIcon.x = this.leftMargin + this.iconSpacing * (i - iconsBefore);
 	});
+
+	this.noGamesText.position.set(this.game.width / 2.0, UIConstants.NO_GAMES_Y);
 
 	this.leftArrow.x = this.itemWidth / 2 - UIConstants.LOBBY_BUTTON_SCROLL_OFFSET;
 	this.rightArrow.x = this.game.width - this.itemWidth / 2 + UIConstants.LOBBY_BUTTON_SCROLL_OFFSET;

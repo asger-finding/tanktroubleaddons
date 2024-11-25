@@ -380,6 +380,23 @@ $max-safe-integer: 2147483647;
 
 }
 
+/* Switch controls ui */
+#switchcontrols {
+	.content {
+		display: flex;
+	}
+
+	.button:not(:active):not(.disabled) .standard,
+	.button:active:not(.disabled) .active,
+	.button.disabled .disabled {
+		display: inherit;
+	}
+	
+	.button img {
+		display: none;
+	}
+}
+
 /* Custom player-name element */
 player-name {
 	width: 150px;

@@ -34,6 +34,7 @@
 	]).then(() => {
 		injectScript(`${meta.extensionUrl}scripts/content/statisticsSnippet.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/menu.js`);
+		injectScript(`${meta.extensionUrl}scripts/content/switchControls.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/playerNameElement.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/maskUsernames.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/classicMouse.js`);

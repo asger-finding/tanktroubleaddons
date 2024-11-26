@@ -447,7 +447,7 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...arg
 	TankTrouble.TankInfoBox.infoAddons.tooltipster('content', 'TankTroubleAddons');
 	Backend.getInstance().getPlayerDetails(result => {
 		if (typeof result === 'object') {
-			if (result.getGmLevel() > 0) {
+			if (result.getGmLevel() !== null) {
 				TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'position', 'left');
 				TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'offsetX', 5);
 			} else {

@@ -445,6 +445,17 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...arg
 
 	TankTrouble.TankInfoBox.infoAddons.toggle(Users.getAllPlayerIds().includes(playerId));
 	TankTrouble.TankInfoBox.infoAddons.tooltipster('content', 'TankTroubleAddons');
+	Backend.getInstance().getPlayerDetails(result => {
+		if (typeof result === 'object') {
+			if (result.getGmLevel() > 0) {
+				TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'position', 'left');
+				TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'offsetX', 5);
+			} else {
+				TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'position', 'top');
+				TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'offsetX', 0);
+			}
+		}
+	}, () => {}, () => {}, playerId, Caches.getPlayerDetailsCache());
 });
 
 ProxyHelper.whenContentInitialized().then(() => Addons.menu.wrapper.appendTo(document.body));

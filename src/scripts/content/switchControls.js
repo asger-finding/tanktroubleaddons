@@ -24,10 +24,11 @@ Inputs.switchInputManager = function(playerId, newInputSetId) {
 	const isContested = Inputs._inputSetsInUse[newInputSetId];
 	if (isContested) {
 		// Switch around controls of the two users
-		const oldPlayerId = Object.keys(Inputs._playerIdInputSetId)
+		const alreadyAssignedPlayerId = Object.keys(Inputs._playerIdInputSetId)
 			.find(_playerId => Inputs.getAssignedInputSetId(_playerId) === newInputSetId);
 
-		Inputs.reassignInputManager(oldPlayerId, playerId);
+		Inputs._releaseInput(playerId);
+		Inputs._assignInput(playerId, newInputSetId);
 
 		// If the new user didn't have any assigned input
 		// then show the overlay for controls selector of
@@ -35,16 +36,18 @@ Inputs.switchInputManager = function(playerId, newInputSetId) {
 		if (!oldSetId) {
 			OverlayManager.enqueueOverlay(
 				TankTrouble.ControlsOverlay,
-				{ playerId: oldPlayerId }
+				{ playerId: alreadyAssignedPlayerId }
 			);
 		} else {
-			Inputs.addInputManager(oldPlayerId, oldSetId);
+			Inputs._releaseInput(alreadyAssignedPlayerId);
+			Inputs._assignInput(alreadyAssignedPlayerId, oldSetId);
 		}
 	} else {
 		Inputs._releaseInput(playerId);
 		Inputs._assignInput(playerId, newInputSetId);
-		Inputs._storeInputSetAssignments();
 	}
+
+	Inputs._storeInputSetAssignments();
 };
 
 Addons.switchControlsBox = {

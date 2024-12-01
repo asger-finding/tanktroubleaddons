@@ -19,6 +19,8 @@ const getInputSetAlias = inputSetId => {
 };
 
 Inputs.switchInputManager = function(playerId, newInputSetId) {
+	Inputs._releaseInput(playerId);
+
 	const oldSetId = Inputs.getAssignedInputSetId(playerId);
 
 	const isContested = Inputs._inputSetsInUse[newInputSetId];
@@ -26,9 +28,6 @@ Inputs.switchInputManager = function(playerId, newInputSetId) {
 		// Switch around controls of the two users
 		const alreadyAssignedPlayerId = Object.keys(Inputs._playerIdInputSetId)
 			.find(_playerId => Inputs.getAssignedInputSetId(_playerId) === newInputSetId);
-
-		Inputs._releaseInput(playerId);
-		Inputs._assignInput(playerId, newInputSetId);
 
 		// If the new user didn't have any assigned input
 		// then show the overlay for controls selector of
@@ -42,11 +41,9 @@ Inputs.switchInputManager = function(playerId, newInputSetId) {
 			Inputs._releaseInput(alreadyAssignedPlayerId);
 			Inputs._assignInput(alreadyAssignedPlayerId, oldSetId);
 		}
-	} else {
-		Inputs._releaseInput(playerId);
-		Inputs._assignInput(playerId, newInputSetId);
 	}
 
+	Inputs._assignInput(playerId, newInputSetId);
 	Inputs._storeInputSetAssignments();
 };
 

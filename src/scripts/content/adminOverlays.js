@@ -314,6 +314,52 @@ async function* fetchFilteredChatMessages(
 	}
 }
 
+TankTrouble.AdminChatLogOverlay._getChatMessagesByTimeAndReplaceStatic = function(id, created, serverName, gameId) {
+	const clickedChatMessageId = `chatMessage-${ serverName }${ gameId ? `-${ gameId }` : ''}-${ id }`;
+	const pointer = $('<div/>');
+	const disabled = this.chatMessages.find(`#${ clickedChatMessageId } > button`).prop('disabled', true);
+	this.chatMessages.find(`#${ clickedChatMessageId }`).after(pointer);
+
+	// eslint-disable-next-line complexity
+	Backend.getInstance().getChatMessagesByTime(result => {
+		if (typeof(result) == 'object') {
+			for (let i = 0; i < result.length; i++) {
+				const chatMessageData = result[i];
+				const chatMessageId = `chatMessage-${ serverName }${ gameId ? `-${ gameId }` : '' }-${ chatMessageData.id }`;
+				let chatMessage = this.chatMessages.find(`#${ chatMessageId }`);
+
+				const replaceStaticMessage = Boolean(chatMessage.length) && chatMessage.hasClass('static');
+
+				if (replaceStaticMessage) {
+					chatMessage.remove();
+					chatMessage = this._createChatMessage(chatMessageData, serverName, gameId);
+				} else if (chatMessage.length === 0) {
+					chatMessage = this._createChatMessage(chatMessageData, serverName, gameId);
+				}
+
+				if (chatMessageId === clickedChatMessageId) {
+					if (i === 0) chatMessage.data('first', true);
+					if (i === result.length - 1) chatMessage.data('last', true);
+				}
+
+				if (i > 0 || i < result.length - 1) chatMessage.data('expanded', true);
+
+				pointer.before(chatMessage);
+			}
+
+			pointer.remove();
+
+			this._updateButtonsAndDividers();
+		} else {
+			this._handleError(result);
+			disabled.prop('disabled', false);
+		}
+	}, (result) => {
+		this._handleError(result);
+		disabled.prop('disabled', false);
+	}, null, this.adminId, created - 60, created + 60, serverName, gameId);
+};
+
 /**
  * Render a chatlog object to a HTMLElement
  * @param {ChatLogMessage} chatMessage Message content
@@ -324,7 +370,7 @@ const renderChatMessage = async(chatMessage, adminId) => {
 	const { serverName, gameId } = chatMessage;
 
 	const wrapper = document.createElement('div');
-	wrapper.classList.add('chatMessage', 'listItem', 'first');
+	wrapper.classList.add('chatMessage', 'listItem', 'static', 'first');
 	wrapper.id = `chatMessage-${ serverName }${ gameId ? `-${ gameId }` : '' }-${ chatMessage.messageId }`;
 	wrapper.dataset.id = chatMessage.messageId;
 	wrapper.dataset.serverName = serverName;
@@ -337,7 +383,7 @@ const renderChatMessage = async(chatMessage, adminId) => {
 	expandButton.innerText = '+';
 
 	expandButton.addEventListener('click', () => {
-		TankTrouble.AdminChatLogOverlay._getChatMessagesByTime(chatMessage.messageId, chatMessage.created, serverName, gameId);
+		TankTrouble.AdminChatLogOverlay._getChatMessagesByTimeAndReplaceStatic(chatMessage.messageId, chatMessage.created, serverName, gameId);
 	});
 
 	const details = document.createElement('div');

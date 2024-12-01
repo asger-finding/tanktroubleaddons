@@ -2,6 +2,42 @@ import ProxyHelper from '../utils/proxyHelper.js';
 
 // Preload functions
 
+/**
+ * Initialize the IndexedDB database and ensure required object stores exist.
+ * @returns {Promise<IDBDatabase>} A promise that resolves to the initialized database.
+ */
+const initDatabase = () => new Promise((resolve, reject) => {
+	const request = indexedDB.open('addons', 3);
+
+	/* eslint-disable jsdoc/require-jsdoc */
+	request.onupgradeneeded = (event) => {
+		const db = event.target.result;
+
+		console.log(db.objectStoreNames);
+
+		// Ensure 'chatlogCache' object store exists
+		if (!db.objectStoreNames.contains('chatlogCache')) {
+			const store = db.createObjectStore(storeName, { keyPath: 'messageId' });
+
+			store.createIndex('created', 'created');
+			store.createIndex('messageId', 'messageId');
+			store.createIndex('messageIndex', 'messageIndex');
+			store.createIndex('senders', 'senders', { multiEntry: true });
+			store.createIndex('type', 'type');
+		}
+
+		// Ensure 'texturePacks' object store exists
+		if (!db.objectStoreNames.contains('texturePacks')) {
+			const store = db.createObjectStore('texturePacks', { keyPath: 'name' });
+			store.createIndex('hashsum', 'hashsum', { unique: true });
+		}
+	};
+
+	request.onsuccess = (event) => resolve(event.target.result);
+	request.onerror = (event) => reject(event.target.error);
+	/* eslint-enable jsdoc/require-jsdoc */
+});
+
 window.Addons = {
 	/**
 	 * Create a link to an extension resource
@@ -32,7 +68,9 @@ window.Addons = {
 
 		container.append(image);
 		return container;
-	}
+	},
+
+	indexedDB: await initDatabase()
 };
 
 const gamePreloadStage = Game.UIPreloadState.getMethod('preload');

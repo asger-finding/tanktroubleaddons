@@ -1,5 +1,169 @@
 import { MaxRectsPacker } from 'maxrects-packer';
+import { calculateHash } from '../utils/mathUtils.js';
 import { unzip } from 'fflate';
+
+const storeName = 'texturePacks';
+
+/**
+ * Add a zip file entry to the database, storing its extracted content.
+ * @param {File} file The zip file to be added.
+ * @param {string} name The unique name of the file.
+ * @returns {Promise<string>} Resolves with hashsum when the operation is complete.
+ */
+const addZipFile = async(file, name) => {
+	if (!file.name.endsWith('.zip')) throw new Error('Only zip files are supported.');
+
+	const hashsum = await calculateHash(file);
+
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+
+		/* eslint-disable jsdoc/require-jsdoc */
+		reader.onload = async(event) => {
+			const arrayBuffer = event.target.result;
+
+			try {
+				unzip(new Uint8Array(arrayBuffer), (err, result) => {
+					if (err) {
+						reject(new Error('Error unzipping file.'));
+						return;
+					}
+
+					// Prepare texturepack data (can be processed further if needed)
+					const texturepack = Object.values(result).find((entry) => entry instanceof Uint8Array);
+
+					if (!texturepack) {
+						reject(new Error('No valid Uint8Array found in the zip.'));
+						return;
+					}
+
+					const transaction = db.transaction([storeName], 'readwrite');
+					const store = transaction.objectStore(storeName);
+
+					const index = store.index('hashsum');
+					const hashRequest = index.get(hashsum);
+
+					hashRequest.onsuccess = () => {
+						const existingFile = hashRequest.result;
+
+						// Case: File with same hashsum exists
+						if (existingFile) {
+							if (existingFile.name === name)
+								reject(new Error('File with the same name and hashsum already exists.'));
+							else
+								reject(new Error('File with the same hashsum already exists.'));
+
+							return;
+						}
+
+						// Check if a file with the same name exists
+						const nameRequest = store.get(name);
+						nameRequest.onsuccess = () => {
+							const existingEntry = nameRequest.result;
+							const timestamp = Date.now();
+
+							if (existingEntry) {
+								// Overwrite file with the same name but different hashsum
+								store.put({ name, hashsum, timestamp, texturepack });
+								resolve(hashsum);
+							} else {
+								// New unique file
+								store.add({ name, hashsum, timestamp, texturepack });
+								resolve(hashsum);
+							}
+						};
+						nameRequest.onerror = () => reject(nameRequest.error);
+					};
+					hashRequest.onerror = () => reject(hashRequest.error);
+				});
+			} catch {
+				reject(new Error('An error occurred while processing the zip file.'));
+			}
+		};
+		reader.onerror = () => reject(new Error('Failed to read file as ArrayBuffer.'));
+		reader.readAsArrayBuffer(file);
+		/* eslint-enable jsdoc/require-jsdoc */
+	});
+};
+
+/**
+ * Retrieve all hashsums and names from the database.
+ * @returns {Promise<Array<{ name: string, hashsum: string }>>} Resolves with an array of file entries.
+ */
+const getAllFileIdentifiers = () => new Promise((resolve, reject) => {
+	const transaction = Addons.indexedDB.transaction(storeName, 'readonly');
+	const store = transaction.objectStore(storeName);
+	const request = store.getAll();
+
+	/* eslint-disable jsdoc/require-jsdoc */
+	request.onsuccess = () => {
+		const files = request.result.map(({ name, hashsum, timestamp }) => ({ name, hashsum, timestamp }));
+		resolve(files);
+	};
+	request.onerror = () => reject(request.error);
+	/* eslint-enable jsdoc/require-jsdoc */
+});
+
+/**
+ * Retrieve a specific entry by its hashsum.
+ * @param {string} hashsum The hashsum of the file to retrieve.
+ * @returns {Promise<{ name: string, hashsum: string, timestamp: number }>} Resolves with the file entry.
+ */
+const getFileByHashsum = hashsum => new Promise((resolve, reject) => {
+	const transaction = Addons.indexedDB.transaction([storeName], 'readonly');
+	const store = transaction.objectStore(storeName);
+	const index = store.index('hashsum');
+	const request = index.get(hashsum);
+
+	/* eslint-disable jsdoc/require-jsdoc */
+	request.onsuccess = () => {
+		if (request.result)
+			resolve(request.result);
+		else
+			reject(new Error('No file found with the specified hashsum.'));
+
+	};
+	request.onerror = () => reject(request.error);
+	/* eslint-enable jsdoc/require-jsdoc */
+});
+
+/**
+ * Get the user-loaded texture pack
+ * @returns {Uint8Array|null} Texture pack or null
+ */
+const getActiveTexturePack = async() => {
+	const hashsum = localStorage.getItem('texturepack');
+
+	let result = null;
+	try {
+		result = await getFileByHashsum(hashsum);
+	} catch (err) {
+		console.log(err);
+	}
+
+	return result;
+};
+
+/**
+ * Store the texturepack hashsum
+ * @param {File} file The zip file to be added.
+ * @param {string} name The unique name of the file.
+ * @returns {string|null} Hashsum if successfully added, else null
+ */
+const storeActiveTexturePack = async(file, name) => {
+	const hashsum = addZipFile(file, name);
+	if (!(/\b[a-fA-F0-9]{64}\b/u).test(hashsum)) return null;
+
+	localStorage.setItem('texturepack', hashsum);
+
+	return hashsum;
+};
+
+Object.assign(Addons, {
+	getActiveTexturePack,
+	storeActiveTexturePack,
+	getAllFileIdentifiers
+});
 
 // FIXME: if a texture pack is loaded while in the game, textures break
 // reload/rejoin the game or prompt a "are you sure?" if the user

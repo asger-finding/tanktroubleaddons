@@ -4,10 +4,11 @@
 	 * @param src Script source
 	 * @returns Promise when loaded
 	 */
-	const injectScript = (src: string) => {
+	const injectScript = (src: string, fetchpriority?: true) => {
 		const script = document.createElement('script');
 		script.src = src;
 		script.type = 'module';
+		script.fetchPriority = fetchpriority ? 'high' : 'auto';
 
 		document.head.append(script);
 
@@ -28,9 +29,9 @@
 	Function(meta.loader)();
 
 	Promise.all([
-		injectScript(`${meta.extensionUrl}scripts/content/preload.js`),
-		injectScript(`${meta.extensionUrl}scripts/content/theme.js`),
-		injectScript(`${meta.extensionUrl}scripts/content/patches.js`)
+		injectScript(`${meta.extensionUrl}scripts/content/preload.js`, true),
+		injectScript(`${meta.extensionUrl}scripts/content/theme.js`, true),
+		injectScript(`${meta.extensionUrl}scripts/content/patches.js`, true)
 	]).then(() => {
 		injectScript(`${meta.extensionUrl}scripts/content/statisticsSnippet.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/menu.js`);

@@ -35,7 +35,7 @@ export default function UIGameIconImage(game) {
 	this.scale.set(0.0, 0.0);
 	this.kill();
 	this.log = Log.create('UIGameIconImage');
-};
+}
 
 UIGameIconImage.prototype = Object.create(Phaser.Image.prototype);
 UIGameIconImage.prototype.constructor = UIGameIconImage;
@@ -114,7 +114,7 @@ UIGameIconImage.prototype._updateUI = function() {
 
 	this.iconsScale = this.iconPlacements.length <= 4
 		? 1
-		: Math.exp(-0.4 * (this.iconPlacements.length - 5));
+		: Math.exp(-0.1 * (this.iconPlacements.length - 2));
 
 	const shift = this.icons.length;
 	for (let i = 0; i < this.iconPlacements.length - shift; i++) this._addPlaceholder(this.iconPlacements[i + shift]);

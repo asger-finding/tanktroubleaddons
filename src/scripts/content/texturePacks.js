@@ -19,25 +19,22 @@ const addZipFile = async(file, name) => {
 		const reader = new FileReader();
 
 		/* eslint-disable jsdoc/require-jsdoc */
-		reader.onload = async(event) => {
+		reader.addEventListener('load', async(event) => {
 			const arrayBuffer = event.target.result;
 
 			try {
-				unzip(new Uint8Array(arrayBuffer), (err, result) => {
+				unzip(new Uint8Array(arrayBuffer), (err, decoded) => {
 					if (err) {
 						reject(new Error('Error unzipping file.'));
 						return;
 					}
 
-					// Prepare texturepack data (can be processed further if needed)
-					const texturepack = Object.values(result).find((entry) => entry instanceof Uint8Array);
-
-					if (!texturepack) {
-						reject(new Error('No valid Uint8Array found in the zip.'));
+					if (!decoded) {
+						reject(new Error('No valid data found in the zip.'));
 						return;
 					}
 
-					const transaction = db.transaction([storeName], 'readwrite');
+					const transaction = Addons.indexedDB.transaction([storeName], 'readwrite');
 					const store = transaction.objectStore(storeName);
 
 					const index = store.index('hashsum');
@@ -48,10 +45,8 @@ const addZipFile = async(file, name) => {
 
 						// Case: File with same hashsum exists
 						if (existingFile) {
-							if (existingFile.name === name)
-								reject(new Error('File with the same name and hashsum already exists.'));
-							else
-								reject(new Error('File with the same hashsum already exists.'));
+							if (existingFile.name === name) reject(new Error('File with the same name and hashsum already exists.'));
+							else reject(new Error('File with the same hashsum already exists.'));
 
 							return;
 						}
@@ -64,11 +59,11 @@ const addZipFile = async(file, name) => {
 
 							if (existingEntry) {
 								// Overwrite file with the same name but different hashsum
-								store.put({ name, hashsum, timestamp, texturepack });
+								store.put({ name, hashsum, timestamp, texturepack: decoded });
 								resolve(hashsum);
 							} else {
 								// New unique file
-								store.add({ name, hashsum, timestamp, texturepack });
+								store.add({ name, hashsum, timestamp, texturepack: decoded });
 								resolve(hashsum);
 							}
 						};
@@ -79,7 +74,7 @@ const addZipFile = async(file, name) => {
 			} catch {
 				reject(new Error('An error occurred while processing the zip file.'));
 			}
-		};
+		});
 		reader.onerror = () => reject(new Error('Failed to read file as ArrayBuffer.'));
 		reader.readAsArrayBuffer(file);
 		/* eslint-enable jsdoc/require-jsdoc */
@@ -133,6 +128,7 @@ const getFileByHashsum = hashsum => new Promise((resolve, reject) => {
  */
 const getActiveTexturePack = async() => {
 	const hashsum = localStorage.getItem('texturepack');
+	if (!(/\b[a-fA-F0-9]{64}\b/u).test(hashsum)) return null;
 
 	let result = null;
 	try {
@@ -145,13 +141,23 @@ const getActiveTexturePack = async() => {
 };
 
 /**
- * Store the texturepack hashsum
+ * Store a new texture pack
  * @param {File} file The zip file to be added.
  * @param {string} name The unique name of the file.
+ * @returns {Promise<string|null>} Resolves with hashsum if successfully added
+ */
+const storeTexturePack = async(file, name) => {
+	const hashsum = await addZipFile(file, name);
+
+	return hashsum;
+};
+
+/**
+ * Set the active texture pack in local storage
+ * @param {string} hashsum The unique hashsum of the texture pack.
  * @returns {string|null} Hashsum if successfully added, else null
  */
-const storeActiveTexturePack = async(file, name) => {
-	const hashsum = addZipFile(file, name);
+const setActiveTexturePack = (hashsum) => {
 	if (!(/\b[a-fA-F0-9]{64}\b/u).test(hashsum)) return null;
 
 	localStorage.setItem('texturepack', hashsum);
@@ -161,7 +167,8 @@ const storeActiveTexturePack = async(file, name) => {
 
 Object.assign(Addons, {
 	getActiveTexturePack,
-	storeActiveTexturePack,
+	storeTexturePack,
+	setActiveTexturePack,
 	getAllFileIdentifiers
 });
 
@@ -181,20 +188,6 @@ const packer = new MaxRectsPacker(2048, 2048, 2, {
 	allowRotation: false,
 	tag: false,
 	border: 0
-});
-
-/**
- * Unzip an arraybuffer
- * @param {ArrayBuffer} buffer Zip file arrayBuffer
- * @returns {Promise<import('fflate').Unzipped>} Promise for unzipped file
- */
-const decodeZipFromArrayBuffer = buffer => new Promise((resolve, reject) => {
-	const zipFile = new Uint8Array(buffer);
-	unzip(zipFile, (err, decoded) => {
-		if (err) return reject(err);
-
-		return resolve(decoded);
-	});
 });
 
 /**
@@ -220,9 +213,9 @@ const is2xFileEnding = urlOrFile => /@2x\.[a-zA-Z0-9]+$/u.test(urlOrFile);
 /**
  * Load texture pack from arraybuffer into an already-loaded sprite atlas, overriding textures in it
  * @param {string} atlasKey key
- * @param {ArrayBuffer} buffer Zip file arrayBuffer
+ * @param {Record<string, Uint8Array>} files Texture pack data
  */
-Phaser.Loader.prototype.addTexturePack = async function(atlasKey, buffer) {
+Phaser.Loader.prototype.addTexturePack = async function(atlasKey, files) {
 	// Wait for the atlas to have loaded
 	if (!this.cache.hasFrameData(atlasKey)) {
 		await new Promise(resolve => {
@@ -236,44 +229,41 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, buffer) {
 	const { url: sourceURL, frameData } = data;
 	const is1x = !is2xFileEnding(sourceURL);
 
-	// Decode the zip file and render the original sprite sheet in parallel
-	const [files, spritesheet] = await Promise.all([
-		decodeZipFromArrayBuffer(buffer),
-		loadSpritesheet(sourceURL)
-	]);
+	const [ spritesheet ] = await Promise.all([
+		loadSpritesheet(sourceURL),
+		...Object.keys(files).map(async fileName => {
+			if (!fileName.endsWith('.png')) return;
 
-	await Promise.all(Object.keys(files).map(async fileName => {
-		if (!fileName.endsWith('.png')) return;
+			// Load the image into buffer
+			const file = files[fileName];
+			const blob = new Blob([file], { type: 'image/png' });
+			let bmp = await createImageBitmap(blob);
 
-		// Load the image into buffer
-		const file = files[fileName];
-		const blob = new Blob([file], { type: 'image/png' });
-		let bmp = await createImageBitmap(blob);
+			// Resize to 1x if the user has low pixel density
+			if (is1x) {
+				const { width, height } = bmp;
+				bmp.close();
+				bmp = await createImageBitmap(blob, {
+					resizeWidth: width / 2,
+					resizeHeight: height / 2,
+					resizeQuality: 'pixelated'
+				});
+			}
 
-		// Resize to 1x if the user has low pixel density
-		if (is1x) {
-			const { width, height } = bmp;
-			bmp.close();
-			bmp = await createImageBitmap(blob, {
-				resizeWidth: width / 2,
-				resizeHeight: height / 2,
-				resizeQuality: 'pixelated'
+			// Create frame name from file name
+			const basename = fileName.split('/').at(-1);
+			const [ext] = (basename.match(/\.(?:[^.]*?)(?=\?|#|$)/u) ?? ['']);
+			const frameName = basename.slice(0, -ext.length);
+
+			// Load into image packer
+			packer.add({
+				width: bmp.width,
+				height: bmp.height,
+				image: bmp,
+				frameName
 			});
-		}
-
-		// Create frame name from file name
-		const basename = fileName.split('/').at(-1);
-		const [ext] = (basename.match(/\.(?:[^.]*?)(?=\?|#|$)/u) ?? ['']);
-		const frameName = basename.slice(0, -ext.length);
-
-		// Load into image packer
-		packer.add({
-			width: bmp.width,
-			height: bmp.height,
-			image: bmp,
-			frameName
-		});
-	}));
+		})
+	]);
 
 	const bin = packer.bins[packer.bins.length - 1];
 
@@ -325,23 +315,15 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, buffer) {
 	packer.reset();
 };
 
-// FIXME: temporary hack
 const gamePreloadStage = Game.UIPreloadState.getMethod('preload');
 Game.UIPreloadState.method('preload', function(...args) {
 	const result = gamePreloadStage.apply(this, ...args);
 
-	const files = Addons.menu.content.find('#texturepackpicker').prop('files');
-	if (files && files.length) {
-		const [file] = files;
-		const fileReader = new FileReader();
+	Addons.getActiveTexturePack().then(texturePackData => {
+		if (texturePackData === null) return;
 
-		fileReader.addEventListener('load', () => {
-			const data = fileReader.result;
-			GameManager.getGame()?.load.addTexturePack('game', data);
-		});
-
-		fileReader.readAsArrayBuffer(file);
-	}
+		GameManager.getGame()?.load.addTexturePack('game', texturePackData.texturepack);
+	});
 
 	return result;
 });

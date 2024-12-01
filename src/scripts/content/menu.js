@@ -411,17 +411,13 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 
 	label.button();
 
-	const fileReader = new FileReader();
-	fileReader.addEventListener('load', () => {
-		const data = fileReader.result;
-		GameManager.getGame()?.load.addTexturePack('game', data);
-	});
-
-	picker.on('change', () => {
+	picker.on('change', async() => {
 		const [file] = picker.prop('files');
 		if (file) {
-			fileReader.readAsArrayBuffer(file);
-			label.text(file.name);
+			const hashsum = await Addons.storeTexturePack(file, Math.random().toString().substring(2));
+			if (hashsum !== null) Addons.setActiveTexturePack(hashsum);
+
+			// label.text(file.name);
 		}
 	});
 

@@ -13,11 +13,9 @@ const initDatabase = () => new Promise((resolve, reject) => {
 	request.onupgradeneeded = (event) => {
 		const db = event.target.result;
 
-		console.log(db.objectStoreNames);
-
 		// Ensure 'chatlogCache' object store exists
 		if (!db.objectStoreNames.contains('chatlogCache')) {
-			const store = db.createObjectStore(storeName, { keyPath: 'messageId' });
+			const store = db.createObjectStore('chatlogCache', { keyPath: 'messageId' });
 
 			store.createIndex('created', 'created');
 			store.createIndex('messageId', 'messageId');

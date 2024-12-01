@@ -10,7 +10,7 @@ const storeName = 'texturePacks';
  * @param {string} name The unique name of the file.
  * @returns {Promise<string>} Resolves with hashsum when the operation is complete.
  */
-const addZipFile = async(file, name) => {
+const addTexturePackToStore = async(file, name) => {
 	if (!file.name.endsWith('.zip')) throw new Error('Only zip files are supported.');
 
 	const hashsum = await calculateHash(file);
@@ -25,12 +25,12 @@ const addZipFile = async(file, name) => {
 			try {
 				unzip(new Uint8Array(arrayBuffer), (err, decoded) => {
 					if (err) {
-						reject(new Error('Error unzipping file.'));
+						reject(new Error('Error unzipping file'));
 						return;
 					}
 
 					if (!decoded) {
-						reject(new Error('No valid data found in the zip.'));
+						reject(new Error('No valid data found in the zip file'));
 						return;
 					}
 
@@ -45,8 +45,8 @@ const addZipFile = async(file, name) => {
 
 						// Case: File with same hashsum exists
 						if (existingFile) {
-							if (existingFile.name === name) reject(new Error('File with the same name and hashsum already exists.'));
-							else reject(new Error('File with the same hashsum already exists.'));
+							if (existingFile.name === name) reject(new Error('File with the same name already exists'));
+							else reject(new Error('Identical file already exists'));
 
 							return;
 						}
@@ -72,10 +72,10 @@ const addZipFile = async(file, name) => {
 					hashRequest.onerror = () => reject(hashRequest.error);
 				});
 			} catch {
-				reject(new Error('An error occurred while processing the zip file.'));
+				reject(new Error('An error occurred while processing the zip file'));
 			}
 		});
-		reader.onerror = () => reject(new Error('Failed to read file as ArrayBuffer.'));
+		reader.onerror = () => reject(new Error('Failed to read file'));
 		reader.readAsArrayBuffer(file);
 		/* eslint-enable jsdoc/require-jsdoc */
 	});
@@ -85,7 +85,7 @@ const addZipFile = async(file, name) => {
  * Retrieve all hashsums and names from the database.
  * @returns {Promise<Array<{ name: string, hashsum: string }>>} Resolves with an array of file entries.
  */
-const getAllFileIdentifiers = () => new Promise((resolve, reject) => {
+const getAllTexturePacksFromStore = () => new Promise((resolve, reject) => {
 	const transaction = Addons.indexedDB.transaction(storeName, 'readonly');
 	const store = transaction.objectStore(storeName);
 	const request = store.getAll();
@@ -104,7 +104,7 @@ const getAllFileIdentifiers = () => new Promise((resolve, reject) => {
  * @param {string} hashsum The hashsum of the file to retrieve.
  * @returns {Promise<{ name: string, hashsum: string, timestamp: number }>} Resolves with the file entry.
  */
-const getFileByHashsum = hashsum => new Promise((resolve, reject) => {
+const getTexturePackFromStore = hashsum => new Promise((resolve, reject) => {
 	const transaction = Addons.indexedDB.transaction([storeName], 'readonly');
 	const store = transaction.objectStore(storeName);
 	const index = store.index('hashsum');
@@ -115,7 +115,7 @@ const getFileByHashsum = hashsum => new Promise((resolve, reject) => {
 		if (request.result)
 			resolve(request.result);
 		else
-			reject(new Error('No file found with the specified hashsum.'));
+			reject(new Error('No file found'));
 
 	};
 	request.onerror = () => reject(request.error);
@@ -123,22 +123,59 @@ const getFileByHashsum = hashsum => new Promise((resolve, reject) => {
 });
 
 /**
+ * Remove an entry from the texture packs object store by its hashsum.
+ * @param {string} hashsum The hashsum of the entry to be removed.
+ * @returns {Promise<void>} Resolves when the entry is successfully removed or if it does not exist.
+ */
+const removeTexturePackFromStore = hashsum => new Promise((resolve, reject) => {
+	const transaction = Addons.indexedDB.transaction([storeName], 'readwrite');
+	const store = transaction.objectStore(storeName);
+	const index = store.index('hashsum');
+
+	const request = index.get(hashsum);
+
+	/* eslint-disable jsdoc/require-jsdoc */
+	request.onsuccess = () => {
+		const entry = request.result;
+
+		if (entry) {
+			const deleteRequest = store.delete(entry.name);
+
+			deleteRequest.onsuccess = () => { resolve(); };
+
+			deleteRequest.onerror = () => {
+				reject(new Error('Failed to delete the texture pack'));
+			};
+		} else {
+			// Entry does not exist
+			resolve();
+		}
+	};
+
+	request.onerror = () => { reject(new Error('Failed to retrieve the texture pack')); };
+	/* eslint-enable jsdoc/require-jsdoc */
+});
+
+
+/**
  * Get the user-loaded texture pack
  * @returns {Uint8Array|null} Texture pack or null
  */
-const getActiveTexturePack = async() => {
+const getActiveTexturePack = () => new Promise((resolve, reject) => {
 	const hashsum = localStorage.getItem('texturepack');
-	if (!(/\b[a-fA-F0-9]{64}\b/u).test(hashsum)) return null;
-
-	let result = null;
-	try {
-		result = await getFileByHashsum(hashsum);
-	} catch (err) {
-		console.log(err);
+	if (hashsum === null) {
+		reject('No texture pack set');
+		return;
 	}
 
-	return result;
-};
+	if (/\b[a-fA-F0-9]{64}\b/u.test(hashsum)) {
+		getTexturePackFromStore(hashsum)
+			.then(texturePack => resolve(texturePack)).
+			catch(err => reject(err));
+	} else {
+		reject('Texture pack has invalid key');
+	}
+});
 
 /**
  * Store a new texture pack
@@ -147,7 +184,7 @@ const getActiveTexturePack = async() => {
  * @returns {Promise<string|null>} Resolves with hashsum if successfully added
  */
 const storeTexturePack = async(file, name) => {
-	const hashsum = await addZipFile(file, name);
+	const hashsum = await addTexturePackToStore(file, name);
 
 	return hashsum;
 };
@@ -155,21 +192,48 @@ const storeTexturePack = async(file, name) => {
 /**
  * Set the active texture pack in local storage
  * @param {string} hashsum The unique hashsum of the texture pack.
- * @returns {string|null} Hashsum if successfully added, else null
+ * @returns {Promise<object|null>} Resolves with texture pack object if successfully added, else null
  */
-const setActiveTexturePack = (hashsum) => {
+const setActiveTexturePack = async(hashsum) => {
 	if (!(/\b[a-fA-F0-9]{64}\b/u).test(hashsum)) return null;
 
 	localStorage.setItem('texturepack', hashsum);
 
-	return hashsum;
+	const activeTexturePack = await Addons.getActiveTexturePack();
+	if (activeTexturePack === null) return null;
+
+	GameManager.getGame()?.load.addTexturePack('game', activeTexturePack.texturepack);
+
+	return activeTexturePack;
 };
+
+/**
+ * Remove a texture pack saved to the store
+ * @param {string} hashsum The hashsum of the texture pack to remove
+ * @returns {Promise<object>} Resolves when texture pack has been removed
+ */
+const removeTexturePack = hashsum => new Promise((resolve, reject) => {
+	removeTexturePackFromStore(hashsum).finally(() => {
+		localStorage.removeItem('texturepack');
+
+		getActiveTexturePack().then(({ hashsum: newHashsum }) => {
+			setActiveTexturePack(newHashsum);
+		}).catch(err => reject(err));
+	});
+});
+
+/**
+ * Retrieve all hashsums and names.
+ * @returns {Promise<Array<{ name: string, hashsum: string }>>} Resolves with an array of file entries.
+ */
+const getAllTexturePacks = () => getAllTexturePacksFromStore();
 
 Object.assign(Addons, {
 	getActiveTexturePack,
 	storeTexturePack,
 	setActiveTexturePack,
-	getAllFileIdentifiers
+	removeTexturePack,
+	getAllTexturePacks
 });
 
 // FIXME: if a texture pack is loaded while in the game, textures break

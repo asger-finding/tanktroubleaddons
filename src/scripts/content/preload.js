@@ -130,7 +130,7 @@ const proxyWidget = (function*() {
 			const li = $('<li>');
 			const wrapper = $('<div>', { text: item.label });
 
-			if ( item.disabled )li.addClass('ui-state-disabled');
+			if (item.disabled) li.addClass('ui-state-disabled');
 
 			if (item.element.attr('data-imagesrc')) {
 				$(`<div><img width="26" src="${ item.element.attr('data-imagesrc') }" srcset="${ item.element.attr('data-imagesrcset') }"/></div>`)
@@ -147,6 +147,32 @@ const proxyWidget = (function*() {
 		}
 	});
 })();
+
+$.widget('custom.deleteselectmenu', $.ui.selectmenu, {
+	_renderItem(ul, item) {
+		const li = $('<li>');
+		const wrapper = $('<div>', { text: item.label });
+
+		if (item.disabled) li.addClass('ui-state-disabled');
+
+		if (item.element.attr('removable')) {
+			$('<button>-</button>')
+				.button()
+				.css({
+					marginRight: '6px',
+					padding: '1px 7px',
+					boxShadow: 'none'
+				})
+				.on('mouseup', () => {
+					item.element.trigger('remove');
+					li.remove();
+				})
+				.prependTo(wrapper);
+		}
+
+		return li.append(wrapper).appendTo(ul);
+	}
+});
 
 ProxyHelper.interceptFunction($.widget, 'bridge', (original, ...args) => {
 	const result = original(...args);

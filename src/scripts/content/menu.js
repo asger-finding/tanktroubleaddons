@@ -392,13 +392,6 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 		<option value='3d'>3D</option>
 		<option value='synthwave'>Synthwave</option>
 	</select>`);
-	// TODO: texture pack from dropdown with option for File selector
-	const texturePackHeading = $('<div class="heading">Texture pack from file ...</div>');
-	const label = $('<label for="texturepackpicker" class="custom-file-upload">Load</label>');
-	const picker = $('<input type="file" id="texturepackpicker" accept=".zip" style="display: none;"/>');
-
-	label.append(picker);
-	otherWidget.append([gameThemeHeading, gameThemeSelect, '<hr>', texturePackHeading, label, picker]);
 
 	get('gameTheme').then(theme => {
 		gameThemeSelect.val(theme);
@@ -409,17 +402,108 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 		}).iconselectmenu('menuWidget');
 	});
 
-	label.button();
+	otherWidget.append([gameThemeHeading, gameThemeSelect]);
 
-	picker.on('change', async() => {
-		const [file] = picker.prop('files');
-		if (file) {
-			const hashsum = await Addons.storeTexturePack(file, Math.random().toString().substring(2));
-			if (hashsum !== null) Addons.setActiveTexturePack(hashsum);
+	(() => {
+		// TODO: texture pack from dropdown with option for File selector
+		const texturePackWrapper = $('<div></div>');
+		const texturePackHeading = $('<div class="heading">Add texture pack from file ...</div>');
+		const selectWrapper = $('<div></div>');
+		const texturePackSelect = $('<select></select>');
+		const createNewWrapper = $('<div></div>');
 
-			// label.text(file.name);
-		}
-	});
+		const createNewLabel = $('<label for="texturepackpicker" class="custom-file-upload">Select file</label>');
+		const createNewPicker = $('<input type="file" id="texturepackpicker" accept=".zip" style="display: none;"/>');
+		const createNewSubmit = $('<button type="submit">Add</button>');
+		createNewLabel.button();
+		createNewSubmit.button();
+		createNewSubmit.css('box-shadow', 'none');
+
+		createNewWrapper.append(['<br>', createNewLabel, createNewPicker, createNewSubmit]);
+		selectWrapper.append(texturePackSelect);
+
+		texturePackWrapper.append([selectWrapper, createNewWrapper]);
+
+		createNewPicker.on('change', async() => {
+			const [file] = createNewPicker.prop('files');
+			if (file) createNewLabel.text(file.name);
+		});
+
+		createNewSubmit.tooltipster({
+			position: 'right',
+			theme: 'tooltipster-error',
+			offsetX: 5
+		});
+
+		createNewSubmit.on('mouseup', async() => {
+			const [file] = createNewPicker.prop('files');
+			if (file) {
+				const [name] = file.name.split('.zip');
+
+				Addons.storeTexturePack(file, name)
+					.then(hashsum => Addons.setActiveTexturePack(hashsum)
+						.then(texturepack => {
+							const option = $('<option></option');
+							option.attr('value', texturepack.hashsum);
+							option.attr('removable', 'true');
+							option.text(texturepack.name);
+							option.on('remove', () => Addons.removeTexturePack(texturepack.hashsum));
+
+							createNewLabel.text('Select file');
+							texturePackSelect.find('> :last').before(option);
+							texturePackSelect.val(hashsum);
+							texturePackSelect.deleteselectmenu('refresh');
+
+							createNewWrapper.hide();
+						}))
+					.catch(err => {
+						Utils.updateTooltip(createNewSubmit, err.message);
+					});
+
+			}
+		});
+
+		Addons.getAllTexturePacks()
+			.then(async texturepacks => {
+				for (const texturepack of texturepacks) {
+					const option = $('<option></option');
+					option.attr('value', texturepack.hashsum);
+					option.attr('removable', 'true');
+					option.text(texturepack.name);
+					option.on('remove', () => {
+						Addons.removeTexturePack(texturepack.hashsum);
+					});
+
+					texturePackSelect.append(option);
+				}
+
+				const addNewOption = $('<option value="new">Add new ...</option>');
+				texturePackSelect.append(addNewOption);
+
+				const selectValue = await Addons.getActiveTexturePack()
+					.then(({ hashsum }) => hashsum)
+					.catch(err => {
+						Utils.updateTooltip(createNewSubmit, err.message);
+						return 'new';
+					});
+				texturePackSelect.val(selectValue);
+				createNewWrapper.toggle(selectValue === 'new');
+
+				texturePackSelect.deleteselectmenu({
+					// eslint-disable-next-line jsdoc/require-jsdoc
+					change: (_event, { item }) => {
+						if (item.value === 'new') {
+							createNewWrapper.show();
+						} else {
+							createNewWrapper.hide();
+							Addons.setActiveTexturePack(item.value);
+						}
+					}
+				});
+			});
+
+		otherWidget.append(['<hr>', texturePackHeading, texturePackWrapper]);
+	})();
 
 	Addons.menu.createSection({
 		title: 'Interface',

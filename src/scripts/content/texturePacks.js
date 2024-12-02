@@ -156,23 +156,36 @@ const removeTexturePackFromStore = hashsum => new Promise((resolve, reject) => {
 	/* eslint-enable jsdoc/require-jsdoc */
 });
 
+const setTankState = RoundModel.getMethod('setTankState');
+RoundModel.method('setTankState', function(...args) {
+	const [tankState] = args;
+	if (this.destroyedPlayerIds.includes(tankState.getPlayerId())) return null;
+
+	return setTankState.apply(this, args);
+});
+
 /**
  * Reload the Phaser game instance and rejoin the current game
  */
-// eslint-disable-next-line complexity
 const reloadGame = () => {
 	const game = GameManager.getGame();
 	if (game) {
+		const gameController = GameManager.getGameController();
+		let state = null;
+		let gameId = null;
+		let tanks = null;
+		if (gameController) {
+			state = gameController.model.getState();
+			gameId = gameController.getId();
+			tanks = gameController.getTanks();
+		}
+
 		game?.load.reset(true, true);
 		game.destroy();
 		GameManager.phaserInstance = null;
-		GameManager.insertGame($('#game'));
+		const newGameInstance = GameManager.insertGame($('#game'));
 
-		const gameController = GameManager.getGameController();
 		if (!gameController) return;
-
-		const gameId = gameController.getId();
-		const newGameInstance = GameManager.getGame();
 
 		// Attempt to rejoin online game after preload has finished.
 		//
@@ -199,6 +212,17 @@ const reloadGame = () => {
 
 					const playerIds = ClientManager.getClient().getPlayerIds();
 					const ttGame = GameController.withIds(gameId, playerIds);
+					ttGame.model.setState(state);
+
+					// All tanks are instanced again with RoundModel.setTankState
+					// so we need to push the dead tanks to destroyedPlayerIds
+					// and hook setTankState as to not spawn a new tank
+					// if it's in destroyedPlayerIds
+					const destroyedTanks = ClientManager.getClient().getExpandedRoundState()
+						.getTankStates()
+						.map(tankState => tankState.getPlayerId())
+						.filter(playerId => !(playerId in tanks));
+					ttGame.roundController.model.destroyedPlayerIds.push(...destroyedTanks);
 
 					newGameInstance.state.start('Game', true, false, ttGame);
 				};

@@ -108,6 +108,7 @@ UIKilledByGroup.prototype.remove = function() {
 };
 
 UIKilledByGroup.prototype.retire = function() {
+	if (this.removeTween) this.removeTween.stop();
 	if (this.spawnTween) this.spawnTween.stop();
 
 	this.killedBy.kill();

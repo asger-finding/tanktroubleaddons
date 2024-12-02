@@ -156,6 +156,58 @@ const removeTexturePackFromStore = hashsum => new Promise((resolve, reject) => {
 	/* eslint-enable jsdoc/require-jsdoc */
 });
 
+/**
+ * Reload the Phaser game instance and rejoin the current game
+ */
+// eslint-disable-next-line complexity
+const reloadGame = () => {
+	const game = GameManager.getGame();
+	if (game) {
+		game?.load.reset(true, true);
+		game.destroy();
+		GameManager.phaserInstance = null;
+		GameManager.insertGame($('#game'));
+
+		const gameController = GameManager.getGameController();
+		if (!gameController) return;
+
+		const gameId = gameController.getId();
+		const newGameInstance = GameManager.getGame();
+
+		// Attempt to rejoin online game after preload has finished.
+		//
+		// Due to how game controllers are handled, it's difficult
+		// to rejoin a local game. Therefore, we exit the user
+		// from the bootcamp and don't attempt to rejoin.
+		if (Constants.getMode() !== Constants.MODE_CLIENT_ONLINE) return;
+
+		/**
+		 * Event listener for Phaser state change
+		 * @param {string} newState State id
+		 */
+		const onStateChangeListener = newState => {
+			if (newState === 'Lobby') {
+				newGameInstance.state.onStateChange.remove(onStateChangeListener);
+
+				const originalLobbyState = newGameInstance.state;
+				const originalLobbyCreate = originalLobbyState.onCreateCallback;
+
+				originalLobbyState.onCreateCallback = function(...args) {
+					if (originalLobbyCreate) originalLobbyCreate.call(this, ...args);
+
+					newGameInstance.state.onStateChange.remove(onStateChangeListener);
+
+					const playerIds = ClientManager.getClient().getPlayerIds();
+					const ttGame = GameController.withIds(gameId, playerIds);
+
+					newGameInstance.state.start('Game', true, false, ttGame);
+				};
+			}
+		};
+
+		newGameInstance.state.onStateChange.add(onStateChangeListener);
+	}
+};
 
 /**
  * Get the user-loaded texture pack
@@ -203,7 +255,8 @@ const setActiveTexturePack = hashsum => new Promise((resolve, reject) => {
 	localStorage.setItem('texturepack', hashsum);
 
 	Addons.getActiveTexturePack().then(activeTexturePack => {
-		GameManager.getGame()?.load.addTexturePack('game', activeTexturePack.texturepack);
+		// GameManager.getGame()?.load.addTexturePack('game', activeTexturePack.texturepack);
+		reloadGame();
 
 		resolve(activeTexturePack);
 	}).catch(err => reject(err));
@@ -254,7 +307,8 @@ Object.assign(Addons, {
 	setActiveTexturePack,
 	storeTexturePack,
 	removeTexturePack,
-	getAllTexturePacks
+	getAllTexturePacks,
+	reloadGame
 });
 
 // FIXME: if a texture pack is loaded while in the game, textures break

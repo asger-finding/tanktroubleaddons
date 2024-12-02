@@ -36,14 +36,7 @@ const initDatabase = () => new Promise((resolve, reject) => {
 	/* eslint-enable jsdoc/require-jsdoc */
 });
 
-window.Addons = {
-	/**
-	 * Create a link to an extension resource
-	 * @param {string} url Path to file
-	 * @returns Url to concate
-	 */
-	t_url: url => `${ window.addons.extensionUrl }${ url }`,
-
+Object.assign(Addons, {
 	/**
 	 * Derived from Utils.addImageWithClasses
 	 *
@@ -69,7 +62,7 @@ window.Addons = {
 	},
 
 	indexedDB: await initDatabase()
-};
+});
 
 const gamePreloadStage = Game.UIPreloadState.getMethod('preload');
 Game.UIPreloadState.method('preload', function(...args) {
@@ -163,9 +156,11 @@ $.widget('custom.deleteselectmenu', $.ui.selectmenu, {
 					padding: '1px 7px',
 					boxShadow: 'none'
 				})
-				.on('mouseup', () => {
+				.on('mouseup', event => {
 					item.element.trigger('remove');
 					li.remove();
+
+					event.preventDefault();
 				})
 				.prependTo(wrapper);
 		}

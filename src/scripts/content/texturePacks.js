@@ -164,7 +164,7 @@ const removeTexturePackFromStore = hashsum => new Promise((resolve, reject) => {
 const getActiveTexturePack = () => new Promise((resolve, reject) => {
 	const hashsum = localStorage.getItem('texturepack');
 	if (hashsum === null) {
-		reject('No texture pack set');
+		reject('Texture pack unset');
 		return;
 	}
 
@@ -173,7 +173,7 @@ const getActiveTexturePack = () => new Promise((resolve, reject) => {
 			.then(texturePack => resolve(texturePack)).
 			catch(err => reject(err));
 	} else {
-		reject('Texture pack has invalid key');
+		reject('Texture pack has an invalid key');
 	}
 });
 
@@ -194,18 +194,37 @@ const storeTexturePack = async(file, name) => {
  * @param {string} hashsum The unique hashsum of the texture pack.
  * @returns {Promise<object|null>} Resolves with texture pack object if successfully added, else null
  */
-const setActiveTexturePack = async(hashsum) => {
-	if (!(/\b[a-fA-F0-9]{64}\b/u).test(hashsum)) return null;
+const setActiveTexturePack = hashsum => new Promise((resolve, reject) => {
+	if (!(/\b[a-fA-F0-9]{64}\b/u).test(hashsum)) {
+		reject('Texture pack key has an invalid key');
+		return;
+	}
 
 	localStorage.setItem('texturepack', hashsum);
 
-	const activeTexturePack = await Addons.getActiveTexturePack();
-	if (activeTexturePack === null) return null;
+	Addons.getActiveTexturePack().then(activeTexturePack => {
+		GameManager.getGame()?.load.addTexturePack('game', activeTexturePack.texturepack);
 
-	GameManager.getGame()?.load.addTexturePack('game', activeTexturePack.texturepack);
+		resolve(activeTexturePack);
+	}).catch(err => reject(err));
+});
 
-	return activeTexturePack;
-};
+/**
+ * Get the first available texture pack in the object store.
+ * Returns false if the store is empty.
+ * @returns {Promise<object|false>} Resolves when texture pack is determined, or if none available, with null
+ */
+const getFirstTexturePackFromStore = () => new Promise((resolve, reject) => {
+	getAllTexturePacksFromStore().then(([texturepack]) => {
+		if (typeof texturepack !== 'undefined') {
+			getTexturePackFromStore(texturepack.hashsum)
+				.then(resolve)
+				.catch(reject);
+		} else {
+			resolve(false);
+		}
+	});
+});
 
 /**
  * Remove a texture pack saved to the store
@@ -216,8 +235,10 @@ const removeTexturePack = hashsum => new Promise((resolve, reject) => {
 	removeTexturePackFromStore(hashsum).finally(() => {
 		localStorage.removeItem('texturepack');
 
-		getActiveTexturePack().then(({ hashsum: newHashsum }) => {
-			setActiveTexturePack(newHashsum);
+		getFirstTexturePackFromStore().then(result => {
+			if (result !== false) setActiveTexturePack(result.hashsum);
+
+			resolve(result);
 		}).catch(err => reject(err));
 	});
 });
@@ -230,8 +251,8 @@ const getAllTexturePacks = () => getAllTexturePacksFromStore();
 
 Object.assign(Addons, {
 	getActiveTexturePack,
-	storeTexturePack,
 	setActiveTexturePack,
+	storeTexturePack,
 	removeTexturePack,
 	getAllTexturePacks
 });
@@ -383,11 +404,9 @@ const gamePreloadStage = Game.UIPreloadState.getMethod('preload');
 Game.UIPreloadState.method('preload', function(...args) {
 	const result = gamePreloadStage.apply(this, ...args);
 
-	Addons.getActiveTexturePack().then(texturePackData => {
-		if (texturePackData === null) return;
-
-		GameManager.getGame()?.load.addTexturePack('game', texturePackData.texturepack);
-	});
+	Addons.getActiveTexturePack().then(({ texturepack }) => {
+		GameManager.getGame()?.load.addTexturePack('game', texturepack);
+	}).catch(() => {});
 
 	return result;
 });

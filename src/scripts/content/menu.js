@@ -117,7 +117,7 @@ class Menu {
 
 		// Instantate border images
 		for (const name of [...border, ...draggable, ...handle]) {
-			fetch(window.Addons.t_url(`assets/menu/${name}.svg`))
+			fetch(Addons.t_url(`assets/menu/${name}.svg`))
 				.then(res => res.text())
 				// eslint-disable-next-line @typescript-eslint/no-loop-func
 				.then(body => {
@@ -435,6 +435,23 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 			offsetX: 5
 		});
 
+		const createNewOption = texturepack => {
+			const option = $('<option></option');
+			option.attr('value', texturepack.hashsum);
+			option.attr('removable', 'true');
+			option.text(texturepack.name);
+			option.on('remove', () => {
+				Addons.removeTexturePack(texturepack.hashsum)
+					.then(result => {
+						texturePackSelect.val(result === false ? 'new' : result.hashsum);
+						texturePackSelect.deleteselectmenu('refresh');
+						createNewWrapper.toggle(!result);
+					});
+			});
+
+			return option;
+		};
+
 		createNewSubmit.on('mouseup', async() => {
 			const [file] = createNewPicker.prop('files');
 			if (file) {
@@ -443,14 +460,12 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 				Addons.storeTexturePack(file, name)
 					.then(hashsum => Addons.setActiveTexturePack(hashsum)
 						.then(texturepack => {
-							const option = $('<option></option');
-							option.attr('value', texturepack.hashsum);
-							option.attr('removable', 'true');
-							option.text(texturepack.name);
-							option.on('remove', () => Addons.removeTexturePack(texturepack.hashsum));
+							Utils.updateTooltip(createNewSubmit, '');
 
-							createNewLabel.text('Select file');
+							const option = createNewOption(texturepack);
+
 							texturePackSelect.find('> :last').before(option);
+							createNewLabel.text('Select file');
 							texturePackSelect.val(hashsum);
 							texturePackSelect.deleteselectmenu('refresh');
 
@@ -465,27 +480,14 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 
 		Addons.getAllTexturePacks()
 			.then(async texturepacks => {
-				for (const texturepack of texturepacks) {
-					const option = $('<option></option');
-					option.attr('value', texturepack.hashsum);
-					option.attr('removable', 'true');
-					option.text(texturepack.name);
-					option.on('remove', () => {
-						Addons.removeTexturePack(texturepack.hashsum);
-					});
+				texturePackSelect.append(texturepacks.map(pack => createNewOption(pack)));
 
-					texturePackSelect.append(option);
-				}
-
-				const addNewOption = $('<option value="new">Add new ...</option>');
-				texturePackSelect.append(addNewOption);
+				const newTexturePackOption = $('<option value="new">Add new ...</option>');
+				texturePackSelect.append(newTexturePackOption);
 
 				const selectValue = await Addons.getActiveTexturePack()
 					.then(({ hashsum }) => hashsum)
-					.catch(err => {
-						Utils.updateTooltip(createNewSubmit, err.message);
-						return 'new';
-					});
+					.catch(() => 'new');
 				texturePackSelect.val(selectValue);
 				createNewWrapper.toggle(selectValue === 'new');
 

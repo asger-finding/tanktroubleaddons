@@ -23,7 +23,16 @@
 
 	const meta = JSON.parse(document.currentScript?.dataset.meta ?? '{}');
 
-	window.addons = meta;
+	window.Addons = {};
+
+	Object.assign(Addons, {
+		/**
+		 * Create a link to an extension resource
+		 * @param url Path to file
+		 * @returns Url to concate
+		 */
+		t_url: (url: string) => `${ meta.extensionUrl }${ url }`
+	});
 
 	// eslint-disable-next-line @typescript-eslint/no-implied-eval
 	Function(meta.loader)();

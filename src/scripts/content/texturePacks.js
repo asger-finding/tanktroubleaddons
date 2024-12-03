@@ -156,13 +156,18 @@ const removeTexturePackFromStore = hashsum => new Promise((resolve, reject) => {
 	/* eslint-enable jsdoc/require-jsdoc */
 });
 
-const setTankState = RoundModel.getMethod('setTankState');
-RoundModel.method('setTankState', function(...args) {
-	const [tankState] = args;
-	if (this.destroyedPlayerIds.includes(tankState.getPlayerId())) return null;
-
-	return setTankState.apply(this, args);
-});
+/**
+ * Listens to a Phaser event and returns callback with remove function.
+ * @param {object} target Phaser signal event manager
+ * @param {(removeListener: () => void, ...args: unknown[]) => void} callback Callback function
+ */
+const phaserUntil = (target, callback) => {
+	// eslint-disable-next-line jsdoc/require-jsdoc
+	function handler(...args) {
+		callback(() => target.remove(handler), ...args);
+	}
+	target.add(handler);
+};
 
 /**
  * Reload the Phaser game instance and rejoin the current game
@@ -171,14 +176,6 @@ const reloadGame = () => {
 	const game = GameManager.getGame();
 	if (game) {
 		const gameController = GameManager.getGameController();
-		let state = null;
-		let gameId = null;
-		let tanks = null;
-		if (gameController) {
-			state = gameController.model.getState();
-			gameId = gameController.getId();
-			tanks = gameController.getTanks();
-		}
 
 		game?.load.reset(true, true);
 		game.destroy();
@@ -194,42 +191,38 @@ const reloadGame = () => {
 		// from the bootcamp and don't attempt to rejoin.
 		if (Constants.getMode() !== Constants.MODE_CLIENT_ONLINE) return;
 
+		GameManager.setGameController(null);
+		ClientManager.getClient().roundState = null;
+		ClientManager.getClient().expandedRoundState = null;
+
+		const gameId = gameController.getId();
+		const state = gameController.getState();
+		const started = gameController.roundController.model.getStarted();
+
 		/**
 		 * Event listener for Phaser state change
 		 * @param {string} newState State id
 		 */
-		const onStateChangeListener = newState => {
+		phaserUntil(newGameInstance.state.onStateChange, (removeListener, newState) => {
 			if (newState === 'Lobby') {
-				newGameInstance.state.onStateChange.remove(onStateChangeListener);
+				removeListener();
 
 				const originalLobbyState = newGameInstance.state;
 				const originalLobbyCreate = originalLobbyState.onCreateCallback;
 
+				// eslint-disable-next-line complexity
 				originalLobbyState.onCreateCallback = function(...args) {
 					if (originalLobbyCreate) originalLobbyCreate.call(this, ...args);
-
-					newGameInstance.state.onStateChange.remove(onStateChangeListener);
 
 					const playerIds = ClientManager.getClient().getPlayerIds();
 					const ttGame = GameController.withIds(gameId, playerIds);
 					ttGame.model.setState(state);
-
-					// All tanks are instanced again with RoundModel.setTankState
-					// so we need to push the dead tanks to destroyedPlayerIds
-					// and hook setTankState as to not spawn a new tank
-					// if it's in destroyedPlayerIds
-					const destroyedTanks = ClientManager.getClient().getExpandedRoundState()
-						.getTankStates()
-						.map(tankState => tankState.getPlayerId())
-						.filter(playerId => !(playerId in tanks));
-					ttGame.roundController.model.destroyedPlayerIds.push(...destroyedTanks);
+					ttGame.roundController.model.started = started;
 
 					newGameInstance.state.start('Game', true, false, ttGame);
 				};
 			}
-		};
-
-		newGameInstance.state.onStateChange.add(onStateChangeListener);
+		});
 	}
 };
 

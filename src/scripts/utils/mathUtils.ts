@@ -83,7 +83,7 @@ export const spaceAround = (width: number, items: number) => {
  * @param file File input
  * @returns Hashsum string
  */
-export const calculateHash = async(file: File) => {
+export const calculateFileHash = async(file: File) => {
 	const arrayBuffer = await file.arrayBuffer();
 	const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
 	const hashArray = Array.from(new Uint8Array(hashBuffer));

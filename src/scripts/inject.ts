@@ -2,13 +2,14 @@
 	/**
 	 * Inject a script into the site
 	 * @param src Script source
+	 * @param fetchPriority Should the script have priority?
 	 * @returns Promise when loaded
 	 */
-	const injectScript = (src: string, fetchpriority?: true) => {
+	const injectScript = (src: string, fetchPriority?: true) => {
 		const script = document.createElement('script');
 		script.src = src;
 		script.type = 'module';
-		script.fetchPriority = fetchpriority ? 'high' : 'auto';
+		script.fetchPriority = fetchPriority ? 'high' : 'auto';
 
 		document.head.append(script);
 
@@ -23,7 +24,11 @@
 
 	const meta = JSON.parse(document.currentScript?.dataset.meta ?? '{}');
 
-	window.Addons = {};
+	Object.defineProperty(window, 'Addons', {
+		value: {},
+		writable: false,
+		configurable: false
+	});
 
 	Object.assign(Addons, {
 		/**

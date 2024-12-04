@@ -142,20 +142,19 @@ const proxyWidget = (function*() {
 })();
 
 $.widget('custom.deleteselectmenu', $.ui.selectmenu, {
+	_create() {
+		this._super('_create');
+		this.menu.addClass('ui-deleteselectmenu');
+	},
 	_renderItem(ul, item) {
 		const li = $('<li>');
 		const wrapper = $('<div>', { text: item.label });
 
 		if (item.disabled) li.addClass('ui-state-disabled');
 
-		if (item.element.attr('removable')) {
+		if (item.element.attr('removable') === 'true') {
 			$('<button>-</button>')
 				.button()
-				.css({
-					marginRight: '6px',
-					padding: '1px 7px',
-					boxShadow: 'none'
-				})
 				.on('mouseup', event => {
 					item.element.trigger('remove');
 					li.remove();

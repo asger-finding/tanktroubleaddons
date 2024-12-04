@@ -9,7 +9,6 @@ const defaultState = {
 		classToken: 'normal',
 		colorScheme: 'light'
 	},
-	gameTheme: 'normal',
 	classicMouse: true,
 	tintedBullets: false,
 	statisticsState: 'global'

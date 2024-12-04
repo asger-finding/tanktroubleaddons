@@ -390,7 +390,7 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 	const otherWidget = $('<div></div>');
 	(() => {
 		const texturePackWrapper = $('<div></div>');
-		const texturePackHeading = $('<div class="heading">Add texture pack from file ...</div>');
+		const texturePackHeading = $('<div class="heading">Texture packs</div>');
 		const selectWrapper = $('<div></div>');
 		const texturePackSelect = $('<select></select>');
 		const createNewWrapper = $('<div class="create-new-wrapper"></div>');
@@ -470,7 +470,7 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 			.then(async texturePacks => {
 				texturePackSelect.append(texturePacks.map(pack => createNewOption(pack)));
 
-				const newTexturePackOption = $('<option value="new">Add new ...</option>');
+				const newTexturePackOption = $('<option value="new">Add from zip ...</option>');
 				texturePackSelect.append(newTexturePackOption);
 
 				const selectValue = await Addons.getActiveTexturePack()

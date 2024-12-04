@@ -13,7 +13,7 @@ const storeName = 'texturePacks';
  * @returns {Promise<string>} Resolves with hashsum when the operation is complete
  */
 const addTexturePackToStore = async(file, name, builtIn) => {
-	if (!file.name.endsWith('.zip')) throw new Error('Only zip files are supported.');
+	if (!file.name.endsWith('.zip')) throw new Error('Only zip files are supported');
 
 	const timestamp = Date.now();
 	const hashsum = await calculateFileHash(file);
@@ -28,7 +28,7 @@ const addTexturePackToStore = async(file, name, builtIn) => {
 			try {
 				unzip(new Uint8Array(arrayBuffer), (err, decoded) => {
 					if (err) {
-						reject(new Error('Error unzipping file'));
+						reject(new Error('Error when unzipping file'));
 						return;
 					}
 
@@ -48,9 +48,7 @@ const addTexturePackToStore = async(file, name, builtIn) => {
 
 						// Case: File with same hashsum exists
 						if (existingFile) {
-							if (existingFile.name === name) reject(new Error('File with the same name already exists'));
-							else reject(new Error('Identical file already exists'));
-
+							reject(new Error('Texture pack already exists'));
 							return;
 						}
 
@@ -60,9 +58,7 @@ const addTexturePackToStore = async(file, name, builtIn) => {
 							const existingEntry = nameRequest.result;
 
 							if (existingEntry) {
-								// Overwrite file with the same name but different hashsum
-								store.put({ name, hashsum, timestamp, builtin: builtIn, texturepack: decoded });
-								resolve(hashsum);
+								reject(new Error('Texture pack with same name already exists'));
 							} else {
 								// New unique file
 								store.add({ name, hashsum, timestamp, builtin: builtIn, texturepack: decoded });

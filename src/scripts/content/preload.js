@@ -7,7 +7,7 @@ import ProxyHelper from '../utils/proxyHelper.js';
  * @returns {Promise<IDBDatabase>} A promise that resolves to the initialized database.
  */
 const initDatabase = () => new Promise((resolve, reject) => {
-	const request = indexedDB.open('addons', 3);
+	const request = indexedDB.open('addons', 1);
 
 	/* eslint-disable jsdoc/require-jsdoc */
 	request.onupgradeneeded = (event) => {

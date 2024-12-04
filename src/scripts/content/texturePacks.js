@@ -272,7 +272,7 @@ const setActiveTexturePack = hashsum => new Promise((resolve, reject) => {
 	localStorage.setItem('texturepack', hashsum);
 
 	Addons.getActiveTexturePack().then(activeTexturePack => {
-		// GameManager.getGame()?.load.addTexturePack('game', activeTexturePack.texturepack);
+		// We pull the active texture pack on each load
 		reloadGame();
 
 		resolve(activeTexturePack);
@@ -328,10 +328,6 @@ Object.assign(Addons, {
 	reloadGame
 });
 
-// FIXME: if a texture pack is loaded while in the game, textures break
-// reload/rejoin the game or prompt a "are you sure?" if the user
-// selects a new texture pack while in a game
-
 /**
  * Frames in the format { [frameName: string]: url as string }
  * @typedef {Record<string, string>} FrameDetails
@@ -343,7 +339,7 @@ const packer = new MaxRectsPacker(2048, 2048, 2, {
 	pot: true,
 	allowRotation: false,
 	tag: false,
-	border: 0
+	border: 2
 });
 
 /**
@@ -425,10 +421,7 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, files) {
 
 	// Assume that no images were packed
 	// Thus, we reset the spritesheet
-	if (!bin) {
-		// FIXME: logic to reload the game entirely
-		return;
-	}
+	if (!bin) return;
 
 	const canvas = document.createElement('canvas');
 	canvas.width = spritesheet.width;
@@ -447,10 +440,10 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, files) {
 		if (exists) {
 			const frame = frameData.getFrameByName(rect.frameName);
 
-			frame.x = rect.x;
-			frame.y = rect.y + spritesheet.height;
-			frame.width = rect.width;
-			frame.height = rect.height;
+			frame.x = rect.x - 1;
+			frame.y = rect.y - 1 + spritesheet.height;
+			frame.width = rect.width + 2;
+			frame.height = rect.height + 2;
 			frame.rotated = false;
 		} else {
 			frameData.addFrame(new Phaser.Frame(

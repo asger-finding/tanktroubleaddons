@@ -78,5 +78,16 @@ export const spaceAround = (width: number, items: number) => {
 	return { leftMargin, spacing };
 };
 
+/**
+ * Calculate the SHA-256 hashsum of a given file
+ * @param file File input
+ * @returns Hashsum string
+ */
+export const calculateFileHash = async(file: File) => {
+	const arrayBuffer = await file.arrayBuffer();
+	const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+	const hashArray = Array.from(new Uint8Array(hashBuffer));
+	return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+};
 
 export const _isESmodule = true;

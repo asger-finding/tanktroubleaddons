@@ -92,7 +92,7 @@ $max-safe-integer: 2147483647;
 #rightBanner,
 #topBanner {
 	@include hide;
-}
+}ui-deleteselectmenu
 
 #navigation {
 	$tab-styles: (
@@ -115,6 +115,22 @@ $max-safe-integer: 2147483647;
 	width: calc(100%) !important;
 }
 
+.ui-deleteselectmenu {
+	.ui-menu-item {
+		text-wrap: nowrap;
+		text-overflow: ellipsis;
+
+		.ui-button {
+			margin-right: 6px;
+			padding: 1px 7px;
+			box-shadow: none;
+		}
+	}
+}
+.ui-deleteselectmenu li {
+	text-wrap: nowrap;
+	text-overflow: ellipsis;
+}
 
 #addons-menu {
 	top: 20px;
@@ -168,6 +184,10 @@ $max-safe-integer: 2147483647;
 			"borderBottomLeft borderBottom borderBottom borderBottom borderBottomRight";
 		animation: none;
 
+		button {
+			box-shadow: none;
+		}
+
 		.grid-item {
 			background: var(--background-color);
 
@@ -183,6 +203,19 @@ $max-safe-integer: 2147483647;
 
 			&[style*="borderTopLeft;"] {
 				background: linear-gradient(315deg, var(--background-color) 63%, transparent 63%);
+			}
+		}
+
+		.create-new-wrapper {
+			label {
+				max-width: 149px;
+				overflow: hidden;
+				text-wrap: nowrap;
+				text-overflow: ellipsis;
+			}
+
+			button {
+				margin-left: 5px;
 			}
 		}
 	}
@@ -408,15 +441,15 @@ player-name {
 }
 
 /* Forum improvements */
-@keyframes highlight-post {
-	50% {
-		background-color: var(--highlight-post-background-color);
-		border-color: var(--highlight-post-border-color);
-		border-width: 2px;
-		border-style: solid;
-	}
-}
 .forum {
+	@keyframes highlight-post {
+		50% {
+			background-color: var(--highlight-post-background-color);
+			border-color: var(--highlight-post-border-color);
+			border-width: 2px;
+			border-style: solid;
+		}
+	}
 
 	%animation {
 		animation: .5s ease-in 0.3s 2 alternate highlight-post;

@@ -2,12 +2,14 @@
 	/**
 	 * Inject a script into the site
 	 * @param src Script source
+	 * @param fetchPriority Should the script have priority?
 	 * @returns Promise when loaded
 	 */
-	const injectScript = (src: string) => {
+	const injectScript = (src: string, fetchPriority?: true) => {
 		const script = document.createElement('script');
 		script.src = src;
 		script.type = 'module';
+		script.fetchPriority = fetchPriority ? 'high' : 'auto';
 
 		document.head.append(script);
 
@@ -22,15 +24,28 @@
 
 	const meta = JSON.parse(document.currentScript?.dataset.meta ?? '{}');
 
-	window.addons = meta;
+	Object.defineProperty(window, 'Addons', {
+		value: {},
+		writable: false,
+		configurable: false
+	});
+
+	Object.assign(Addons, {
+		/**
+		 * Create a link to an extension resource
+		 * @param url Path to file
+		 * @returns Url to concate
+		 */
+		t_url: (url: string) => `${ meta.extensionUrl }${ url }`
+	});
 
 	// eslint-disable-next-line @typescript-eslint/no-implied-eval
 	Function(meta.loader)();
 
 	Promise.all([
-		injectScript(`${meta.extensionUrl}scripts/content/preload.js`),
-		injectScript(`${meta.extensionUrl}scripts/content/theme.js`),
-		injectScript(`${meta.extensionUrl}scripts/content/patches.js`)
+		injectScript(`${meta.extensionUrl}scripts/content/preload.js`, true),
+		injectScript(`${meta.extensionUrl}scripts/content/theme.js`, true),
+		injectScript(`${meta.extensionUrl}scripts/content/patches.js`, true)
 	]).then(() => {
 		injectScript(`${meta.extensionUrl}scripts/content/statisticsSnippet.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/menu.js`);

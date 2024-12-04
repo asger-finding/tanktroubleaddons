@@ -117,7 +117,7 @@ class Menu {
 
 		// Instantate border images
 		for (const name of [...border, ...draggable, ...handle]) {
-			fetch(window.Addons.t_url(`assets/menu/${name}.svg`))
+			fetch(Addons.t_url(`assets/menu/${name}.svg`))
 				.then(res => res.text())
 				// eslint-disable-next-line @typescript-eslint/no-loop-func
 				.then(body => {
@@ -292,7 +292,9 @@ class Menu {
 
 }
 
-window.Addons.menu = new Menu();
+Object.assign(Addons, {
+	menu: new Menu()
+});
 
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) => {
 	original(...args);
@@ -328,102 +330,171 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 	container.insertAfter(TankTrouble.TankInfoBox.infoAchievements);
 
 	const interfaceWidget = $('<div></div>');
-	const themeHeading = $('<div class="heading">Theme</div>');
-	const themeSelect = $(`
-		<label for="radio-1">Normal</label>
-		<input type="radio" name="radio-1" id="radio-1" value="normal" data-set-color-scheme="light">
-		<label for="radio-2">Dark</label>
-		<input type="radio" name="radio-1" id="radio-2" value="dark" data-set-color-scheme="dark">
-	`);
-	const checkboxWrapper = $('<div style="display: grid; grid-template-areas: \'title-1 title-2\' \'checkbox-1 checkbox-2\'"></div>');
-	const classicMouseCheckbox = $(`
-		<div class="heading" style="grid-area: title-1">Classic mouse</div>
-		<input type="checkbox" id="checkbox-1" style="grid-area: checkbox-1">
-	`);
-	const tintedBulletsCheckbox = $(`
-		<div class="heading" style="grid-area: title-2">Tinted bullets</div>
-		<input type="checkbox" id="checkbox-1" style="grid-area: checkbox-2">	
-	`);
+	(() => {
+		const themeHeading = $('<div class="heading">Theme</div>');
+		const themeSelect = $(`
+			<label for="radio-1">Normal</label>
+			<input type="radio" name="radio-1" id="radio-1" value="normal" data-set-color-scheme="light">
+			<label for="radio-2">Dark</label>
+			<input type="radio" name="radio-1" id="radio-2" value="dark" data-set-color-scheme="dark">
+		`);
+		const checkboxWrapper = $('<div style="display: grid; grid-template-areas: \'title-1 title-2\' \'checkbox-1 checkbox-2\'"></div>');
+		const classicMouseCheckbox = $(`
+			<div class="heading" style="grid-area: title-1">Classic mouse</div>
+			<input type="checkbox" id="checkbox-1" style="grid-area: checkbox-1">
+		`);
+		const tintedBulletsCheckbox = $(`
+			<div class="heading" style="grid-area: title-2">Tinted bullets</div>
+			<input type="checkbox" id="checkbox-1" style="grid-area: checkbox-2">	
+		`);
 
-	checkboxWrapper.append([classicMouseCheckbox, tintedBulletsCheckbox]);
-	interfaceWidget.append([themeHeading, themeSelect, '<hr>', checkboxWrapper]);
+		checkboxWrapper.append([classicMouseCheckbox, tintedBulletsCheckbox]);
+		interfaceWidget.append([themeHeading, themeSelect, '<hr>', checkboxWrapper]);
 
-	get('theme').then(theme => {
-		const { classToken } = theme;
-		themeSelect.filter(`input[type="radio"][value="${classToken}"]`).prop('checked', true);
+		get('theme').then(theme => {
+			const { classToken } = theme;
+			themeSelect.filter(`input[type="radio"][value="${classToken}"]`).prop('checked', true);
 
-		themeSelect.filter('input[type="radio"]')
-			.checkboxradio();
+			themeSelect.filter('input[type="radio"]')
+				.checkboxradio();
 
-		// Attach a change event listener
-		themeSelect.filter('input[type="radio"]').on('change', ({ target }) => {
-			const $target = $(target);
-			if ($target.is(':checked')) {
-				const newTheme = $target.val();
-				const colorScheme = $target.attr('data-set-color-scheme');
-				set('theme', { classToken: newTheme, colorScheme });
-			}
+			// Attach a change event listener
+			themeSelect.filter('input[type="radio"]').on('change', ({ target }) => {
+				const $target = $(target);
+				if ($target.is(':checked')) {
+					const newTheme = $target.val();
+					const colorScheme = $target.attr('data-set-color-scheme');
+					set('theme', { classToken: newTheme, colorScheme });
+				}
+			});
 		});
-	});
 
-	get('classicMouse').then(classicMouse => {
-		classicMouseCheckbox.filter('input[type="checkbox"]')
-			.prop('checked', classicMouse)
-			.checkboxtoggle({
-				// eslint-disable-next-line jsdoc/require-jsdoc
-				change: (_event, { item }) => set('classicMouse', item.value)
-			});
-	});
-	get('tintedBullets').then(tintedBullets => {
-		tintedBulletsCheckbox.filter('input[type="checkbox"]')
-			.prop('checked', tintedBullets)
-			.checkboxtoggle({
-				// eslint-disable-next-line jsdoc/require-jsdoc
-				change: (_event, { item }) => set('tintedBullets', item.value)
-			});
-	});
+		get('classicMouse').then(classicMouse => {
+			classicMouseCheckbox.filter('input[type="checkbox"]')
+				.prop('checked', classicMouse)
+				.checkboxtoggle({
+					// eslint-disable-next-line jsdoc/require-jsdoc
+					change: (_event, { item }) => set('classicMouse', item.value)
+				});
+		});
+		get('tintedBullets').then(tintedBullets => {
+			tintedBulletsCheckbox.filter('input[type="checkbox"]')
+				.prop('checked', tintedBullets)
+				.checkboxtoggle({
+					// eslint-disable-next-line jsdoc/require-jsdoc
+					change: (_event, { item }) => set('tintedBullets', item.value)
+				});
+		});
+	})();
 
 	const otherWidget = $('<div></div>');
-	const gameThemeHeading = $('<div class="heading">Game theme</div>');
-	const gameThemeSelect = $(`
-	<select>
-		<option value='normal' data-imagesrc="https://cdn.tanktrouble.com/RELEASE-2023-09-06-01/assets/images/game/pingTimeNoConnection.png" data-imagesrcset="https://cdn.tanktrouble.com/RELEASE-2023-09-06-01/assets/images/game/pingTimeNoConnection@2x.png 2x" data-description="Selected">Normal</option>
-		<option value='dark'>Dark</option>
-		<option value='3d'>3D</option>
-		<option value='synthwave'>Synthwave</option>
-	</select>`);
-	// TODO: texture pack from dropdown with option for File selector
-	const texturePackHeading = $('<div class="heading">Texture pack from file ...</div>');
-	const label = $('<label for="texturepackpicker" class="custom-file-upload">Load</label>');
-	const picker = $('<input type="file" id="texturepackpicker" accept=".zip" style="display: none;"/>');
+	(() => {
+		const texturePackWrapper = $('<div></div>');
+		const texturePackHeading = $('<div class="heading">Texture packs</div>');
+		const selectWrapper = $('<div></div>');
+		const texturePackSelect = $('<select></select>');
+		const createNewWrapper = $('<div class="create-new-wrapper"></div>');
 
-	label.append(picker);
-	otherWidget.append([gameThemeHeading, gameThemeSelect, '<hr>', texturePackHeading, label, picker]);
+		const createNewLabel = $('<label for="texturepackpicker" class="custom-file-upload">Select file</label>');
+		const createNewPicker = $('<input type="file" id="texturepackpicker" accept=".zip" style="display: none;"/>');
+		const createNewSubmit = $('<button type="submit">Add</button>');
+		createNewLabel.button();
+		createNewSubmit.button();
 
-	get('gameTheme').then(theme => {
-		gameThemeSelect.val(theme);
+		createNewWrapper.append(['<br>', createNewLabel, createNewPicker, createNewSubmit]);
+		selectWrapper.append(texturePackSelect);
 
-		gameThemeSelect.iconselectmenu({
-			// eslint-disable-next-line jsdoc/require-jsdoc
-			change: (_event, { item }) => set('gameTheme', item.value)
-		}).iconselectmenu('menuWidget');
-	});
+		texturePackWrapper.append([selectWrapper, createNewWrapper]);
 
-	label.button();
+		createNewPicker.on('change', async() => {
+			const [file] = createNewPicker.prop('files');
+			createNewLabel.text(file ? file.name : 'Select file');
+		});
 
-	const fileReader = new FileReader();
-	fileReader.addEventListener('load', () => {
-		const data = fileReader.result;
-		GameManager.getGame()?.load.addTexturePack('game', data);
-	});
+		createNewSubmit.tooltipster({
+			position: 'right',
+			theme: 'tooltipster-error',
+			offsetX: 5
+		});
 
-	picker.on('change', () => {
-		const [file] = picker.prop('files');
-		if (file) {
-			fileReader.readAsArrayBuffer(file);
-			label.text(file.name);
-		}
-	});
+		/**
+		 * Create a new option for the select menu
+		 * @param texturePack Texture pack details
+		 * @returns New option element
+		 */
+		const createNewOption = texturePack => {
+			const option = $('<option></option');
+			option.attr('value', texturePack.hashsum);
+			option.attr('removable', !texturePack.builtin);
+			option.text(texturePack.name);
+			option.on('remove', () => {
+				Addons.removeTexturePack(texturePack.hashsum)
+					.then(result => {
+						texturePackSelect.val(result === false ? 'new' : result.hashsum);
+						texturePackSelect.deleteselectmenu('refresh');
+						createNewWrapper.toggle(!result);
+					});
+			});
+
+			return option;
+		};
+
+		createNewSubmit.on('mouseup', async() => {
+			const [file] = createNewPicker.prop('files');
+			if (file) {
+				const [name] = file.name.split('.zip');
+
+				Addons.storeTexturePack(file, name)
+					.then(hashsum => Addons.setActiveTexturePack(hashsum)
+						.then(texturePack => {
+							Utils.updateTooltip(createNewSubmit, '');
+							Addons.reloadGame();
+
+							const option = createNewOption(texturePack);
+
+							texturePackSelect.find('> :last').before(option);
+							createNewLabel.text('Select file');
+							texturePackSelect.val(hashsum);
+							texturePackSelect.deleteselectmenu('refresh');
+
+							createNewWrapper.hide();
+						}))
+					.catch(err => {
+						Utils.updateTooltip(createNewSubmit, err.message);
+					});
+
+			}
+		});
+
+		Addons.getAllTexturePacks()
+			.then(async texturePacks => {
+				texturePackSelect.append(texturePacks.map(pack => createNewOption(pack)));
+
+				const newTexturePackOption = $('<option value="new">Add from zip ...</option>');
+				texturePackSelect.append(newTexturePackOption);
+
+				const selectValue = await Addons.getActiveTexturePack()
+					.then(({ hashsum }) => hashsum)
+					.catch(() => 'new');
+				texturePackSelect.val(selectValue);
+				createNewWrapper.toggle(selectValue === 'new');
+
+				texturePackSelect.deleteselectmenu({
+					// eslint-disable-next-line jsdoc/require-jsdoc
+					change: (_event, { item }) => {
+						if (item.value === 'new') {
+							createNewWrapper.show();
+						} else {
+							createNewWrapper.hide();
+							Addons.setActiveTexturePack(item.value);
+							Addons.reloadGame();
+						}
+					}
+				});
+			});
+
+		otherWidget.append([texturePackHeading, texturePackWrapper]);
+	})();
 
 	Addons.menu.createSection({
 		title: 'Interface',
@@ -434,7 +505,7 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 	Addons.menu.createSection({
 		title: 'Other',
 		id: 'other',
-		requiresReload: true
+		requiresReload: false
 	}, [ otherWidget ]);
 });
 

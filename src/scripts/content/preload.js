@@ -2,14 +2,41 @@ import ProxyHelper from '../utils/proxyHelper.js';
 
 // Preload functions
 
-window.Addons = {
-	/**
-	 * Create a link to an extension resource
-	 * @param {string} url Path to file
-	 * @returns Url to concate
-	 */
-	t_url: url => `${ window.addons.extensionUrl }${ url }`,
+/**
+ * Initialize the IndexedDB database and ensure required object stores exist.
+ * @returns {Promise<IDBDatabase>} A promise that resolves to the initialized database.
+ */
+const initDatabase = () => new Promise((resolve, reject) => {
+	const request = indexedDB.open('addons', 3);
 
+	/* eslint-disable jsdoc/require-jsdoc */
+	request.onupgradeneeded = (event) => {
+		const db = event.target.result;
+
+		// Ensure 'chatlogCache' object store exists
+		if (!db.objectStoreNames.contains('chatlogCache')) {
+			const store = db.createObjectStore('chatlogCache', { keyPath: 'messageId' });
+
+			store.createIndex('created', 'created');
+			store.createIndex('messageId', 'messageId');
+			store.createIndex('messageIndex', 'messageIndex');
+			store.createIndex('senders', 'senders', { multiEntry: true });
+			store.createIndex('type', 'type');
+		}
+
+		// Ensure 'texturePacks' object store exists
+		if (!db.objectStoreNames.contains('texturePacks')) {
+			const store = db.createObjectStore('texturePacks', { keyPath: 'name' });
+			store.createIndex('hashsum', 'hashsum', { unique: true });
+		}
+	};
+
+	request.onsuccess = (event) => resolve(event.target.result);
+	request.onerror = (event) => reject(event.target.error);
+	/* eslint-enable jsdoc/require-jsdoc */
+});
+
+Object.assign(Addons, {
 	/**
 	 * Derived from Utils.addImageWithClasses
 	 *
@@ -32,8 +59,10 @@ window.Addons = {
 
 		container.append(image);
 		return container;
-	}
-};
+	},
+
+	indexedDB: await initDatabase()
+});
 
 const gamePreloadStage = Game.UIPreloadState.getMethod('preload');
 Game.UIPreloadState.method('preload', function(...args) {
@@ -94,7 +123,7 @@ const proxyWidget = (function*() {
 			const li = $('<li>');
 			const wrapper = $('<div>', { text: item.label });
 
-			if ( item.disabled )li.addClass('ui-state-disabled');
+			if (item.disabled) li.addClass('ui-state-disabled');
 
 			if (item.element.attr('data-imagesrc')) {
 				$(`<div><img width="26" src="${ item.element.attr('data-imagesrc') }" srcset="${ item.element.attr('data-imagesrcset') }"/></div>`)
@@ -111,6 +140,33 @@ const proxyWidget = (function*() {
 		}
 	});
 })();
+
+$.widget('custom.deleteselectmenu', $.ui.selectmenu, {
+	_create() {
+		this._super('_create');
+		this.menu.addClass('ui-deleteselectmenu');
+	},
+	_renderItem(ul, item) {
+		const li = $('<li>');
+		const wrapper = $('<div>', { text: item.label });
+
+		if (item.disabled) li.addClass('ui-state-disabled');
+
+		if (item.element.attr('removable') === 'true') {
+			$('<button>-</button>')
+				.button()
+				.on('mouseup', event => {
+					item.element.trigger('remove');
+					li.remove();
+
+					event.preventDefault();
+				})
+				.prependTo(wrapper);
+		}
+
+		return li.append(wrapper).appendTo(ul);
+	}
+});
 
 ProxyHelper.interceptFunction($.widget, 'bridge', (original, ...args) => {
 	const result = original(...args);

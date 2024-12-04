@@ -54,41 +54,15 @@ const FILTERS = {
 	MULTIPLE_SENDERS: 'multiple-users'
 };
 
-const dbName = 'addons';
 const storeName = 'chatlogCache';
 
 /**
- * Open a new chat log message cache
- * @returns {Promise<IDBDatabase>} Promise with database
- */
-const openMessagesDatabase = () => new Promise((resolve, reject) => {
-	const request = indexedDB.open(dbName, 1);
-
-	/* eslint-disable jsdoc/require-jsdoc */
-	request.onupgradeneeded = (event) => {
-		const db = event.target.result;
-		const store = db.createObjectStore(storeName, { keyPath: 'messageId' });
-
-		store.createIndex('created', 'created');
-		store.createIndex('messageId', 'messageId');
-		store.createIndex('messageIndex', 'messageIndex');
-		store.createIndex('senders', 'senders', { multiEntry: true });
-		store.createIndex('type', 'type');
-	};
-
-	request.onsuccess = (event) => resolve(event.target.result);
-	request.onerror = (event) => reject(event.target.error);
-	/* eslint-enable jsdoc/require-jsdoc */
-});
-
-/**
  * Add chat log item to database
- * @param {IDBDatabase} db Database object
  * @param {ChatLogMessage} chatMessage Chat log message item
  * @returns {Promise<void>} Promise when done
  */
-const addMessage = (db, chatMessage) => new Promise(resolve => {
-	const transaction = db.transaction([storeName], 'readwrite');
+const addMessage = chatMessage => new Promise(resolve => {
+	const transaction = Addons.indexedDB.transaction([storeName], 'readwrite');
 	const store = transaction.objectStore(storeName);
 	const request = store.add(chatMessage);
 
@@ -152,10 +126,9 @@ const makeServerRequest = (adminId, playerIds, offset, limit) => fetch($.jsonRPC
  * @param {string} playerId playerId to match against
  * @param {number} offset Offset/shift in their list of chat messages to get messages by
  * @param {number} limit Amount of messages
- * @param {IDBDatabase} cacheDb IndexedDB database to cache to
  * @returns {ChatLogMessage[]} List of transformed chat messages
  */
-const requestAndCache = async(adminId, playerId, offset, limit, cacheDb) => {
+const requestAndCache = async(adminId, playerId, offset, limit) => {
 	const messageList = await makeServerRequest(adminId, [playerId], offset, limit);
 	if (messageList === null) return [];
 
@@ -178,7 +151,7 @@ const requestAndCache = async(adminId, playerId, offset, limit, cacheDb) => {
 		/** @type {ChatLogMessage} */
 		const dbMessage = { messageId, messageIndex, type, created, senders, recipients, serverName, gameId, message };
 
-		addMessage(cacheDb, dbMessage);
+		addMessage(dbMessage);
 
 		return dbMessage;
 	});
@@ -186,15 +159,14 @@ const requestAndCache = async(adminId, playerId, offset, limit, cacheDb) => {
 
 /**
  * Check the cache map for gaps in message indices
- * @param {IDBDatabase} db Database object
  * @param {number} messageIndex Message index to start search on
  * @param {string} playerId Player identifier
  * @param {number} offset Offset of first message
  * @param {number} limit Amount of messages
  * @returns {[ChatLogMessage[], Record<number, number>]} Gaps map with their absolute offset
  */
-const findCacheGaps = (db, messageIndex, playerId, offset, limit) => new Promise((resolve, reject) => {
-	const transaction = db.transaction([storeName], 'readonly');
+const findCacheGaps = ( messageIndex, playerId, offset, limit) => new Promise((resolve, reject) => {
+	const transaction = Addons.indexedDB.transaction([storeName], 'readonly');
 	const store = transaction.objectStore(storeName);
 
 	const index = store.index('messageIndex');
@@ -247,15 +219,14 @@ const getChatTotal = (adminId, playerId) => makeServerRequest(adminId, [playerId
  * @param {string} playerId playerId to match against
  * @param {number} offset Offset/shift in their list of chat messages to get messages by
  * @param {number} limit Amount of messages
- * @param {IDBDatabase} cacheDb IndexedDB database to cache to
  * @returns {Promise<object[]>} Chat message data
  */
-const getChatMessagesByPlayerId = async(adminId, playerId, offset, limit, cacheDb) => {
+const getChatMessagesByPlayerId = async(adminId, playerId, offset, limit) => {
 	const total = await getChatTotal(adminId, playerId);
 	const firstMessageIndex = total - offset;
-	const [cached, gaps] = await findCacheGaps(cacheDb, firstMessageIndex, playerId, offset, limit);
+	const [cached, gaps] = await findCacheGaps(firstMessageIndex, playerId, offset, limit);
 
-	const missing = gaps.flatMap(([gapOffset, gapLimit]) => requestAndCache(adminId, playerId, gapOffset, gapLimit, cacheDb));
+	const missing = gaps.flatMap(([gapOffset, gapLimit]) => requestAndCache(adminId, playerId, gapOffset, gapLimit));
 	const fetched = await Promise.all(missing);
 
 	const messages = [ ...cached, ...fetched ].flat()
@@ -270,7 +241,6 @@ const getChatMessagesByPlayerId = async(adminId, playerId, offset, limit, cacheD
  * @param {string} playerId playerId to match against
  * @param {number} offset Offset in the chat messages list to start from
  * @param {number} limit Amount of messages to fetch
- * @param {IDBDatabase} cacheDb IndexedDB database to cache to
  * @param {(ChatLogMessage) => boolean} filter Type of message to filter by (e.g., MESSAGE_TYPES.GLOBAL)
  * @param {AbortSignal} abortSignal Signal if we need to drop process early
  * @param {number?} fetchLimit How many messages to fetch at once
@@ -283,7 +253,6 @@ async function* fetchFilteredChatMessages(
 	playerId,
 	offset,
 	limit,
-	cacheDb,
 	filter,
 	abortSignal = new AbortController().signal,
 	fetchLimit = limit
@@ -296,7 +265,7 @@ async function* fetchFilteredChatMessages(
 
 		// Fetch messages in batches
 		// eslint-disable-next-line no-await-in-loop
-		const messagesBatch = await getChatMessagesByPlayerId(adminId, playerId, currentOffset, fetchLimit, cacheDb);
+		const messagesBatch = await getChatMessagesByPlayerId(adminId, playerId, currentOffset, fetchLimit);
 
 		if (!messagesBatch.length) break;
 
@@ -490,7 +459,6 @@ TankTrouble.AdminChatLogOverlay.filterAndRenderMessages = async function(offset,
 		playerId,
 		offset,
 		limit,
-		Addons.chatlogDb,
 		messageFilter
 	);
 
@@ -557,19 +525,17 @@ const createVariablePaginator = (lastOffset, nextOffset, pageIndex, limit, callb
  *
  * @param {string} adminId Admin playerId
  * @param {string} playerId playerId to look up
- * @param {IDBDatabase} cacheDb Chat log database
  * @param {AbortController} abortSignal Event if process should abort
  * @param {(playerId: string) => void} newPlayerIdCallback Callback for new unique player id
  * @returns {Promise<string[]>} playerId result array
  */
-const makeAltLookup = async(adminId, playerId, cacheDb, abortSignal, newPlayerIdCallback) => {
+const makeAltLookup = async(adminId, playerId, abortSignal, newPlayerIdCallback) => {
 	const total = await getChatTotal(adminId, playerId);
 	const messageGenerator = fetchFilteredChatMessages(
 		adminId,
 		playerId,
 		0,
 		total,
-		cacheDb,
 		({ senders }) => senders.length > 1,
 		abortSignal,
 		1000
@@ -592,160 +558,155 @@ const makeAltLookup = async(adminId, playerId, cacheDb, abortSignal, newPlayerId
 	return Array.from(uniques);
 };
 
-openMessagesDatabase().then(async cacheDb => {
-	Addons.chatlogDb = cacheDb;
+ProxyHelper.interceptFunction(TankTrouble.AdminChatLogOverlay, '_initialize', async(original, ...args) => {
+	const overlay = TankTrouble.AdminChatLogOverlay;
+	if (overlay.initialized) return;
 
-	ProxyHelper.interceptFunction(TankTrouble.AdminChatLogOverlay, '_initialize', async(original, ...args) => {
-		const overlay = TankTrouble.AdminChatLogOverlay;
-		if (overlay.initialized) return;
+	original(args);
 
-		original(args);
+	overlay.messageTypeFilter = $('<select name="filter" class="messagefilterselector"/>');
+	overlay.messageTypeFilter.append(`<option value="${ FILTERS.ALL }">Show all</option>`);
+	overlay.messageTypeFilter.append(`<option value="${ FILTERS.LOCAL }">Local chat</option>`);
+	overlay.messageTypeFilter.append(`<option value="${ FILTERS.IN_GAME_ONLY }">Local sent in game</option>`);
+	overlay.messageTypeFilter.append(`<option value="${ FILTERS.GLOBAL }">Global chat</option>`);
+	overlay.messageTypeFilter.append(`<option value="${ FILTERS.USER }">User chat</option>`);
+	overlay.messageTypeFilter.append(`<option value="${ FILTERS.MULTIPLE_SENDERS }">Multiple senders</option>`);
 
-		overlay.messageTypeFilter = $('<select name="filter" class="messagefilterselector"/>');
-		overlay.messageTypeFilter.append(`<option value="${ FILTERS.ALL }">Show all</option>`);
-		overlay.messageTypeFilter.append(`<option value="${ FILTERS.LOCAL }">Local chat</option>`);
-		overlay.messageTypeFilter.append(`<option value="${ FILTERS.IN_GAME_ONLY }">Local sent in game</option>`);
-		overlay.messageTypeFilter.append(`<option value="${ FILTERS.GLOBAL }">Global chat</option>`);
-		overlay.messageTypeFilter.append(`<option value="${ FILTERS.USER }">User chat</option>`);
-		overlay.messageTypeFilter.append(`<option value="${ FILTERS.MULTIPLE_SENDERS }">Multiple senders</option>`);
+	overlay.messageTypeFilter.insertAfter(overlay.header);
 
-		overlay.messageTypeFilter.insertAfter(overlay.header);
+	overlay.filteredPageIndices = new Map();
 
-		overlay.filteredPageIndices = new Map();
+	overlay.messageTypeFilter.change(async() => {
+		const topPaginator = $('<div></div>');
+		overlay.topPaginator.replaceWith(topPaginator);
+		overlay.topPaginator = topPaginator;
 
-		overlay.messageTypeFilter.change(async() => {
-			const topPaginator = $('<div></div>');
-			overlay.topPaginator.replaceWith(topPaginator);
-			overlay.topPaginator = topPaginator;
+		const bottomPaginator = topPaginator.clone(true);
+		overlay.bottomPaginator.replaceWith(bottomPaginator);
+		overlay.bottomPaginator = bottomPaginator;
 
-			const bottomPaginator = topPaginator.clone(true);
-			overlay.bottomPaginator.replaceWith(bottomPaginator);
-			overlay.bottomPaginator = bottomPaginator;
-
-			overlay.filteredPageIndices.clear();
-			overlay.filteredPageIndices.set(0, 0);
-			overlay._getChatMessagesByPlayerIds(0, 50, 0, 0);
-		});
+		overlay.filteredPageIndices.clear();
+		overlay.filteredPageIndices.set(0, 0);
+		overlay._getChatMessagesByPlayerIds(0, 50, 0, 0);
 	});
+});
 
-	// eslint-disable-next-line complexity
-	ProxyHelper.interceptFunction(TankTrouble.AdminChatLogOverlay, '_getChatMessagesByPlayerIds', async(original, ...args) => {
-		const overlay = TankTrouble.AdminChatLogOverlay;
+// eslint-disable-next-line complexity
+ProxyHelper.interceptFunction(TankTrouble.AdminChatLogOverlay, '_getChatMessagesByPlayerIds', async(original, ...args) => {
+	const overlay = TankTrouble.AdminChatLogOverlay;
 
-		if (overlay.messageTypeFilter.val() === FILTERS.ALL) {
-			original(...args);
-		} else {
-			const [offset, limit] = args;
-			const page = args[2] ?? 0;
-
-			const messages = await overlay.filterAndRenderMessages(offset, limit, overlay.messageTypeFilter.val(), page);
-			const total = await getChatTotal(overlay.adminId, overlay.playerIds[0]);
-			const firstMessage = messages.at(0);
-			const lastMessage = messages.at(-1);
-
-			if (!firstMessage) return;
-
-			const offsetToLastPage = overlay.filteredPageIndices.get(page - 1) ?? null;
-			const offsetToNextPage = messages.length < limit
-				? null
-				: total - lastMessage.messageIndex + 1;
-			overlay.filteredPageIndices.set(page + 1, offsetToNextPage);
-
-			const topPaginator = createVariablePaginator(offsetToLastPage, offsetToNextPage, page, limit, (newOffset, newLimit, newPage) => {
-				overlay._getChatMessagesByPlayerIds(newOffset, newLimit, newPage);
-			});
-			overlay.topPaginator.replaceWith(topPaginator);
-			overlay.topPaginator = topPaginator;
-
-			const bottomPaginator = topPaginator.clone(true);
-			overlay.bottomPaginator.replaceWith(bottomPaginator);
-			overlay.bottomPaginator = bottomPaginator;
-		}
-	});
-
-	ProxyHelper.interceptFunction(TankTrouble.AdminPlayerLookupOverlay, '_update', (original, ...args) => {
-		const overlay = TankTrouble.AdminPlayerLookupOverlay;
-
+	if (overlay.messageTypeFilter.val() === FILTERS.ALL) {
 		original(...args);
+	} else {
+		const [offset, limit] = args;
+		const page = args[2] ?? 0;
 
-		ProxyHelper.interceptFunction(overlay.details, 'append', (scopedAppend, ...appendArgs) => {
-			scopedAppend(...appendArgs);
+		const messages = await overlay.filterAndRenderMessages(offset, limit, overlay.messageTypeFilter.val(), page);
+		const total = await getChatTotal(overlay.adminId, overlay.playerIds[0]);
+		const firstMessage = messages.at(0);
+		const lastMessage = messages.at(-1);
 
-			const chatlogButton = overlay.details.find('.section button:contains("Chat log")');
+		if (!firstMessage) return;
 
-			// Admin has access to chat log
-			if (chatlogButton.length) {
-				const abort = new AbortController();
+		const offsetToLastPage = overlay.filteredPageIndices.get(page - 1) ?? null;
+		const offsetToNextPage = messages.length < limit
+			? null
+			: total - lastMessage.messageIndex + 1;
+		overlay.filteredPageIndices.set(page + 1, offsetToNextPage);
 
-				const section = chatlogButton.parent();
-				const adminAltLookupButton = $('<button class="small" type="button" tabindex="-1">Alternative accounts</button>');
-				const fetchingIcon = $('<span class="ui-icon ui-icon-arrowthickstop-1-s"></span>').css('vertical-align', 'bottom');
-				const altAccountDialog = $('<div></div>').dialog({
-					autoOpen: false,
-					minWidth: 600,
-					width: 600,
-					title: 'Loading alternative accounts . . .',
-
-					/** Preprocessing */
-					open() {
-						$(this).append(fetchingIcon);
-						$(this).parent().css('zIndex', 1001);
-					},
-
-					/** Signal for close */
-					close() { abort.abort(); },
-
-					buttons: [
-						{
-							text: 'Copy id + username',
-							click() {
-								const text = $(this)
-									.children()
-									.map(function() {
-										const playerId = $(this).attr('data-id');
-										if (typeof playerId === 'undefined') return null;
-
-										return `${ playerId }: ${ $(this).text() }`;
-									})
-									.get();
-
-								ClipboardManager.copy(text.join('\n'));
-							}
-						},
-						{
-							text: 'Copy usernames',
-							click() {
-								const text = this.innerText.trim().split(' ').join('\n');
-								ClipboardManager.copy(text);
-							}
-						}
-					]
-				});
-
-				adminAltLookupButton.on('mouseup', async() => {
-					altAccountDialog.dialog('open');
-
-					await makeAltLookup(
-						overlay.adminId,
-						overlay.playerId,
-						Addons.chatlogDb,
-						abort.signal,
-						playerId => {
-							AdminUtils.createPlayerNamesWithLookupByPlayerIds([playerId], overlay.adminId, username => {
-								username.attr('data-id', playerId);
-								fetchingIcon.before([username, ' ']);
-							});
-						}
-					);
-
-					fetchingIcon.remove();
-
-					if (!abort.signal.aborted) altAccountDialog.dialog({ title: 'Loaded all chat history' });
-				});
-
-				section.append([adminAltLookupButton]);
-			}
+		const topPaginator = createVariablePaginator(offsetToLastPage, offsetToNextPage, page, limit, (newOffset, newLimit, newPage) => {
+			overlay._getChatMessagesByPlayerIds(newOffset, newLimit, newPage);
 		});
+		overlay.topPaginator.replaceWith(topPaginator);
+		overlay.topPaginator = topPaginator;
+
+		const bottomPaginator = topPaginator.clone(true);
+		overlay.bottomPaginator.replaceWith(bottomPaginator);
+		overlay.bottomPaginator = bottomPaginator;
+	}
+});
+
+ProxyHelper.interceptFunction(TankTrouble.AdminPlayerLookupOverlay, '_update', (original, ...args) => {
+	const overlay = TankTrouble.AdminPlayerLookupOverlay;
+
+	original(...args);
+
+	ProxyHelper.interceptFunction(overlay.details, 'append', (scopedAppend, ...appendArgs) => {
+		scopedAppend(...appendArgs);
+
+		const chatlogButton = overlay.details.find('.section button:contains("Chat log")');
+
+		// Admin has access to chat log
+		if (chatlogButton.length) {
+			const abort = new AbortController();
+
+			const section = chatlogButton.parent();
+			const adminAltLookupButton = $('<button class="small" type="button" tabindex="-1">Alternative accounts</button>');
+			const fetchingIcon = $('<span class="ui-icon ui-icon-arrowthickstop-1-s"></span>').css('vertical-align', 'bottom');
+			const altAccountDialog = $('<div></div>').dialog({
+				autoOpen: false,
+				minWidth: 600,
+				width: 600,
+				title: 'Loading alternative accounts . . .',
+
+				/** Preprocessing */
+				open() {
+					$(this).append(fetchingIcon);
+					$(this).parent().css('zIndex', 1001);
+				},
+
+				/** Signal for close */
+				close() { abort.abort(); },
+
+				buttons: [
+					{
+						text: 'Copy id + username',
+						click() {
+							const text = $(this)
+								.children()
+								.map(function() {
+									const playerId = $(this).attr('data-id');
+									if (typeof playerId === 'undefined') return null;
+
+									return `${ playerId }: ${ $(this).text() }`;
+								})
+								.get();
+
+							ClipboardManager.copy(text.join('\n'));
+						}
+					},
+					{
+						text: 'Copy usernames',
+						click() {
+							const text = this.innerText.trim().split(' ').join('\n');
+							ClipboardManager.copy(text);
+						}
+					}
+				]
+			});
+
+			adminAltLookupButton.on('mouseup', async() => {
+				altAccountDialog.dialog('open');
+
+				await makeAltLookup(
+					overlay.adminId,
+					overlay.playerId,
+					abort.signal,
+					playerId => {
+						AdminUtils.createPlayerNamesWithLookupByPlayerIds([playerId], overlay.adminId, username => {
+							username.attr('data-id', playerId);
+							fetchingIcon.before([username, ' ']);
+						});
+					}
+				);
+
+				fetchingIcon.remove();
+
+				if (!abort.signal.aborted) altAccountDialog.dialog({ title: 'Loaded all chat history' });
+			});
+
+			section.append([adminAltLookupButton]);
+		}
 	});
 });
 

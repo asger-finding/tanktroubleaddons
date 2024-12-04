@@ -493,7 +493,7 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 				});
 			});
 
-		otherWidget.append(['<hr>', texturePackHeading, texturePackWrapper]);
+		otherWidget.append([texturePackHeading, texturePackWrapper]);
 	})();
 
 	Addons.menu.createSection({

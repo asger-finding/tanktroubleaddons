@@ -375,11 +375,11 @@ Object.assign(Addons, {
 
 const packer = new MaxRectsPacker(2048, 2048, 2, {
 	smart: true,
-	square: true,
+	square: false,
 	pot: true,
 	allowRotation: false,
 	tag: false,
-	border: 2
+	border: 1
 });
 
 /**
@@ -476,17 +476,80 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, files) {
 
 	// Draw texture pack frames onto the extended canvas below
 	for (const rect of packer.rects) {
+		// Draw the original image at its position
 		context.drawImage(rect.image, rect.x, rect.y + spritesheet.height);
+
+		// Add 1-pixel borders by copying edge pixels outward
+		const { x, y, width, height } = rect;
+		const drawY = y + spritesheet.height;
+
+		// Top border
+		context.drawImage(
+			rect.image,
+			0, 0, width, 1,
+			x, drawY - 1, width, 1
+		);
+
+		// Bottom border
+		context.drawImage(
+			rect.image,
+			0, height - 1, width, 1,
+			x, drawY + height, width, 1
+		);
+
+		// Left border
+		context.drawImage(
+			rect.image,
+			0, 0, 1, height,
+			x - 1, drawY, 1, height
+		);
+
+		// Right border
+		context.drawImage(
+			rect.image,
+			width - 1, 0, 1, height,
+			x + width, drawY, 1, height
+		);
+
+		// Top-left corner
+		context.drawImage(
+			rect.image,
+			0, 0, 1, 1,
+			x - 1, drawY - 1, 1, 1
+		);
+
+		// Top-right corner
+		context.drawImage(
+			rect.image,
+			width - 1, 0, 1, 1,
+			x + width, drawY - 1, 1, 1
+		);
+
+		// Bottom-left corner
+		context.drawImage(
+			rect.image,
+			0, height - 1, 1, 1,
+			x - 1, drawY + height, 1, 1
+		);
+
+		// Bottom-right corner
+		context.drawImage(
+			rect.image,
+			width - 1, height - 1, 1, 1,
+			x + width, drawY + height, 1, 1
+		);
+
+		// Close the image to release resources
 		rect.image.close();
 
 		const exists = frameData.checkFrameName(rect.frameName);
 		if (exists) {
 			const frame = frameData.getFrameByName(rect.frameName);
 
-			frame.x = rect.x - 1;
-			frame.y = rect.y - 1 + spritesheet.height;
-			frame.width = rect.width + 2;
-			frame.height = rect.height + 2;
+			frame.x = rect.x;
+			frame.y = rect.y + spritesheet.height;
+			frame.width = rect.width;
+			frame.height = rect.height;
 			frame.rotated = false;
 		} else {
 			frameData.addFrame(new Phaser.Frame(

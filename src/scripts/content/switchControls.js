@@ -19,26 +19,27 @@ const getInputSetAlias = inputSetId => {
 };
 
 Inputs.switchInputManager = function(playerId, newInputSetId) {
+	const oldSetId = Inputs.getAssignedInputSetId(playerId);
+	const isContested = Inputs._inputSetsInUse[newInputSetId];
+
 	Inputs._releaseInput(playerId);
 
-	const oldSetId = Inputs.getAssignedInputSetId(playerId);
-
-	const isContested = Inputs._inputSetsInUse[newInputSetId];
 	if (isContested) {
 		// Switch around controls of the two users
 		const alreadyAssignedPlayerId = Object.keys(Inputs._playerIdInputSetId)
 			.find(_playerId => Inputs.getAssignedInputSetId(_playerId) === newInputSetId);
 
+		Inputs._releaseInput(alreadyAssignedPlayerId);
+
 		// If the new user didn't have any assigned input
 		// then show the overlay for controls selector of
 		// the replaced user
-		if (!oldSetId) {
+		if (!oldSetId && alreadyAssignedPlayerId) {
 			OverlayManager.enqueueOverlay(
 				TankTrouble.ControlsOverlay,
 				{ playerId: alreadyAssignedPlayerId }
 			);
 		} else {
-			Inputs._releaseInput(alreadyAssignedPlayerId);
 			Inputs._assignInput(alreadyAssignedPlayerId, oldSetId);
 		}
 	}

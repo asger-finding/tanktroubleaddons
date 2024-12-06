@@ -1,6 +1,7 @@
 import ProxyHelper from '../utils/proxyHelper.js';
 import { decode } from 'iso-8859-15';
 import { matchSorter } from 'match-sorter';
+import { timeUntil } from '../utils/timeUtils.js';
 
 // TODO: add auto-disappearing chat after timeout
 // TODO: add scroll
@@ -493,6 +494,62 @@ const preventServerChangeChatClear = () => {
 };
 
 /**
+ * If the server responds a chat with the 'You are temporarily banned from chatting'
+ * system message, then intercept and give a more meaningful response
+ */
+const insertChatBanExpiryTime = () => {
+	ProxyHelper.interceptFunction(TankTrouble.ChatBox, 'addSystemMessage', (original, ...args) => {
+		const [, message] = args;
+		if (message === 'You are temporarily banned from chatting') {
+			const playerIds = Users.getAllPlayerIds();
+
+			Backend.getInstance().getNewestTempBanValidities(tempBans => {
+				if (typeof tempBans !== 'undefined') {
+					// Current timestamp in seconds
+					const now = Date.now() / 1000;
+
+					// Filter temp bans for futures
+					const bannedPlayers = Object.keys(tempBans).filter(playerId => tempBans[playerId] > now);
+
+					Promise.all(
+						bannedPlayers.map(playerId => new Promise(resolve => {
+							Backend.getInstance().getPlayerDetails(details => {
+								if (typeof details === 'object') resolve([playerId, details.getUsername()]);
+								else resolve([playerId, 'Scrapped']);
+							}, () => {}, () => {}, playerId, Caches.getPlayerDetailsCache());
+						}))
+					).then(usernameEntries => {
+						const involvedPlayerIds = bannedPlayers;
+						const involvedUsernameMap = Object.fromEntries(usernameEntries);
+
+						// Message gets fuggly when we have multiple
+						// banned users. For example:
+						// 'User1 and User2 will be unbanned in 11 hours, 10 hours'
+						// This is hopefully implausible, so we won't account for it
+						let unbannedMessage = '@  will be unbanned in ';
+						unbannedMessage += involvedPlayerIds.map(playerId => {
+							const banExpiry = new Date(
+								tempBans[playerId] * 1000
+							);
+							const untilUnban = timeUntil(banExpiry);
+							return untilUnban.substring(3);
+						}).join(', ');
+
+						TankTrouble.ChatBox._addSystemMessage(
+							involvedPlayerIds,
+							involvedUsernameMap,
+							unbannedMessage
+						);
+					});
+				}
+			}, () => {}, () => {}, playerIds, Caches.getTempBanValidityCache());
+		} else {
+			original(...args);
+		}
+	});
+};
+
+/**
  * Replace non-ISO-8859-15-compliant characters with a question mark
  */
 const escapeBadCharacters = () => {
@@ -518,6 +575,7 @@ ProxyHelper.whenContentInitialized().then(() => {
 
 	preventServerChangeChatClear();
 	escapeBadCharacters();
+	insertChatBanExpiryTime();
 	addMentionAutocomplete(chatInput);
 
 	TankTrouble.ChatBox.chatInput.tooltipster({

@@ -5,6 +5,7 @@ import { timeAgo } from '../utils/timeUtils.js';
  * @param threadOrReply Post data
  * @param threadOrReplyElement Parsed post element
  */
+// eslint-disable-next-line complexity
 const insertMultipleCreators = (threadOrReply, threadOrReplyElement) => {
 	// Remove original tank preview
 	threadOrReplyElement.find('.tank').remove();
@@ -20,6 +21,8 @@ const insertMultipleCreators = (threadOrReply, threadOrReplyElement) => {
 
 	// Render all creator tanks in canvas
 	for (const [creatorType, playerId] of Object.entries(creators)) {
+		if (playerId === null) continue;
+
 		const wrapper = document.createElement('div');
 		wrapper.classList.add('tank', creatorType);
 
@@ -43,7 +46,6 @@ const insertMultipleCreators = (threadOrReply, threadOrReplyElement) => {
 		wrapper.append(canvas);
 		creatorsContainer.append(wrapper);
 	}
-
 	// Render name of primary creator
 	Backend.getInstance().getPlayerDetails(result => {
 		const username = typeof result === 'object' ? Utils.maskUnapprovedUsername(result) : 'Scrapped';
@@ -52,7 +54,7 @@ const insertMultipleCreators = (threadOrReply, threadOrReplyElement) => {
 
 		const playerName = $(`<player-name username="${ username }" width="${ width }" height="${ height }"></player-name>`);
 		creatorsContainer.find('.tank.creator').append(playerName);
-	}, () => {}, () => {}, creators.creator, Caches.getPlayerDetailsCache());
+	}, () => {}, () => {}, creators.creator || '', Caches.getPlayerDetailsCache());
 };
 
 /**

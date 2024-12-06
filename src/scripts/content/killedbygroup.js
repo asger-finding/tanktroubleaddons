@@ -2,7 +2,7 @@ UIConstants.classFields({
 	KILLED_BY_FONT_SIZE: 24 * devicePixelRatio,
 	KILLED_BY_STROKE_WIDTH: 4 * devicePixelRatio,
 	//ms
-	KILLED_BY_POP_OUT_TIME: 2_500
+	KILLED_BY_POP_OUT_TIME: 2_000
 });
 
 /**
@@ -93,18 +93,22 @@ UIKilledByGroup.prototype.remove = function() {
 		this.spawnTween = null;
 	}
 
-	this.removeTween = this.game.add.tween(this.scale).to({
-		x: 0,
-		y: 0
-	}, UIConstants.ELEMENT_GLIDE_OUT_TIME, Phaser.Easing.Linear.None, true);
+	if (this.game) {
+		this.removeTween = this.game.add.tween(this.scale).to({
+			x: 0,
+			y: 0
+		}, UIConstants.ELEMENT_GLIDE_OUT_TIME, Phaser.Easing.Linear.None, true);
 
-	this.removeTween.onComplete.add(function() {
-		this.killedBy.kill();
-		this.killerPlayerId = null;
-		this.victimPlayerId = null;
-		this.exists = false;
-		this.visible = false;
-	}, this);
+		this.removeTween.onComplete.add(function() {
+			this.killedBy.kill();
+			this.killerPlayerId = null;
+			this.victimPlayerId = null;
+			this.exists = false;
+			this.visible = false;
+		}, this);
+	} else {
+		this.retire();
+	}
 };
 
 UIKilledByGroup.prototype.retire = function() {
@@ -117,3 +121,5 @@ UIKilledByGroup.prototype.retire = function() {
 	this.exists = false;
 	this.visible = false;
 };
+
+export const _isESmodule = true;

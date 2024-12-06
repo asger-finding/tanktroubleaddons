@@ -196,3 +196,5 @@ UIGameIconImage.prototype.retire = function() {
 	this.tankIconGroup.callAll('retire');
 	this.tankNameGroup.callAll('retire');
 };
+
+export const _isESmodule = true;

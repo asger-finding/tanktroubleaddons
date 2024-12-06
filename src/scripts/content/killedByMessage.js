@@ -42,3 +42,5 @@ Game.UIGameState.method('_onSizeChangeHandler', function(...args) {
 
 	return result;
 });
+
+export const _isESmodule = true;

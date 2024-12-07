@@ -86,7 +86,8 @@ $tooltipster-accent-dark: rgb(25 25 25);
 
 	#addons-menu {
 		--lightness: 50%;
-		--icon-color: rgb(26, 26, 26);
+		--icon-color: rgb(26 26 26 / 1.0);
+		--icon-separator-color: rgb(80 80 80 / 1.0);
 
 		.content {
 			color: rgb(255 255 255);

@@ -143,6 +143,7 @@ $max-safe-integer: 2147483647;
 	--lightness: 95%;
 
 	--background-color: color-mix(in oklab, white calc(var(--lightness) - 27%), black);
+	--icon-color: rgb(70 70 70 / 1.0);
 	--border-accent-1: color-mix(in oklab, white calc(var(--lightness)), black);
     --border-accent-2: color-mix(in oklab, white calc(var(--lightness) - 6%), black);
     --border-accent-3: color-mix(in oklab, white calc(var(--lightness) - 7%), black);
@@ -227,6 +228,23 @@ $max-safe-integer: 2147483647;
 		transform: translateX(-50%);
 		filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.2));
 		pointer-events: none;
+	}
+
+	.icon {
+		position: absolute;
+		bottom: 2px;
+		width: 20px;
+		height: 20px;
+		margin-right: 10px;
+
+		// Add left-shift for each icon (there are two)
+		@for $i from 1 through 2 {
+		&:nth-child(#{$i + 1}) {
+				$initial-offset: 30px;
+				$shift: 30px;
+				left: #{$initial-offset + $shift * ($i - 1)};
+			}
+		}
 	}
 
 	.content {

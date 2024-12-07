@@ -10,6 +10,6 @@
         </linearGradient>
     </defs>
     <path fill="url(#5240)" d="M0 25h16v433H0z" transform="matrix(-1 0 0 .05312 23 -1.328)"/>
-    <path fill-opacity=".3" d="M16 25h2.828v433H16z" transform="matrix(-1 0 0 .05312 23 -1.328)"/>
+    <path fill="var(--border-shadow)" d="M16 25h2.828v433H16z" transform="matrix(-1 0 0 .05312 23 -1.328)"/>
     <path fill="url(#white)" d="M14 25h2v433h-2z" transform="matrix(-1 0 0 .05312 23 -1.328)"/>
 </svg>

@@ -1,4 +1,5 @@
 @use "sass:map";
+@use "sass:math";
 @use 'dark.scss';
 
 $assets: "chrome-extension://__MSG_@@extension_id__/assets";
@@ -141,9 +142,10 @@ $max-safe-integer: 2147483647;
 	filter: drop-shadow(0 12px 7px rgba(0, 0, 0, 0.5));
 
 	--lightness: 95%;
+	--icon-color: rgb(70 70 70 / 1.0);
 
 	--background-color: color-mix(in oklab, white calc(var(--lightness) - 27%), black);
-	--icon-color: rgb(70 70 70 / 1.0);
+	--border-shadow: color-mix(in oklab, white calc(var(--lightness) * 0.8 - 25%), black);
 	--border-accent-1: color-mix(in oklab, white calc(var(--lightness)), black);
     --border-accent-2: color-mix(in oklab, white calc(var(--lightness) - 6%), black);
     --border-accent-3: color-mix(in oklab, white calc(var(--lightness) - 7%), black);
@@ -232,17 +234,33 @@ $max-safe-integer: 2147483647;
 
 	.icon {
 		position: absolute;
-		bottom: 2px;
 		width: 20px;
 		height: 20px;
-		margin-right: 10px;
+		left: 25px;
+		bottom: 50%;
+		padding: 6px;
+
+		background: var(--border-accent-4);
+		border: 0 var(--border-shadow) solid;
+		border-right-width: 4px;
+
+		$icon-count: 2;
 
 		// Add left-shift for each icon (there are two)
-		@for $i from 1 through 2 {
-		&:nth-child(#{$i + 1}) {
-				$initial-offset: 30px;
+		@for $i from 1 through $icon-count {
+			&:nth-child(#{$i + 1}) {
 				$shift: 30px;
-				left: #{$initial-offset + $shift * ($i - 1)};
+				transform: translateY(($i - math.div($icon-count, 2) - 0.5) * $shift + 18.5);
+				z-index: $i;
+
+				@if $i == 1 {
+					border-top-width: 4px;
+					border-top-right-radius: 8px;
+				}
+				@if $i == $icon-count {
+					border-bottom-width: 4px;
+					border-bottom-right-radius: 8px;
+				}
 			}
 		}
 	}
@@ -250,6 +268,7 @@ $max-safe-integer: 2147483647;
 	.content {
 		color: rgb(70 70 70 / 1.0);
 		font-family: $font-stack;
+		padding: 5px 10px 5px 15px;
 		background-image: asset("/menu/background.avif");
 		background-size: contain;
 		background-color: var(--background-color);
@@ -298,7 +317,7 @@ $max-safe-integer: 2147483647;
 		}
 		
 		&::-webkit-scrollbar-thumb {
-			background: rgb(0 0 0 / 0.3);
+			background: var(--border-shadow);
 		}
 	}
 }

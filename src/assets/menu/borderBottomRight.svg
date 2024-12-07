@@ -12,6 +12,6 @@
     <path fill="url(#5240)" d="M0 459.172V480l16-16v-4.828z" transform="matrix(-1 0 0 1 23 -459.172)"/>
     <path fill="url(#402e)" d="M16-464h7v2h-7z" transform="rotate(180 11.5 -229.586)"/>
     <path fill="var(--border-accent-8)" d="M16 464 0 480h23v-16z" transform="matrix(-1 0 0 1 23 -459.172)"/>
-    <path fill-opacity=".3" d="M16-462h7v2.828h-7z" transform="rotate(180 11.5 -229.586)"/>
+    <path fill="var(--border-shadow)" d="M16-462h7v2.828h-7z" transform="rotate(180 11.5 -229.586)"/>
     <path fill="#fff" fill-opacity=".2" d="M624 459.172h2V462l-2.008 2.013z" transform="translate(-617 -459.172)"/>
 </svg>

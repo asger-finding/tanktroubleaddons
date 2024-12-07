@@ -108,8 +108,7 @@ class Menu {
 			'borderTopLeftBottom',
 			'borderRight',
 			'borderBottom',
-			'borderBottomLeft',
-			'borderLeft'
+			'borderBottomLeft'
 		];
 		const draggable = [
 			'borderTop',
@@ -119,14 +118,14 @@ class Menu {
 			'borderTopLeftRight'
 		];
 		const icons = [
-			'borderBottom'
+			'borderLeft'
 		];
 		const handle = [
 			'borderBottomRight'
 		];
 
 		// Instantiate border vectors
-		for (const name of [...border, ...draggable, ...handle]) {
+		for (const name of [...border, ...draggable, ...icons, ...handle]) {
 			fetch(Addons.t_url(`assets/menu/${name}.svg`))
 				.then(result => result.text())
 				// eslint-disable-next-line @typescript-eslint/no-loop-func

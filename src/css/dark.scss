@@ -86,6 +86,7 @@ $tooltipster-accent-dark: rgb(25 25 25);
 
 	#addons-menu {
 		--lightness: 50%;
+		--icon-color: rgb(26, 26, 26);
 
 		.content {
 			color: rgb(255 255 255);
@@ -98,10 +99,6 @@ $tooltipster-accent-dark: rgb(25 25 25);
 			hr {
 				border: none;
 				border-top: double rgb(52 52 52);
-			}
-
-			&::-webkit-scrollbar-thumb {
-				background: rgb(255 255 255 / 0.08);
 			}
 		}
 	}

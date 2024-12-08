@@ -128,10 +128,6 @@ $max-safe-integer: 2147483647;
 		}
 	}
 }
-.ui-deleteselectmenu li {
-	text-wrap: nowrap;
-	text-overflow: ellipsis;
-}
 
 #addons-menu {
 	top: 20px;
@@ -148,15 +144,15 @@ $max-safe-integer: 2147483647;
 	--background-color: color-mix(in oklab, white calc(var(--lightness) - 27%), black);
 	--border-shadow: color-mix(in oklab, white calc(var(--lightness) * 0.8 - 25%), black);
 	--border-accent-1: color-mix(in oklab, white calc(var(--lightness)), black);
-    --border-accent-2: color-mix(in oklab, white calc(var(--lightness) - 6%), black);
-    --border-accent-3: color-mix(in oklab, white calc(var(--lightness) - 7%), black);
-    --border-accent-4: color-mix(in oklab, white calc(var(--lightness) - 13%), black);
-    --border-accent-5: color-mix(in oklab, white calc(var(--lightness) - 17%), black);
-    --border-accent-6: color-mix(in oklab, white calc(var(--lightness) - 19%), black);
-    --border-accent-7: color-mix(in oklab, white calc(var(--lightness) - 20%), black);
-    --border-accent-8: color-mix(in oklab, white calc(var(--lightness) - 21%), black);
+	--border-accent-2: color-mix(in oklab, white calc(var(--lightness) - 6%), black);
+	--border-accent-3: color-mix(in oklab, white calc(var(--lightness) - 7%), black);
+	--border-accent-4: color-mix(in oklab, white calc(var(--lightness) - 13%), black);
+	--border-accent-5: color-mix(in oklab, white calc(var(--lightness) - 17%), black);
+	--border-accent-6: color-mix(in oklab, white calc(var(--lightness) - 19%), black);
+	--border-accent-7: color-mix(in oklab, white calc(var(--lightness) - 20%), black);
+	--border-accent-8: color-mix(in oklab, white calc(var(--lightness) - 21%), black);
 	--border-accent-9: color-mix(in oklab, white calc(var(--lightness) - 22%), black);
-    --border-accent-10: color-mix(in oklab, white calc(var(--lightness) - 23%), black);
+	--border-accent-10: color-mix(in oklab, white calc(var(--lightness) - 23%), black);
 
 	&.closing {
 		animation: tv-close-wrapper 1.0s normal;
@@ -222,6 +218,29 @@ $max-safe-integer: 2147483647;
 				margin-left: 5px;
 			}
 		}
+
+		.ui-progressbar {
+			position: relative;
+			background: none;
+
+			.caption {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				top: 0;
+				left: 0;
+			}
+
+			&.rank .ui-progressbar-value {
+				background-size: contain !important;
+				background: url(../assets/images/tankInfo/rankProgressBar.png);
+			}
+
+			&.xp .ui-progressbar-value {
+				background-size: contain !important;
+				background: url(../assets/images/tankInfo/xpProgressBar.png);
+			}
+		}
 	}
 
 	.header {
@@ -239,7 +258,7 @@ $max-safe-integer: 2147483647;
 		height: 20px;
 		left: 24px;
 		bottom: 50%;
-		padding: 2px 6px 6px 6px;
+		padding: 10px 6px 2px 6px;
 
 		background: var(--border-accent-4);
 		border: 0 var(--border-shadow) solid;
@@ -250,17 +269,17 @@ $max-safe-integer: 2147483647;
 		// Add left-shift for each icon (there are two)
 		@for $i from 1 through $icon-count {
 			&:nth-child(#{$i + 1}) {
-				$shift: 30px;
+				$shift: 40px;
 				transform: translateY(($i - math.div($icon-count, 2) - 0.5) * $shift + 18.5);
-				z-index: $i;
+				z-index: $icon-count - $i;
 
 				@if $i == 1 {
-					padding-top: 6px;
+					padding-top: 8px;
 					border-top-width: 4px;
 					border-top-right-radius: 8px;
 				}
 				@if $i == $icon-count {
-					padding-bottom: 6px;
+					padding-bottom: 8px;
 					border-bottom-width: 4px;
 					border-bottom-right-radius: 8px;
 				}
@@ -275,7 +294,7 @@ $max-safe-integer: 2147483647;
 			width: 25px;
 			height: 1.5px;
 			left: 3px;
-			top: 28px;
+			top: 32px;
 			background: var(--icon-separator-color);
 		}
 	}
@@ -284,7 +303,6 @@ $max-safe-integer: 2147483647;
 		color: rgb(70 70 70 / 1.0);
 		font-family: $font-stack;
 		padding: 5px 10px 5px 15px;
-		background-image: asset("/menu/background.avif");
 		background-size: contain;
 		background-color: var(--background-color);
 		background-repeat: no-repeat;
@@ -292,6 +310,14 @@ $max-safe-integer: 2147483647;
 		background-blend-mode: soft-light;
 		overflow-y: scroll;
 		grid-area: content;
+
+		&.addons {
+			background-image: asset("/menu/addons.avif");
+		}
+
+		&.ironvault {
+			background-image: asset("/menu/ironvault.avif");
+		}
 
 		fieldset {
 			font-size: 14px;
@@ -482,8 +508,8 @@ $max-safe-integer: 2147483647;
 	}
 }
 
-/* Custom player-name element */
-player-name {
+/* Custom stroked text element */
+stroked-text {
 	width: 150px;
 	height: 20px;
 	left: -5px;

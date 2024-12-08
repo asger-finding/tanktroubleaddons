@@ -38,10 +38,6 @@ export default class AddonsOverlay {
 	init() {
 		if (this.#initialized) return;
 
-		this.content.css({
-			backgroundImage: `url('${ Addons.t_url('/assets/menu/background.svg') }'), linear-gradient(325deg, var(--background-color) 50%, #333333 calc(50% + 1px));`
-		});
-
 		const interfaceWidget = $('<div></div>');
 		(() => {
 			const themeHeading = $('<div class="heading">Theme</div>');

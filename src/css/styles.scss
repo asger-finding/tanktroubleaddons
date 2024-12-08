@@ -272,6 +272,15 @@ $max-safe-integer: 2147483647;
 					}
 				}
 
+				#badges {
+					display: flex;
+					flex-direction: row;
+
+					> img {
+						height: 25px;
+					}
+				}
+
 				#player-details {
 					display: grid;
 					grid-template-columns: repeat(2, 1fr);

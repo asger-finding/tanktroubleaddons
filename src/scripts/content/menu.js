@@ -315,6 +315,8 @@ Object.assign(Addons, {
 	menu: new Menu()
 });
 
+ProxyHelper.whenContentInitialized().then(() => Addons.menu.wrapper.appendTo(document.body));
+
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) => {
 	original(...args);
 
@@ -364,7 +366,5 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...arg
 		}
 	}, () => {}, () => {}, playerId, Caches.getPlayerDetailsCache());
 });
-
-ProxyHelper.whenContentInitialized().then(() => Addons.menu.wrapper.appendTo(document.body));
 
 export const _isESmodule = true;

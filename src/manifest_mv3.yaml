@@ -31,7 +31,7 @@ content_scripts:
   - run_at: document_start
     css: [css/styles.css]
     matches: ["*://*.tanktrouble.com/*"]
-host_permissions: ["*://*.tanktrouble.com/*", "*://code.jquery.com/*"]
+host_permissions: ["*://*.tanktrouble.com/*", "*://code.jquery.com/*", "*://ironvault.vercel.app/api/*"]
 web_accessible_resources:
   - resources: ["*"]
     matches: ["*://*.tanktrouble.com/*"]

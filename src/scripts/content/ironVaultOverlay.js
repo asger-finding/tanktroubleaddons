@@ -1,3 +1,5 @@
+import { dispatchMessage, once } from '../common/ipcBridge.js';
+import { generateUUID } from '../utils/mathUtils.js';
 import { timeAgo } from '../utils/timeUtils.js';
 
 /**
@@ -126,7 +128,7 @@ export default class IronVaultOverlay {
 			searchResult.empty();
 
 			const username = usernameInput.val();
-			IronVaultOverlay.#insertPlayerDetails(username)
+			IronVaultOverlay.#insertPlayer(username)
 				.then(result => {
 					searchSeparator.show();
 					searchResult.append(result);
@@ -170,7 +172,7 @@ export default class IronVaultOverlay {
 	 * @param {string} username Player username
 	 * @returns {Promise<void>} Resolves when done or error
 	 */
-	static #insertPlayerDetails(username) {
+	static #insertPlayer(username) {
 		return new Promise((resolve, reject) => {
 			if (typeof username !== 'string' || username === '') {
 				reject('Input is empty');
@@ -181,9 +183,10 @@ export default class IronVaultOverlay {
 				if (typeof result === 'object') {
 					const container = $('<div></div>');
 					const tankDetails = IronVaultOverlay.#createTankDetails(result);
+					const badges = IronVaultOverlay.#createBadges(result);
 					const playerDetails = IronVaultOverlay.#createPlayerDetails(result);
 
-					container.append([tankDetails, '<hr>', playerDetails]);
+					container.append([tankDetails, '<hr>', badges, '<hr>', playerDetails]);
 
 					resolve(container);
 				} else {
@@ -255,6 +258,50 @@ export default class IronVaultOverlay {
 		right.append(rankProgress, levelProgress);
 
 		container.append([left, right]);
+
+		return container;
+	}
+
+	/**
+	 * Create a container with IronVault badges
+	 * @param {object} playerDetails Player details
+	 * @returns {JQuery} Container HTMLDivElement
+	 */
+	static #createBadges(playerDetails) {
+		const container = $('<div id="badges"></div>');
+		const playerId = playerDetails.getPlayerId();
+
+		const endPoint = `https://ironvault.vercel.app/api/${ playerId }/badges`;
+		const uuid = generateUUID();
+		dispatchMessage(null, {
+			type: 'CORS_EXEMPT_FETCH',
+			data: {
+				resource: endPoint,
+				options: {
+					method: 'GET',
+					headers: { 'Content-Type': 'application/json' }
+				},
+				uuid
+			}
+		});
+		once('CORS_EXEMPT_FETCH_RESULT', evt => evt.detail?.data?.uuid === uuid, ({ detail }) => {
+			if (!detail) return;
+
+			const { result } = detail.data;
+			if (result instanceof Array) {
+				for (const badge of result) {
+					const { description, svg } = badge;
+					const image = $(`<img src="https://ironvault.vercel.app/assets/images/badges/${ svg }.svg">`);
+					image.tooltipster({
+						position: 'top',
+						offsetY: 5,
+						content: description
+					});
+
+					container.append(image);
+				}
+			}
+		});
 
 		return container;
 	}

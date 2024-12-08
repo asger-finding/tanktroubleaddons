@@ -437,11 +437,11 @@ $max-safe-integer: 2147483647;
 		grid-area: content;
 
 		&.addons {
-			background-image: asset("/menu/addons.avif");
+			background-image: asset("/menu/addons/addons.avif");
 		}
 
 		&.ironvault {
-			background-image: asset("/menu/ironvault.avif");
+			background-image: asset("/menu/ironvault/ironvault.avif");
 		}
 
 		fieldset {

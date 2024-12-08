@@ -73,14 +73,16 @@ export default class IronVaultOverlay {
 	#showing = false;
 
 	/**
-	 *
+	 * Is the overlay showing?
+	 * @returns {boolean} Showing
 	 */
 	get isShowing() {
 		return this.#showing;
 	}
 
 	/**
-	 *
+	 * @param {boolean} showing Should the menu show?
+	 * @returns {boolean} Showing
 	 */
 	set isShowing(showing) {
 		this.init();
@@ -92,8 +94,8 @@ export default class IronVaultOverlay {
 	}
 
 	/**
-	 *
-	 * @param parent
+	 * Create the overlay
+	 * @param {class} parent Menu class
 	 */
 	constructor(parent) {
 		fetch(Addons.t_url('assets/menu/ironvault.svg'))
@@ -106,7 +108,7 @@ export default class IronVaultOverlay {
 	}
 
 	/**
-	 *
+	 * Initialize the overlay content
 	 */
 	init() {
 		if (this.#initialized) return;

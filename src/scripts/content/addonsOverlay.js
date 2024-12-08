@@ -12,10 +12,18 @@ export default class AddonsOverlay {
 
 	#showing = false;
 
+	/**
+	 * Is the overlay showing?
+	 * @returns {boolean} Showing
+	 */
 	get isShowing() {
 		return this.#showing;
 	}
 
+	/**
+	 * @param {boolean} showing Should the menu show?
+	 * @returns {boolean} Showing
+	 */
 	set isShowing(showing) {
 		this.init();
 
@@ -25,8 +33,12 @@ export default class AddonsOverlay {
 		return this.#showing;
 	}
 
+	/**
+	 * Create the overlay
+	 * @param {class} parent Menu class
+	 */
 	constructor(parent) {
-		fetch(Addons.t_url('assets/menu/addons.svg'))
+		fetch(Addons.t_url('assets/menu/addons/addons.svg'))
 			.then(result => result.text())
 			.then(body => {
 				this.icon.html(body);
@@ -35,11 +47,14 @@ export default class AddonsOverlay {
 		parent.bindOverlay(this);
 	}
 
+	/**
+	 * Initialize the overlay content
+	 */
 	init() {
 		if (this.#initialized) return;
 
-		const interfaceWidget = $('<div></div>');
 		(() => {
+			const interfaceWidget = $('<div></div>');
 			const themeHeading = $('<div class="heading">Theme</div>');
 			const themeSelect = $(`
 				<label for="radio-1">Normal</label>
@@ -94,10 +109,16 @@ export default class AddonsOverlay {
 						change: (_event, { item }) => set('tintedBullets', item.value)
 					});
 			});
+
+			this.createSection({
+				title: 'Interface',
+				id: 'theme',
+				requiresReload: false
+			}, [ interfaceWidget ]);
 		})();
 
-		const otherWidget = $('<div></div>');
 		(() => {
+			const otherWidget = $('<div></div>');
 			const texturePackWrapper = $('<div></div>');
 			const texturePackHeading = $('<div class="heading">Texture packs</div>');
 			const selectWrapper = $('<div></div>');
@@ -202,19 +223,13 @@ export default class AddonsOverlay {
 				});
 
 			otherWidget.append([texturePackHeading, texturePackWrapper]);
+
+			this.createSection({
+				title: 'Other',
+				id: 'other',
+				requiresReload: false
+			}, [ otherWidget ]);
 		})();
-
-		this.createSection({
-			title: 'Interface',
-			id: 'theme',
-			requiresReload: false
-		}, [ interfaceWidget ]);
-
-		this.createSection({
-			title: 'Other',
-			id: 'other',
-			requiresReload: false
-		}, [ otherWidget ]);
 
 		this.#initialized = true;
 	}

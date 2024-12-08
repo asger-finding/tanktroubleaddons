@@ -215,18 +215,25 @@ class Menu {
 		this.hide(false);
 	}
 
+	/**
+	 * Initialize the menu overlays and set default page
+	 */
 	init() {
-		if (this.#initialized) return;
+		if (!this.#initialized) {
+			this.addons = new AddonsOverlay(this);
+			this.ironvault = new IronVaultOverlay(this);
 
-		this.addons = new AddonsOverlay(this);
-		this.ironvault = new IronVaultOverlay(this);
+			this.currentPage = 'addons';
+			this.goToCurrentPage();
 
-		this.currentPage = 'addons';
-		this.goToCurrentPage();
-
-		this.#initialized = true;
+			this.#initialized = true;
+		}
 	}
 
+	/**
+	 * Add new overlay to menu
+	 * @param {class} overlay Overlay class
+	 */
 	bindOverlay(overlay) {
 		this.body.append(overlay.content);
 		this.icons.append(overlay.icon);
@@ -237,6 +244,9 @@ class Menu {
 		});
 	}
 
+	/**
+	 * Go to the current page as decided by `this.currentPage`
+	 */
 	goToCurrentPage() {
 		this.addons.isShowing = false;
 		this.ironvault.isShowing = false;

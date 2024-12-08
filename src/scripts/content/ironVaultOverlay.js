@@ -1,4 +1,42 @@
+/**
+ * Trim a canvas to remove alpha pixels from each side
+ * @param {HTMLCanvasElement} canvas Target canvas element
+ * @param {number} threshold Alpha threshold. Range 0-255.
+ * @returns {object} Width and height of trimmed canvcas and left-top coordinate of trimmed area
+ */
+const trimCanvas = (canvas, threshold = 0) => {
+	const ctx = canvas.getContext('2d');
+	const { width } = canvas;
+	const { height } = canvas;
+	const imageData = ctx.getImageData(0, 0, width, height);
+	const tlCorner = { x: width + 1, y: height + 1 };
+	const brCorner = { x:-1, y:-1 };
 
+	for (let y = 0; y < height; y++) {
+		for (let x = 0; x < width; x++) {
+			if (imageData.data[((y * width + x) * 4) + 3] > threshold) {
+				tlCorner.x = Math.min(x, tlCorner.x);
+				tlCorner.y = Math.min(y, tlCorner.y);
+				brCorner.x = Math.max(x, brCorner.x);
+				brCorner.y = Math.max(y, brCorner.y);
+			}
+		}
+	}
+
+	const cut = ctx.getImageData(
+		tlCorner.x,
+		tlCorner.y,
+		brCorner.x - tlCorner.x,
+		brCorner.y - tlCorner.y
+	);
+
+	canvas.width = brCorner.x - tlCorner.x;
+	canvas.height = brCorner.y - tlCorner.y;
+
+	ctx.putImageData(cut, 0, 0);
+
+	return { width: canvas.width, height: canvas.height, x: tlCorner.x, y: tlCorner.y };
+};
 
 export default class IronVaultOverlay {
 
@@ -12,10 +50,16 @@ export default class IronVaultOverlay {
 
 	#showing = false;
 
+	/**
+	 *
+	 */
 	get isShowing() {
 		return this.#showing;
 	}
 
+	/**
+	 *
+	 */
 	set isShowing(showing) {
 		this.init();
 
@@ -25,6 +69,10 @@ export default class IronVaultOverlay {
 		return this.#showing;
 	}
 
+	/**
+	 *
+	 * @param parent
+	 */
 	constructor(parent) {
 		fetch(Addons.t_url('assets/menu/ironvault.svg'))
 			.then(result => result.text())
@@ -35,6 +83,9 @@ export default class IronVaultOverlay {
 		parent.bindOverlay(this);
 	}
 
+	/**
+	 *
+	 */
 	init() {
 		if (this.#initialized) return;
 
@@ -72,7 +123,7 @@ export default class IronVaultOverlay {
 			searchResult.empty();
 
 			const username = usernameInput.val();
-			this.insertPlayerDetails(username)
+			IronVaultOverlay.#insertPlayerDetails(username)
 				.then(result => {
 					searchSeparator.show();
 					searchResult.append(result);
@@ -116,7 +167,7 @@ export default class IronVaultOverlay {
 	 * @param {string} username Player username
 	 * @returns {Promise<void>} Resolves when done or error
 	 */
-	insertPlayerDetails(username) {
+	static #insertPlayerDetails(username) {
 		return new Promise((resolve, reject) => {
 			if (typeof username !== 'string' || username === '') {
 				reject('Input is empty');
@@ -125,7 +176,7 @@ export default class IronVaultOverlay {
 
 			Backend.getInstance().getPlayerDetailsByUsername(result => {
 				if (typeof result === 'object') {
-					const tankDetails = this.createTankDetails(result);
+					const tankDetails = IronVaultOverlay.#createTankDetails(result);
 					resolve(tankDetails);
 				} else {
 					reject('User not found');
@@ -137,32 +188,48 @@ export default class IronVaultOverlay {
 	/**
 	 * Create a container with username, player id, rendered tank, rank and level
 	 * @param {object} playerDetails Player details
+	 * @returns {JQuery} Container HTMLDivElement
 	 */
-	createTankDetails(playerDetails) {
+	static #createTankDetails(playerDetails) {
 		const container = $('<div></div>').css({
 			display: 'grid',
-			'grid-template': '"top top" auto "left right" auto / 130px auto'
+			'grid-template': '"top top" 1em "left right" auto / 130px auto',
+			'align-items': 'center'
 		});
 
-		const top = $('<div style="grid-area: top;"></div>').css('width', '100%');
-		const left = $('<div style="grid-area: left;"></div>');
+		const left = $('<div style="grid-area: left;"></div>')
+			.addClass('ui-corner-all ui-widget ui-widget-content')
+			.css({
+				display: 'flex',
+				flexDirection: 'column',
+				alignItems: 'center',
+				padding: '10px 0',
+				marginRight: '10px',
+				background: 'none'
+			});
 		const right = $('<div style="grid-area: right;"></div>');
-
-		const username = $(`<stroked-text text="${ playerDetails.getUsername() }" width="100%" height="2em"></stroked-text>`).css({
-			width: 'inherit',
-			top: 0,
-			left: 0
-		});
 
 		const canvas = document.createElement('canvas');
 		canvas.width = UIConstants.TANK_ICON_WIDTH_LARGE;
 		canvas.height = UIConstants.TANK_ICON_HEIGHT_LARGE;
 		canvas.style.width = `${UIConstants.TANK_ICON_RESOLUTIONS[UIConstants.TANK_ICON_SIZES.SMALL] }px`;
 		canvas.style.height = `${UIConstants.TANK_ICON_RESOLUTIONS[UIConstants.TANK_ICON_SIZES.SMALL] * 0.6 }px`;
-		UITankIcon.loadPlayerTankIcon(canvas, UIConstants.TANK_ICON_SIZES.LARGE, playerDetails.getPlayerId());
+		left.append([canvas]);
 
-		const playerId = $('<div class="heading"><div>');
-		playerId.text(playerDetails.getPlayerId());
+		UITankIcon.loadPlayerTankIcon(canvas, UIConstants.TANK_ICON_SIZES.LARGE, playerDetails.getPlayerId(), () => {
+			const username = $(`<stroked-text text="${ playerDetails.getUsername() }" width="100px" height="2em"></stroked-text>`).css({
+				width: 'inherit',
+				top: 0,
+				left: 0
+			});
+			left.append(username);
+
+			requestAnimationFrame(() => {
+				trimCanvas(canvas);
+				canvas.style.width = '';
+				canvas.style.height = UIConstants.TANK_ICON_RESOLUTIONS[UIConstants.TANK_ICON_SIZES.SMALL] * 0.6;
+			});
+		}, {});
 
 		const rank = playerDetails.getRank();
 		const rankIndex = UIUtils.getRankLevelFromRank(rank);
@@ -191,13 +258,10 @@ export default class IronVaultOverlay {
 			classes: {
 				'ui-progressbar': 'ui-corner-all'
 			}
-		}).addClass('xp');
+		}).css('margin-top', '8px').addClass('xp');
+		right.append(rankProgress, levelProgress);
 
-		top.append(username);
-		left.append([canvas]);
-		right.append(playerId, rankProgress, levelProgress);
-
-		container.append([top, left, right]);
+		container.append([left, right]);
 
 		return container;
 	}

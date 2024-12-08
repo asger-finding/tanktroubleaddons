@@ -44,7 +44,7 @@ if (!browser.runtime) {
 
 	get = key => {
 		const promise = new Promise(resolve => {
-			once(StoreEvent.READ_RESPONSE, key, evt => resolve(evt.detail?.data));
+			once(StoreEvent.READ_RESPONSE, evt => evt.detail?.key === key, evt => resolve(evt.detail?.data));
 		});
 
 		dispatchMessage(null, {
@@ -57,7 +57,7 @@ if (!browser.runtime) {
 
 	set = (key, value) => {
 		const promise = new Promise(resolve => {
-			once(StoreEvent.WRITE_RESPONSE, key, evt => resolve(evt.detail?.data));
+			once(StoreEvent.WRITE_RESPONSE, evt => evt.detail?.key === key, evt => resolve(evt.detail?.data));
 		});
 
 		dispatchMessage(null, {

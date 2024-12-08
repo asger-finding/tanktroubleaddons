@@ -7,5 +7,5 @@
     </defs>
     <path fill="url(#2e28)" d="M23 0h594v18H23z" transform="matrix(.00337 0 0 1 -.077 0)"/>
     <path fill="#fff" fill-opacity=".15" d="M23 0h594v2H23z" transform="matrix(.00337 0 0 1 -.077 0)"/>
-    <path fill-opacity=".3" d="M23 18v4l348.047-1.172H617V18z" transform="matrix(.00337 0 0 1 -.077 0)"/>
+    <path fill="var(--border-shadow)" d="M23 18v4l348.047-1.172H617V18z" transform="matrix(.00337 0 0 1 -.077 0)"/>
 </svg>

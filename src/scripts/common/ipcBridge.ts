@@ -5,7 +5,7 @@ setBrowserNamespace();
 type MessageData = {
 	type: string;
 	key?: string;
-	data?: object;
+	data?: Record<string, any>;
 };
 
 interface CustomIpcEvent extends Partial<Event> {
@@ -22,7 +22,7 @@ export enum Process {
 const thisProcess: Process = typeof browser.runtime === 'undefined'
 	? Process.INJECT
 	: Process.MAIN;
-const otherProcess: Process = typeof browser.runtime === 'undefined'
+const foreignProcess: Process = typeof browser.runtime === 'undefined'
 	? Process.MAIN
 	: Process.INJECT;
 
@@ -44,7 +44,7 @@ export const dispatchMessage = (to: Process | null, data: MessageData) => {
  * @param from Expected sender (optional)
  */
 export const listen = (types: MessageData['type'][] | null, cb: Callback, from?: Process | null) => {
-	const eventName = from || otherProcess;
+	const eventName = from || foreignProcess;
 	addEventListener(eventName, (evt: CustomIpcEvent) => {
 		const type = evt.detail?.type;
 		if (types === null || (type && types.includes(type))) return cb(evt);
@@ -59,8 +59,8 @@ export const listen = (types: MessageData['type'][] | null, cb: Callback, from?:
  * @param cb Callback function
  * @param from Expected sender (optional)
  */
-export const once = (type: MessageData['type'], conditional: string | null, cb: Callback, from?: Process | null) => {
-	const eventName = from || otherProcess;
+export const once = (type: MessageData['type'], conditional: (evt: CustomIpcEvent) => boolean, cb: Callback, from?: Process | null) => {
+	const eventName = from || foreignProcess;
 
 	/**
 	 * One-time listener
@@ -69,7 +69,7 @@ export const once = (type: MessageData['type'], conditional: string | null, cb: 
 	 */
 	const listener = (evt: CustomIpcEvent) => {
 		if (evt.detail?.type === type) {
-			if (conditional !== null && evt.detail?.key !== conditional) return null;
+			if (conditional !== null && !conditional(evt)) return null;
 
 			removeEventListener(eventName, listener);
 			return cb(evt);

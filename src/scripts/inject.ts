@@ -48,12 +48,12 @@
 		injectScript(`${meta.extensionUrl}scripts/content/patches.js`, true)
 	]).then(() => {
 		injectScript(`${meta.extensionUrl}scripts/content/statisticsSnippet.js`);
+		injectScript(`${meta.extensionUrl}scripts/content/strokedText.js`);
+		injectScript(`${meta.extensionUrl}scripts/content/forum.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/menu.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/switchControls.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/playerNameElement.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/maskUsernames.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/classicMouse.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/forum.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/chat.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/lobby.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/gameSettings.js`);

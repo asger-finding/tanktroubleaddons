@@ -19,5 +19,5 @@
         <path fill="url(#5240)" d="M0 18v7h16z" transform="matrix(-1 0 0 1 23 0)"/>
         <path fill="#fff" fill-opacity=".15" d="m17 0 .666 2H23V0z" transform="matrix(-1 0 0 1 23 0)"/>
     </g>
-    <path fill-opacity=".3" d="m23 18-7 7h4l3-3z" transform="matrix(-1 0 0 1 23 0)"/>
+    <path fill="var(--border-shadow)" d="m23 18-7 7h4l3-3z" transform="matrix(-1 0 0 1 23 0)"/>
 </svg>

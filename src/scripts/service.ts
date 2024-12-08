@@ -41,7 +41,24 @@ async function execScript() {
 	}
 }
 
+
 // event to run execute.js content when extension's button is clicked
 browser.action.onClicked.addListener(execScript);
+
+// Listener for fetch requests from the content script
+// eslint-disable-next-line consistent-return
+chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
+	if (request.action === 'CORS_EXEMPT_FETCH' && request.resource) {
+		const { resource, options, uuid } = request;
+
+		fetch(resource, options || {})
+			.then(response => response.json())
+			.then(data => sendResponse({ success: true, data, uuid }))
+			.catch(error => sendResponse({ success: false, error }));
+
+		return true;
+	}
+});
+
 
 //# HMRBackground

@@ -1,3 +1,4 @@
+import { dispatchMessage, listen } from './common/ipcBridge.js';
 import { setBrowserNamespace } from './common/set-browser-namespace.js';
 import { setupStoreHandler } from './common/store.js';
 
@@ -25,6 +26,8 @@ class Addons {
 	 * Load the extension into the website
 	 */
 	public load() {
+		Addons.setupFetchNoCors();
+
 		Addons.waitForLoader().then(loader => {
 			const code = String(loader.textContent);
 			loader.textContent = '';
@@ -120,7 +123,53 @@ class Addons {
 		browser.storage.local.set({ [key]: value });
 	}
 
+	/**
+	 * Bypass cors for sites exempt in `host_permissions` in manifest
+	 * @param args Fetch arguments
+	 * @returns Resolves when fetch finalizes
+	 */
+	static async fetchNoCors(...args: Parameters<typeof fetch>): Promise<unknown> {
+		const [resource, options] = args;
+
+		return new Promise((resolve, reject) => {
+			chrome.runtime.sendMessage({
+				action: 'CORS_EXEMPT_FETCH',
+				resource,
+				options
+			}, response => {
+				if (response && response.success) resolve(response.data);
+				else reject(response.error || 'Unknown error');
+			}
+			);
+		});
+	}
+
+	/**
+	 * Set up listener for cors-bypass fetch requests from the inject scripts
+	 */
+	static setupFetchNoCors() {
+		listen(['CORS_EXEMPT_FETCH'], ({ detail }) => {
+			if (!detail) throw new Error('No details provided for cors exempt fetch');
+
+			const resource = detail.data?.resource;
+			if (!resource) throw new Error('No url provided for cors exempt fetch');
+
+			Addons.fetchNoCors(resource, detail.data?.options ?? {})
+				.then(result => {
+					dispatchMessage(null, {
+						type: 'CORS_EXEMPT_FETCH_RESULT',
+						data: {
+							result,
+							uuid: detail.data?.uuid
+						}
+					});
+				});
+		});
+	}
+
 }
+
+
 
 const addon = new Addons();
 addon.load();

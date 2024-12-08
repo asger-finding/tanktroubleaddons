@@ -1,4 +1,5 @@
-import { get, set } from '../common/store.js';
+import AddonsOverlay from './addonsOverlay.js';
+import IronVaultOverlay from './ironVaultOverlay.js';
 import ProxyHelper from '../utils/proxyHelper.js';
 
 /**
@@ -19,11 +20,17 @@ class Menu {
 
 	draggable = $('<div style="display: contents; cursor: move;"></div>');
 
+	icons = $('<div style="display: contents;"></div>');
+
 	handle = $('<div style="display: contents; cursor: se-resize;"></div>');
 
 	header = $('<div class="header"/>');
 
-	content = $('<div class="content"></div>');
+	currentPage = '';
+
+	addons = null;
+
+	#initialized = false;
 
 	isShowing = false;
 
@@ -94,15 +101,14 @@ class Menu {
 		const scaleAndTranslate = Utils.getSVGScaleAndTranslateToFit(300, 312, 34, 'left');
 		this.headerSvg.configure(headerText, { transform: scaleAndTranslate });
 
-		this.body.append([this.draggable, this.handle, this.header, this.content]);
+		this.body.append([this.draggable, this.icons, this.handle, this.header]);
 
 		const border = [
 			'borderTopRightBottom',
 			'borderTopLeftBottom',
 			'borderRight',
 			'borderBottom',
-			'borderBottomLeft',
-			'borderLeft'
+			'borderBottomLeft'
 		];
 		const draggable = [
 			'borderTop',
@@ -111,19 +117,23 @@ class Menu {
 			'borderTopLeft',
 			'borderTopLeftRight'
 		];
+		const icons = [
+			'borderLeft'
+		];
 		const handle = [
 			'borderBottomRight'
 		];
 
-		// Instantate border images
-		for (const name of [...border, ...draggable, ...handle]) {
+		// Instantiate border vectors
+		for (const name of [...border, ...draggable, ...icons, ...handle]) {
 			fetch(Addons.t_url(`assets/menu/${name}.svg`))
-				.then(res => res.text())
+				.then(result => result.text())
 				// eslint-disable-next-line @typescript-eslint/no-loop-func
 				.then(body => {
 					const image = $(`<div class="grid-item" style="grid-area: ${name};">`).append(body);
 
 					if (draggable.includes(name)) this.draggable.append(image);
+					else if (icons.includes(name)) this.icons.append(image);
 					else if (handle.includes(name)) this.handle.append(image);
 					else this.body.append(image);
 				});
@@ -206,6 +216,45 @@ class Menu {
 	}
 
 	/**
+	 * Initialize the menu overlays and set default page
+	 */
+	init() {
+		if (!this.#initialized) {
+			this.addons = new AddonsOverlay(this);
+			this.ironvault = new IronVaultOverlay(this);
+
+			this.currentPage = 'addons';
+			this.goToCurrentPage();
+
+			this.#initialized = true;
+		}
+	}
+
+	/**
+	 * Add new overlay to menu
+	 * @param {class} overlay Overlay class
+	 */
+	bindOverlay(overlay) {
+		this.body.append(overlay.content);
+		this.icons.append(overlay.icon);
+
+		overlay.icon.on('mouseup', () => {
+			this.currentPage = overlay.id;
+			this.goToCurrentPage();
+		});
+	}
+
+	/**
+	 * Go to the current page as decided by `this.currentPage`
+	 */
+	goToCurrentPage() {
+		this.addons.isShowing = false;
+		this.ironvault.isShowing = false;
+
+		this[this.currentPage].isShowing = true;
+	}
+
+	/**
 	 * Calculate a perspective distortion value based on a pixel positon in the window
 	 * @param {number} x x-position
 	 * @param {number} y y-position
@@ -233,6 +282,8 @@ class Menu {
 	 * @param {boolean} animate Should the sequence animate?
 	 */
 	toggle(animate) {
+		this.init();
+
 		if (this.isShowing) this.hide(animate);
 		else this.show(animate);
 	}
@@ -242,6 +293,8 @@ class Menu {
 	 * @param {boolean} animate Should the opening sequence animate?
 	 */
 	show(animate = true) {
+		this.wrapper.appendTo(document.body);
+
 		if (animate) {
 			this.wrapper.addClass('opening');
 			this.wrapper.css({ display: 'block' });
@@ -268,46 +321,21 @@ class Menu {
 		this.isShowing = false;
 	}
 
-	/**
-	 * Create a new content block with options
-	 * @param {SectionOptions} sectionOpts Options for the section
-	 * @param  {Widget[]} widgets JQuery UI widgets
-	 * @returns New section
-	 */
-	// eslint-disable-next-line complexity
-	createSection(sectionOpts, widgets = []) {
-		const wrapper = $(`<fieldset id="${ sectionOpts.id }"></fieldset>`);
-		const legend = $(`<legend>${ sectionOpts.title }</legend>`);
-
-		if (sectionOpts.requiresReload) legend.append('<span class="requires-reload">*</span>');
-
-		wrapper.append(legend);
-
-		for (const widget of widgets) wrapper.append(widget);
-
-		this.content.append(wrapper);
-
-		return wrapper;
-	}
-
 }
 
 Object.assign(Addons, {
 	menu: new Menu()
 });
 
+
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) => {
 	original(...args);
 
-	const container = TankTrouble.TankInfoBox.infoAddons = $('<div class="button" title=""/>');
-	const standard = Addons.addImageWithClasses(container, 'standard', 'assets/menu/menu.png');
-	const active = Addons.addImageWithClasses(container, 'active', 'assets/menu/menuActive.png');
+	const addonsButton = TankTrouble.TankInfoBox.infoAddons = $('<div class="button" title=""/>');
+	const standard = Addons.addImageWithClasses(addonsButton, 'standard', 'assets/menu/menu.png');
+	const active = Addons.addImageWithClasses(addonsButton, 'active', 'assets/menu/menuActive.png');
 
-	Addons.menu.content.css({
-		backgroundImage: `url('${ Addons.t_url('/assets/menu/background.svg') }'), linear-gradient(325deg, var(--background-color) 50%, #333333 calc(50% + 1px));`
-	});
-
-	container.tooltipster({
+	addonsButton.tooltipster({
 		position: 'right',
 		offsetX: 5
 	});
@@ -319,194 +347,15 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 			height: '52px'
 		});
 
-	container.on('mouseup', () => {
+	addonsButton.on('mouseup', () => {
 		if (TankTrouble.TankInfoBox.showing) {
 			TankTrouble.TankInfoBox.hide();
 			Addons.menu.toggle();
 		}
 	});
 
-	container.append([standard, active]);
-	container.insertAfter(TankTrouble.TankInfoBox.infoAchievements);
-
-	const interfaceWidget = $('<div></div>');
-	(() => {
-		const themeHeading = $('<div class="heading">Theme</div>');
-		const themeSelect = $(`
-			<label for="radio-1">Normal</label>
-			<input type="radio" name="radio-1" id="radio-1" value="normal" data-set-color-scheme="light">
-			<label for="radio-2">Dark</label>
-			<input type="radio" name="radio-1" id="radio-2" value="dark" data-set-color-scheme="dark">
-		`);
-		const checkboxWrapper = $('<div style="display: grid; grid-template-areas: \'title-1 title-2\' \'checkbox-1 checkbox-2\'"></div>');
-		const classicMouseCheckbox = $(`
-			<div class="heading" style="grid-area: title-1">Classic mouse</div>
-			<input type="checkbox" id="checkbox-1" style="grid-area: checkbox-1">
-		`);
-		const tintedBulletsCheckbox = $(`
-			<div class="heading" style="grid-area: title-2">Tinted bullets</div>
-			<input type="checkbox" id="checkbox-1" style="grid-area: checkbox-2">	
-		`);
-
-		checkboxWrapper.append([classicMouseCheckbox, tintedBulletsCheckbox]);
-		interfaceWidget.append([themeHeading, themeSelect, '<hr>', checkboxWrapper]);
-
-		get('theme').then(theme => {
-			const { classToken } = theme;
-			themeSelect.filter(`input[type="radio"][value="${classToken}"]`).prop('checked', true);
-
-			themeSelect.filter('input[type="radio"]')
-				.checkboxradio();
-
-			// Attach a change event listener
-			themeSelect.filter('input[type="radio"]').on('change', ({ target }) => {
-				const $target = $(target);
-				if ($target.is(':checked')) {
-					const newTheme = $target.val();
-					const colorScheme = $target.attr('data-set-color-scheme');
-					set('theme', { classToken: newTheme, colorScheme });
-				}
-			});
-		});
-
-		get('classicMouse').then(classicMouse => {
-			classicMouseCheckbox.filter('input[type="checkbox"]')
-				.prop('checked', classicMouse)
-				.checkboxtoggle({
-					// eslint-disable-next-line jsdoc/require-jsdoc
-					change: (_event, { item }) => set('classicMouse', item.value)
-				});
-		});
-		get('tintedBullets').then(tintedBullets => {
-			tintedBulletsCheckbox.filter('input[type="checkbox"]')
-				.prop('checked', tintedBullets)
-				.checkboxtoggle({
-					// eslint-disable-next-line jsdoc/require-jsdoc
-					change: (_event, { item }) => set('tintedBullets', item.value)
-				});
-		});
-	})();
-
-	const otherWidget = $('<div></div>');
-	(() => {
-		const texturePackWrapper = $('<div></div>');
-		const texturePackHeading = $('<div class="heading">Texture packs</div>');
-		const selectWrapper = $('<div></div>');
-		const texturePackSelect = $('<select></select>');
-		const createNewWrapper = $('<div class="create-new-wrapper"></div>');
-
-		const createNewLabel = $('<label for="texturepackpicker" class="custom-file-upload">Select file</label>');
-		const createNewPicker = $('<input type="file" id="texturepackpicker" accept=".zip" style="display: none;"/>');
-		const createNewSubmit = $('<button type="submit">Add</button>');
-		createNewLabel.button();
-		createNewSubmit.button();
-
-		createNewWrapper.append(['<br>', createNewLabel, createNewPicker, createNewSubmit]);
-		selectWrapper.append(texturePackSelect);
-
-		texturePackWrapper.append([selectWrapper, createNewWrapper]);
-
-		createNewPicker.on('change', async() => {
-			const [file] = createNewPicker.prop('files');
-			createNewLabel.text(file ? file.name : 'Select file');
-		});
-
-		createNewSubmit.tooltipster({
-			position: 'right',
-			theme: 'tooltipster-error',
-			offsetX: 5
-		});
-
-		/**
-		 * Create a new option for the select menu
-		 * @param texturePack Texture pack details
-		 * @returns New option element
-		 */
-		const createNewOption = texturePack => {
-			const option = $('<option></option');
-			option.attr('value', texturePack.hashsum);
-			option.attr('removable', !texturePack.builtin);
-			option.text(texturePack.name);
-			option.on('remove', () => {
-				Addons.removeTexturePack(texturePack.hashsum)
-					.then(result => {
-						texturePackSelect.val(result === false ? 'new' : result.hashsum);
-						texturePackSelect.deleteselectmenu('refresh');
-						createNewWrapper.toggle(!result);
-					});
-			});
-
-			return option;
-		};
-
-		createNewSubmit.on('mouseup', async() => {
-			const [file] = createNewPicker.prop('files');
-			if (file) {
-				const [name] = file.name.split('.zip');
-
-				Addons.storeTexturePack(file, name)
-					.then(hashsum => Addons.setActiveTexturePack(hashsum)
-						.then(texturePack => {
-							Utils.updateTooltip(createNewSubmit, '');
-							Addons.reloadGame();
-
-							const option = createNewOption(texturePack);
-
-							texturePackSelect.find('> :last').before(option);
-							createNewLabel.text('Select file');
-							texturePackSelect.val(hashsum);
-							texturePackSelect.deleteselectmenu('refresh');
-
-							createNewWrapper.hide();
-						}))
-					.catch(err => {
-						Utils.updateTooltip(createNewSubmit, err.message);
-					});
-
-			}
-		});
-
-		Addons.getAllTexturePacks()
-			.then(async texturePacks => {
-				texturePackSelect.append(texturePacks.map(pack => createNewOption(pack)));
-
-				const newTexturePackOption = $('<option value="new">Add from zip ...</option>');
-				texturePackSelect.append(newTexturePackOption);
-
-				const selectValue = await Addons.getActiveTexturePack()
-					.then(({ hashsum }) => hashsum)
-					.catch(() => 'new');
-				texturePackSelect.val(selectValue);
-				createNewWrapper.toggle(selectValue === 'new');
-
-				texturePackSelect.deleteselectmenu({
-					// eslint-disable-next-line jsdoc/require-jsdoc
-					change: (_event, { item }) => {
-						if (item.value === 'new') {
-							createNewWrapper.show();
-						} else {
-							createNewWrapper.hide();
-							Addons.setActiveTexturePack(item.value);
-							Addons.reloadGame();
-						}
-					}
-				});
-			});
-
-		otherWidget.append([texturePackHeading, texturePackWrapper]);
-	})();
-
-	Addons.menu.createSection({
-		title: 'Interface',
-		id: 'theme',
-		requiresReload: false
-	}, [ interfaceWidget ]);
-
-	Addons.menu.createSection({
-		title: 'Other',
-		id: 'other',
-		requiresReload: false
-	}, [ otherWidget ]);
+	addonsButton.append([standard, active]);
+	addonsButton.insertAfter(TankTrouble.TankInfoBox.infoAchievements);
 });
 
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {
@@ -528,7 +377,5 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...arg
 		}
 	}, () => {}, () => {}, playerId, Caches.getPlayerDetailsCache());
 });
-
-ProxyHelper.whenContentInitialized().then(() => Addons.menu.wrapper.appendTo(document.body));
 
 export const _isESmodule = true;

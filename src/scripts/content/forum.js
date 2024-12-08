@@ -52,7 +52,7 @@ const insertMultipleCreators = (threadOrReply, threadOrReplyElement) => {
 		const width = UIConstants.TANK_ICON_RESOLUTIONS[UIConstants.TANK_ICON_SIZES.SMALL] + 10;
 		const height = 25;
 
-		const playerName = $(`<player-name username="${ username }" width="${ width }" height="${ height }"></player-name>`);
+		const playerName = $(`<stroked-text text="${ username }" width="${ width }" height="${ height }"></stroked-text>`);
 		creatorsContainer.find('.tank.creator').append(playerName);
 	}, () => {}, () => {}, creators.creator || '', Caches.getPlayerDetailsCache());
 };

@@ -749,7 +749,7 @@ ProxyHelper.interceptFunction(TankTrouble.AdminStatisticsOverlay, '_initialize',
 	overlay.startDate.hide();
 	overlay.endDate.hide();
 
-	overlay.customRangeWrapper.append(['<hr></hr>', overlay.startDate, overlay.endDate]);
+	overlay.customRangeWrapper.append(['<hr>', overlay.startDate, overlay.endDate]);
 	overlay.period.append("<option value='custom'>Custom timerange</option>");
 	overlay.period.after(overlay.customRangeWrapper);
 });

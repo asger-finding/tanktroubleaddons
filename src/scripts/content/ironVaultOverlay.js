@@ -1,3 +1,5 @@
+import { timeAgo } from '../utils/timeUtils.js';
+
 /**
  * Trim a canvas to remove alpha pixels from each side
  * @param {HTMLCanvasElement} canvas Target canvas element
@@ -5,7 +7,7 @@
  * @returns {object} Width and height of trimmed canvcas and left-top coordinate of trimmed area
  */
 const trimCanvas = (canvas, threshold = 0) => {
-	const ctx = canvas.getContext('2d');
+	const ctx = canvas.getContext('2d', { willReadFrequently: true });
 	const { width } = canvas;
 	const { height } = canvas;
 	const imageData = ctx.getImageData(0, 0, width, height);
@@ -43,7 +45,7 @@ const trimCanvas = (canvas, threshold = 0) => {
  * @param {number} number Number to delimit
  * @returns {string} Formatted number
  */
-const spaceSeperateThousands = number => number.toString().replace(/\B(?=(?:\d{3})+(?!\d))/gu, ' ');
+const spaceSeparateThousands = number => number.toString().replace(/\B(?=(?:\d{3})+(?!\d))/gu, ' ');
 
 export default class IronVaultOverlay {
 
@@ -51,7 +53,7 @@ export default class IronVaultOverlay {
 
 	content = $(`<div class="content ${ this.id }"></div>`);
 
-	icon = $('<div class="icon"></div>');
+	icon = $('<div class="menuicon"></div>');
 
 	#initialized = false;
 
@@ -100,18 +102,12 @@ export default class IronVaultOverlay {
 		const usernameHeading = $('<div class="heading">Username</div>');
 		const usernameInput = $('<input type="text" placeholder="Laika">');
 		const usernameSubmit = $('<button type="submit">Search</button>');
-		const searchSeparator = $('<hr></hr>');
+		const searchSeparator = $('<hr>');
 		const searchResult = $('<div></div>');
 
 		usernameInput.button()
 			.off('keydown')
-			.css({
-				'width': '130px',
-				'color' : 'inherit',
-				'text-align' : 'left',
-				'outline' : 'none',
-				'cursor' : 'text'
-			});
+			.css('width', '130px');
 
 		usernameSubmit.button();
 
@@ -183,8 +179,13 @@ export default class IronVaultOverlay {
 
 			Backend.getInstance().getPlayerDetailsByUsername(result => {
 				if (typeof result === 'object') {
+					const container = $('<div></div>');
 					const tankDetails = IronVaultOverlay.#createTankDetails(result);
-					resolve(tankDetails);
+					const playerDetails = IronVaultOverlay.#createPlayerDetails(result);
+
+					container.append([tankDetails, '<hr>', playerDetails]);
+
+					resolve(container);
 				} else {
 					reject('User not found');
 				}
@@ -198,23 +199,10 @@ export default class IronVaultOverlay {
 	 * @returns {JQuery} Container HTMLDivElement
 	 */
 	static #createTankDetails(playerDetails) {
-		const container = $('<div></div>').css({
-			display: 'grid',
-			'grid-template': '"top top" 1em "left right" auto / 130px auto',
-			'align-items': 'center'
-		});
+		const container = $('<div id="tank-details"></div>');
 
-		const left = $('<div style="grid-area: left;"></div>')
-			.addClass('ui-corner-all ui-widget ui-widget-content')
-			.css({
-				display: 'flex',
-				flexDirection: 'column',
-				alignItems: 'center',
-				padding: '10px 0',
-				marginRight: '10px',
-				background: 'none'
-			});
-		const right = $('<div style="grid-area: right;"></div>');
+		const left = $('<div id="tankbox" class="ui-corner-all ui-widget ui-widget-content"></div>');
+		const right = $('<div id="ranklevelprogress"></div>');
 
 		const canvas = document.createElement('canvas');
 		canvas.width = UIConstants.TANK_ICON_WIDTH_LARGE;
@@ -242,7 +230,7 @@ export default class IronVaultOverlay {
 		const rankIndex = UIUtils.getRankLevelFromRank(rank);
 		const rankToLevelUp = UIConstants.RANK_LEVELS[rankIndex];
 		const rankTitle = UIConstants.RANK_TITLES[rankIndex];
-		const rankText = `${ rankTitle } (${ spaceSeperateThousands(rank) }${ rankToLevelUp ? `/${ spaceSeperateThousands(rankToLevelUp) }` : '' })`;
+		const rankText = `${ rankTitle } (${ spaceSeparateThousands(rank) }${ rankToLevelUp ? `/${ spaceSeparateThousands(rankToLevelUp) }` : '' })`;
 		const rankProgress = $(`<div><stroked-text class="caption" text="${ rankText }" width="100%" height="2em"></stroked-text></div>`);
 		rankProgress.progressbar({
 			value: rank,
@@ -255,7 +243,7 @@ export default class IronVaultOverlay {
 		const xp = playerDetails.getXP();
 		const levelIndex = UIUtils.getLevelFromXp(xp);
 		const xpToLevelUp = UIConstants.XP_LEVELS[levelIndex];
-		const levelText = `Level ${ levelIndex + 1 } (${ spaceSeperateThousands(xp) } xp)`;
+		const levelText = `Level ${ levelIndex + 1 } (${ spaceSeparateThousands(xp) } xp)`;
 		const levelProgress = $(`<div><stroked-text class="caption" text="${ levelText }" width="100%" height="2em"></stroked-text></div>`);
 		levelProgress.progressbar({
 			value: xp,
@@ -267,6 +255,71 @@ export default class IronVaultOverlay {
 		right.append(rankProgress, levelProgress);
 
 		container.append([left, right]);
+
+		return container;
+	}
+
+	/**
+	 * Create a container containing crucial player details
+	 * @param {object} playerDetails Player details
+	 * @returns {JQuery} Container HTMLDivElement
+	 */
+	static #createPlayerDetails(playerDetails) {
+		const container = $('<div id="player-details"></div>');
+
+		const elements = [
+			[
+				'Kills',
+				Addons.t_url('assets/menu/ironvault/kills.svg'),
+				spaceSeparateThousands(playerDetails.getKills())
+			],
+			[
+				'Victories',
+				Addons.t_url('assets/menu/ironvault/victories.svg'),
+				spaceSeparateThousands(playerDetails.getVictories())
+			],
+			[
+				'Deaths',
+				Addons.t_url('assets/menu/ironvault/deaths.svg'),
+				spaceSeparateThousands(playerDetails.getKills())
+			],
+			[
+				'Suicides',
+				Addons.t_url('assets/menu/ironvault/suicides.svg'),
+				spaceSeparateThousands(playerDetails.getSuicides())
+			],
+			[
+				'Created',
+				Addons.t_url('assets/menu/ironvault/created.svg'),
+				new Intl.DateTimeFormat(navigator.language || 'en-US')
+					.format(new Date(playerDetails.getCreated() * 1000))
+			],
+			[
+				'Last login',
+				Addons.t_url('assets/menu/ironvault/last-login.svg'),
+				timeAgo(new Date(playerDetails.getLastLogin() * 1000))
+			]
+
+		].map(item => {
+			const [key, iconUrl, value] = item;
+
+			const wrapper = $('<div class="stat ui-corner-all ui-widget ui-widget-content"></div>');
+			const icon = $('<div class="icon"></img>');
+			const stat = $('<div class="value"></div>');
+			const description = $('<div class="description"></div>');
+
+			fetch(iconUrl)
+				.then(result => result.text())
+				.then(iconSvg => icon.append(iconSvg));
+
+			stat.text(value);
+			description.text(key);
+
+			wrapper.append([icon, stat, description]);
+			return wrapper;
+		});
+
+		container.append(elements);
 
 		return container;
 	}

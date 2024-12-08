@@ -6,7 +6,7 @@ export default class AddonsOverlay {
 
 	content = $(`<div class="content ${ this.id }"></div>`);
 
-	icon = $('<div class="icon"></div>');
+	icon = $('<div class="menuicon"></div>');
 
 	#initialized = false;
 

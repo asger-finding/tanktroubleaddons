@@ -283,6 +283,8 @@ class Menu {
 	 * @param {boolean} animate Should the opening sequence animate?
 	 */
 	show(animate = true) {
+		this.wrapper.appendTo(document.body);
+
 		if (animate) {
 			this.wrapper.addClass('opening');
 			this.wrapper.css({ display: 'block' });
@@ -315,7 +317,6 @@ Object.assign(Addons, {
 	menu: new Menu()
 });
 
-ProxyHelper.whenContentInitialized().then(() => Addons.menu.wrapper.appendTo(document.body));
 
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) => {
 	original(...args);

@@ -49,6 +49,17 @@ const trimCanvas = (canvas, threshold = 0) => {
  */
 const spaceSeparateThousands = number => number.toString().replace(/\B(?=(?:\d{3})+(?!\d))/gu, ' ');
 
+/**
+ * Create ordinal from number
+ * @param {number} number Number to convert
+ * @returns {string} Number as ordinal
+ */
+const getOrdinal = number => {
+	const suffixes = ['th', 'st', 'nd', 'rd'];
+	const value = number % 100;
+	return number + (suffixes[(value - 20) % 10] || suffixes[value] || suffixes[0]);
+};
+
 export default class IronVaultOverlay {
 
 	id = 'ironvault';
@@ -100,46 +111,43 @@ export default class IronVaultOverlay {
 	init() {
 		if (this.#initialized) return;
 
-		const searchForPlayerWidget = $('<div></div>');
-		const usernameInput = $('<input type="text" placeholder="Laika">');
-		const usernameSubmit = $('<button type="submit">Search</button>');
-		const searchSeparator = $('<hr>');
-		const searchResult = $('<div></div>');
+		this.searchForPlayerWidget = $('<div></div>');
+		this.usernameInput = $('<input type="text" placeholder="Laika">');
+		this.usernameSubmit = $('<button type="submit">Search</button>');
+		this.searchSeparator = $('<hr>');
+		this.searchResult = $('<div></div>');
 
-		usernameInput.button()
+		this.usernameInput.button()
 			.off('keydown')
 			.css('width', '130px');
-
-		usernameSubmit.button();
-
-		usernameSubmit.tooltipster({
+		this.usernameSubmit.button();
+		this.usernameSubmit.tooltipster({
 			position: 'right',
 			theme: 'tooltipster-error',
-			offsetX: 5
+			offsetX: 5,
+			trigger: 'custom'
 		});
+		this.searchSeparator.hide();
+		this.searchForPlayerWidget.append([this.usernameInput, this.usernameSubmit, this.searchSeparator, this.searchResult]);
 
-		searchSeparator.hide();
+		this.usernameSubmit.on('mouseup', () => {
+			this.searchSeparator.hide();
+			this.searchResult.empty();
 
-		searchForPlayerWidget.append([usernameInput, usernameSubmit, searchSeparator, searchResult]);
-
-		usernameSubmit.on('mouseup', () => {
-			searchSeparator.hide();
-			searchResult.empty();
-
-			const username = usernameInput.val();
+			const username = this.usernameInput.val();
 			IronVaultOverlay.#insertPlayer(username)
 				.then(result => {
-					searchSeparator.show();
-					searchResult.append(result);
+					this.searchSeparator.show();
+					this.searchResult.append(result);
 				})
-				.catch(err => Utils.updateTooltip(usernameSubmit, err));
+				.catch(err => this.updateSubmitTooltipster(err));
 		});
 
 		this.createSection({
 			title: 'Search for player',
 			id: 'ironvault-search',
 			requiresReload: false
-		}, [ searchForPlayerWidget ]);
+		}, [ this.searchForPlayerWidget ]);
 
 		this.#initialized = true;
 	}
@@ -167,6 +175,15 @@ export default class IronVaultOverlay {
 	}
 
 	/**
+	 * Update the search button error tooltip
+	 * @param {string} content Error content
+	 */
+	updateSubmitTooltipster(content) {
+		Utils.updateTooltip(this.usernameSubmit, content);
+		setTimeout(() => Utils.updateTooltip(this.usernameSubmit, ''), 1_500);
+	}
+
+	/**
 	 * Search for a player and return TankTrouble and IronVault data as html elements
 	 * @param {string} username Player username
 	 * @returns {Promise<void>} Resolves when done or error
@@ -184,8 +201,9 @@ export default class IronVaultOverlay {
 					const tankDetails = IronVaultOverlay.#createTankDetails(result);
 					const badges = IronVaultOverlay.#createBadges(result);
 					const playerDetails = IronVaultOverlay.#createPlayerDetails(result);
+					const competitionResults = IronVaultOverlay.#createCompetitionResults(result);
 
-					container.append([tankDetails, badges, '<hr>', playerDetails]);
+					container.append([tankDetails, badges, '<hr>', playerDetails, competitionResults]);
 
 					resolve(container);
 				} else {
@@ -287,21 +305,21 @@ export default class IronVaultOverlay {
 			if (!detail) return;
 
 			const { result } = detail.data;
-			if (result instanceof Array) {
-				for (const badge of result) {
-					const { description, svg } = badge;
-					const image = $(`<img src="https://ironvault.vercel.app/assets/images/badges/${ svg }.svg">`);
-					image.tooltipster({
-						position: 'top',
-						offsetY: 5,
-						content: description
-					});
+			if (!result.badges) return;
 
-					container.append(image);
-				}
+			for (const badge of result.badges) {
+				const { description, svg } = badge;
+				const image = $(`<img src="https://ironvault.vercel.app/assets/images/badges/${ svg }.svg">`);
+				image.tooltipster({
+					position: 'top',
+					offsetY: 5,
+					content: description
+				});
 
-				if (result.length) container.before('<hr>');
+				container.append(image);
 			}
+
+			if (container.children().length) container.before('<hr>');
 		});
 
 		return container;
@@ -372,6 +390,55 @@ export default class IronVaultOverlay {
 		return container;
 	}
 
+
+	/**
+	 * Create a container with IronVault competition results
+	 * @param {object} playerDetails Player details
+	 * @returns {JQuery} Container HTMLDivElement
+	 */
+	static #createCompetitionResults(playerDetails) {
+		const container = $('<div id="competitions"></div>');
+		const playerId = playerDetails.getPlayerId();
+
+		const endPoint = `https://ironvault.vercel.app/api/${ playerId }/competitions`;
+		const uuid = generateUUID();
+		dispatchMessage(null, {
+			type: 'CORS_EXEMPT_FETCH',
+			data: {
+				resource: endPoint,
+				options: {
+					method: 'GET',
+					headers: { 'Content-Type': 'application/json' }
+				},
+				uuid
+			}
+		});
+		once('CORS_EXEMPT_FETCH_RESULT', evt => evt.detail?.data?.uuid === uuid, ({ detail }) => {
+			if (!detail) return;
+
+			const { result } = detail.data;
+			if (!result.competitions) return;
+
+			for (const competition of result.competitions) {
+				const wrapper = $('<div class="competition ui-corner-all ui-widget ui-widget-content"></div>');
+
+				const { name, year, place, svg } = competition;
+				const image = $(`<img class="icon" src="https://ironvault.vercel.app/assets/images/competitions/${ svg }.svg">`);
+				const competitionName = $('<div class="name"></div>');
+				const competitionResult = $('<div class="result"></div>');
+
+				competitionName.text(`${ name } ${ year }`);
+				competitionResult.text(`${ getOrdinal(place) } place`);
+
+				wrapper.append([image, competitionName, competitionResult]);
+				container.append(wrapper);
+			}
+
+			if (container.children().length) container.before('<hr>');
+		});
+
+		return container;
+	}
 }
 
 export const _isESmodule = true;

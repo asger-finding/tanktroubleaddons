@@ -101,7 +101,6 @@ export default class IronVaultOverlay {
 		if (this.#initialized) return;
 
 		const searchForPlayerWidget = $('<div></div>');
-		const usernameHeading = $('<div class="heading">Username</div>');
 		const usernameInput = $('<input type="text" placeholder="Laika">');
 		const usernameSubmit = $('<button type="submit">Search</button>');
 		const searchSeparator = $('<hr>');
@@ -121,7 +120,7 @@ export default class IronVaultOverlay {
 
 		searchSeparator.hide();
 
-		searchForPlayerWidget.append([usernameHeading, searchSeparator, usernameInput, usernameSubmit, searchResult]);
+		searchForPlayerWidget.append([usernameInput, usernameSubmit, searchSeparator, searchResult]);
 
 		usernameSubmit.on('mouseup', () => {
 			searchSeparator.hide();
@@ -186,7 +185,7 @@ export default class IronVaultOverlay {
 					const badges = IronVaultOverlay.#createBadges(result);
 					const playerDetails = IronVaultOverlay.#createPlayerDetails(result);
 
-					container.append([tankDetails, '<hr>', badges, '<hr>', playerDetails]);
+					container.append([tankDetails, badges, '<hr>', playerDetails]);
 
 					resolve(container);
 				} else {
@@ -300,6 +299,8 @@ export default class IronVaultOverlay {
 
 					container.append(image);
 				}
+
+				if (result.length) container.before('<hr>');
 			}
 		});
 

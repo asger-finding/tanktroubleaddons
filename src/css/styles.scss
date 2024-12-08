@@ -253,8 +253,7 @@ $max-safe-integer: 2147483647;
 
 				#tank-details {
 					display: grid;
-					grid-template: "top top" 1em
-						"left right" auto / 130px auto;
+					grid-template: "left right" auto / 130px auto;
 					align-items: center;
 
 					#tankbox {

@@ -38,6 +38,13 @@ const trimCanvas = (canvas, threshold = 0) => {
 	return { width: canvas.width, height: canvas.height, x: tlCorner.x, y: tlCorner.y };
 };
 
+/**
+ * Add space thousands delimiters to a number and return it as a string
+ * @param {number} number Number to delimit
+ * @returns {string} Formatted number
+ */
+const spaceSeperateThousands = number => number.toString().replace(/\B(?=(?:\d{3})+(?!\d))/gu, ' ');
+
 export default class IronVaultOverlay {
 
 	id = 'ironvault';
@@ -235,8 +242,7 @@ export default class IronVaultOverlay {
 		const rankIndex = UIUtils.getRankLevelFromRank(rank);
 		const rankToLevelUp = UIConstants.RANK_LEVELS[rankIndex];
 		const rankTitle = UIConstants.RANK_TITLES[rankIndex];
-		const formattedRank = rank.toString().replace(/\B(?=(?:\d{3})+(?!\d))/gu, ' ');
-		const rankText = `${ rankTitle } (${ formattedRank })`;
+		const rankText = `${ rankTitle } (${ spaceSeperateThousands(rank) }${ rankToLevelUp ? `/${ spaceSeperateThousands(rankToLevelUp) }` : '' })`;
 		const rankProgress = $(`<div><stroked-text class="caption" text="${ rankText }" width="100%" height="2em"></stroked-text></div>`);
 		rankProgress.progressbar({
 			value: rank,
@@ -249,8 +255,7 @@ export default class IronVaultOverlay {
 		const xp = playerDetails.getXP();
 		const levelIndex = UIUtils.getLevelFromXp(xp);
 		const xpToLevelUp = UIConstants.XP_LEVELS[levelIndex];
-		const formattedXp = xp.toString().replace(/\B(?=(?:\d{3})+(?!\d))/gu, ' ');
-		const levelText = `Level ${ levelIndex + 1 } (${ formattedXp } xp)`;
+		const levelText = `Level ${ levelIndex + 1 } (${ spaceSeperateThousands(xp) } xp)`;
 		const levelProgress = $(`<div><stroked-text class="caption" text="${ levelText }" width="100%" height="2em"></stroked-text></div>`);
 		levelProgress.progressbar({
 			value: xp,

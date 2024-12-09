@@ -142,7 +142,7 @@ export default class IronVaultOverlay {
 					this.searchSeparator.show();
 					this.searchResult.append(result);
 				})
-				.catch(err => this.updateSubmitTooltipster(err));
+				.catch(err => IronVaultOverlay.#updateTooltipster(this.usernameSubmit, err.message));
 		});
 
 		this.createSection({
@@ -178,11 +178,12 @@ export default class IronVaultOverlay {
 
 	/**
 	 * Update the search button error tooltip
+	 * @param {JQuery} element Tooltipstered element
 	 * @param {string} content Error content
 	 */
-	updateSubmitTooltipster(content) {
-		Utils.updateTooltip(this.usernameSubmit, content);
-		setTimeout(() => Utils.updateTooltip(this.usernameSubmit, ''), 1_500);
+	static #updateTooltipster(element, content) {
+		Utils.updateTooltip(element, content);
+		setTimeout(() => Utils.updateTooltip(element, ''), 1_500);
 	}
 
 	/**
@@ -193,7 +194,7 @@ export default class IronVaultOverlay {
 	static #insertPlayer(username) {
 		return new Promise((resolve, reject) => {
 			if (typeof username !== 'string' || username === '') {
-				reject('Input is empty');
+				reject(new Error('Input is empty'));
 				return;
 			}
 
@@ -209,7 +210,7 @@ export default class IronVaultOverlay {
 
 					resolve(container);
 				} else {
-					reject('User not found');
+					reject(new Error('User not found'));
 				}
 			}, () => {}, () => {}, username, Caches.getPlayerDetailsByUsernameCache());
 		});

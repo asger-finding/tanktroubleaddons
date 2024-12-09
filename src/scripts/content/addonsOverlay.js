@@ -144,7 +144,8 @@ export default class AddonsOverlay {
 			createNewSubmit.tooltipster({
 				position: 'right',
 				theme: 'tooltipster-error',
-				offsetX: 5
+				offsetX: 5,
+				trigger: 'custom'
 			});
 
 			/**
@@ -177,6 +178,7 @@ export default class AddonsOverlay {
 					Addons.storeTexturePack(file, name)
 						.then(hashsum => Addons.setActiveTexturePack(hashsum)
 							.then(texturePack => {
+								AddonsOverlay.#updateTooltipster(createNewSubmit, '');
 								Utils.updateTooltip(createNewSubmit, '');
 								Addons.reloadGame();
 
@@ -190,7 +192,7 @@ export default class AddonsOverlay {
 								createNewWrapper.hide();
 							}))
 						.catch(err => {
-							Utils.updateTooltip(createNewSubmit, err.message);
+							AddonsOverlay.#updateTooltipster(createNewSubmit, err.message);
 						});
 				}
 			});
@@ -254,6 +256,16 @@ export default class AddonsOverlay {
 		this.content.append(wrapper);
 
 		return wrapper;
+	}
+
+	/**
+	 * Update the search button error tooltip
+	 * @param {JQuery} element Tooltipstered element
+	 * @param {string} content Error content
+	 */
+	static #updateTooltipster(element, content) {
+		Utils.updateTooltip(element, content);
+		setTimeout(() => Utils.updateTooltip(element, ''), 1_500);
 	}
 
 }

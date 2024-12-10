@@ -350,7 +350,7 @@ export default class IronVaultOverlay {
 			[
 				'Deaths',
 				Addons.t_url('assets/menu/ironvault/deaths.svg'),
-				spaceSeparateThousands(playerDetails.getKills())
+				spaceSeparateThousands(playerDetails.getDeaths())
 			],
 			[
 				'Suicides',

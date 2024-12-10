@@ -132,20 +132,19 @@ export default class IronVaultOverlay {
 		this.searchSeparator.hide();
 		this.searchForPlayerWidget.append([this.usernameInput, this.usernameSubmit, this.searchSeparator, this.searchResult]);
 
-		this.usernameSubmit.on('mouseup', () => {
-			this.searchSeparator.hide();
-			this.searchResult.empty();
-
-			const username = this.usernameInput.val();
-			IronVaultOverlay.#insertPlayer(username)
-				.then(result => {
-					this.searchSeparator.show();
-					this.searchResult.append(result);
-				})
-				.catch(err => IronVaultOverlay.#updateTooltipster(this.usernameSubmit, err.message));
+		this.usernameInput.on('input', () => {
+			const acceptedOnly = this.usernameInput.val().replace(/[^A-Za-z0-9_-]/gu, '');
+			this.usernameInput.val(acceptedOnly);
 		});
+		this.usernameInput.on('keypress', ({ key }) => {
+			const submit = key === 'Enter';
+			if (submit) this.#handleSearchSubmit();
 
-		this.createSection({
+			return !submit;
+		});
+		this.usernameSubmit.on('mouseup', () => this.#handleSearchSubmit());
+
+		this.#createSection({
 			title: 'Search for player',
 			id: 'ironvault-search',
 			requiresReload: false
@@ -160,8 +159,7 @@ export default class IronVaultOverlay {
 	 * @param  {Widget[]} widgets JQuery UI widgets
 	 * @returns New section
 	 */
-	// eslint-disable-next-line complexity
-	createSection(sectionOpts, widgets = []) {
+	#createSection(sectionOpts, widgets = []) {
 		const wrapper = $(`<fieldset id="${ sectionOpts.id }"></fieldset>`);
 		const legend = $(`<legend>${ sectionOpts.title }</legend>`);
 
@@ -174,6 +172,22 @@ export default class IronVaultOverlay {
 		this.content.append(wrapper);
 
 		return wrapper;
+	}
+
+	/**
+	 * Search and insert player on search
+	 */
+	#handleSearchSubmit() {
+		this.searchSeparator.hide();
+		this.searchResult.empty();
+
+		const username = this.usernameInput.val();
+		IronVaultOverlay.#insertPlayer(username)
+			.then(result => {
+				this.searchSeparator.show();
+				this.searchResult.append(result);
+			})
+			.catch(err => IronVaultOverlay.#updateTooltipster(this.usernameSubmit, err.message));
 	}
 
 	/**

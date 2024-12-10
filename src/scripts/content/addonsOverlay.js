@@ -110,7 +110,7 @@ export default class AddonsOverlay {
 					});
 			});
 
-			this.createSection({
+			this.#createSection({
 				title: 'Interface',
 				id: 'theme',
 				requiresReload: false
@@ -226,7 +226,7 @@ export default class AddonsOverlay {
 
 			otherWidget.append([texturePackHeading, texturePackWrapper]);
 
-			this.createSection({
+			this.#createSection({
 				title: 'Other',
 				id: 'other',
 				requiresReload: false
@@ -243,7 +243,7 @@ export default class AddonsOverlay {
 	 * @returns New section
 	 */
 	// eslint-disable-next-line complexity
-	createSection(sectionOpts, widgets = []) {
+	#createSection(sectionOpts, widgets = []) {
 		const wrapper = $(`<fieldset id="${ sectionOpts.id }"></fieldset>`);
 		const legend = $(`<legend>${ sectionOpts.title }</legend>`);
 

@@ -367,6 +367,16 @@ export default class IronVaultOverlay {
 				'Last login',
 				Addons.t_url('assets/menu/ironvault/last-login.svg'),
 				timeAgo(new Date(playerDetails.getLastLogin() * 1000))
+			],
+			[
+				'Player ID',
+				Addons.t_url('assets/menu/ironvault/player-id.svg'),
+				playerDetails.getPlayerId()
+			],
+			[
+				'Game Master',
+				Addons.t_url('assets/menu/ironvault/game-master.svg'),
+				`Level ${ playerDetails.getGmLevel() }`
 			]
 
 		].map(item => {

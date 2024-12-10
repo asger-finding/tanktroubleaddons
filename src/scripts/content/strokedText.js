@@ -44,6 +44,8 @@ if (!customElements.get('stroked-text')) {
 
 				this.svg.appendChild(this.text);
 
+				this.hasResized = false;
+
 				shadow.appendChild(this.svg);
 			}
 
@@ -54,6 +56,8 @@ if (!customElements.get('stroked-text')) {
 			 * it can be rendered.
 			 */
 			connectedCallback() {
+				if (this.hasResized) return;
+
 				const textWidth = this.text.getComputedTextLength();
 				if (textWidth > this.clientWidth) {
 					// Scale text down to match svg size
@@ -63,6 +67,8 @@ if (!customElements.get('stroked-text')) {
 
 				const newY = this.svg.clientHeight / 2 - this.text.clientHeight;
 				this.text.setAttribute('y', `${ newY }px`);
+
+				this.hasResized = true;
 			}
 
 		});

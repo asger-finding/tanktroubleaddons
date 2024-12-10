@@ -76,6 +76,8 @@ class Menu {
 		return this.#matrixTransform;
 	}
 
+	#jqMatrixTransform = $(this.matrixTransform);
+
 	/** Construct and initialize the overlay */
 	constructor() {
 		this.header.svg({
@@ -148,7 +150,7 @@ class Menu {
 				this.wrapper.css({ opacity: 0.7 });
 
 				const self = this;
-				$(this.matrixTransform).animate({ multiplier: 1 }, {
+				this.#jqMatrixTransform.animate({ multiplier: 1 }, {
 					duration: 300,
 
 					step() {
@@ -160,10 +162,12 @@ class Menu {
 			/** Reset overlay opacity, animate out matrix transform */
 			stop: () => {
 				this.wrapper.css({ opacity: '' });
+				this.#jqMatrixTransform.stop(true, false);
 
 				const self = this;
-				$(this.matrixTransform).animate({ multiplier: 0 }, {
+				this.#jqMatrixTransform.animate({ multiplier: 0 }, {
 					duration: 120,
+					queue: false,
 
 					step() {
 						self.matrixTransform = { multiplier: this.multiplier };

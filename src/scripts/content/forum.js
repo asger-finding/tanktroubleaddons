@@ -281,6 +281,11 @@ const postHandler = (...args) => {
 		default:
 			break;
 	}
+
+	// Whenever a change happens we must handle the selected thread
+	// as well, as its set by the getter functions, and not sent through
+	// the change event listeners
+	handleThreadOrReply(Forum.getInstance().model.getSelectedThread());
 };
 
 const proxy = new Proxy({}, {
@@ -295,13 +300,10 @@ const proxy = new Proxy({}, {
 
 const { getInstance } = Forum;
 Forum.classMethod('getInstance', function(...args) {
-	const hadInstance = Boolean(Forum.instance);
 	const instance = getInstance.apply(this, args);
 
-	if (!hadInstance) {
-		instance.model.threadListChangeListeners =  [proxy, ...instance.model.threadListChangeListeners];
-		instance.model.replyListChangeListeners =  [proxy, ...instance.model.replyListChangeListeners];
-	}
+	instance.model.threadListChangeListeners = Array.from(new Set([proxy, ...instance.model.threadListChangeListeners]));
+	instance.model.replyListChangeListeners = Array.from(new Set([proxy, ...instance.model.replyListChangeListeners]));
 
 	return instance;
 });

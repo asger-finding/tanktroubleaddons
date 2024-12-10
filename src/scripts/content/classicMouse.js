@@ -52,9 +52,9 @@ MouseInputManager.method('update', function() {
 	const relativeToTank = tankSprite.toLocal(new Phaser.Point(this.mouseX, this.mouseY));
 	const magnitude = relativeToTank.getMagnitude();
 	let angle = Phaser.Math.angleBetween(0, 0, relativeToTank.x, relativeToTank.y);
-	if (angle > Math.PI / 2) angle = -angle;
 
 	if (isClassicMouse) {
+		if (angle > Math.PI / 2) angle = -angle;
 		const distance = Math.abs((angle / Math.PI) + 0.5);
 		const rotationMultiplier = distance > 0.1
 			? Math.max(Math.min(distance * 12, 4), 1)

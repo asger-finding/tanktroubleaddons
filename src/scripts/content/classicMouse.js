@@ -109,6 +109,8 @@ MouseInputManager.method('update', function() {
 	stateChanged ||= this.storedStates.fire !== fireState;
 	stateChanged ||= !leftState.every((el, i) => this.storedStates.left[i] === el);
 	stateChanged ||= !rightState.every((el, i) => this.storedStates.right[i] === el);
+	stateChanged ||= leftState[1] < 0.8 || leftState[1] > 1.2;
+	stateChanged ||= rightState[1] < 0.8 || rightState[1] > 1.2;
 
 	const gameController = GameManager.getGameController();
 	if (stateChanged && gameController) {

@@ -331,7 +331,6 @@ Object.assign(Addons, {
 	menu: new Menu()
 });
 
-
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) => {
 	original(...args);
 
@@ -359,7 +358,7 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 	});
 
 	addonsButton.append([standard, active]);
-	addonsButton.insertAfter(TankTrouble.TankInfoBox.infoAchievements);
+	addonsButton.insertBefore(TankTrouble.TankInfoBox.infoAccount);
 });
 
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {

@@ -233,7 +233,7 @@ Addons.switchControlsBox = {
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) => {
 	original(...args);
 
-	const container = TankTrouble.TankInfoBox.infoSwitchControls = $('<div class="button" title=""/>');
+	const switchControlsButton = TankTrouble.TankInfoBox.infoSwitchControls = $('<div class="button" title=""/>');
 	for (const inputSet of Inputs.getAllInputSetIds()) {
 		const inputButton = $('<div/>');
 
@@ -244,15 +244,15 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 			.attr('draggable', 'false')
 			.hide();
 		inputButton.data('inputsetid', inputSet);
-		container.append(inputButton);
+		switchControlsButton.append(inputButton);
 	}
 
-	container.tooltipster({
+	switchControlsButton.tooltipster({
 		position: 'right',
 		offsetX: 5
 	});
 
-	container.on('mouseup', () => {
+	switchControlsButton.on('mouseup', () => {
 		Addons.switchControlsBox.show(
 			TankTrouble.TankInfoBox.playerId,
 			TankTrouble.TankInfoBox.infoSwitchControls.offset().left + TankTrouble.TankInfoBox.infoSwitchControls.outerWidth() * 0.5,
@@ -262,7 +262,7 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 		);
 	});
 
-	container.insertAfter(TankTrouble.TankInfoBox.infoAchievements);
+	switchControlsButton.insertBefore(TankTrouble.TankInfoBox.infoAccount);
 });
 
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {

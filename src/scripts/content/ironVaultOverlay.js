@@ -373,11 +373,11 @@ export default class IronVaultOverlay {
 				Addons.t_url('assets/menu/ironvault/player-id.svg'),
 				playerDetails.getPlayerId()
 			],
-			[
+			...(playerDetails.getGmLevel() !== null ?  [[
 				'Game Master',
 				Addons.t_url('assets/menu/ironvault/game-master.svg'),
 				`Level ${ playerDetails.getGmLevel() }`
-			]
+			]] : [])
 
 		].map(item => {
 			const [key, iconUrl, value] = item;

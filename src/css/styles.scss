@@ -531,6 +531,10 @@ $max-safe-integer: 2147483647;
 		top: 0 !important;
 	}
 
+	&:not(:is(.opening,.open)) form .autocomplete-dropdown {
+		@include hide();
+	}
+
 	form {
 		width: fit-content;
 

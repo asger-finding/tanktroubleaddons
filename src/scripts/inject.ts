@@ -58,6 +58,7 @@
 		injectScript(`${meta.extensionUrl}scripts/content/lobby.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/gameSettings.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/tankNameOnClick.js`);
+		injectScript(`${meta.extensionUrl}scripts/content/tintedBullets.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/killedByMessage.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/deathCount.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/texturePacks.js`);

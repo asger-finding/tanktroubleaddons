@@ -97,7 +97,7 @@ export const calculateFileHash = async(file: File) => {
  * @link http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript/21963136#21963136
  * @returns RFC4122 version 4 compliant UUID
  */
-export const generateUUID = (function() {
+export const generateUUID = (() => {
 	const lut: string[] = [];
 	for (let i = 0; i < 256; i++)  lut[i] = (i < 16 ? '0' : '') + (i).toString(16);
 
@@ -112,5 +112,31 @@ export const generateUUID = (function() {
 		}${lut[d3 & 0xff]}${lut[d3 >> 8 & 0xff]}${lut[d3 >> 16 & 0xff]}${lut[d3 >> 24 & 0xff]}`;
 	};
 })();
+
+/**
+ * Convert a string hexadecimal color to numbers
+ * @param hex Hexadecimal color
+ * @returns Parsed colors in RGB
+ */
+export const parseHexColor = (hex: string) => {
+	if (typeof hex !== 'string' || !/^0x[0-9a-fA-F]+$/u.test(hex)) throw new Error('Invalid hexadecimal color string');
+
+	const hexValue = parseInt(hex, 16);
+	const isShorthand = hex.length === 5;
+
+	// eslint-disable-next-line init-declarations
+	let blue, green, red;
+	if (isShorthand) {
+		red = ((hexValue >> 8) & 0xf) * 17;
+		green = ((hexValue >> 4) & 0xf) * 17;
+		blue = (hexValue & 0xf) * 17;
+	} else {
+		red = (hexValue >> 16) & 0xff;
+		green = (hexValue >> 8) & 0xff;
+		blue = hexValue & 0xff;
+	}
+
+	return { red, green, blue };
+};
 
 export const _isESmodule = true;

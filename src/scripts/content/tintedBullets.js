@@ -42,11 +42,36 @@ varying vec2 vTextureCoord;
 void main(void) {
     vec4 textureColor = texture2D(uSampler, vTextureCoord);
 
-    vec4 solidColor = vec4(red, green, blue, textureColor.a);
+	if (textureColor.a > 0.0) {
+			float alpha = textureColor.a;
+			textureColor.rgb /= alpha;
 
-    gl_FragColor = mix(textureColor, vec4(red, green, blue, textureColor.a), enabled) * textureColor.a;
+			textureColor = mix(textureColor,  vec4(red, green, blue, alpha), enabled);
+
+			textureColor.rgb *= alpha;  
+	}
+
+    gl_FragColor = textureColor;
 }
 `;
+
+const proto = UIProjectileImage.prototype;
+UIProjectileImage = function(game, gameController) {
+	Phaser.Image.call(this, game, 0, 0, 'game', '');
+	this.gameController = gameController;
+	this.anchor.setTo(0.5, 0.5);
+	this.scale.setTo(UIConstants.GAME_ASSET_SCALE, UIConstants.GAME_ASSET_SCALE);
+	this.colorFilter = new Phaser.Filter(this.game, {
+		red: { type: '1f', value: 0.0 },
+		green: { type: '1f', value: 0.0 },
+		blue: { type: '1f', value: 0.0 },
+		enabled: { type: '1f', value: 0.0 }
+	}, solidColorFragShader);
+	this.filters = [ this.colorFilter ];
+	this.kill();
+};
+
+UIProjectileImage.prototype = proto;
 
 UIProjectileImage.prototype.spawn = function(x, y, projectileId, frameName) {
 	this.frameName = frameName;
@@ -56,18 +81,9 @@ UIProjectileImage.prototype.spawn = function(x, y, projectileId, frameName) {
 };
 
 UIProjectileImage.prototype.updateColor = function(enabled) {
-	if (!this.filters) {
-		this.filters = [
-			new Phaser.Filter(this.game, {
-				red: { type: '1f', value: 0.0 },
-				green: { type: '1f', value: 0.0 },
-				blue: { type: '1f', value: 0.0 },
-				enabled: { type: '1f', value: 0.0 }
-			}, solidColorFragShader)
-		];
-	}
+	if (!this.colorFilter) return;
 
-	this.filters[0].uniforms.enabled.value = 0.0;
+	this.colorFilter.uniforms.enabled.value = 0.0;
 
 	const projectileData = this.gameController.getProjectile(this.projectileId);
 	if (projectileData && enabled) {
@@ -78,15 +94,14 @@ UIProjectileImage.prototype.updateColor = function(enabled) {
 		].includes(projectileData.getType())) return;
 
 		Backend.getInstance().getPlayerDetails(result => {
-			const [filter] = this.filters;
 			if (typeof result === 'object') {
 				const turret = result.getTurretColour();
 				const { red, green, blue } = parseHexColor(turret.numericValue);
 
-				filter.uniforms.red.value = red / 255;
-				filter.uniforms.green.value = green / 255;
-				filter.uniforms.blue.value = blue / 255;
-				filter.uniforms.enabled.value = 1.0;
+				this.colorFilter.uniforms.red.value = red / 255;
+				this.colorFilter.uniforms.green.value = green / 255;
+				this.colorFilter.uniforms.blue.value = blue / 255;
+				this.colorFilter.uniforms.enabled.value = 1.0;
 			}
 		}, () => {}, () => {}, projectileData.getPlayerId(), Caches.getPlayerDetailsCache());
 	}

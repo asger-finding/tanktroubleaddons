@@ -30,26 +30,25 @@ onStateChange(({ detail }) => {
 });
 
 const solidColorFragShader = `
-precision mediump float;
+precision lowp float;
 
 uniform sampler2D uSampler;
-uniform float red;
-uniform float green;
-uniform float blue;
+uniform vec3 color;
 uniform float enabled;
 varying vec2 vTextureCoord;
 
 void main(void) {
-    vec4 textureColor = texture2D(uSampler, vTextureCoord);
-
-	if (textureColor.a > 0.0) {
-			float alpha = textureColor.a;
-			textureColor.rgb /= alpha;
-
-			textureColor = mix(textureColor,  vec4(red, green, blue, alpha), enabled);
-
-			textureColor.rgb *= alpha;  
+	if (enabled != 1.0) {
+		gl_FragColor = texture2D(uSampler, vTextureCoord);;
+		return;
 	}
+
+    vec4 textureColor = texture2D(uSampler, vTextureCoord);
+	float alpha = textureColor.a;
+    if (alpha > 0.0) {
+        // Un-premultiply alpha and blend directly, then re-premultiply
+        textureColor.rgb = mix(textureColor.rgb / alpha, color, enabled) * alpha;
+    }
 
     gl_FragColor = textureColor;
 }
@@ -61,13 +60,14 @@ UIProjectileImage = function(game, gameController) {
 	this.gameController = gameController;
 	this.anchor.setTo(0.5, 0.5);
 	this.scale.setTo(UIConstants.GAME_ASSET_SCALE, UIConstants.GAME_ASSET_SCALE);
+
 	this.colorFilter = new Phaser.Filter(this.game, {
-		red: { type: '1f', value: 0.0 },
-		green: { type: '1f', value: 0.0 },
-		blue: { type: '1f', value: 0.0 },
+		color: { type: '3fv', value: [0.0, 0.0, 0.0] },
 		enabled: { type: '1f', value: 0.0 }
 	}, solidColorFragShader);
+	this.colorFilter.setResolution(16, 16);
 	this.filters = [ this.colorFilter ];
+
 	this.kill();
 };
 
@@ -93,14 +93,15 @@ UIProjectileImage.prototype.updateColor = function(enabled) {
 			Constants.WEAPON_TYPES.SHOTGUN
 		].includes(projectileData.getType())) return;
 
+		this.colorFilter.uniforms.color.value = [255, 0, 0];
+		this.colorFilter.uniforms.enabled.value = 1.0;
+
 		Backend.getInstance().getPlayerDetails(result => {
 			if (typeof result === 'object') {
 				const turret = result.getTurretColour();
 				const { red, green, blue } = parseHexColor(turret.numericValue);
 
-				this.colorFilter.uniforms.red.value = red / 255;
-				this.colorFilter.uniforms.green.value = green / 255;
-				this.colorFilter.uniforms.blue.value = blue / 255;
+				this.colorFilter.uniforms.color.value = [red / 255, green / 255, blue / 255];
 				this.colorFilter.uniforms.enabled.value = 1.0;
 			}
 		}, () => {}, () => {}, projectileData.getPlayerId(), Caches.getPlayerDetailsCache());

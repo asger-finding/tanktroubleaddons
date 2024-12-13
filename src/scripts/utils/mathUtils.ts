@@ -119,24 +119,9 @@ export const generateUUID = (() => {
  * @returns Parsed colors in RGB
  */
 export const parseHexColor = (hex: string) => {
-	if (typeof hex !== 'string' || !/^0x[0-9a-fA-F]+$/u.test(hex)) throw new Error('Invalid hexadecimal color string');
-
 	const hexValue = parseInt(hex, 16);
-	const isShorthand = hex.length === 5;
 
-	// eslint-disable-next-line init-declarations
-	let blue, green, red;
-	if (isShorthand) {
-		red = ((hexValue >> 8) & 0xf) * 17;
-		green = ((hexValue >> 4) & 0xf) * 17;
-		blue = (hexValue & 0xf) * 17;
-	} else {
-		red = (hexValue >> 16) & 0xff;
-		green = (hexValue >> 8) & 0xff;
-		blue = hexValue & 0xff;
-	}
-
-	return { red, green, blue };
+	return { red: (hexValue >> 16) & 0xff, green: (hexValue >> 8) & 0xff, blue: hexValue & 0xff };
 };
 
 export const _isESmodule = true;

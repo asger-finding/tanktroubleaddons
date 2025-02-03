@@ -10,6 +10,7 @@ permissions:
   - declarativeNetRequest
   - tabs
   - scripting
+  - windows
 action:
   default_title: execute.js will run (watch the Chrome DevTools' console)
 background:

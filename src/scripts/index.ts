@@ -27,6 +27,7 @@ class Addons {
 	 */
 	public load() {
 		Addons.setupFetchNoCors();
+		Addons.setupFullscreen();
 
 		Addons.waitForLoader().then(loader => {
 			const code = String(loader.textContent);
@@ -139,8 +140,7 @@ class Addons {
 			}, response => {
 				if (response && response.success) resolve(response.data);
 				else reject(response.error || 'Unknown error');
-			}
-			);
+			});
 		});
 	}
 
@@ -165,6 +165,26 @@ class Addons {
 					});
 				});
 		});
+	}
+
+	/**
+	 * Set up listener for fullscreen toggle
+	 */
+	static setupFullscreen() {
+		listen(['FULLSCREEN'], ({ detail }) => new Promise((resolve, reject) => {
+			if (!detail) throw new Error('No details provided for fullscreen request');
+
+			const state = detail.data?.state;
+			if (!state) throw new Error('No state provided for fullscreen request');
+
+			chrome.runtime.sendMessage({
+				action: 'FULLSCREEN',
+				state
+			}, response => {
+				if (response && response.success) resolve(response.data);
+				else reject(response.error || 'Unknown error');
+			});
+		}));
 	}
 
 }

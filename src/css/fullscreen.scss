@@ -1,0 +1,39 @@
+@mixin hide {
+	display: none !important
+}
+
+:root.fullscreen {
+	#header,
+	#leftBanner,
+	#rightBanner,
+	#secondaryContent,
+	#tertiaryContent,
+	#red_infiltration,
+	#version {
+		@include hide;
+	}
+
+	#contentWrapper {
+		height: 100% !important;
+	}
+
+	#contentWrapper, #content {
+		margin: 0 !important;
+	}
+
+	body, #contentWrapper {
+		overflow: hidden;
+	}
+
+	#mainContent {
+		display: flex !important;
+		width: calc(100vw - 20px) !important;
+        margin: 0 10px;
+		height: 100vh !important;
+	}
+
+    ::backdrop {
+        z-index: 0;
+        background: none !important;
+    }
+}

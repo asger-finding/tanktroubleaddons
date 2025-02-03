@@ -1,5 +1,6 @@
 @use "sass:map";
 @use "sass:math";
+@use 'fullscreen.scss';
 @use 'dark.scss';
 
 $assets: "chrome-extension://__MSG_@@extension_id__/assets";
@@ -113,7 +114,7 @@ $max-safe-integer: 2147483647;
 // Wide content
 #content {
 	max-width: 1884px !important;
-	width: calc(100%) !important;
+	width: 100% !important;
 }
 
 .ui-deleteselectmenu {

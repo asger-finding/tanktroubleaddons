@@ -1,4 +1,5 @@
 import { get, set } from '../common/store.js';
+import { dispatchMessage } from '../common/ipcBridge.js';
 
 export default class AddonsOverlay {
 
@@ -65,11 +66,11 @@ export default class AddonsOverlay {
 			const checkboxWrapper = $('<div style="display: grid; grid-template-areas: \'title-1 title-2\' \'checkbox-1 checkbox-2\'"></div>');
 			const classicMouseCheckbox = $(`
 				<div class="heading" style="grid-area: title-1">Classic mouse</div>
-				<input type="checkbox" id="checkbox-1" style="grid-area: checkbox-1">
+				<input type="checkbox" style="grid-area: checkbox-1">
 			`);
 			const tintedBulletsCheckbox = $(`
 				<div class="heading" style="grid-area: title-2">Tinted bullets</div>
-				<input type="checkbox" id="checkbox-1" style="grid-area: checkbox-2">	
+				<input type="checkbox" style="grid-area: checkbox-2">	
 			`);
 
 			checkboxWrapper.append([classicMouseCheckbox, tintedBulletsCheckbox]);
@@ -115,6 +116,48 @@ export default class AddonsOverlay {
 				id: 'theme',
 				requiresReload: false
 			}, [ interfaceWidget ]);
+		})();
+
+		(() => {
+			const featuresWidget = $('<div></div>');
+			const focusModeHeading = $('<div class="heading">Fullscreen mode</div>');
+
+			const focusModeSubmit = $('<button type="submit">Enter</button>');
+			focusModeSubmit.button();
+
+			focusModeSubmit.on('mouseup', () => {
+				if (GameManager.phaserInstance) {
+					dispatchMessage(null, {
+						type: 'FULLSCREEN',
+						data: {
+							state: document.documentElement.classList.contains('fullscreen') ? 'off' : 'on'
+						}
+					});
+					document.documentElement.classList.toggle(
+						'fullscreen',
+						!document.documentElement.classList.contains('fullscreen')
+					);
+					ResizeManager._resize();
+				} else {
+					Utils.updateTooltip(focusModeSubmit, 'No game loaded');
+					setTimeout(() => Utils.updateTooltip(focusModeSubmit, ''), 1_500);
+				}
+			});
+
+			focusModeSubmit.tooltipster({
+				position: 'right',
+				theme: 'tooltipster-error',
+				offsetX: 5,
+				trigger: 'custom'
+			});
+
+			featuresWidget.append([focusModeHeading, focusModeSubmit]);
+
+			this.#createSection({
+				title: 'Features',
+				id: 'features',
+				requiresReload: false
+			}, [ featuresWidget ]);
 		})();
 
 		(() => {

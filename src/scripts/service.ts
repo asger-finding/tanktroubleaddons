@@ -11,10 +11,13 @@ const defaultState = {
 	},
 	classicMouse: true,
 	tintedBullets: false,
+	fullscreen: false,
 	statisticsState: 'global'
 };
 
 startSyncStore(defaultState);
+
+let lastWindowState: chrome.windows.windowStateEnum = 'normal';
 
 /**
  * Get the tab id of the focused tab
@@ -41,6 +44,32 @@ async function execScript() {
 	}
 }
 
+/**
+ * Fullscreen or unfullscreen the current tab
+ * @param state Should the fullscreen be on or off?
+ */
+function toggleFullscreen(state?: 'on' | 'off') {
+	chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+		if (tabs.length === 0) return;
+
+		const [tab] = tabs;
+		const { windowId } = tab;
+
+		if (typeof tab.url === 'undefined') return;
+
+		const { hostname } = new URL(tab.url);
+		if (hostname === 'tanktrouble.com' || hostname.endsWith('.tanktrouble.com')) {
+			chrome.windows.get(windowId, window => {
+				const currentState = window.state ?? 'normal';
+				lastWindowState = currentState !== 'fullscreen' ?  currentState : 'normal';
+
+				chrome.windows.update(windowId, {
+					state: state === 'on' ? 'fullscreen' : lastWindowState
+				});
+			});
+		}
+	});
+}
 
 // event to run execute.js content when extension's button is clicked
 browser.action.onClicked.addListener(execScript);
@@ -55,6 +84,10 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 			.then(response => response.json())
 			.then(data => sendResponse({ success: true, data, uuid }))
 			.catch(error => sendResponse({ success: false, error }));
+
+		return true;
+	} else if (request.action === 'FULLSCREEN') {
+		toggleFullscreen(request.state);
 
 		return true;
 	}

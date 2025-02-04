@@ -558,6 +558,10 @@ $max-safe-integer: 2147483647;
 			z-index: 999;
 			filter: drop-shadow(0 0 3px rgb(0 0 0 / 70%));
 
+			&:empty {
+				display: none;
+			}
+
 			div {
 				border-bottom: 1pt dotted rgb(0 169 0 / 1.0);
 				cursor: pointer;

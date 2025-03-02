@@ -11,7 +11,7 @@ import { timeUntil } from '../utils/timeUtils.js';
  * Add auto-complete for user mentions when typing @ in the chat input
  * @param chatInput Chat input instance
  */
-const addMentionAutocomplete = chatInput => {
+const addAutocomplete = chatInput => {
 	class Autocomplete {
 
 		options = new Map();
@@ -661,16 +661,30 @@ const escapeBadCharacters = () => {
 	});
 };
 
+/**
+ * Adds emojis to chat messages
+ */
+const insertEmojis = () => {
+	const pattern = new RegExp(`:(${Object.keys(dismoji).join('|')}):`, 'gu');
+
+	ProxyHelper.interceptFunction(TankTrouble.ChatBox, '_renderChatMessage', (original, ...args) => {
+		args[6] = args[6].replace(pattern, match => dismoji[match.slice(1, -1)]);
+
+		return original(...args);
+	});
+};
+
 ProxyHelper.whenContentInitialized().then(() => {
 	/* eslint-disable prefer-destructuring */
 	const chatBody = TankTrouble.ChatBox.chatBody[0];
 	const chatInput = TankTrouble.ChatBox.chatInput[0];
 	/* eslint-enable prefer-destructuring*/
 
+	addAutocomplete(chatInput);
 	preventServerChangeChatClear();
 	escapeBadCharacters();
 	insertChatBanExpiryTime();
-	addMentionAutocomplete(chatInput);
+	insertEmojis();
 
 	TankTrouble.ChatBox.chatInput.tooltipster({
 		position: 'right',

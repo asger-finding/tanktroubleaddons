@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      discord_emoji:
+        specifier: github:asger-finding/discord_emoji
+        version: https://codeload.github.com/asger-finding/discord_emoji/tar.gz/e63e919752e2fa051bd8588907b05f7f92054a81
       fflate:
         specifier: ^0.8.2
         version: 0.8.2
@@ -954,6 +957,10 @@ packages:
   dir-glob@3.0.1:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
     engines: {node: '>=8'}
+
+  discord_emoji@https://codeload.github.com/asger-finding/discord_emoji/tar.gz/e63e919752e2fa051bd8588907b05f7f92054a81:
+    resolution: {tarball: https://codeload.github.com/asger-finding/discord_emoji/tar.gz/e63e919752e2fa051bd8588907b05f7f92054a81}
+    version: 0.1.0
 
   doctrine@2.1.0:
     resolution: {integrity: sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw==}
@@ -3837,6 +3844,8 @@ snapshots:
   dir-glob@3.0.1:
     dependencies:
       path-type: 4.0.0
+
+  discord_emoji@https://codeload.github.com/asger-finding/discord_emoji/tar.gz/e63e919752e2fa051bd8588907b05f7f92054a81: {}
 
   doctrine@2.1.0:
     dependencies:

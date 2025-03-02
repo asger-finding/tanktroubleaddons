@@ -540,7 +540,19 @@ $max-safe-integer: 2147483647;
 		width: fit-content;
 
 		.autocomplete-dropdown {
-			background-color: rgb(0 255 2 / 1.0);
+			--background: rgb(255 255 255 / 1.0);
+			--accent: rgb(160 160 160 / 1.0);
+
+			&#mention {
+				--background: rgb(0 255 2 / 1.0);
+				--accent: rgb(0 169 0 / 1.0);
+			}
+			&#emoji {
+				--background: rgb(255 255 255 / 1.0);
+				--accent: rgb(160 160 160 / 1.0);
+			}
+
+			background-color: var(--background);
 			border-radius: 3px;
 			top: 0;
 			font-family: $font-stack;
@@ -551,7 +563,7 @@ $max-safe-integer: 2147483647;
 			overflow-y: scroll;
 			padding: 4px 2px;
 			position: absolute;
-			scrollbar-color: rgb(0 169 0 / 1.0) transparent;
+			scrollbar-color: var(--accent) transparent;
 			scrollbar-gutter: stable;
 			scrollbar-width: thin;
 			white-space: nowrap;
@@ -563,7 +575,7 @@ $max-safe-integer: 2147483647;
 			}
 
 			div {
-				border-bottom: 1pt dotted rgb(0 169 0 / 1.0);
+				border-bottom: 1pt dotted var(--accent);
 				cursor: pointer;
 				display: none;
 				margin-bottom: 2px;

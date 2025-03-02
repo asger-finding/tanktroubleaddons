@@ -50,6 +50,7 @@
     "yargs": "^17.3.1"
   },
   "dependencies": {
+    "discord_emoji": "github:asger-finding/discord_emoji",
     "fflate": "^0.8.2",
     "iso-8859-15": "^3.0.4",
     "match-sorter": "^6.3.4",

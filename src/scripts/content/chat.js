@@ -1,5 +1,6 @@
 import ProxyHelper from '../utils/proxyHelper.js';
 import { decode } from 'iso-8859-15';
+import dismoji from 'discord_emoji';
 import { matchSorter } from 'match-sorter';
 import { timeUntil } from '../utils/timeUtils.js';
 
@@ -19,24 +20,28 @@ const addMentionAutocomplete = chatInput => {
 
 		/**
 		 * Setup the dropdown class
-		 * @param input Input to attach to
-		 * @param config Dropdown configuration (allow multiple of the same value, expiry time)
+		 * @param {HTMLInputElement} input Input to attach to
+		 * @param {string} id autocomplete element ID
+		 * @param {object} config Dropdown configuration override
 		 */
-		constructor(input, config) {
+		constructor(input, id, config) {
 			this.input = $(input);
 			this.wrapper = $('<div class="autocomplete-dropdown" tabindex="-1"></div>').insertAfter(this.input);
 			this.textareaMirror = $('<div class="autocomplete-caret-mirror"></div>').appendTo(this.wrapper.parent());
 			this.textareaMirrorInline = $('<span></span>').appendTo(this.textareaMirror);
 
 			Object.assign(this, {
-				allowRepeats: false,
-				autofillLifetime: 10 * 60 * 100,
+				// Default configuration
+				lifetime: 10 * 60 * 100,
 				inputHeight: 18,
+
+				// User configuration
 				...config
 			});
 
-			this.wrapper.insertAfter(this.input);
+			this.wrapper.attr('id', id);
 
+			this.wrapper.insertAfter(this.input);
 
 			this.hide();
 		}
@@ -45,8 +50,8 @@ const addMentionAutocomplete = chatInput => {
 
 		/**
 		 * Filter the dropdown elements when searchterm is set
-		 * @param term String term to search the dropdown registry for
-		 * @returns term
+		 * @param {string} term Term to match the dropdown registry for
+		 * @returns Setter result (term)
 		 */
 		set searchTerm(term) {
 			if (this.#searchTerm !== term) {
@@ -54,12 +59,14 @@ const addMentionAutocomplete = chatInput => {
 
 				const allSymbols = Array.from(this.options.keys());
 				this.matches = matchSorter(allSymbols, term, { keys: [symbol => symbol.description] });
+
 				for (const symbol of allSymbols) {
-					const element = this.options.get(symbol).value;
+					const element = this.options.get(symbol).display;
 
 					element.classList[this.matches.includes(symbol) ? 'add' : 'remove']('match');
 				}
-				for (const symbol of this.matches) this.wrapper.append(this.options.get(symbol).value);
+
+				for (const symbol of this.matches) this.wrapper.append(this.options.get(symbol).display);
 
 				this.#resetToFirst();
 			}
@@ -106,7 +113,7 @@ const addMentionAutocomplete = chatInput => {
 
 		/**
 		 * Check if the dropdown is visible
-		 * @returns Is the dropdown showing?
+		 * @returns {boolean} Is the dropdown showing?
 		 */
 		isShowing() {
 			return this.wrapper.is(':visible');
@@ -147,30 +154,41 @@ const addMentionAutocomplete = chatInput => {
 
 		/**
 		 * Add an autocomplete option to the dropdown
-		 * @param option Option as string
-		 * @param submitCallback Event handler for mouseup
-		 * @returns Success in adding option?
+		 * @param {string} key Search option
+		 * @param {HTMLElement} display Element to display in lookup
+		 * @param {number} lifetime How long until removed from dropdown matches?
+		 * @param {(...args: unknown) => void} submitCallback Event handler for mouseup
+		 * @returns {boolean} Success in adding option?
 		 */
-		addOption(option, submitCallback) {
-			const overrideSymbol = !this.allowRepeats
-				&& Array.from(this.options.keys())
-					.find(({ description }) => description === option);
+		addOption(key, display, lifetime, submitCallback) {
+			const overrideSymbol = Array.from(this.options.keys())
+				.find(({ description }) => description === key);
 			const symbolExists = typeof overrideSymbol === 'symbol';
 
 			if (symbolExists) return false;
 
-			const symbol = Symbol(option);
+			const symbol = Symbol(key);
 
-			const element = document.createElement('div');
-			element.innerText = option;
-			element.addEventListener('mouseup', evt => submitCallback(evt, evt.target.innerText));
+			display.addEventListener('mouseup', evt => {
+				submitCallback(evt);
+
+				this.#resetToFirst();
+			});
+			display.addEventListener('mouseout', () => {
+				const symbols = this.matches;
+				const [currentSymbol] = this.iterator.next(0).value;
+				const distToHover = symbols.indexOf(symbol);
+				const distToCurrent = symbols.indexOf(currentSymbol);
+
+				this.navigate(distToHover - distToCurrent, false);
+			});
 
 			const insert = [
 				symbol,
 				{
 					inserted: Date.now(),
-					lifetime: this.autofillLifetime,
-					value: element
+					lifetime,
+					display
 				}
 			];
 
@@ -180,28 +198,19 @@ const addMentionAutocomplete = chatInput => {
 		}
 
 		/**
-		 * Add an array of text options to the dropdown
-		 * @param options Options as string[]
-		 * @param submitCallback Generalized event handler for mouseup for all options
-		 */
-		addOptions(options, submitCallback) {
-			for (const option of options) this.addOption(option, submitCallback);
-		}
-
-		/**
 		 * Remove option and corresponding HTMLElement from DOM
-		 * @param symbol Symbol for element to remove
-		 * @returns Was the option deleted?
+		 * @param {symbol} symbol Symbol for element to remove
+		 * @returns {boolean} Was the option deleted?
 		 */
 		removeOption(symbol) {
-			this.options.get(symbol)?.value.remove();
+			this.options.get(symbol)?.display.remove();
 			this.matches = this.matches.filter(toRemove => toRemove !== symbol);
 			return this.options.delete(symbol);
 		}
 
 		/**
 		 * Clear all options from the dropdown
-		 * @returns Did options clear?
+		 * @returns {boolean} Did options clear?
 		 */
 		clearOptions() {
 			for (const symbol of this.options.keys()) this.removeOption(symbol);
@@ -212,24 +221,30 @@ const addMentionAutocomplete = chatInput => {
 
 		/**
 		 * Navigate position in the dropdown up/down
-		 * @param direction Up/down shift as number
-		 * @returns Identifier for where we navigated to
+		 * @param {number} shift Up/down shift as number
+		 * @param {boolean} scroll Should we scroll to the element?
+		 * @returns {symbol} Symbol identifier for our navigation result
 		 */
-		navigate(direction) {
+		navigate(shift, scroll) {
 			this.wrapper.children().removeClass('highlight');
 
-			const [symbol, data] = this.iterator.next(direction).value;
+			const [symbol, data] = this.iterator.next(shift).value;
 			if (!symbol) return null;
 
-			data.value.classList.add('highlight');
-			data.value.scrollIntoView(false);
+			data.display.classList.add('highlight');
+			if (scroll) {
+				data.display.scrollIntoView({
+					behavior: 'instant',
+					block: 'nearest'
+				});
+			}
 
 			return symbol;
 		}
 
 		/**
 		 * Check if the input wraps to newline
-		 * @returns Whether the input is one or multiple lines
+		 * @returns {boolean} Whether the input is one or multiple lines
 		 */
 		#isWordWrapped() {
 			return this.input.outerHeight() <= this.inputHeight;
@@ -244,7 +259,7 @@ const addMentionAutocomplete = chatInput => {
 			const [currentSymbol] = this.iterator.next(0).value;
 			const dist = symbols.indexOf(currentSymbol);
 
-			this.navigate(-dist);
+			this.navigate(-dist, true);
 		}
 
 		/**
@@ -252,21 +267,21 @@ const addMentionAutocomplete = chatInput => {
 		 */
 		#removeExpired() {
 			for (const [symbol, value] of this.options.entries()) {
-				const expiry = value.inserted + value.autofillLifetime;
+				if (value.lifetime === -1) continue;
+
+				const expiry = value.inserted + value.lifetime;
 				if (Date.now() > expiry) this.removeOption(symbol);
 			}
 		}
 
 		/**
 		 * Remove all non-numbers from string and return string as number
-		 * @param str String to parse
-		 * @returns String in number format
+		 * @param {string} str String to parse
+		 * @returns {number} String in number format
 		 */
 		static #toNumeric = str => Number(str.replace(/[^0-9.]/ug, ''));
 
 	}
-
-	const dropdown = new Autocomplete(chatInput);
 
 	/**
 	 * Get the word and start/end indexies of the input selectionEnd
@@ -288,18 +303,45 @@ const addMentionAutocomplete = chatInput => {
 		return currentWord;
 	};
 
+	const usernameAutocomplete = new Autocomplete(chatInput, 'mention');
+	const emojiAutocomplete = new Autocomplete(chatInput, 'emoji');
+
 	/**
-	 * Returns the user that the selection is over, from the input value, if prefixed by a @
+	 * Returns the user that the selection is over,
+	 * from the input value, if prefixed by @
 	 * @returns Mention username or null
 	 */
-	const getUserFocusIfMention = () => {
+	const getMentionFocus = () => {
 		const currentWord = getIndexiesOfWordInCurrentSelection();
 		const [mentions] = chatInput.value.split(/\s+(?=[^@])/u);
-		const isUserChat = mentions.startsWith('@');
+		const isTypingUserChat = mentions.startsWith('@');
 
-		if (currentWord && isUserChat) {
+		if (currentWord && isTypingUserChat) {
 			const [, end] = currentWord.range;
-			return end <= mentions.length ? currentWord : null;
+			const [ currentMatch ] = usernameAutocomplete.getCurrent();
+			return end <= mentions.length ? { match: currentMatch?.description, ...currentWord } : null;
+		}
+
+		return null;
+	};
+
+	/**
+	 * Returns the emoji that the selection is over,
+	 * from the input value, if prefixed by :
+	 * @returns Emoji identifier or null
+	 */
+	const getEmojiFocus = () => {
+		const currentWord = getIndexiesOfWordInCurrentSelection();
+		if (!currentWord) return null;
+
+		const isTypingEmoji = currentWord.word.startsWith(':') && !(currentWord.word.endsWith(':'));
+
+		if (isTypingEmoji) {
+			// Start emoji search query after three characters
+			if (currentWord.range[1] - currentWord.range[0] < 3) return null;
+
+			const [ currentMatch ] = emojiAutocomplete.getCurrent();
+			return { match: currentMatch?.description, ...currentWord };
 		}
 
 		return null;
@@ -309,20 +351,19 @@ const addMentionAutocomplete = chatInput => {
 	 * Handle a dropdown submit event (enter, tab or click)
 	 * by autofilling the value to the input field
 	 * @param evt Event object
-	 * @param username Username to autofill
 	 */
-	const handleSubmit = (evt, username = dropdown.getCurrent()[0].description) => {
-		const mention = getUserFocusIfMention();
-		if (mention === null) return;
+	const handleSubmit = evt => {
+		const content = getMentionFocus() || getEmojiFocus();
+		if (content === null) return;
 
-		const [start, end] = mention.range;
-		if (username) {
+		const [start, end] = content.range;
+		if (content.match) {
 			const before = chatInput.value.slice(0, start);
 			const after = chatInput.value.substring(end, chatInput.value.length);
 
 			const insertSpaceAfter = !after.startsWith(' ');
 
-			const beforeValue = `${ before }@${ username }${ insertSpaceAfter ? ' ' : '' }`;
+			const beforeValue = `${ before }${ content.match }${ insertSpaceAfter ? ' ' : '' }`;
 			const cursorPosition = [beforeValue.length + 1, beforeValue.length + 1];
 			chatInput.value = `${ beforeValue }${ after }`;
 
@@ -330,28 +371,41 @@ const addMentionAutocomplete = chatInput => {
 		}
 
 		evt.preventDefault();
-
 		chatInput.dispatchEvent(new InputEvent('input'));
+		chatInput.focus();
 	};
 
 	/**
-	 * Event handler for TTClient.EVENTS.GAME_LIST_CHANGED
+	 * Insert new username to username autofill
+	 * @param {object} playerDetails Player details object
 	 */
-	const handleGameListChanged = () => {
-		const gameStates = ClientManager.getClient().getAvailableGameStates();
+	const insertMention = playerDetails => {
+		if (typeof playerDetails === 'object') {
+			const key = `@${ playerDetails.getUsername() }`;
+			const display = document.createElement('div');
+			const lifetime = 10 * 60 * 1000;
+			display.innerText = playerDetails.getUsername();
 
-		for (const gameState of gameStates) {
-			const playerStates = gameState.getPlayerStates();
-
-			for (const player of playerStates) {
-				const playerId = player.getPlayerId();
-
-				Backend.getInstance().getPlayerDetails(result => {
-					if (typeof result === 'object') dropdown.addOption(result.getUsername(), handleSubmit);
-				}, () => {}, () => {}, playerId, Caches.getPlayerDetailsCache());
-			}
+			usernameAutocomplete.addOption(key, display, lifetime, handleSubmit);
 		}
 	};
+
+	/**
+	 * Insert new emoji to emoji autofill
+	 * @param {string} key Emoji identifier
+	 * @param {string} emoji Emoji symbol
+	 */
+	const insertEmoji = (key, emoji) => {
+		const identifier = `:${key.replaceAll(' ', '_').replace(/[^a-zA-Z0-9_]/gu, '') }:`;
+
+		const display = document.createElement('div');
+		display.innerText = `${ emoji } ${ identifier }`;
+
+		emojiAutocomplete.addOption(identifier, display, -1, handleSubmit);
+	};
+
+	// Insert emojis from emoji list
+	for (const [key, emoji] of Object.entries(dismoji)) insertEmoji(key, emoji);
 
 	/**
 	 * Event handler for received chat messages
@@ -364,7 +418,14 @@ const addMentionAutocomplete = chatInput => {
 
 		for (const playerId of foreignPlayerIds) {
 			Backend.getInstance().getPlayerDetails(result => {
-				if (typeof result === 'object') dropdown.addOption(result.getUsername(), handleSubmit);
+				if (typeof result === 'object') {
+					const key = `@${ result.getUsername() }`;
+					const display = document.createElement('div');
+					const lifetime = 10 * 60 * 1000;
+					display.innerText = result.getUsername();
+
+					usernameAutocomplete.addOption(key, display, lifetime, handleSubmit);
+				}
 			}, () => {}, () => {}, playerId, Caches.getPlayerDetailsCache());
 		}
 	};
@@ -372,42 +433,58 @@ const addMentionAutocomplete = chatInput => {
 	chatInput.addEventListener('input', ({ isComposing }) => {
 		if (isComposing) return;
 
-		const userFocus = getUserFocusIfMention();
+		const userFocus = getMentionFocus();
 		if (userFocus === null) {
-			dropdown.hide();
+			usernameAutocomplete.hide();
 			return;
 		}
 
-		dropdown.searchTerm = userFocus.word.replace(/^@/u, '');
-		if (!dropdown.matches.length) {
-			dropdown.hide();
+		usernameAutocomplete.searchTerm = userFocus.word;
+		if (!usernameAutocomplete.matches.length) {
+			usernameAutocomplete.hide();
 			return;
 		}
 
 		// Show UI
-		dropdown.show();
-		dropdown.update();
+		usernameAutocomplete.show();
+		usernameAutocomplete.update();
 	});
 
-	// eslint-disable-next-line complexity
+	chatInput.addEventListener('input', ({ isComposing }) => {
+		if (isComposing) return;
+
+		const emojiFocus = getEmojiFocus();
+		// console.log(emojiFocus)
+		if (emojiFocus === null) {
+			emojiAutocomplete.hide();
+			return;
+		}
+
+		emojiAutocomplete.searchTerm = emojiFocus.word;
+		if (!emojiAutocomplete.matches.length) {
+			emojiAutocomplete.hide();
+			return;
+		}
+
+		// Show UI
+		emojiAutocomplete.show();
+		emojiAutocomplete.update();
+	});
+
 	chatInput.addEventListener('keydown', evt => {
-		const userFocus = getUserFocusIfMention();
-		if (userFocus === null) return;
-
-		dropdown.searchTerm = userFocus.word.replace(/^@/u, '');
-		if (!dropdown.matches.length) return;
-
 		switch (evt.key) {
 			case 'Enter':
 			case 'Tab':
 				handleSubmit(evt);
 				break;
 			case 'ArrowUp':
-				dropdown.navigate(-1);
+				emojiAutocomplete.navigate(-1, true);
+				usernameAutocomplete.navigate(-1, true);
 				evt.preventDefault();
 				break;
 			case 'ArrowDown':
-				dropdown.navigate(1);
+				emojiAutocomplete.navigate(1, true);
+				usernameAutocomplete.navigate(1, true);
 				evt.preventDefault();
 				break;
 			default:
@@ -415,8 +492,29 @@ const addMentionAutocomplete = chatInput => {
 		}
 	}, false);
 
+	/** Event handler for TTClient.EVENTS.GAME_LIST_CHANGED */
+	const handleGameListChanged = () => {
+		const gameStates = ClientManager.getClient().getAvailableGameStates();
+
+		for (const gameState of gameStates) {
+			const playerStates = gameState.getPlayerStates();
+
+			for (const player of playerStates) {
+				const playerId = player.getPlayerId();
+
+				Backend.getInstance().getPlayerDetails(
+					insertMention,
+					() => {},
+					() => {},
+					playerId,
+					Caches.getPlayerDetailsCache()
+				);
+			}
+		}
+	};
+
 	/**
-	 * State change event handler
+	 * Event handler for client state changes (connect, disconnect, handshaked, etc.)
 	 * @param _self Self reference
 	 * @param _oldState Old client state
 	 * @param newState New client state
@@ -424,7 +522,7 @@ const addMentionAutocomplete = chatInput => {
 	const clientStateEventHandler = (_self, _oldState, newState) => {
 		switch (newState) {
 			case TTClient.STATES.UNCONNECTED:
-				dropdown.clearOptions();
+				usernameAutocomplete.clearOptions();
 				break;
 			default:
 				break;
@@ -440,20 +538,16 @@ const addMentionAutocomplete = chatInput => {
 	// eslint-disable-next-line complexity
 	const clientEventHandler = (_self, evt, data) => {
 		switch (evt) {
-			case TTClient.EVENTS.GAME_LIST_CHANGED:
-				handleGameListChanged();
-				break;
 			case TTClient.EVENTS.USER_CHAT_POSTED:
-				if (data) handleNewChatMessage(data);
-				break;
 			case TTClient.EVENTS.GLOBAL_CHAT_POSTED:
 			case TTClient.EVENTS.CHAT_POSTED:
-				if (data) handleNewChatMessage(data);
-				break;
 			case TTClient.EVENTS.SYSTEM_CHAT_POSTED:
 			case TTClient.EVENTS.PLAYERS_BANNED:
 			case TTClient.EVENTS.PLAYERS_UNBANNED:
 				if (data) handleNewChatMessage(data);
+				break;
+			case TTClient.EVENTS.GAME_LIST_CHANGED:
+				handleGameListChanged();
 				break;
 			default:
 				break;

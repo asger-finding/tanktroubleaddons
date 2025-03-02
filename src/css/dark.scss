@@ -276,10 +276,20 @@ $tooltipster-accent-dark: rgb(25 25 25);
 		}
 
 		&.user form {
-			background-color: $chat-user-bg
+			background-color: $chat-user-bg;
+
+			.autocomplete-dropdown {
+				--background: #{$chat-user-bg} !important;
+				--accent: #{$chat-user-accent} !important;
+			}
 		}
 		&.global form {
-			background-color: $chat-global-bg
+			background-color: $chat-global-bg;
+
+			.autocomplete-dropdown {
+				--background: #{$chat-global-bg} !important;
+				--accent: #{$chat-global-accent} !important;
+			}
 		}
 	}
 

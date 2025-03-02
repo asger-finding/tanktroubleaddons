@@ -174,7 +174,7 @@ const addAutocomplete = chatInput => {
 
 				this.#resetToFirst();
 			});
-			display.addEventListener('mouseout', () => {
+			display.addEventListener('mouseover', () => {
 				const symbols = this.matches;
 				const [currentSymbol] = this.iterator.next(0).value;
 				const distToHover = symbols.indexOf(symbol);

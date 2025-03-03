@@ -60,6 +60,7 @@
 		injectScript(`${meta.extensionUrl}scripts/content/tankNameOnClick.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/tintedBullets.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/killedByMessage.js`);
+		injectScript(`${meta.extensionUrl}scripts/content/fullscreenGame.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/deathCount.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/texturePacks.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/emporium.js`);

@@ -119,48 +119,6 @@ export default class AddonsOverlay {
 		})();
 
 		(() => {
-			const featuresWidget = $('<div></div>');
-			const focusModeHeading = $('<div class="heading">Fullscreen mode</div>');
-
-			const focusModeSubmit = $('<button type="submit">Enter</button>');
-			focusModeSubmit.button();
-
-			focusModeSubmit.on('mouseup', () => {
-				if (GameManager.phaserInstance) {
-					dispatchMessage(null, {
-						type: 'FULLSCREEN',
-						data: {
-							state: document.documentElement.classList.contains('fullscreen') ? 'off' : 'on'
-						}
-					});
-					document.documentElement.classList.toggle(
-						'fullscreen',
-						!document.documentElement.classList.contains('fullscreen')
-					);
-					ResizeManager._resize();
-				} else {
-					Utils.updateTooltip(focusModeSubmit, 'No game loaded');
-					setTimeout(() => Utils.updateTooltip(focusModeSubmit, ''), 1_500);
-				}
-			});
-
-			focusModeSubmit.tooltipster({
-				position: 'right',
-				theme: 'tooltipster-error',
-				offsetX: 5,
-				trigger: 'custom'
-			});
-
-			featuresWidget.append([focusModeHeading, focusModeSubmit]);
-
-			this.#createSection({
-				title: 'Features',
-				id: 'features',
-				requiresReload: false
-			}, [ featuresWidget ]);
-		})();
-
-		(() => {
 			const otherWidget = $('<div></div>');
 			const texturePackWrapper = $('<div></div>');
 			const texturePackHeading = $('<div class="heading">Texture packs</div>');

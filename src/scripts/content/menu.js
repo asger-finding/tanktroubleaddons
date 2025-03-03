@@ -204,12 +204,12 @@ class Menu {
 			minWidth: 400,
 			maxWidth: 400,
 			minHeight: 200,
-			maxHeight: 500
+			maxHeight: 730
 		});
 
 		this.body.css({
 			width: 400,
-			height: 300
+			height: 330
 		});
 
 		this.draggable.on('dblclick', () => this.hide(true));

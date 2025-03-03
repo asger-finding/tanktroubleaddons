@@ -11,6 +11,7 @@ const autoprefixer = require('autoprefixer');
 const htmlmin = require('gulp-htmlmin');
 const jeditor = require('gulp-json-editor');
 const yaml = require('gulp-yaml');
+const avif = require('gulp-avif');
 const esbuild = require('esbuild');
 const tinyLr = require('tiny-lr');
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -24,7 +25,8 @@ const paths = {
 		script: `${origin}/**/*.@(js|ts)`,
 		styles: [`${origin}/css/styles.scss`, `${origin}/css/*.css`],
 		html: `${origin}/html/*.html`,
-		assets: `${origin}/assets/**/*.@(png|avif|jpg|jpeg|gif|svg|zip)`,
+		assets: `${origin}/assets/**/*.@(avif|gif|svg|zip)`,
+		bitmap: `${origin}/assets/**/*.@(png|jpg|jpeg)`,
 		json: `${origin}/**/*.json`
 	},
 	baseBuild: './build',
@@ -230,6 +232,36 @@ const insertHotModuleReload = () => new Transform({
 });
 
 /**
+ * Use an angular-syntax to modify code conditionally whether dev or prod
+ * Syntax: `{{VALUE1|VALUE2}}` inline
+ * @returns Code with replacements
+ */
+const conditionalReplacement = () => new Transform({
+	objectMode: true,
+
+	transform(file, _enc, callback) {
+		/**
+		 * Replace conditional values in a file.
+		 * Syntax: `{{VALUE1|VALUE2}}`
+		 * @param {string} input Input string value
+		 * @param {string} sec Pick first or second value in syntax (`VALUE1` or `VALUE2`)
+		 * @returns {string} String with syntax replaced
+		 */
+		const replaceTransformSyntax = (input, sec = state.isProd) => {
+			const regex = /\{\{(?<value1>.*?)\|(?<value2>.*?)\}\}/gu;
+
+			return input.replace(regex, (match, value1, value2) =>
+				sec ? value2 : value1
+			);
+		};
+
+		file.contents = Buffer.from(replaceTransformSyntax(String(file.contents)));
+
+		callback(null, file);
+	}
+});
+
+/**
  * Reload the page when we observe a filechange
  * @returns Hot module reload plugin
  */
@@ -249,6 +281,7 @@ const hotReload = () => new Transform({
  */
 const scripts = () => src(paths.files.script)
 	.pipe(changed(state.dest, { extension: '.js' }))
+	.pipe(conditionalReplacement())
 	.pipe(gulpif(state.isDev, insertHotModuleReload()))
 	.pipe(esbuildTransform())
 	.pipe(excludeFiles())
@@ -272,6 +305,7 @@ const styles = () => {
 			outputStyle: state.isProd ? 'compressed' : 'expanded'
 		}))
 		.pipe(postCSS(plugins))
+		.pipe(conditionalReplacement())
 		.pipe(dest(`${ state.dest }/css`))
 		.pipe(hotReload());
 };
@@ -285,19 +319,33 @@ const styles = () => {
  */
 const html = () => src(paths.files.html)
 	.pipe(changed(`${ state.dest }/html`))
+	.pipe(conditionalReplacement())
 	.pipe(excludeFiles())
 	.pipe(gulpif(state.isProd, htmlmin({ collapseWhitespace: true })))
 	.pipe(dest(`${ state.dest }/html`))
 	.pipe(hotReload());
 
-
 /**
  * Pipe assets to the active folder
  * @returns Gulp end signal
  */
-const images = () => src(paths.files.assets)
+const assets = () => src(paths.files.assets)
 	.pipe(changed(`${ state.dest }/assets`))
 	.pipe(excludeFiles())
+	.pipe(dest(`${ state.dest }/assets`))
+	.pipe(hotReload());
+
+/**
+ * Pipe bitmap assets to the active folder
+ * @returns Gulp end signal
+ */
+const bitmap = () => src(paths.files.bitmap)
+	.pipe(changed(`${ state.dest }/assets`))
+	.pipe(excludeFiles())
+	.pipe(gulpif(state.isProd, avif({
+		lossless: false,
+		quality: 90
+	})))
 	.pipe(dest(`${ state.dest }/assets`))
 	.pipe(hotReload());
 
@@ -358,7 +406,8 @@ const watch = () => {
 	gulpWatch(paths.files.script, scripts);
 	gulpWatch(paths.files.styles, styles);
 	gulpWatch(paths.files.html, html);
-	gulpWatch(paths.files.assets, images);
+	gulpWatch(paths.files.assets, assets);
+	gulpWatch(paths.files.bitmap, bitmap);
 	gulpWatch(paths.files.json, json);
 	gulpWatch(paths.manifest, manifest);
 };
@@ -367,10 +416,10 @@ const watch = () => {
  * Broadcast the process arguments
  */
 const broadcast = async() => {
-	process.stdout.write(`\x1b[35m# compiling ${state.current} build for ${paths.mvTarget}\x1b[0m\n . . .`);
+	process.stdout.write(`\x1b[35m# compiling ${state.current} build for ${paths.mvTarget}\x1b[0m . . .\n`);
 };
 
 exports.destroy = destroy;
-exports.build = series(broadcast, clean, parallel(scripts, styles, html, images, json, manifest));
+exports.build = series(broadcast, clean, parallel(scripts, styles, html, assets, bitmap, json, manifest));
 exports.watch = series(setupLiveReload, exports.build, watch);
 exports.default = exports.build;

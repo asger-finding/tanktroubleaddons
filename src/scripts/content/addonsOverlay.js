@@ -1,5 +1,4 @@
 import { get, set } from '../common/store.js';
-import { dispatchMessage } from '../common/ipcBridge.js';
 
 export default class AddonsOverlay {
 

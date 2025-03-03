@@ -71,8 +71,8 @@ Addons.switchControlsBox = {
 		for (const inputSet of Inputs.getAllInputSetIds()) {
 			const inputButton = $('<div class="button" title=""/>');
 
-			const standard = Addons.addImageWithClasses(inputButton, 'standard', `assets/switch-controls/${ inputSet }.png`);
-			const active = Addons.addImageWithClasses(inputButton, 'active', `assets/switch-controls/${ inputSet }Active.png`);
+			const standard = Addons.addImageWithClasses(inputButton, 'standard', `assets/switch-controls/${ inputSet }.{{png|avif}}`);
+			const active = Addons.addImageWithClasses(inputButton, 'active', `assets/switch-controls/${ inputSet }Active.{{png|avif}}`);
 
 			$(standard).add(active)
 				.attr('draggable', 'false')
@@ -237,8 +237,8 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 	for (const inputSet of Inputs.getAllInputSetIds()) {
 		const inputButton = $('<div/>');
 
-		const standard = Addons.addImageWithClasses(inputButton, 'standard', `assets/switch-controls/${ inputSet }.png`);
-		const active = Addons.addImageWithClasses(inputButton, 'active', `assets/switch-controls/${ inputSet }Active.png`);
+		const standard = Addons.addImageWithClasses(inputButton, 'standard', `assets/switch-controls/${ inputSet }.{{png|avif}}`);
+		const active = Addons.addImageWithClasses(inputButton, 'active', `assets/switch-controls/${ inputSet }Active.{{png|avif}}`);
 
 		$(standard).add(active)
 			.attr('draggable', 'false')

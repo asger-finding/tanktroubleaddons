@@ -335,8 +335,8 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 	original(...args);
 
 	const addonsButton = TankTrouble.TankInfoBox.infoAddons = $('<div class="button" title=""/>');
-	const standard = Addons.addImageWithClasses(addonsButton, 'standard', 'assets/menu/menu.png');
-	const active = Addons.addImageWithClasses(addonsButton, 'active', 'assets/menu/menuActive.png');
+	const standard = Addons.addImageWithClasses(addonsButton, 'standard', 'assets/menu/menu.{{png|avif}}');
+	const active = Addons.addImageWithClasses(addonsButton, 'active', 'assets/menu/menuActive.{{png|avif}}');
 
 	addonsButton.tooltipster({
 		position: 'right',

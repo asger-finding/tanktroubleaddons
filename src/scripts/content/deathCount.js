@@ -5,7 +5,7 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 
 	// Initialize death info elements
 	TankTrouble.TankInfoBox.infoDeathsDiv = $('<tr/>');
-	TankTrouble.TankInfoBox.infoDeathsIcon = $('<img class="statsIcon" src="https://i.imgur.com/PMAUKdq.png" srcset="https://i.imgur.com/vEjIwA4.png 2x"/>');
+	TankTrouble.TankInfoBox.infoDeathsIcon = $(`<img class="standard" src="${Addons.t_url('assets/tankInfo/deaths.{{png|avif}}')}" srcset="${Addons.t_url('assets/tankInfo/deaths@2x.{{png|avif}}')} 2x"/>`);
 	TankTrouble.TankInfoBox.infoDeaths = $('<div/>');
 
 	// Align to center

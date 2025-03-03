@@ -30,8 +30,8 @@ $tooltipster-accent-dark: rgb(25 25 25);
 		@each $state, $state-filename in $selectors {
 			#{$selector}#{$state} {
 				background-image: image-set(
-					asset("/#{$state-filename}.png") 1x,
-					asset("/#{$state-filename}@2x.png") 2x
+					asset("/#{$state-filename}.{{png|avif}}") 1x,
+					asset("/#{$state-filename}@2x.{{png|avif}}") 2x
 				);
 			}
 		}
@@ -40,9 +40,9 @@ $tooltipster-accent-dark: rgb(25 25 25);
 
 :root.dark {
 	--jq-widget-header-bg: url("https://download.jqueryui.com/themeroller/images/ui-bg_highlight-soft_75_131313_1x100.png");
-	--jq-widget-button-disabled-hovered-or-active-bg: #{asset("/jquery-ui/ui-bg-glass-variant-01.png")};
-	--jq-widget-hover-or-focus: #{asset("/jquery-ui/ui-bg-glass-variant-02.png")};
-	--jq-widget-active: #{asset("/jquery-ui/ui-bg-glass-variant-02.png")};
+	--jq-widget-button-disabled-hovered-or-active-bg: #{asset("/jquery-ui/ui-bg-glass-variant-01.{{png|avif}}")};
+	--jq-widget-hover-or-focus: #{asset("/jquery-ui/ui-bg-glass-variant-02.{{png|avif}}")};
+	--jq-widget-active: #{asset("/jquery-ui/ui-bg-glass-variant-02.{{png|avif}}")};
 	--jq-widget-highlighted: url("https://download.jqueryui.com/themeroller/images/ui-bg_glass_55_fbf9ee_1x400.png");
 	--jq-widget-errored: url("https://download.jqueryui.com/themeroller/images/ui-bg_glass_95_fef1ec_1x400.png");
 	--jq-ui-icon-primary: url("https://download.jqueryui.com/themeroller/images/ui-icons_cccccc_256x240.png");	
@@ -295,14 +295,14 @@ $tooltipster-accent-dark: rgb(25 25 25);
 
 	body:not(.premium) {
 		#header {
-			background-image: asset("/header/background.png") !important;
+			background-image: asset("/header/background.{{png|avif}}") !important;
 		}
 
 		@media (min-device-pixel-ratio:2),
 		(min-resolution:192dpi),
 		(min-resolution:2dppx) {
 			#header {
-				background-image: asset("/header/background@2x.png") !important;
+				background-image: asset("/header/background@2x.{{png|avif}}") !important;
 			}
 		}
 	}
@@ -380,7 +380,7 @@ $tooltipster-accent-dark: rgb(25 25 25);
 		);
 
 		#newsPost-25 .content {
-			background-image: asset("/news/getimage13.png") !important;
+			background-image: asset("/news/getimage13.{{png|avif}}") !important;
 		}
 
 		@include generate-images($tab-styles);

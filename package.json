@@ -35,6 +35,7 @@
     "eslint-config-raven": "^1.0.3",
     "eslint-plugin-jsdoc": "^50.2.2",
     "gulp": "^4.0.2",
+    "gulp-avif": "^1.1.1",
     "gulp-changed": "^4.0.3",
     "gulp-htmlmin": "^5.0.1",
     "gulp-if": "^3.0.0",

@@ -52,8 +52,9 @@ Object.assign(Addons, {
 		image.attr('src', Addons.t_url(src));
 
 		// Image is of type PNG, also set responsive image (@2x)
-		if (src.endsWith('.png')) {
-			const srcset = `${Addons.t_url(`${src.substring(0, src.length - 4)  }@2x.png`)  } 2x`;
+		if (src.endsWith('.png') || src.endsWith('.avif')) {
+			const ending = src.split('.').pop();
+			const srcset = `${Addons.t_url(`${src.substring(0, src.length - ending.length - 1)  }@2x.${ ending }`)  } 2x`;
 			image.attr('srcset', srcset);
 		}
 
@@ -69,18 +70,18 @@ Game.UIPreloadState.method('preload', function(...args) {
 	const result = gamePreloadStage.apply(this, ...args);
 
 	GameManager.getGame().load.removeFile('image', 'gameiconplaceholder');
-	this.load.image('gameiconplaceholder', Addons.t_url('assets/lobby/game.png'));
+	this.load.image('gameiconplaceholder', Addons.t_url('assets/lobby/game.{{png|avif}}'));
 
 	if (this.game.device.pixelRatio > 1) {
-		this.load.image('tankiconplaceholderaddons-small', Addons.t_url('assets/lobby/placeholder-140@2x.png'));
-		this.load.image('tankiconplaceholderaddons-large', Addons.t_url('assets/lobby/placeholder-320@2x.png'));
-		this.load.image('leftarrow', Addons.t_url('assets/lobby/leftArrow@2x.png'));
-		this.load.image('rightarrow', Addons.t_url('assets/lobby/rightArrow@2x.png'));
+		this.load.image('tankiconplaceholderaddons-small', Addons.t_url('assets/lobby/placeholder-140@2x.{{png|avif}}'));
+		this.load.image('tankiconplaceholderaddons-large', Addons.t_url('assets/lobby/placeholder-320@2x.{{png|avif}}'));
+		this.load.image('leftarrow', Addons.t_url('assets/lobby/leftArrow@2x.{{png|avif}}'));
+		this.load.image('rightarrow', Addons.t_url('assets/lobby/rightArrow@2x.{{png|avif}}'));
 	} else {
-		this.load.image('tankiconplaceholderaddons-small', Addons.t_url('assets/lobby/placeholder-140.png'));
-		this.load.image('tankiconplaceholderaddons-large', Addons.t_url('assets/lobby/placeholder-320.png'));
-		this.load.image('leftarrow', Addons.t_url('assets/lobby/leftArrow.png'));
-		this.load.image('rightarrow', Addons.t_url('assets/lobby/rightArrow.png'));
+		this.load.image('tankiconplaceholderaddons-small', Addons.t_url('assets/lobby/placeholder-140.{{png|avif}}'));
+		this.load.image('tankiconplaceholderaddons-large', Addons.t_url('assets/lobby/placeholder-320.{{png|avif}}'));
+		this.load.image('leftarrow', Addons.t_url('assets/lobby/leftArrow.{{png|avif}}'));
+		this.load.image('rightarrow', Addons.t_url('assets/lobby/rightArrow.{{png|avif}}'));
 	}
 
 	return result;

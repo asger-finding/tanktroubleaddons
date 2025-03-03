@@ -96,8 +96,8 @@ const addShare = (threadOrReply, threadOrReplyElement) => {
 	const likeAction = threadOrReplyElement.find('.action.like');
 
 	let shareAction = $('<div class="action share"></div>');
-	const shareActionStandardImage = $(`<img class="standard" src="${Addons.t_url('assets/forum/share.png')}" srcset="${Addons.t_url('assets/forum/share@2x.png')} 2x"/>`);
-	const shareActionActiveImage = $(`<img class="active" src="${Addons.t_url('assets/forum/shareActive.png')}" srcset="${Addons.t_url('assets/forum/shareActive@2x.png')} 2x"/>`);
+	const shareActionStandardImage = $(`<img class="standard" src="${Addons.t_url('assets/forum/share.{{png|avif}}')}" srcset="${Addons.t_url('assets/forum/share@2x.{{png|avif}}')} 2x"/>`);
+	const shareActionActiveImage = $(`<img class="active" src="${Addons.t_url('assets/forum/shareActive.{{png|avif}}')}" srcset="${Addons.t_url('assets/forum/shareActive@2x.{{png|avif}}')} 2x"/>`);
 
 	shareAction.append([shareActionStandardImage, shareActionActiveImage]);
 	likeAction.after(shareAction);

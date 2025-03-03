@@ -61,7 +61,9 @@ function toggleFullscreen(state?: 'on' | 'off') {
 		if (hostname === 'tanktrouble.com' || hostname.endsWith('.tanktrouble.com')) {
 			chrome.windows.get(windowId, window => {
 				const currentState = window.state ?? 'normal';
-				lastWindowState = currentState !== 'fullscreen' ?  currentState : 'normal';
+
+				// Update lastWindowState only if the current state is not fullscreen
+				if (currentState !== 'fullscreen') lastWindowState = currentState;
 
 				chrome.windows.update(windowId, {
 					state: state === 'on' ? 'fullscreen' : lastWindowState

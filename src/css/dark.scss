@@ -246,12 +246,12 @@ $tooltipster-accent-dark: rgb(25 25 25);
 
 	#chat {
 		$chat-normal-bg: rgb(34 34 34);
-		$chat-user-bg: rgb(0, 60, 4);
-		$chat-global-bg: rgb(41, 64, 84);
+		$chat-user-bg: rgb(0 60 4);
+		$chat-global-bg: rgb(41 64 84);
 
-		$chat-normal-accent: rgb(117 117 117);
-		$chat-user-accent: rgb(0, 112, 0);
-		$chat-global-accent: rgb(60, 95, 126);
+		$chat-normal-accent: rgb(104 104 104);
+		$chat-user-accent: rgb(0 112 0);
+		$chat-global-accent: rgb(60 95 126);
 
 		form {
 			background-color: $chat-normal-bg;

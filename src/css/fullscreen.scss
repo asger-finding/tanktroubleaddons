@@ -32,6 +32,12 @@
 		height: 100vh !important;
 	}
 
+	#game {
+		margin-top: 20px;
+		left: unset;
+		top: unset;
+	}
+
     ::backdrop {
         z-index: 0;
         background: none !important;

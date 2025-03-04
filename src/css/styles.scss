@@ -540,7 +540,7 @@ $max-safe-integer: 2147483647;
 		width: fit-content;
 
 		&:has(> textarea:placeholder-shown) {
-			height: 22px;
+			height: 18px;
 		}
 
 		.autocomplete-dropdown {
@@ -624,7 +624,7 @@ $max-safe-integer: 2147483647;
 			height: 0;
 			margin: 0 0 0 5px;
 			opacity: 0;
-			padding: 1px 2px;
+			padding: 0 2px;
 			pointer-events: none;
 			z-index: -$max-safe-integer;
 

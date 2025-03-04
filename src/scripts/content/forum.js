@@ -21,7 +21,7 @@ const insertMultipleCreators = (threadOrReply, threadOrReplyElement) => {
 
 	// Render all creator tanks in canvas
 	for (const [creatorType, playerId] of Object.entries(creators)) {
-		if (playerId === null) continue;
+		const id = playerId === null ? '-1' : playerId;
 
 		const wrapper = document.createElement('div');
 		wrapper.classList.add('tank', creatorType);
@@ -39,9 +39,9 @@ const insertMultipleCreators = (threadOrReply, threadOrReplyElement) => {
 			const top = rect.top + win.scrollY;
 			const left = rect.left + win.scrollX;
 
-			TankTrouble.TankInfoBox.show(left + (canvas.clientWidth / 2), top + (canvas.clientHeight / 2), playerId, canvas.clientWidth / 2, canvas.clientHeight / 4);
+			TankTrouble.TankInfoBox.show(left + (canvas.clientWidth / 2), top + (canvas.clientHeight / 2), id, canvas.clientWidth / 2, canvas.clientHeight / 4);
 		});
-		UITankIcon.loadPlayerTankIcon(canvas, UIConstants.TANK_ICON_SIZES.SMALL, playerId);
+		UITankIcon.loadPlayerTankIcon(canvas, UIConstants.TANK_ICON_SIZES.SMALL, id);
 
 		wrapper.append(canvas);
 		creatorsContainer.append(wrapper);
@@ -54,7 +54,7 @@ const insertMultipleCreators = (threadOrReply, threadOrReplyElement) => {
 
 		const playerName = $(`<stroked-text text="${ username }" width="${ width }" height="${ height }"></stroked-text>`);
 		creatorsContainer.find('.tank.creator').append(playerName);
-	}, () => {}, () => {}, creators.creator || '', Caches.getPlayerDetailsCache());
+	}, () => {}, () => {}, creators.creator || '-1', Caches.getPlayerDetailsCache());
 };
 
 /**

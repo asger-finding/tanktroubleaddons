@@ -538,7 +538,10 @@ $max-safe-integer: 2147483647;
 
 	form {
 		width: fit-content;
-		height: 16px;
+
+		&:has(> textarea:placeholder-shown) {
+			height: 22px;
+		}
 
 		.autocomplete-dropdown {
 			--background: rgb(255 255 255 / 1.0);

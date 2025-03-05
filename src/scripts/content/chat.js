@@ -370,6 +370,7 @@ const addAutocomplete = chatInput => {
 			chatInput.setSelectionRange(...cursorPosition);
 		}
 
+		evt.stopPropagation();
 		evt.preventDefault();
 		chatInput.dispatchEvent(new InputEvent('input'));
 		chatInput.focus();
@@ -490,7 +491,7 @@ const addAutocomplete = chatInput => {
 			default:
 				break;
 		}
-	}, false);
+	}, true);
 
 	/** Event handler for TTClient.EVENTS.GAME_LIST_CHANGED */
 	const handleGameListChanged = () => {

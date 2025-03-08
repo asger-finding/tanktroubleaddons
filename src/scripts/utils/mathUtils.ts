@@ -114,14 +114,22 @@ export const generateUUID = (() => {
 })();
 
 /**
- * Convert a string hexadecimal color to numbers
- * @param hex Hexadecimal color
- * @returns Parsed colors in RGB
+ * A function that transitions smoothly from y0 at x0 to y1 at x1,
+ * and remains constant beyond x1.
+ * @param x The input value.
+ * @param x0 The start of the transition region.
+ * @param x1 The end of the transition region.
+ * @param y0 The value of y at x0.
+ * @param y1 The value of y at x1.
+ * @returns The value of y at x.
  */
-export const parseHexColor = (hex: string) => {
-	const hexValue = parseInt(hex, 16);
+export const smoothTransition = (x: number, x0: number, x1: number, y0: number, y1: number): number => {
+	if (x <= x0) return y0;
+	else if (x >= x1) return y1;
 
-	return { red: (hexValue >> 16) & 0xff, green: (hexValue >> 8) & 0xff, blue: hexValue & 0xff };
+	// Smooth transition using a sigmoid-like function
+	const diff = (x - x0) / (x1 - x0);
+	return y0 + (y1 - y0) * (1 - Math.cos(Math.PI * diff)) / 2;
 };
 
 export const _isESmodule = true;

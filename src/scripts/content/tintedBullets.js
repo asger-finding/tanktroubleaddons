@@ -1,21 +1,23 @@
 import { StoreEvent, get, onStateChange } from '../common/store.js';
-import { parseHexColor } from '../utils/mathUtils.js';
+import { colord } from '@pixi/colord';
+import { smoothTransition } from '../utils/mathUtils.js';
+import { rgb as rgbContrast } from 'wcag-contrast';
 
-let isTintedBullets = false;
+let shouldBulletsTint = false;
 
 /**
- * Set the tined bullets option
+ * Set the tinted bullets option
  * @param option Are tinted bullets enabled?
  */
 const setTintedBullets = option => {
-	isTintedBullets = option === true;
+	shouldBulletsTint = option === true;
 
 	const game = GameManager.getGame();
 	if (!game || !game.state.getCurrentState()?.projectileGroup) return;
 
 	const state = game.state.getCurrentState();
 	const alive = state.projectileGroup.iterate('alive', true, Phaser.Group.RETURN_ALL);
-	for (const projectile of alive) projectile.updateColor(isTintedBullets);
+	for (const projectile of alive) projectile.updateColor(shouldBulletsTint);
 };
 
 // Initialize tintedBullets setting
@@ -54,6 +56,29 @@ void main(void) {
 }
 `;
 
+/**
+ * If a projectile is hard to read on a maze (proj. color on #e4e6e8)
+ * then darken its color
+ * @param {object} rgb RGB color channel {red: number, green: number, blue: number}
+ * @param {number} rgb.r Red channel [0..255]
+ * @param {number} rgb.g Green channel [0..255]
+ * @param {number} rgb.b Blue channel [0..255]
+ * @returns {object} Hard to see?
+ */
+const adjustColorToMaze = ({ r, g, b }) => {
+	const score = rgbContrast([r, g, b], [228, 230, 232]);
+	if (score < 8.0) {
+		// Make adjustments to darken the color
+		const hsl = colord({ r, g, b }).toHsl();
+		const adjustment = smoothTransition(score, 1.0, 8.0, -20, 0);
+
+		// eslint-disable-next-line id-length
+		return colord({ h: hsl.h, s: hsl.s, l: Math.floor(hsl.l + adjustment) }).toRgb();
+	}
+
+	return { r, g, b };
+};
+
 const proto = UIProjectileImage.prototype;
 UIProjectileImage = function(game, gameController) {
 	Phaser.Image.call(this, game, 0, 0, 'game', '');
@@ -77,7 +102,7 @@ UIProjectileImage.prototype.spawn = function(x, y, projectileId, frameName) {
 	this.frameName = frameName;
 	this.reset(x, y);
 	this.projectileId = projectileId;
-	this.updateColor(isTintedBullets);
+	this.updateColor(shouldBulletsTint);
 };
 
 UIProjectileImage.prototype.updateColor = function(enabled) {
@@ -93,16 +118,15 @@ UIProjectileImage.prototype.updateColor = function(enabled) {
 			Constants.WEAPON_TYPES.SHOTGUN
 		].includes(projectileData.getType())) return;
 
-		this.colorFilter.uniforms.color.value = [255, 0, 0];
+		this.colorFilter.uniforms.color.value = [0, 0, 0];
 		this.colorFilter.uniforms.enabled.value = 1.0;
 
 		Backend.getInstance().getPlayerDetails(result => {
 			if (typeof result === 'object') {
 				const turret = result.getTurretColour();
-				const { red, green, blue } = parseHexColor(turret.numericValue);
+				const { r, g, b } = adjustColorToMaze(colord(turret.numericValue.replace('0x', '#')).toRgb());
 
-				this.colorFilter.uniforms.color.value = [red / 255, green / 255, blue / 255];
-				this.colorFilter.uniforms.enabled.value = 1.0;
+				this.colorFilter.uniforms.color.value = [r / 255, g / 255, b / 255];
 			}
 		}, () => {}, () => {}, projectileData.getPlayerId(), Caches.getPlayerDetailsCache());
 	}

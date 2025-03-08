@@ -60,7 +60,11 @@ rules:
   new-cap: [error, { capIsNewExceptionPattern: "(b2dbody|Box2D)\\.." }]
 
   # for loops and game coordinate variables
-  id-length: [warn, { exceptions: [i, j, k, x, y] }]
+  id-length: [warn, { exceptions: [
+    i, j, k,
+    x, y, 
+    r, g, b
+    ] }]
 
   no-trailing-spaces: [error, { ignoreComments: true }]
   import/extensions: [error, ignorePackages]

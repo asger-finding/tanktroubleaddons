@@ -16,6 +16,9 @@ export default function UIFullscreenGameButtonGroup(game, x, y) {
 
 	this.fullscreenGroup = this.addChild(new UIButtonGroup(game, 0, 0, '', UIConstants.BUTTON_SIZES.MEDIUM, '⛶', this._toggleFullscreen, this, 0));
 
+	// Make icon bold.
+	this.fullscreenGroup.buttonText.addFontWeight('bold', 0);
+
 	this.removeTween = null;
 	this.openTween = null;
 	this.closeTween = null;
@@ -59,9 +62,6 @@ UIFullscreenGameButtonGroup.prototype.spawn = function() {
 	if (this.removeTween) this.removeTween.stop();
 
 	this.game.add.tween(this.scale).to({ x: 1, y: 1 }, UIConstants.ELEMENT_POP_IN_TIME, Phaser.Easing.Back.Out, true);
-
-	// Make icon bold.
-	this.fullscreenGroup.buttonText.addFontWeight('bold', 0);
 };
 
 UIFullscreenGameButtonGroup.prototype.update = function() {

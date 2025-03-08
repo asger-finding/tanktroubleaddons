@@ -267,9 +267,16 @@ $max-safe-integer: 2147483647;
 						margin-right: 10px;
 						background: none;
 
-						canvas {
-							width: 120px !important;
-							height: unset !important;
+						.tankcontainer {
+							display: flex;
+							justify-content: center;
+							width: 120px;
+							height: 72px;
+
+							canvas {
+								width: auto !important;
+								height: 72px !important;
+							}
 						}
 					}
 

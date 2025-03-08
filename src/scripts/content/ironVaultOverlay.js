@@ -138,11 +138,11 @@ export default class IronVaultOverlay {
 		});
 		this.usernameInput.on('keypress', ({ key }) => {
 			const submit = key === 'Enter';
-			if (submit) this.#handleSearchSubmit();
+			if (submit) this.search(this.usernameInput.val());
 
 			return !submit;
 		});
-		this.usernameSubmit.on('mouseup', () => this.#handleSearchSubmit());
+		this.usernameSubmit.on('mouseup', () => this.search(this.usernameInput.val()));
 
 		this.#createSection({
 			title: 'Search for player',
@@ -176,12 +176,12 @@ export default class IronVaultOverlay {
 
 	/**
 	 * Search and insert player on search
+	 * @param {string} username Player username
 	 */
-	#handleSearchSubmit() {
+	search(username) {
 		this.searchSeparator.hide();
 		this.searchResult.empty();
 
-		const username = this.usernameInput.val();
 		IronVaultOverlay.#insertPlayer(username)
 			.then(result => {
 				this.searchSeparator.show();
@@ -241,12 +241,14 @@ export default class IronVaultOverlay {
 		const left = $('<div id="tankbox" class="ui-corner-all ui-widget ui-widget-content"></div>');
 		const right = $('<div id="ranklevelprogress"></div>');
 
+		const tankContainer = $('<div class="tankcontainer"></div>');
+
 		const canvas = document.createElement('canvas');
 		canvas.width = UIConstants.TANK_ICON_WIDTH_LARGE;
 		canvas.height = UIConstants.TANK_ICON_HEIGHT_LARGE;
 		canvas.style.width = `${UIConstants.TANK_ICON_RESOLUTIONS[UIConstants.TANK_ICON_SIZES.SMALL] }px`;
 		canvas.style.height = `${UIConstants.TANK_ICON_RESOLUTIONS[UIConstants.TANK_ICON_SIZES.SMALL] * 0.6 }px`;
-		left.append([canvas]);
+		left.append(tankContainer.append(canvas));
 
 		UITankIcon.loadPlayerTankIcon(canvas, UIConstants.TANK_ICON_SIZES.LARGE, playerDetails.getPlayerId(), () => {
 			const username = $(`<stroked-text text="${ playerDetails.getUsername() }" width="100px" height="2em"></stroked-text>`).css({

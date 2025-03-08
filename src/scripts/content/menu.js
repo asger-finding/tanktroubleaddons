@@ -215,8 +215,9 @@ class Menu {
 		this.draggable.on('dblclick', () => this.hide(true));
 
 		this.wrapper.append(this.body);
+		this.wrapper.css({ display: 'none' });
 
-		this.hide(false);
+		this.isShowing = false;
 	}
 
 	/**
@@ -286,8 +287,6 @@ class Menu {
 	 * @param {boolean} animate Should the sequence animate?
 	 */
 	toggle(animate) {
-		this.init();
-
 		if (this.isShowing) this.hide(animate);
 		else this.show(animate);
 	}
@@ -296,7 +295,9 @@ class Menu {
 	 * Show the overlay
 	 * @param {boolean} animate Should the opening sequence animate?
 	 */
-	show(animate = true) {
+	show(animate = !this.isShowing) {
+		this.init();
+
 		this.wrapper.appendTo(document.body);
 
 		if (animate) {
@@ -315,6 +316,8 @@ class Menu {
 	 * @param {boolean} animate Should the close sequence animate?
 	 */
 	hide(animate = true) {
+		if (!this.#initialized) this.init();
+
 		if (animate) {
 			this.wrapper.addClass('closing');
 			setTimeout(() => this.wrapper.removeClass('closing').css({ display: 'none' }), 1_000);
@@ -335,15 +338,27 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 	original(...args);
 
 	const addonsButton = TankTrouble.TankInfoBox.infoAddons = $('<div class="button" title=""/>');
-	const standard = Addons.addImageWithClasses(addonsButton, 'standard', 'assets/menu/menu.{{png|avif}}');
-	const active = Addons.addImageWithClasses(addonsButton, 'active', 'assets/menu/menuActive.{{png|avif}}');
+	const standardAddons = Addons.addImageWithClasses(addonsButton, 'standard', 'assets/menu/menu.{{png|avif}}');
+	const activeAddons = Addons.addImageWithClasses(addonsButton, 'active', 'assets/menu/menuActive.{{png|avif}}');
+
+	const addonsLookupButton = TankTrouble.TankInfoBox.infoAddonsLookup = $('<div class="button" title=""/>');
+	const standardAddonsLookup = Addons.addImageWithClasses(addonsLookupButton, 'standard', 'assets/menu/menu.{{png|avif}}');
+	const activeAddonsLookup = Addons.addImageWithClasses(addonsLookupButton, 'active', 'assets/menu/menuActive.{{png|avif}}');
 
 	addonsButton.tooltipster({
 		position: 'right',
 		offsetX: 5
 	});
 
-	$(standard).add(active)
+	addonsLookupButton.tooltipster({
+		position: 'left',
+		offsetX: 5
+	});
+
+	$(standardAddons)
+		.add(activeAddons)
+		.add(standardAddonsLookup)
+		.add(activeAddonsLookup)
 		.attr('draggable', 'false')
 		.css({
 			width: '52px',
@@ -357,8 +372,29 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 		}
 	});
 
-	addonsButton.append([standard, active]);
+	addonsLookupButton.on('mouseup', () =>{
+		if (TankTrouble.TankInfoBox.showing) {
+			Addons.menu.init();
+			Addons.menu.currentPage = 'ironvault';
+			Addons.menu.goToCurrentPage();
+
+			Backend.getInstance().getPlayerDetails(result => {
+				if (typeof result === 'object') {
+					const username = result.getUsername();
+					Addons.menu.ironvault.usernameInput.val(username);
+					Addons.menu.ironvault.search(username);
+					Addons.menu.show();
+
+					TankTrouble.TankInfoBox.hide();
+				}
+			}, () => {}, () => {}, TankTrouble.TankInfoBox.playerId, Caches.getPlayerDetailsCache());
+		}
+	});
+
+	addonsButton.append([standardAddons, activeAddons]);
+	addonsLookupButton.append([standardAddonsLookup, activeAddonsLookup]);
 	addonsButton.insertBefore(TankTrouble.TankInfoBox.infoAccount);
+	addonsLookupButton.insertBefore(TankTrouble.TankInfoBox.infoAdminLookup);
 });
 
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {
@@ -366,19 +402,41 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...arg
 
 	const [,, playerId] = args;
 
-	TankTrouble.TankInfoBox.infoAddons.toggle(Users.getAllPlayerIds().includes(playerId));
-	TankTrouble.TankInfoBox.infoAddons.tooltipster('content', 'TankTroubleAddons');
-	Backend.getInstance().getPlayerDetails(result => {
-		if (typeof result === 'object') {
-			if (result.getGmLevel() !== null) {
-				TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'position', 'left');
-				TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'offsetX', 5);
-			} else {
-				TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'position', 'top');
-				TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'offsetX', 0);
+	// Local user
+	if (Users.getAllPlayerIds().includes(playerId)) {
+		TankTrouble.TankInfoBox.infoAddons.show();
+		TankTrouble.TankInfoBox.infoAddonsLookup.hide();
+		TankTrouble.TankInfoBox.infoAddons.tooltipster('content', 'TankTroubleAddons');
+
+		Backend.getInstance().getPlayerDetails(result => {
+			if (typeof result === 'object') {
+				if (result.getGmLevel() !== null) {
+					TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'position', 'left');
+					TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'offsetX', 5);
+				} else {
+					TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'position', 'top');
+					TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'offsetX', 0);
+				}
 			}
+		}, () => {}, () => {}, playerId, Caches.getPlayerDetailsCache());
+	} else {
+		TankTrouble.TankInfoBox.infoAddons.hide();
+
+		const canUserAdminLookup = Users.getHighestGmLevel() >= UIConstants.ADMIN_LEVEL_PLAYER_LOOKUP;
+		if (canUserAdminLookup) {
+			TankTrouble.TankInfoBox.infoAddonsLookup.hide();
+			return;
 		}
-	}, () => {}, () => {}, playerId, Caches.getPlayerDetailsCache());
+
+		TankTrouble.TankInfoBox.infoAddonsLookup.show();
+		Backend.getInstance().getPlayerDetails(result => {
+			if (typeof result === 'object') {
+				const username = result.getUsername();
+				TankTrouble.TankInfoBox.infoAddonsLookup.tooltipster('content', `Look up ${ username }`);
+			}
+		}, () => {}, () => {}, playerId, Caches.getPlayerDetailsCache());
+	}
+
 });
 
 export const _isESmodule = true;

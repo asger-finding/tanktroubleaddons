@@ -3,35 +3,36 @@ if (!customElements.get('stroked-text')) {
 	$.svg._attrNames.paintOrder = 'paint-order';
 
 	customElements.define('stroked-text',
-
 		/**
 		 * Custom HTML element that renders a TankTrouble-style teext
 		 * from the text, width and height attribute
 		 */
-		class StrokedText extends HTMLElement {
-
+		class extends HTMLElement {
 			/**
-			 * Initialize the text element
+			 *
 			 */
 			constructor() {
 				super();
 
 				const shadow = this.attachShadow({ mode: 'closed' });
 
-				this.innerText = this.getAttribute('text');
-				this.width = this.getAttribute('width') || '150';
-				this.height = this.getAttribute('height') || '25';
+				// Store original width & height attributes
+				this.widthAttr = this.getAttribute('width') || '150px';
+				this.heightAttr = this.getAttribute('height') || '25px';
+				this.textContent = this.getAttribute('text') || '';
 
-				// create the internal implementation
+				// Create the SVG
 				this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-				this.svg.setAttribute('width', this.width);
-				this.svg.setAttribute('height', this.height);
+				this.svg.setAttribute('width', this.widthAttr);
+				this.svg.setAttribute('height', this.heightAttr);
+				this.svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
+				// Create the text element
 				this.text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
 				this.text.setAttribute('x', '50%');
-				this.text.setAttribute('y', '0');
+				this.text.setAttribute('y', '50%');
 				this.text.setAttribute('text-anchor', 'middle');
-				this.text.setAttribute('dominant-baseline', 'text-before-edge');
+				this.text.setAttribute('dominant-baseline', 'middle');
 				this.text.setAttribute('font-family', 'TankTrouble');
 				this.text.setAttribute('font-weight', 'normal');
 				this.text.setAttribute('font-size', '16');
@@ -40,38 +41,70 @@ if (!customElements.get('stroked-text')) {
 				this.text.setAttribute('stroke-line-join', 'round');
 				this.text.setAttribute('stroke-width', '2');
 				this.text.setAttribute('paint-order', 'stroke');
-				this.text.textContent = this.innerText;
+				this.text.textContent = this.textContent;
 
 				this.svg.appendChild(this.text);
-
-				this.hasResized = false;
-
 				shadow.appendChild(this.svg);
+
+				this.isAdjusting = false;
 			}
 
 			/**
-			 * Scale the SVG text when it's in the DOM.
-			 *
-			 * Bounding boxes will first be calculated right when
-			 * it can be rendered.
+			 * Adjust the font size of the text to fit within the SVG.
 			 */
-			connectedCallback() {
-				if (this.hasResized) return;
+			adjustFontSize() {
+				if (this.isAdjusting) return;
+				this.isAdjusting = true;
 
-				const textWidth = this.text.getComputedTextLength();
-				if (textWidth > this.clientWidth) {
-					// Scale text down to match svg size
-					const newSize = Math.floor((this.clientWidth / textWidth) * 100);
-					this.text.setAttribute('font-size', `${ newSize }%`);
+				// Temporarily detach the element from its parent and attach
+				// it to the the body, as to avoid transformation issues.
+				const parent = this.parentElement;
+				if (parent) parent.removeChild(this);
+				document.body.appendChild(this);
+
+				const { width, height } = this.svg.getBoundingClientRect();
+
+				this.svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+				const textBox = this.text.getBBox();
+				const textWidth = textBox.width;
+
+				// Scale font-size down if text is wider than the SVG
+				if (textWidth > width) {
+					const scaleFactor = width / textWidth;
+					const newSize = Math.floor(16 * scaleFactor);
+					this.text.setAttribute('font-size', `${newSize}px`);
 				}
 
-				const newY = this.svg.clientHeight / 2 - this.text.clientHeight;
-				this.text.setAttribute('y', `${ newY }px`);
+				// Reattach the element to its original parent
+				if (parent) parent.appendChild(this);
+				else document.body.removeChild(this);
 
-				this.hasResized = true;
+				this.isAdjusting = false;
 			}
 
-		});
+			/**
+			 * Called when the element is added to the DOM.
+			 */
+			connectedCallback() {
+				if (this.isAdjusting) return;
+
+				// Adjust font size after the element is connected
+				this.adjustFontSize();
+
+				// Resize observer to handle dynamic size changes
+				this.resizeObserver = new ResizeObserver(() => this.adjustFontSize());
+				this.resizeObserver.observe(this);
+			}
+
+			/**
+			 * Called when the element is removed from the DOM.
+			 */
+			disconnectedCallback() {
+				this.resizeObserver.disconnect();
+			}
+		}
+	);
 }
 
 export const _isESmodule = true;

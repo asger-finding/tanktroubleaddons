@@ -75,27 +75,28 @@ const adjustColorToMaze = ({ r, g, b }) => {
 // TODO:
 // We need some kind of symbol logic so that we can do Symbol(key)
 // and add it to a WeakMap so that we can garbage collect filters
-const filters = new Map();
 
 /**
  * Create a new filter by its color
+ * @param {Phaser.Game} game Phaser game instance
  * @param {{ r: number, g: number, b: number }} color RGB color channels
- * @param {number} enabled Is the filter enabled (0 or 1)
  * @returns {Phaser.Filter} New or existing phaser filter
  */
-const instanceNewColorFilter = (color, enabled) => {
+const instanceNewColorFilter = (game, color) => {
+	game.filters ??= new Map();
+
 	const key = colord(color).toHex();
-	const cached = filters.get(key);
+	const cached = game.filters.get(key);
 	if (typeof cached !== 'undefined') return cached;
 
 	// Add new filter for the color
 	const filter = new Phaser.Filter(game, {
 		color: { type: '3fv', value: [color.r / 255, color.g / 255, color.b / 255] },
-		enabled: { type: '1f', value: enabled }
+		enabled: { type: '1f', value: 0.0 }
 	}, solidColorFragShader);
 	filter.setResolution(16, 16);
 
-	filters.set(key, filter);
+	game.filters.set(key, filter);
 
 	return filter;
 };
@@ -133,8 +134,10 @@ UIProjectileImage.prototype.updateColor = function(enabled) {
 				const turret = result.getTurretColour();
 				const { r, g, b } = adjustColorToMaze(colord(turret.numericValue.replace('0x', '#')).toRgb());
 
-				this.colorFilter = instanceNewColorFilter({ r, g, b }, 1.0);
+				this.colorFilter = instanceNewColorFilter(this.game, { r, g, b });
 				this.filters = [this.colorFilter];
+
+				this.colorFilter.uniforms.enabled.value = 1.0;
 			}
 		}, () => {}, () => {}, projectileData.getPlayerId(), Caches.getPlayerDetailsCache());
 	} else {

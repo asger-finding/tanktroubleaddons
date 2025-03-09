@@ -101,7 +101,7 @@ if (!customElements.get('stroked-text')) {
 			 * Called when the element is removed from the DOM.
 			 */
 			disconnectedCallback() {
-				this.resizeObserver.disconnect();
+				if (this.resizeObserver) this.resizeObserver.disconnect();
 			}
 		}
 	);

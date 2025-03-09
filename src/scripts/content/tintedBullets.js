@@ -40,19 +40,12 @@ uniform float enabled;
 varying vec2 vTextureCoord;
 
 void main(void) {
-	if (enabled != 1.0) {
-		gl_FragColor = texture2D(uSampler, vTextureCoord);;
-		return;
-	}
-
     vec4 textureColor = texture2D(uSampler, vTextureCoord);
-	float alpha = textureColor.a;
-    if (alpha > 0.0) {
-        // Un-premultiply alpha and blend directly, then re-premultiply
-        textureColor.rgb = mix(textureColor.rgb / alpha, color, enabled) * alpha;
-    }
+    float alpha = textureColor.a;
 
-    gl_FragColor = textureColor;
+    // Use mix to avoid conditional branching
+    vec3 blendedColor = mix(textureColor.rgb, color * alpha, enabled * step(0.0, alpha));
+    gl_FragColor = vec4(blendedColor, textureColor.a);
 }
 `;
 
@@ -79,19 +72,40 @@ const adjustColorToMaze = ({ r, g, b }) => {
 	return { r, g, b };
 };
 
+// TODO:
+// We need some kind of symbol logic so that we can do Symbol(key)
+// and add it to a WeakMap so that we can garbage collect filters
+const filters = new Map();
+
+/**
+ * Create a new filter by its color
+ * @param {{ r: number, g: number, b: number }} color RGB color channels
+ * @param {number} enabled Is the filter enabled (0 or 1)
+ * @returns {Phaser.Filter} New or existing phaser filter
+ */
+const instanceNewColorFilter = (color, enabled) => {
+	const key = colord(color).toHex();
+	const cached = filters.get(key);
+	if (typeof cached !== 'undefined') return cached;
+
+	// Add new filter for the color
+	const filter = new Phaser.Filter(game, {
+		color: { type: '3fv', value: [color.r / 255, color.g / 255, color.b / 255] },
+		enabled: { type: '1f', value: enabled }
+	}, solidColorFragShader);
+	filter.setResolution(16, 16);
+
+	filters.set(key, filter);
+
+	return filter;
+};
+
 const proto = UIProjectileImage.prototype;
 UIProjectileImage = function(game, gameController) {
 	Phaser.Image.call(this, game, 0, 0, 'game', '');
 	this.gameController = gameController;
 	this.anchor.setTo(0.5, 0.5);
 	this.scale.setTo(UIConstants.GAME_ASSET_SCALE, UIConstants.GAME_ASSET_SCALE);
-
-	this.colorFilter = new Phaser.Filter(this.game, {
-		color: { type: '3fv', value: [0.0, 0.0, 0.0] },
-		enabled: { type: '1f', value: 0.0 }
-	}, solidColorFragShader);
-	this.colorFilter.setResolution(16, 16);
-	this.filters = [ this.colorFilter ];
 
 	this.kill();
 };
@@ -106,10 +120,6 @@ UIProjectileImage.prototype.spawn = function(x, y, projectileId, frameName) {
 };
 
 UIProjectileImage.prototype.updateColor = function(enabled) {
-	if (!this.colorFilter) return;
-
-	this.colorFilter.uniforms.enabled.value = 0.0;
-
 	const projectileData = this.gameController.getProjectile(this.projectileId);
 	if (projectileData && enabled) {
 		if (![
@@ -118,17 +128,17 @@ UIProjectileImage.prototype.updateColor = function(enabled) {
 			Constants.WEAPON_TYPES.SHOTGUN
 		].includes(projectileData.getType())) return;
 
-		this.colorFilter.uniforms.color.value = [0, 0, 0];
-		this.colorFilter.uniforms.enabled.value = 1.0;
-
 		Backend.getInstance().getPlayerDetails(result => {
 			if (typeof result === 'object') {
 				const turret = result.getTurretColour();
 				const { r, g, b } = adjustColorToMaze(colord(turret.numericValue.replace('0x', '#')).toRgb());
 
-				this.colorFilter.uniforms.color.value = [r / 255, g / 255, b / 255];
+				this.colorFilter = instanceNewColorFilter({ r, g, b }, 1.0);
+				this.filters = [this.colorFilter];
 			}
 		}, () => {}, () => {}, projectileData.getPlayerId(), Caches.getPlayerDetailsCache());
+	} else {
+		this.colorFilter.uniforms.enabled.value = 0.0;
 	}
 };
 

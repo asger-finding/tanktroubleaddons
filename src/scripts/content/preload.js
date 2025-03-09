@@ -69,7 +69,7 @@ const gamePreloadStage = Game.UIPreloadState.getMethod('preload');
 Game.UIPreloadState.method('preload', function(...args) {
 	const result = gamePreloadStage.apply(this, ...args);
 
-	GameManager.getGame().load.removeFile('image', 'gameiconplaceholder');
+	this.load.removeFile('image', 'gameiconplaceholder');
 	this.load.image('gameiconplaceholder', Addons.t_url('assets/lobby/game.{{png|avif}}'));
 
 	if (this.game.device.pixelRatio > 1) {
@@ -83,6 +83,19 @@ Game.UIPreloadState.method('preload', function(...args) {
 		this.load.image('leftarrow', Addons.t_url('assets/lobby/leftArrow.{{png|avif}}'));
 		this.load.image('rightarrow', Addons.t_url('assets/lobby/rightArrow.{{png|avif}}'));
 	}
+
+	// Optimization flags should preferably
+	// be done in the Boot state, but we might
+	// as well recycle this function for this
+	const { gl } = this.game.renderer;
+	gl.disable(gl.DEPTH_TEST);
+	gl.disable(gl.CULL_FACE);
+	gl.disable(gl.STENCIL_TEST);
+	gl.disable(gl.DITHER);
+	gl.disable(gl.POLYGON_OFFSET_FILL);
+	gl.disable(gl.SAMPLE_COVERAGE);
+	gl.disable(gl.SAMPLE_ALPHA_TO_COVERAGE);
+	gl.disable(gl.SCISSOR_TEST);
 
 	return result;
 });

@@ -4,7 +4,7 @@
 @use 'dark.scss';
 
 $assets: "chrome-extension://__MSG_@@extension_id__/assets";
-$font-stack: Arial, verdana;
+$font-stack: Arial, Verdana, sans-serif;
 $max-safe-integer: 2147483647;
 
 @function asset($path) {
@@ -369,6 +369,35 @@ $max-safe-integer: 2147483647;
 							color: var(--jq-fcDefault);
 							grid-row: 2;
 							grid-column: 2;
+						}
+					}
+				}
+
+				#playerdetails-json {
+					input#cm-toggle:checked + label + .codeblock {
+						display: block;
+					}
+					.clicker {
+						display: block;
+						font-size: 16px;
+						font-family: $font-stack;
+						font-weight: bold;
+						cursor: pointer;
+
+						&:focus .codeblock {
+							display: block;
+						}
+					}
+					.codeblock {
+						display: none;
+						margin-top: 6px;
+
+						.cm-s-blackboard.CodeMirror {
+							border: 1px solid var(--jq-borderColorDefault);
+							background-color: rgb(0 0 0 / 0.45);
+						}
+						.CodeMirror-focused {
+							border: inherit;
 						}
 					}
 				}

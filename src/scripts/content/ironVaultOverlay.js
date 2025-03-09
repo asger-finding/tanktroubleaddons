@@ -218,9 +218,10 @@ export default class IronVaultOverlay {
 					const tankDetails = IronVaultOverlay.#createTankDetails(result);
 					const badges = IronVaultOverlay.#createBadges(result);
 					const playerDetails = IronVaultOverlay.#createPlayerDetails(result);
+					const playerDetailsJSON = IronVaultOverlay.#createPlayerDetailsJSON(result);
 					const competitionResults = IronVaultOverlay.#createCompetitionResults(result);
 
-					container.append([tankDetails, badges, '<hr>', playerDetails, competitionResults]);
+					container.append([tankDetails, badges, '<hr>', playerDetails, competitionResults, '<hr>', playerDetailsJSON]);
 
 					resolve(container);
 				} else {
@@ -419,6 +420,38 @@ export default class IronVaultOverlay {
 		return container;
 	}
 
+	/**
+	 *
+	 * @param playerDetails
+	 */
+	static #createPlayerDetailsJSON(playerDetails) {
+		const container = $('<div id="playerdetails-json"></div>');
+		const clicker = $('<input id="cm-toggle" class="hidden" type="checkbox"><label for="cm-toggle" class="clicker ui-widget" tabindex="1">View raw details ...</label>');
+		const codeblock = $('<div class="codeblock"></div>');
+
+		const value = JSON.stringify(playerDetails.data, null, 2)
+			.replace(/"(?<_>[^"]+)":/gu, '$1:');
+
+		container.append([clicker, codeblock]);
+		container.appendTo('body');
+
+		// Initialize CodeMirror
+		// eslint-disable-next-line new-cap
+		const editor = CodeMirror(codeblock[0], {
+			value,
+			mode: 'javascript',
+			theme: 'blackboard',
+			lineNumbers: false,
+			readOnly: true,
+			scrollbarStyle: null
+		});
+
+		// https://stackoverflow.com/questions/8349571/codemirror-editor-is-not-loading-content-until-clicked
+		editor.refresh();
+		container.remove();
+
+		return container;
+	}
 
 	/**
 	 * Create a container with IronVault competition results

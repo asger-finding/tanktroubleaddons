@@ -103,3 +103,5 @@ UIFullscreenGameButtonGroup.prototype.retire = function() {
 	// Unfullscreen the user
 	this._unfullscreen();
 };
+
+export const _isESmodule = true;

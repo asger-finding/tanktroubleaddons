@@ -1,3 +1,6 @@
+// Precompute lowercase admin array
+const admins = TankTrouble.WallOfFame.admins.map(username => username.toLowerCase());
+
 /**
  * Determine player's admin state
  * @param {object} playerDetails Player details
@@ -7,7 +10,7 @@ const getAdminState = playerDetails => {
 	const isAdmin = playerDetails.getGmLevel() >= UIConstants.ADMIN_LEVEL_PLAYER_LOOKUP;
 
 	if (isAdmin) return 1;
-	else if (TankTrouble.WallOfFame.admins.includes(playerDetails.getUsername())) return -1;
+	else if (admins.includes(playerDetails.getUsername().toLowerCase())) return -1;
 	return 0;
 };
 

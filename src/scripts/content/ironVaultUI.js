@@ -187,7 +187,7 @@ export default class IronVaultUI {
 		if (this.#initialized) return;
 
 		this.searchForPlayerWidget = $('<div></div>');
-		this.usernameInput = $('<input type="text" placeholder="E.g.: Laika">');
+		this.usernameInput = $('<input type="text" maxlength="32" placeholder="E.g.: Laika">');
 		this.usernameSubmit = $('<button type="submit">Search</button>');
 		this.searchSeparator = $('<hr>');
 		this.searchResult = $('<div></div>');
@@ -589,11 +589,18 @@ export default class IronVaultUI {
 				Addons.t_url('assets/menu/ironvault/player-id.svg'),
 				playerDetails.getPlayerId()
 			],
-			...(playerDetails.getGmLevel() !== null ?  [[
+			...(playerDetails.getGmLevel() !== null ? [[
 				'Game Master',
 				Addons.t_url('assets/menu/ironvault/game-master.svg'),
 				`Level ${ playerDetails.getGmLevel() }`
-			]] : [])
+			]] : []),
+			...(playerDetails.getGmLevel() === null
+				&& TankTrouble.WallOfFame.admins.some(admin => admin.toLowerCase() === playerDetails.getUsername())
+				?  [[
+					'Game Master',
+					Addons.t_url('assets/menu/ironvault/game-master-retired.svg'),
+					'Retired'
+				]] : [])
 
 		].map(item => {
 			const [key, iconUrl, value] = item;

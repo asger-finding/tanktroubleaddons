@@ -486,7 +486,7 @@ export default class IronVaultUI {
 					$canvas.tooltipster({
 						position: 'right',
 						theme: 'tooltipster-error',
-						offsetX: 5,
+						offsetX: -20,
 						trigger: 'custom'
 					});
 					IronVaultUI.#updateTooltipster($canvas, 'Failed to load tank');

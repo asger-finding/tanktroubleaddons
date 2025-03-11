@@ -275,26 +275,34 @@ export default class IronVaultOverlay {
 	static #insertPlayer(username) {
 		return new Promise((resolve, reject) => {
 			if (typeof username !== 'string' || username === '') {
-				reject(new Error('Input is empty'));
+				reject(new Error('Field is empty'));
 				return;
 			}
 
-			Backend.getInstance().getPlayerDetailsByUsername(result => {
-				if (typeof result === 'object') {
-					const container = $('<div></div>');
-					const tankDetails = IronVaultOverlay.#createTankDetails(result);
-					const badges = IronVaultOverlay.#createBadges(result);
-					const playerDetails = IronVaultOverlay.#createPlayerDetails(result);
-					const playerDetailsJSON = IronVaultOverlay.#createPlayerDetailsJSON(result);
-					const competitionResults = IronVaultOverlay.#createCompetitionResults(result);
+			TankTrouble.Ajax.checkUsername(response => {
+				if (response.result.result || response.result.message === 'Username is already taken') {
+					Backend.getInstance().getPlayerDetailsByUsername(result => {
+						if (typeof result === 'object') {
+							const container = $('<div></div>');
+							const tankDetails = IronVaultOverlay.#createTankDetails(result);
+							const badges = IronVaultOverlay.#createBadges(result);
+							const playerDetails = IronVaultOverlay.#createPlayerDetails(result);
+							const playerDetailsJSON = IronVaultOverlay.#createPlayerDetailsJSON(result);
+							const competitionResults = IronVaultOverlay.#createCompetitionResults(result);
 
-					container.append([tankDetails, badges, '<hr>', playerDetails, competitionResults, '<hr>', playerDetailsJSON]);
+							container.append([tankDetails, badges, '<hr>', playerDetails, competitionResults, '<hr>', playerDetailsJSON]);
 
-					resolve(container);
+							resolve(container);
+						} else {
+							reject(new Error('User not found'));
+						}
+					}, () => {}, () => {}, username, Caches.getPlayerDetailsByUsernameCache());
 				} else {
-					reject(new Error('User not found'));
+					reject(new Error(response.result.message));
 				}
-			}, () => {}, () => {}, username, Caches.getPlayerDetailsByUsernameCache());
+			}, response => reject(new Error(response.result.message)), () => {}, username, null);
+
+
 		});
 	}
 

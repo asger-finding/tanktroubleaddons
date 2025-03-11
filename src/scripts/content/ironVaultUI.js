@@ -7,7 +7,7 @@ import { timeAgo } from '../utils/timeUtils.js';
  * @param {string} src Image source
  * @returns {Promise<HTMLImageElement>} Image once loaded
  */
-const loadImage = src => new Promise(resolve => {
+const loadImage = src => new Promise((resolve, reject) => {
 	const image = new Image();
 	image.crossOrigin = 'Anonymous';
 	image.src = src;
@@ -16,6 +16,12 @@ const loadImage = src => new Promise(resolve => {
 	 * @returns {HTMLImageElement} Image once loaded
 	 */
 	image.onload = () => resolve(image);
+	/**
+	 * Reject promise if image load fails
+	 * @param {Event} ev Error reason
+	 * @returns {Event} Error event
+	 */
+	image.onerror = ev => reject(ev);
 });
 
 /**
@@ -398,14 +404,16 @@ export default class IronVaultUI {
 			switch (part.type) {
 				case 'shade':
 					return loadImage(g_url(`assets/images/tankIcon/${ part.data }-320@2x.png`))
-						.then(shade => [null, shade]);
+						.then(shade => [null, shade])
+						.catch(url => new Error(`Failed to load shading: ${ url }`));
 				case 'accessory':
 					return part.data[1] !== '0'
 						? loadImage(g_url(`assets/images/accessories/${ part.data[0] }${ part.data[1] }-320@2x.png`))
 							.then(accessory => [null, accessory])
+							.catch(url => new Error(`Failed to load accessory: ${ url }`))
 						: Promise.resolve(null);
 				case 'base':
-					return new Promise(resolve => {
+					return new Promise((resolve, reject) => {
 						loadImage(g_url(`assets/images/tankIcon/${ part.data[0] }-320@2x.png`))
 							.then(flat => {
 								if (part.data[1].type === 'numeric') {
@@ -415,9 +423,11 @@ export default class IronVaultUI {
 								} else {
 									// Resolve for image
 									loadImage(g_url(`assets/images/colours/colour${ part.data[1].imageValue }-320@2x.png`))
-										.then(color => resolve([color, flat]));
+										.then(color => resolve([color, flat]))
+										.catch(url => reject(new Error(`Failed to load color texture: ${ url }`)));
 								}
-							});
+							})
+							.catch(url => reject(new Error(`Failed to load color mask: ${ url }`)));
 					});
 				default:
 					throw new Error('Tank part must be "shade", "accessory" or "base"');
@@ -454,7 +464,7 @@ export default class IronVaultUI {
 
 				// Apply the fill (color or texture)
 				if (typeof fill === 'number') {
-					ctx.fillStyle = `#${ fill.toString(16) }`;
+					ctx.fillStyle = `#${ fill.toString(16).padStart(6, '0') }`;
 					ctx.fillRect(0, 0, width, height);
 					ctx.globalCompositeOperation = 'source-over';
 				} else if (fill instanceof HTMLImageElement) {
@@ -465,7 +475,23 @@ export default class IronVaultUI {
 				const maskBuffer = ctx.getImageData(0, 0, width, height);
 				return layerImageData(currentBuffer, maskBuffer);
 			}, initialBuffer);
+		}).catch(async() => {
+			// An image errored. Show the 404 tank
+			await loadImage(Addons.t_url('assets/menu/ironvault/404-tank.{{png|avif}}'))
+				.then(image => {
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
+					const $canvas = $(canvas);
+					$canvas.tooltipster({
+						position: 'right',
+						theme: 'tooltipster-error',
+						offsetX: 5,
+						trigger: 'custom'
+					});
+					IronVaultUI.#updateTooltipster($canvas, 'Failed to load tank');
+				});
+		}).finally(() => {
 			trimCanvas(ctx);
 		});
 

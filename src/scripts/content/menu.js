@@ -1,6 +1,7 @@
 import AddonsUI from './addonsUI.js';
 import IronVaultUI from './ironVaultUI.js';
 import ProxyHelper from '../utils/proxyHelper.js';
+import { listen } from '../common/ipcBridge.js';
 
 /**
  * @typedef {object} SectionOptions
@@ -333,6 +334,12 @@ class Menu {
 Object.assign(Addons, {
 	menu: new Menu()
 });
+
+/**
+ * Toggle Addons menu on icon click
+ */
+listen(['TOGGLE_MENU'], () => Addons.menu.toggle());
+
 
 /**
  * Insert addons button and addons (ironvault) lookup buttons on TankInfoBox initialize

@@ -12,7 +12,7 @@ permissions:
   - scripting
   - windows
 action:
-  default_title: execute.js will run (watch the Chrome DevTools' console)
+  default_title: __MSG_name__
 background:
   service_worker: scripts/service.js
 declarative_net_request:

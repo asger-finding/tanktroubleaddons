@@ -20,65 +20,76 @@ startSyncStore(defaultState);
 let lastWindowState: chrome.windows.windowStateEnum = 'normal';
 
 /**
- * Get the tab id of the focused tab
- * @returns Current tab id (if any)
+ * Get the focused tab
+ * @returns Current tab (if any)
  */
-async function getTabId() {
+async function getFocusedTab() {
 	const tabs = await browser.tabs.query({
 		active: true,
 		currentWindow: true
 	});
-	return (tabs.length > 0) ? tabs[0].id : null;
+	return (tabs.length > 0) ? tabs[0] : null;
 }
 
 /**
- * Event handler for onclick action. Execute a script on click.
+ * Check if url domain is TankTrouble
+ * @param url URL string
+ * @returns Is TankTrouble?
  */
-async function execScript() {
-	const tabId = await getTabId();
-	if (tabId) {
-		browser.scripting.executeScript({
-			target: { tabId },
-			files: [ 'scripts/execute.js' ]
-		});
-	}
+function isTankTrouble(url: string) {
+	const { hostname } = new URL(url);
+	return hostname === 'tanktrouble.com' || hostname.endsWith('.tanktrouble.com');
 }
 
 /**
  * Fullscreen or unfullscreen the current tab
  * @param state Should the fullscreen be on or off?
  */
-function toggleFullscreen(state?: 'on' | 'off') {
-	chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-		if (tabs.length === 0) return;
+async function toggleFullscreen(state?: 'on' | 'off') {
+	const tab = await getFocusedTab();
+	if (tab === null) return;
+	if (typeof tab.url === 'undefined') return;
 
-		const [tab] = tabs;
-		const { windowId } = tab;
+	const { windowId } = tab;
 
-		if (typeof tab.url === 'undefined') return;
+	if (isTankTrouble(tab.url)) {
+		browser.windows.get(windowId, window => {
+			const currentState = window.state ?? 'normal';
 
-		const { hostname } = new URL(tab.url);
-		if (hostname === 'tanktrouble.com' || hostname.endsWith('.tanktrouble.com')) {
-			chrome.windows.get(windowId, window => {
-				const currentState = window.state ?? 'normal';
+			// Update lastWindowState only if the current state is not fullscreen
+			if (currentState !== 'fullscreen') lastWindowState = currentState;
 
-				// Update lastWindowState only if the current state is not fullscreen
-				if (currentState !== 'fullscreen') lastWindowState = currentState;
-
-				chrome.windows.update(windowId, {
-					state: state === 'on' ? 'fullscreen' : lastWindowState
-				});
+			browser.windows.update(windowId, {
+				state: state === 'on' ? 'fullscreen' : lastWindowState
 			});
-		}
-	});
+		});
+	}
 }
 
-// event to run execute.js content when extension's button is clicked
-browser.action.onClicked.addListener(execScript);
+/**
+ * Event handler for onclick action.
+ */
+async function toggleMenu() {
+	const tab = await getFocusedTab();
+
+	if (tab === null) return;
+	if (typeof tab.url === 'undefined') return;
+	if (typeof tab.id === 'undefined') return;
+
+	if (isTankTrouble(tab.url)) {
+		browser.scripting.executeScript({
+			target: { tabId: tab.id },
+			files: [ 'scripts/toggleMenu.js' ]
+		});
+	}
+}
+
+// Event to toggle menu when extension's button is clicked
+browser.action.onClicked.addListener(toggleMenu);
 
 // Listener for fetch requests from the content script
 // eslint-disable-next-line consistent-return
-chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
+browser.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 	if (request.action === 'CORS_EXEMPT_FETCH' && request.resource) {
 		const { resource, options, uuid } = request;
 

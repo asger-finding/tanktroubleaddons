@@ -133,7 +133,7 @@ class Addons {
 		const [resource, options] = args;
 
 		return new Promise((resolve, reject) => {
-			chrome.runtime.sendMessage({
+			browser.runtime.sendMessage({
 				action: 'CORS_EXEMPT_FETCH',
 				resource,
 				options
@@ -177,7 +177,7 @@ class Addons {
 			const state = detail.data?.state;
 			if (!state) throw new Error('No state provided for fullscreen request');
 
-			chrome.runtime.sendMessage({
+			browser.runtime.sendMessage({
 				action: 'FULLSCREEN',
 				state
 			}, response => {
@@ -188,8 +188,6 @@ class Addons {
 	}
 
 }
-
-
 
 const addon = new Addons();
 addon.load();

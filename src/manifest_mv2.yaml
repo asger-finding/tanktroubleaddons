@@ -6,7 +6,7 @@ author: Asger Finding
 manifest_version: 2
 homepage_url: "https://github.com/asger-finding/TankTroubleAddons/tree/v2"
 browser_action:
-  default_title: execute.js will run (watch the Chrome DevTools' console)
+  default_title: __MSG_name__
 content_scripts:
   - run_at: document_start
     js: [scripts/index.js]

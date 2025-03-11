@@ -181,7 +181,7 @@ export default class IronVaultOverlay {
 		if (this.#initialized) return;
 
 		this.searchForPlayerWidget = $('<div></div>');
-		this.usernameInput = $('<input type="text" placeholder="Laika">');
+		this.usernameInput = $('<input type="text" placeholder="E.g.: Laika">');
 		this.usernameSubmit = $('<button type="submit">Search</button>');
 		this.searchSeparator = $('<hr>');
 		this.searchResult = $('<div></div>');

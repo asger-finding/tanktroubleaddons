@@ -27,6 +27,7 @@ const paths = {
 		html: `${origin}/html/*.html`,
 		assets: `${origin}/assets/**/*.@(avif|gif|svg|zip)`,
 		bitmap: `${origin}/assets/**/*.@(png|jpg|jpeg)`,
+		meta: `${origin}/meta/**/*`,
 		json: `${origin}/**/*.json`
 	},
 	baseBuild: './build',
@@ -349,6 +350,12 @@ const bitmap = () => src(paths.files.bitmap)
 	.pipe(dest(`${ state.dest }/assets`))
 	.pipe(hotReload());
 
+const meta = () => src(paths.files.meta)
+	.pipe(changed(`${ state.dest }/meta`))
+	.pipe(excludeFiles())
+	.pipe(dest(`${ state.dest }/meta`))
+	.pipe(hotReload());
+
 /**
  * Pipe JSON to the active folder
  *
@@ -409,6 +416,7 @@ const watch = () => {
 	gulpWatch(paths.files.html, html);
 	gulpWatch(paths.files.assets, assets);
 	gulpWatch(paths.files.bitmap, bitmap);
+	gulpWatch(paths.files.meta, meta);
 	gulpWatch(paths.files.json, json);
 	gulpWatch(paths.manifest, manifest);
 };
@@ -421,6 +429,6 @@ const broadcast = async() => {
 };
 
 exports.destroy = destroy;
-exports.build = series(broadcast, clean, parallel(scripts, styles, html, assets, bitmap, json, manifest));
+exports.build = series(broadcast, clean, parallel(scripts, styles, html, assets, bitmap, meta, json, manifest));
 exports.watch = series(setupLiveReload, exports.build, watch);
 exports.default = exports.build;

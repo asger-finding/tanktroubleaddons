@@ -16,10 +16,10 @@ action:
 background:
   service_worker: scripts/service.js
 icons:
-  32: assets/icons/32.{{png|avif}}
-  64: assets/icons/64.{{png|avif}}
-  96: assets/icons/96.{{png|avif}}
-  128: assets/icons/128.{{png|avif}}
+  32: meta/32.png
+  64: meta/64.png
+  96: meta/96.png
+  128: meta/128.png
 declarative_net_request:
   rule_resources:
     - id: ruleset_1

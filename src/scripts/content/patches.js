@@ -51,6 +51,16 @@ const proxyWidget = (function*() {
 			}
 
 			return li.append(wrapper).appendTo(ul);
+		},
+
+		refresh() {
+			this._super();
+
+			const selectedItem = this.element.find('option:selected');
+			const selectedText = selectedItem.text();
+			const selectedDescription = selectedItem.attr('data-description');
+
+			if (selectedDescription) this.buttonItem.text(`${selectedText} ${ selectedDescription }`);
 		}
 	});
 })();

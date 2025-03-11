@@ -43,9 +43,9 @@
 	Function(meta.loader)();
 
 	Promise.all([
+		injectScript(`${meta.extensionUrl}scripts/content/patches.js`, true),
 		injectScript(`${meta.extensionUrl}scripts/content/preload.js`, true),
-		injectScript(`${meta.extensionUrl}scripts/content/theme.js`, true),
-		injectScript(`${meta.extensionUrl}scripts/content/patches.js`, true)
+		injectScript(`${meta.extensionUrl}scripts/content/theme.js`, true)
 	]).then(() => {
 		injectScript(`${meta.extensionUrl}scripts/content/statisticsSnippet.js`);
 		injectScript(`${meta.extensionUrl}scripts/content/strokedText.js`);

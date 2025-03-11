@@ -3,13 +3,29 @@ import { generateUUID } from '../utils/mathUtils.js';
 import { timeAgo } from '../utils/timeUtils.js';
 
 /**
- * Trim a canvas to remove alpha pixels from each side
- * @param {HTMLCanvasElement} canvas Target canvas element
- * @param {number} threshold Alpha threshold. Range 0-255.
- * @returns {object} Width and height of trimmed canvcas and left-top coordinate of trimmed area
+ * Load a source into an image and resolve when loaded
+ * @param {string} src Image source
+ * @returns {Promise<HTMLImageElement>} Image once loaded
  */
-const trimCanvas = (canvas, threshold = 0) => {
-	const ctx = canvas.getContext('2d', { willReadFrequently: true });
+const loadImage = src => new Promise(resolve => {
+	const image = new Image();
+	image.crossOrigin = 'Anonymous';
+	image.src = src;
+	/**
+	 * Resolve when the image has loaded
+	 * @returns {HTMLImageElement} Image once loaded
+	 */
+	image.onload = () => resolve(image);
+});
+
+/**
+ * Trim a canvas to remove alpha pixels from each side
+ * @param {CanvasRenderingContext2D} ctx Canvas context
+ * @param {number} threshold Alpha threshold. Range 0-255.
+ * @returns {object} Width and height of trimmed canvas and left-top coordinate of trimmed area
+ */
+const trimCanvas = (ctx, threshold = 0) => {
+	const { canvas } = ctx;
 	const { width } = canvas;
 	const { height } = canvas;
 	const imageData = ctx.getImageData(0, 0, width, height);
@@ -41,6 +57,57 @@ const trimCanvas = (canvas, threshold = 0) => {
 
 	return { width: canvas.width, height: canvas.height, x: tlCorner.x, y: tlCorner.y };
 };
+
+/**
+ * Merge two image data layers into one layer, ignoring alpha.
+ * @param {ImageData} baseLayer Base image data
+ * @param {ImageData} onTopLayer Image data to add on top
+ * @returns {ImageData} Merged layers
+ */
+function layerImageData(baseLayer, onTopLayer) {
+	const { width } = onTopLayer;
+	const { height } = onTopLayer;
+
+	// Create a new ImageData object to store the result
+	const resultImageData = new ImageData(width, height);
+
+	// Get the pixel data arrays
+	const data1 = onTopLayer.data;
+	const data2 = baseLayer.data;
+	const resultData = resultImageData.data;
+
+	for (let i = 0; i < data1.length; i += 4) {
+		// Extract RGBA values for imageData1
+		const r1 = data1[i];
+		const g1 = data1[i + 1];
+		const b1 = data1[i + 2];
+		const a1 = data1[i + 3] / 255;
+
+		// Extract RGBA values for imageData2
+		const r2 = data2[i];
+		const g2 = data2[i + 1];
+		const b2 = data2[i + 2];
+		const a2 = data2[i + 3] / 255;
+
+		// Calculate the resulting alpha
+		const alpha = a1 + a2 * (1 - a1);
+
+		// Calculate the resulting color
+		const r = Math.round((r1 * a1 + r2 * a2 * (1 - a1)) / alpha);
+		const g = Math.round((g1 * a1 + g2 * a2 * (1 - a1)) / alpha);
+		const b = Math.round((b1 * a1 + b2 * a2 * (1 - a1)) / alpha);
+
+		// Set the resulting pixel data
+		resultData[i] = r;
+		resultData[i + 1] = g;
+		resultData[i + 2] = b;
+
+		// Denormalize alpha to [0, 255]
+		resultData[i + 3] = Math.round(alpha * 255);
+	}
+
+	return resultImageData;
+}
 
 /**
  * Add space thousands delimiters to a number and return it as a string
@@ -244,27 +311,19 @@ export default class IronVaultOverlay {
 
 		const tankContainer = $('<div class="tankcontainer"></div>');
 
-		const canvas = document.createElement('canvas');
+		const canvas = IronVaultOverlay.#loadTankIcon(playerDetails);
 		canvas.width = UIConstants.TANK_ICON_WIDTH_LARGE;
 		canvas.height = UIConstants.TANK_ICON_HEIGHT_LARGE;
-		canvas.style.width = `${UIConstants.TANK_ICON_RESOLUTIONS[UIConstants.TANK_ICON_SIZES.SMALL] }px`;
-		canvas.style.height = `${UIConstants.TANK_ICON_RESOLUTIONS[UIConstants.TANK_ICON_SIZES.SMALL] * 0.6 }px`;
-		left.append(tankContainer.append(canvas));
+		canvas.style.width = '';
+		canvas.style.height = UIConstants.TANK_ICON_RESOLUTIONS[UIConstants.TANK_ICON_SIZES.SMALL] * 0.6;
+		tankContainer.append(canvas).appendTo(left);
 
-		UITankIcon.loadPlayerTankIcon(canvas, UIConstants.TANK_ICON_SIZES.LARGE, playerDetails.getPlayerId(), () => {
-			const username = $(`<stroked-text text="${ playerDetails.getUsername() }" width="100px" height="2em"></stroked-text>`).css({
-				width: 'inherit',
-				top: 0,
-				left: 0
-			});
-			left.append(username);
-
-			requestAnimationFrame(() => {
-				trimCanvas(canvas);
-				canvas.style.width = '';
-				canvas.style.height = UIConstants.TANK_ICON_RESOLUTIONS[UIConstants.TANK_ICON_SIZES.SMALL] * 0.6;
-			});
-		}, {});
+		const username = $(`<stroked-text text="${ playerDetails.getUsername() }" width="100px" height="2em"></stroked-text>`).css({
+			width: 'inherit',
+			top: 0,
+			left: 0
+		});
+		left.append(username);
 
 		const rank = playerDetails.getRank();
 		const rankIndex = UIUtils.getRankLevelFromRank(rank);
@@ -297,6 +356,112 @@ export default class IronVaultOverlay {
 		container.append([left, right]);
 
 		return container;
+	}
+
+	/**
+	 * Render a tank (player details) onto a canvas
+	 * @param {object} playerDetails Player details
+	 * @returns {HTMLCanvasElement} Tank canvas
+	 */
+	static #loadTankIcon(playerDetails) {
+		const canvas = document.createElement('canvas');
+		canvas.width = UIConstants.TANK_ICON_WIDTH_LARGE;
+		canvas.height = UIConstants.TANK_ICON_HEIGHT_LARGE;
+
+		const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+		// Custom tank image loader (ensure highest resolution, no outline)
+		const tank = [
+			{ type: 'accessory', data: ['back', playerDetails.getBackAccessory()] },
+			{ type: 'base', data: [ 'turret', playerDetails.getTurretColour() ] },
+			{ type: 'shade', data: 'turretShade' },
+			{ type: 'base', data: [ 'leftTread', playerDetails.getTreadColour() ] },
+			{ type: 'shade', data: 'leftTreadShade' },
+			{ type: 'base', data: [ 'barrel', playerDetails.getTurretColour() ] },
+			{ type: 'shade', data: 'barrelShade' },
+			{ type: 'base', data: [ 'base', playerDetails.getBaseColour() ] },
+			{ type: 'shade', data: 'baseShade' },
+			{ type: 'base', data: [ 'rightTread', playerDetails.getTreadColour() ] },
+			{ type: 'shade', data: 'rightTreadShade' },
+			{ type: 'accessory', data: ['turret', playerDetails.getTurretAccessory()] },
+			{ type: 'accessory', data: ['front', playerDetails.getFrontAccessory()] },
+			{ type: 'accessory', data: ['barrel', playerDetails.getBarrelAccessory()] }
+		].map(part => {
+			switch (part.type) {
+				case 'shade':
+					return loadImage(g_url(`assets/images/tankIcon/${ part.data }-320@2x.png`))
+						.then(shade => [null, shade]);
+				case 'accessory':
+					return part.data[1] !== '0'
+						? loadImage(g_url(`assets/images/accessories/${ part.data[0] }${ part.data[1] }-320@2x.png`))
+							.then(accessory => [null, accessory])
+						: Promise.resolve(null);
+				case 'base':
+					return new Promise(resolve => {
+						loadImage(g_url(`assets/images/tankIcon/${ part.data[0] }-320@2x.png`))
+							.then(flat => {
+								if (part.data[1].type === 'numeric') {
+									// Resolve for flat color
+									const color = parseInt(part.data[1].numericValue);
+									resolve([color, flat]);
+								} else {
+									// Resolve for image
+									loadImage(g_url(`assets/images/colours/colour${ part.data[1].imageValue }-320@2x.png`))
+										.then(color => resolve([color, flat]));
+								}
+							});
+					});
+				default:
+					throw new Error('Tank part must be "shade", "accessory" or "base"');
+			}
+		});
+
+		Promise.all(tank).then(result => {
+			const { width, height } = canvas;
+			const initialBuffer = ctx.getImageData(0, 0, width, height);
+
+			result.reduce((currentBuffer, part) => {
+				if (part === null) return currentBuffer;
+
+				const [fill, image] = part;
+
+				ctx.clearRect(0, 0, width, height);
+
+				// We simply draw the part
+				if (!fill) {
+					ctx.putImageData(currentBuffer, 0, 0);
+					ctx.drawImage(image, 0, 0, width, height);
+
+					return ctx.getImageData(0, 0, width, height);
+				}
+
+				// We need to mask a shape with an image or fill color
+				ctx.save();
+
+				// Draw mask
+				ctx.drawImage(image, 0, 0, width, height);
+
+				// Only apply where the mask is
+				ctx.globalCompositeOperation = 'source-in';
+
+				// Apply the fill (color or texture)
+				if (typeof fill === 'number') {
+					ctx.fillStyle = `#${ fill.toString(16) }`;
+					ctx.fillRect(0, 0, width, height);
+					ctx.globalCompositeOperation = 'source-over';
+				} else if (fill instanceof HTMLImageElement) {
+					ctx.drawImage(fill, 0, 0, width, height);
+					ctx.globalCompositeOperation = 'source-over';
+				}
+
+				const maskBuffer = ctx.getImageData(0, 0, width, height);
+				return layerImageData(currentBuffer, maskBuffer);
+			}, initialBuffer);
+
+			trimCanvas(ctx);
+		});
+
+		return canvas;
 	}
 
 	/**
@@ -421,8 +586,9 @@ export default class IronVaultOverlay {
 	}
 
 	/**
-	 *
-	 * @param playerDetails
+	 * Create a raw overview of the player details in the original JSON format
+	 * @param {object} playerDetails Player details
+	 * @returns {JQuery} Player details json container
 	 */
 	static #createPlayerDetailsJSON(playerDetails) {
 		const container = $('<div id="playerdetails-json"></div>');

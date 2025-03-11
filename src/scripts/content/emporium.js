@@ -1,5 +1,8 @@
 import ProxyHelper from '../utils/proxyHelper.js';
 
+/**
+ * Insert wallet elements in shop overlay navigator
+ */
 ProxyHelper.interceptFunction(TankTrouble.VirtualShopOverlay, '_initialize', (original, ...args) => {
 	original(...args);
 
@@ -9,6 +12,9 @@ ProxyHelper.interceptFunction(TankTrouble.VirtualShopOverlay, '_initialize', (or
 	TankTrouble.VirtualShopOverlay.navigation.append([TankTrouble.VirtualShopOverlay.walletGold, TankTrouble.VirtualShopOverlay.walletDiamonds]);
 });
 
+/**
+ * Show wallet coins and diamonds in shop navigator
+ */
 ProxyHelper.interceptFunction(TankTrouble.VirtualShopOverlay, 'show', (original, ...args) => {
 	original(...args);
 

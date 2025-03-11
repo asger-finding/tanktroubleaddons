@@ -2,8 +2,8 @@ import { timeAgo } from '../utils/timeUtils.js';
 
 /**
  * Add tank previews for all thread creators, not just the primary creator
- * @param threadOrReply Post data
- * @param threadOrReplyElement Parsed post element
+ * @param {object} threadOrReply Post data
+ * @param {JQuery} threadOrReplyElement Post element
  */
 // eslint-disable-next-line complexity
 const insertMultipleCreators = (threadOrReply, threadOrReplyElement) => {
@@ -60,7 +60,7 @@ const insertMultipleCreators = (threadOrReply, threadOrReplyElement) => {
 /**
  * Scroll a post into view if it's not already
  * and highlight it once in view
- * @param threadOrReply Parsed post element
+ * @param {object} threadOrReply Post element
  */
 const highlightThreadOrReply = threadOrReply => {
 	const observer = new IntersectionObserver(entries => {
@@ -80,8 +80,8 @@ const highlightThreadOrReply = threadOrReply => {
 
 /**
  * Insert a share button to the thread or reply that copies the link to the post to clipboard
- * @param threadOrReply Post data
- * @param threadOrReplyElement Parsed post element
+ * @param {object} threadOrReply Post data
+ * @param {JQuery} threadOrReplyElement Post element
  */
 const addShare = (threadOrReply, threadOrReplyElement) => {
 	const isReply = Boolean(threadOrReply.threadId);
@@ -139,8 +139,8 @@ const addShare = (threadOrReply, threadOrReplyElement) => {
 
 /**
  * Add text to details that shows when a post was last edited
- * @param threadOrReply Post data
- * @param threadOrReplyElement Parsed post element
+ * @param {object} threadOrReply Post data
+ * @param {JQuery} threadOrReplyElement Post element
  */
 const addLastEdited = (threadOrReply, threadOrReplyElement) => {
 	const { created, latestEdit } = threadOrReply;
@@ -167,8 +167,8 @@ const addLastEdited = (threadOrReply, threadOrReplyElement) => {
 
 /**
  * Add anchor tags to links in posts
- * @param _threadOrReply Post data
- * @param threadOrReplyElement Parsed post element
+ * @param {object} _threadOrReply Post data
+ * @param {JQuery} threadOrReplyElement Post element
  */
 const addHyperlinks = (_threadOrReply, threadOrReplyElement) => {
 	const threadOrReplyContent = threadOrReplyElement.find('.bubble .content');
@@ -183,8 +183,8 @@ const addHyperlinks = (_threadOrReply, threadOrReplyElement) => {
 /**
  * Check the latest three replies of a forum thread
  * and highlight the thread if any of them are unmoderated
- * @param threadOrReply Post data
- * @param threadOrReplyElement Parsed post element
+ * @param {object} threadOrReply Post data
+ * @param {JQuery} threadOrReplyElement Post element
  */
 const addUnmoderatedHighlight = (threadOrReply, threadOrReplyElement) => {
 	const { hasAnyReplies } = threadOrReply;
@@ -207,8 +207,8 @@ const addUnmoderatedHighlight = (threadOrReply, threadOrReplyElement) => {
 
 /**
  * Add extra features to a thread or reply
- * @param threadOrReply Post data
- * @param threadOrReplyElement Post HTMLElement
+ * @param {object} threadOrReply Post data
+ * @param {JQuery} threadOrReplyElement Post element
  */
 const addFeaturesToThreadOrReply = (threadOrReply, threadOrReplyElement) => {
 	insertMultipleCreators(threadOrReply, threadOrReplyElement);
@@ -220,7 +220,7 @@ const addFeaturesToThreadOrReply = (threadOrReply, threadOrReplyElement) => {
 
 /**
  * Handle a thread  or reply
- * @param threadOrReply Post data
+ * @param {object} threadOrReply Post data
  */
 const handleThreadOrReply = threadOrReply => {
 	if (threadOrReply === null) return;
@@ -246,14 +246,14 @@ const handleThreadOrReply = threadOrReply => {
 };
 
 /**
- * Infer post type from <any>
- * @param item Post item
+ * Infer post type from data
+ * @param {object|Array|number} data Post (reply or thread) or post list or post id
  * @returns Type or null if undefined
  */
-const getPostType = item => {
-	if (typeof item === 'number') return 'postId';
-	if (item instanceof Array) return 'postList';
-	if (item instanceof Object) return 'post';
+const getPostType = data => {
+	if (typeof data === 'number') return 'postId';
+	if (data instanceof Array) return 'postList';
+	if (data instanceof Object) return 'post';
 	return null;
 };
 
@@ -298,6 +298,9 @@ const proxy = new Proxy({}, {
 	}
 });
 
+/**
+ * Prepend (inject) custom event listeners to modify threads and replies
+ */
 const { getInstance } = Forum;
 Forum.classMethod('getInstance', function(...args) {
 	const instance = getInstance.apply(this, args);

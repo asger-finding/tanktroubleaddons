@@ -2,6 +2,9 @@ import UIKilledByGroup from './killedbygroup.js';
 
 Game.UIGameState.field('killedByGroup', null);
 
+/**
+ * Inject killed by group to game state
+ */
 const createGameState = Game.UIGameState.getMethod('create');
 Game.UIGameState.method('create', function(...args) {
 	const result = createGameState.apply(this, ...args);
@@ -11,6 +14,9 @@ Game.UIGameState.method('create', function(...args) {
 	return result;
 });
 
+/**
+ * Spawn killed by message if a local user is killed
+ */
 const gameRoundEventHandler = Game.UIGameState.getMethod('_roundEventHandler');
 Game.UIGameState.method('_roundEventHandler', (...args) => {
 	const [self,, evt, data] = args;
@@ -27,6 +33,9 @@ Game.UIGameState.method('_roundEventHandler', (...args) => {
 	return gameRoundEventHandler(...args);
 });
 
+/**
+ * Retire group on cleanup
+ */
 const gameCleanup = Game.UIGameState.getMethod('_cleanUp');
 Game.UIGameState.method('_cleanUp', function(...args) {
 	this.killedByGroup.retire();
@@ -34,6 +43,9 @@ Game.UIGameState.method('_cleanUp', function(...args) {
 	return gameCleanup.apply(this, ...args);
 });
 
+/**
+ * Position killed by group on resize
+ */
 const gameResizeHandler = Game.UIGameState.getMethod('_onSizeChangeHandler');
 Game.UIGameState.method('_onSizeChangeHandler', function(...args) {
 	const result = gameResizeHandler.apply(this, ...args);

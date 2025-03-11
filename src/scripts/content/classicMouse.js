@@ -54,6 +54,7 @@ MouseInputManager.method('update', function() {
 	let angle = Phaser.Math.angleBetween(0, 0, relativeToTank.x, relativeToTank.y);
 
 	if (isClassicMouse) {
+		// Classic (addons) mouse logic
 		if (angle > Math.PI / 2) angle = -angle;
 		const distance = Math.abs((angle / Math.PI) + 0.5);
 		const rotationMultiplier = distance > 0.1
@@ -66,6 +67,7 @@ MouseInputManager.method('update', function() {
 		forwardState = magnitude > UIConstants.CLASSIC_MOUSE_INPUT.POSITION_DEAD_DISTANCE / UIConstants.GAME_ASSET_SCALE;
 		backState = false;
 	} else {
+		// Standard mouse logic
 		const canReverse = magnitude < UIConstants.MOUSE_INPUT.MAX_REVERSE_DISTANCE / UIConstants.GAME_ASSET_SCALE;
 		let goInReverse = false;
 		if (angle > Math.PI * 0.5 + UIConstants.MOUSE_INPUT.ROTATION_DEAD_ANGLE || angle < -Math.PI * 0.5 - UIConstants.MOUSE_INPUT.ROTATION_DEAD_ANGLE) {
@@ -125,6 +127,9 @@ MouseInputManager.method('update', function() {
 	this.storedStates.fire = fireState;
 });
 
+/**
+ * Allow variable rotation speed (rotationSpeedMultiplier)
+ */
 Tank.method('setTankState', function(tankState) {
 	this.playerId = tankState.getPlayerId();
 	this.x = tankState.getX();
@@ -148,6 +153,9 @@ Tank.method('setTankState', function(tankState) {
 	}
 });
 
+/**
+ * Allow variable rotation speed (rotationSpeedMultiplier)
+ */
 Tank.method('update', function() {
 	this.x = this.b2dbody.GetPosition().x;
 	this.y = this.b2dbody.GetPosition().y;

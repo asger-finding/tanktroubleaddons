@@ -1,5 +1,8 @@
 import ProxyHelper from '../utils/proxyHelper.js';
 
+/**
+ * Initialize death count elements
+ */
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) => {
 	original(...args);
 
@@ -34,6 +37,9 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 	TankTrouble.TankInfoBox.infoDeathsSvg = TankTrouble.TankInfoBox.infoDeaths.svg('get');
 });
 
+/**
+ * Show death count elements to user
+ */
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {
 	original(...args);
 

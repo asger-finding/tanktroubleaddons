@@ -2,9 +2,9 @@ import { dispatchMessage } from '../common/ipcBridge.js';
 
 /**
  * Create full screen toggle game button
- * @param game Phaser game instance
- * @param x x pixel position
- * @param y y pixel position
+ * @param {Phaser.Game} game Phaser game instance
+ * @param {number} x x pixel position
+ * @param {number} y y pixel position
  */
 export default function UIFullscreenGameButtonGroup(game, x, y) {
 	// Call super.

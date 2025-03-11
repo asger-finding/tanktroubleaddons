@@ -1,5 +1,5 @@
-import AddonsOverlay from './addonsOverlay.js';
-import IronVaultOverlay from './ironVaultOverlay.js';
+import AddonsUI from './addonsUI.js';
+import IronVaultUI from './ironVaultUI.js';
 import ProxyHelper from '../utils/proxyHelper.js';
 
 /**
@@ -42,7 +42,7 @@ class Menu {
 
 	/**
 	 * Get the matrix transform
-	 * @returns Matrix transform values
+	 * @returns {{ d1: number, d2: number, d3: number }} Matrix transform values
 	 */
 	get matrixTransform() {
 		return this.#matrixTransform;
@@ -225,8 +225,8 @@ class Menu {
 	 */
 	init() {
 		if (!this.#initialized) {
-			this.addons = new AddonsOverlay(this);
-			this.ironvault = new IronVaultOverlay(this);
+			this.addons = new AddonsUI(this);
+			this.ironvault = new IronVaultUI(this);
 
 			this.currentPage = 'addons';
 			this.goToCurrentPage();
@@ -263,7 +263,7 @@ class Menu {
 	 * Calculate a perspective distortion value based on a pixel positon in the window
 	 * @param {number} x x-position
 	 * @param {number} y y-position
-	 * @returns d1 and d2 values for a matrix3d() css function
+	 * @returns {[number, number]} d1 and d2 values for a matrix3d() css function
 	 */
 	// eslint-disable-next-line class-methods-use-this, @typescript-eslint/class-methods-use-this
 	#calculate3DDistort(x, y) {
@@ -334,6 +334,9 @@ Object.assign(Addons, {
 	menu: new Menu()
 });
 
+/**
+ * Insert addons button and addons (ironvault) lookup buttons on TankInfoBox initialize
+ */
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) => {
 	original(...args);
 
@@ -397,6 +400,9 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 	addonsLookupButton.insertBefore(TankTrouble.TankInfoBox.infoAdminLookup);
 });
 
+/**
+ * Show Addons button on own user or IronVault lookup button on foreign user
+ */
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {
 	original(...args);
 

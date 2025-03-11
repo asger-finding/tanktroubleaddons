@@ -1,6 +1,6 @@
 import { get, set } from '../common/store.js';
 
-export default class AddonsOverlay {
+export default class AddonsUI {
 
 	id = 'addons';
 
@@ -14,13 +14,14 @@ export default class AddonsOverlay {
 
 	/**
 	 * Is the overlay showing?
-	 * @returns {boolean} Showing
+	 * @returns {boolean} Is showing?
 	 */
 	get isShowing() {
 		return this.#showing;
 	}
 
 	/**
+	 * Show or hide the menu depending on the setter
 	 * @param {boolean} showing Should the menu show?
 	 * @returns {boolean} Showing
 	 */
@@ -34,8 +35,8 @@ export default class AddonsOverlay {
 	}
 
 	/**
-	 * Create the overlay
-	 * @param {class} parent Menu class
+	 * Construct the addons content
+	 * @param {class} parent Menu class instance
 	 */
 	constructor(parent) {
 		fetch(Addons.t_url('assets/menu/addons/addons.svg'))
@@ -48,11 +49,12 @@ export default class AddonsOverlay {
 	}
 
 	/**
-	 * Initialize the overlay content
+	 * Initialize the addons content
 	 */
 	init() {
 		if (this.#initialized) return;
 
+		// Interface options
 		(() => {
 			const interfaceWidget = $('<div></div>');
 			const themeHeading = $('<div class="heading">Theme</div>');
@@ -117,6 +119,7 @@ export default class AddonsOverlay {
 			}, [ interfaceWidget ]);
 		})();
 
+		// "Other" options
 		(() => {
 			const otherWidget = $('<div></div>');
 			const texturePackWrapper = $('<div></div>');
@@ -178,7 +181,7 @@ export default class AddonsOverlay {
 					Addons.storeTexturePack(file, name)
 						.then(hashsum => Addons.setActiveTexturePack(hashsum)
 							.then(texturePack => {
-								AddonsOverlay.#updateTooltipster(createNewSubmit, '');
+								AddonsUI.#updateTooltipster(createNewSubmit, '');
 								Utils.updateTooltip(createNewSubmit, '');
 								Addons.reloadGame();
 
@@ -192,7 +195,7 @@ export default class AddonsOverlay {
 								createNewWrapper.hide();
 							}))
 						.catch(err => {
-							AddonsOverlay.#updateTooltipster(createNewSubmit, err.message);
+							AddonsUI.#updateTooltipster(createNewSubmit, err.message);
 						});
 				}
 			});
@@ -240,7 +243,7 @@ export default class AddonsOverlay {
 	 * Create a new content block with options
 	 * @param {SectionOptions} sectionOpts Options for the section
 	 * @param  {Widget[]} widgets JQuery UI widgets
-	 * @returns New section
+	 * @returns {JQuery} New section
 	 */
 	// eslint-disable-next-line complexity
 	#createSection(sectionOpts, widgets = []) {

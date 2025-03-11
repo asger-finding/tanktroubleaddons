@@ -9,7 +9,9 @@ if (!customElements.get('stroked-text')) {
 		 */
 		class extends HTMLElement {
 			/**
-			 *
+			 * Create new auto-resizing stroked text element
+			 * @example
+			 * const text = $(`<stroked-text text="Laika" width="200px height="2em"></stroked-text>`);
 			 */
 			constructor() {
 				super();

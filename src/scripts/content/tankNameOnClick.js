@@ -1,3 +1,6 @@
+/**
+ * Show tank usernames below their name when clicked in-game.
+ */
 const createUIGameState = Game.UIGameState.getMethod('create');
 Game.UIGameState.method('create', function(...args) {
 	createUIGameState.apply(this, args);

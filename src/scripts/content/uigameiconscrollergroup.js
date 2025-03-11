@@ -15,10 +15,10 @@ UIConstants.classFields({
 
 /**
  * Create a new game icon scroller.
- * @param game Phaser game instance
- * @param itemWidth Game icon width
- * @param itemHeight Game icon height
- * @param maxScrollSpeed Scroll speed
+ * @param {Phaser.Game} game Phaser game instance
+ * @param {number} itemWidth Game icon width
+ * @param {number} itemHeight Game icon height
+ * @param {number} maxScrollSpeed Scroll speed
  */
 export default function UIGameIconScrollerGroup(game, itemWidth, itemHeight, maxScrollSpeed) {
 	// Call super.

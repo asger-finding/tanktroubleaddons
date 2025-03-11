@@ -127,7 +127,7 @@ const getOrdinal = number => {
 	return number + (suffixes[(value - 20) % 10] || suffixes[value] || suffixes[0]);
 };
 
-export default class IronVaultOverlay {
+export default class IronVaultUI {
 
 	id = 'ironvault';
 
@@ -161,7 +161,7 @@ export default class IronVaultOverlay {
 	}
 
 	/**
-	 * Create the overlay
+	 * Construct IronVault overlay
 	 * @param {class} parent Menu class
 	 */
 	constructor(parent) {
@@ -175,7 +175,7 @@ export default class IronVaultOverlay {
 	}
 
 	/**
-	 * Initialize the overlay content
+	 * Initialize the IronVault content
 	 */
 	init() {
 		if (this.#initialized) return;
@@ -249,12 +249,12 @@ export default class IronVaultOverlay {
 		this.searchSeparator.hide();
 		this.searchResult.empty();
 
-		IronVaultOverlay.#insertPlayer(username)
+		IronVaultUI.#insertPlayer(username)
 			.then(result => {
 				this.searchSeparator.show();
 				this.searchResult.append(result);
 			})
-			.catch(err => IronVaultOverlay.#updateTooltipster(this.usernameSubmit, err.message));
+			.catch(err => IronVaultUI.#updateTooltipster(this.usernameSubmit, err.message));
 	}
 
 	/**
@@ -284,11 +284,11 @@ export default class IronVaultOverlay {
 					Backend.getInstance().getPlayerDetailsByUsername(result => {
 						if (typeof result === 'object') {
 							const container = $('<div></div>');
-							const tankDetails = IronVaultOverlay.#createTankDetails(result);
-							const badges = IronVaultOverlay.#createBadges(result);
-							const playerDetails = IronVaultOverlay.#createPlayerDetails(result);
-							const playerDetailsJSON = IronVaultOverlay.#createPlayerDetailsJSON(result);
-							const competitionResults = IronVaultOverlay.#createCompetitionResults(result);
+							const tankDetails = IronVaultUI.#createTankDetails(result);
+							const badges = IronVaultUI.#createBadges(result);
+							const playerDetails = IronVaultUI.#createPlayerDetails(result);
+							const playerDetailsJSON = IronVaultUI.#createPlayerDetailsJSON(result);
+							const competitionResults = IronVaultUI.#createCompetitionResults(result);
 
 							container.append([tankDetails, badges, '<hr>', playerDetails, competitionResults, '<hr>', playerDetailsJSON]);
 
@@ -319,7 +319,7 @@ export default class IronVaultOverlay {
 
 		const tankContainer = $('<div class="tankcontainer"></div>');
 
-		const canvas = IronVaultOverlay.#loadTankIcon(playerDetails);
+		const canvas = IronVaultUI.#loadTankIcon(playerDetails);
 		canvas.width = UIConstants.TANK_ICON_WIDTH_LARGE;
 		canvas.height = UIConstants.TANK_ICON_HEIGHT_LARGE;
 		canvas.style.width = '';

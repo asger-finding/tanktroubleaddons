@@ -1,6 +1,9 @@
 import ProxyHelper from '../utils/proxyHelper.js';
 import { timeAgo } from '../utils/timeUtils.js';
 
+/**
+ * Insert creation date and player id elements
+ */
 ProxyHelper.interceptFunction(TankTrouble.AccountOverlay, '_initialize', (original, ...args) => {
 	original(...args);
 
@@ -13,6 +16,9 @@ ProxyHelper.interceptFunction(TankTrouble.AccountOverlay, '_initialize', (origin
 	]);
 });
 
+/**
+ * Render creation date and player id to the menu
+ */
 ProxyHelper.interceptFunction(TankTrouble.AccountOverlay, 'show', (original, ...args) => {
 	original(...args);
 

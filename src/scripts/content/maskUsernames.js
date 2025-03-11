@@ -1,7 +1,7 @@
 /**
  * Determine player's admin state
- * @param playerDetails Player details
- * @returns -1 for retired admin, 0 for non-admin, 1 for admin
+ * @param {object} playerDetails Player details
+ * @returns {-1|0|1} -1 for retired admin, 0 for non-admin, 1 for admin
  */
 const getAdminState = playerDetails => {
 	const isAdmin = playerDetails.getGmLevel() >= UIConstants.ADMIN_LEVEL_PLAYER_LOOKUP;
@@ -13,9 +13,9 @@ const getAdminState = playerDetails => {
 
 /**
  * Prepend admin details to username
- * @param usernameParts Transformable array for the username
- * @param playerDetails Player details
- * @returns Mutated username parts
+ * @param {string[]} usernameParts Transformable array for the username
+ * @param {object} playerDetails Player details
+ * @returns {string[]} Mutated username parts
  */
 const maskUsernameByAdminState = (usernameParts, playerDetails) => {
 	const adminState = getAdminState(playerDetails);
@@ -30,9 +30,9 @@ const maskUsernameByAdminState = (usernameParts, playerDetails) => {
  * Mask username if not yet approved
  * If the user or an admin is logged in
  * locally, then still show the username
- * @param usernameParts Transformable array for the username
- * @param playerDetails Player details
- * @returns Mutated username parts
+ * @param {string[]} usernameParts Transformable array for the username
+ * @param {object} playerDetails Player details
+ * @returns {string[]} Mutated username parts
  */
 const maskUnapprovedUsername = (usernameParts, playerDetails) => {
 	if (!playerDetails.getUsernameApproved()) {
@@ -56,8 +56,8 @@ const maskUnapprovedUsername = (usernameParts, playerDetails) => {
 /**
  * Transforms the player's username
  * depending on parameters admin and username approved
- * @param playerDetails Player details
- * @returns New username
+ * @param {object} playerDetails Player details
+ * @returns {string} New username
  */
 const transformUsername = playerDetails => {
 	const usernameParts = [];
@@ -68,6 +68,9 @@ const transformUsername = playerDetails => {
 	return usernameParts.join('');
 };
 
+/**
+ * Override mask username method to show GM levels
+ */
 Utils.classMethod('maskUnapprovedUsername', playerDetails => transformUsername(playerDetails));
 
 export const _isESmodule = true;

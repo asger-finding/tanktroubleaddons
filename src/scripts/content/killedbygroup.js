@@ -8,8 +8,8 @@ UIConstants.classFields({
 /**
  * Sprite to show a "killed by" text message when someone on the
  * player's end, dies.
- * @param game Phaser game instance
- * @param gameController Game controller
+ * @param {Phaser.Game} game Phaser game instance
+ * @param {object} gameController Game controller
  */
 export default function UIKilledByGroup(game, gameController) {
 	Phaser.Group.call(this, game, null);

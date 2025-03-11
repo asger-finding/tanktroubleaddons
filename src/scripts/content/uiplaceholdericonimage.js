@@ -1,7 +1,7 @@
 /**
  * Creates new tank placeholder icon sprite
- * @param game Phaser.Game
- * @param size Icon size
+ * @param {Phaser.Game} game Phaser.Game
+ * @param {UIConstants.TANK_ICON_SIZES} size Icon size
  */
 export default function UIPlaceholderIconImage(game, size) {
 	this.iconWidth = 0;

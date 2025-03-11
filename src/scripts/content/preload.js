@@ -44,7 +44,7 @@ Object.assign(Addons, {
 	 * @param {JQuery} container Parent element
 	 * @param {string} classes Item classes
 	 * @param {string} src Image source
-	 * @returns Parent element
+	 * @returns {JQuery} Parent element
 	 */
 	addImageWithClasses: (container, classes, src) => {
 		const image = $(`<img class='${  classes  }'/>`);
@@ -65,6 +65,9 @@ Object.assign(Addons, {
 	indexedDB: await initDatabase()
 });
 
+/**
+ * Load custom images in preload
+ */
 const gamePreloadStage = Game.UIPreloadState.getMethod('preload');
 Game.UIPreloadState.method('preload', function(...args) {
 	const result = gamePreloadStage.apply(this, ...args);
@@ -100,6 +103,53 @@ Game.UIPreloadState.method('preload', function(...args) {
 	return result;
 });
 
+/**
+ * Hook the JQUery UI iconselectmenu widget,
+ * since its normal setup is incorrect in the
+ * upgraded JQuery UI API.
+ */
+const proxyWidget = (function*() {
+	yield () => $.widget('custom.iconselectmenu', $.ui.selectmenu, {
+		_renderItem(ul, item) {
+			const li = $('<li>');
+			const wrapper = $('<div>', { text: item.label });
+
+			if (item.disabled) li.addClass('ui-state-disabled');
+
+			if (item.element.attr('data-imagesrc')) {
+				$(`<div><img width="26" src="${ item.element.attr('data-imagesrc') }" srcset="${ item.element.attr('data-imagesrcset') }"/></div>`)
+					.addClass('ui-icon')
+					.appendTo(wrapper);
+			}
+
+			if (item.element.attr('data-description')) {
+				$(`<div style="font-size: 0.7em;">${ item.element.attr('data-description') }</div>`)
+					.appendTo(wrapper);
+			}
+
+			return li.append(wrapper).appendTo(ul);
+		}
+	});
+})();
+
+/**
+ * Apply widget proxy
+ */
+ProxyHelper.interceptFunction($.widget, 'bridge', (original, ...args) => {
+	const result = original(...args);
+
+	const [name] = args;
+	if (name === 'iconselectmenu') {
+		const widgetFunc = proxyWidget.next();
+		if (!widgetFunc.done) widgetFunc.value();
+	}
+
+	return result;
+});
+
+/**
+ * Custom checkbox JQuery UI widget
+ */
 $.widget('custom.checkboxtoggle', {
 	_create() {
 		this.element.addClass('ui-checkbox-toggle-input ui-widget-header')
@@ -131,30 +181,9 @@ $.widget('custom.checkboxtoggle', {
 	}
 });
 
-const proxyWidget = (function*() {
-	yield () => $.widget('custom.iconselectmenu', $.ui.selectmenu, {
-		_renderItem(ul, item) {
-			const li = $('<li>');
-			const wrapper = $('<div>', { text: item.label });
-
-			if (item.disabled) li.addClass('ui-state-disabled');
-
-			if (item.element.attr('data-imagesrc')) {
-				$(`<div><img width="26" src="${ item.element.attr('data-imagesrc') }" srcset="${ item.element.attr('data-imagesrcset') }"/></div>`)
-					.addClass('ui-icon')
-					.appendTo(wrapper);
-			}
-
-			if (item.element.attr('data-description')) {
-				$(`<div style="font-size: 0.7em;">${ item.element.attr('data-description') }</div>`)
-					.appendTo(wrapper);
-			}
-
-			return li.append(wrapper).appendTo(ul);
-		}
-	});
-})();
-
+/**
+ * Custom delete-/select menu JQuery UI widget
+ */
 $.widget('custom.deleteselectmenu', $.ui.selectmenu, {
 	_create() {
 		this._super('_create');
@@ -180,18 +209,6 @@ $.widget('custom.deleteselectmenu', $.ui.selectmenu, {
 
 		return li.append(wrapper).appendTo(ul);
 	}
-});
-
-ProxyHelper.interceptFunction($.widget, 'bridge', (original, ...args) => {
-	const result = original(...args);
-
-	const [name] = args;
-	if (name === 'iconselectmenu') {
-		const widgetFunc = proxyWidget.next();
-		if (!widgetFunc.done) widgetFunc.value();
-	}
-
-	return result;
 });
 
 export const _isESmodule = true;

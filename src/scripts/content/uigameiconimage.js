@@ -10,7 +10,7 @@ const resolutionScale = UIUtils.getLoadedAssetResolutionScale(devicePixelRatio);
 
 /**
  * Create game icon image for the lobby with variable tank seats
- * @param game Phaser game instance
+ * @param {Phaser.Game} game Phaser game instance
  */
 export default function UIGameIconImage(game) {
 	Phaser.Image.call(this, game, 0, 0, 'gameicon');

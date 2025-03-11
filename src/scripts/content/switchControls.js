@@ -3,7 +3,7 @@ import ProxyHelper from '../utils/proxyHelper.js';
 /**
  * Pretty printed alias for input set id
  * @param {string} inputSetId Input set internal id
- * @returns Definition
+ * @returns {string} Human readable definition
  */
 const getInputSetAlias = inputSetId => {
 	switch (inputSetId) {
@@ -14,10 +14,17 @@ const getInputSetAlias = inputSetId => {
 		case 'mouse':
 			return 'Mouse';
 		default:
-			return inputSetId;
+			throw new Error('Unalised input setrequested in getInputSetAlias');
 	}
 };
 
+/**
+ * Allow a user to set a new input manager.
+ *
+ * If the input manager is contested, switch controls between the two users.
+ * @param {string} playerId Player id
+ * @param {string} newInputSetId Input set id
+ */
 Inputs.switchInputManager = function(playerId, newInputSetId) {
 	const oldSetId = Inputs.getAssignedInputSetId(playerId);
 	const isContested = Inputs._inputSetsInUse[newInputSetId];
@@ -60,6 +67,9 @@ Addons.switchControlsBox = {
 	initialized: false,
 	showing: false,
 
+	/**
+	 * Initialize switch controls tooltip elements
+	 */
 	_initialize() {
 		this.switchControls = $("<div class='box noselect' id='switchcontrols'></div>");
 		this.switchControlsContent = $("<div class='content'></div>");
@@ -118,6 +128,14 @@ Addons.switchControlsBox = {
 		this.initialized = true;
 	},
 
+	/**
+	 * Show the switch controls tooltip for the clicked user
+	 * @param {string} playerId Player id
+	 * @param {number} x Tooltipster x
+	 * @param {number} y Tooltipster y
+	 * @param {string} preferredDirection Tooltipster direction
+	 * @param {number} preferredRadius Tooltipster radius
+	 */
 	show(playerId, x, y, preferredDirection, preferredRadius) {
 		if (!this.initialized) this._initialize();
 
@@ -202,6 +220,9 @@ Addons.switchControlsBox = {
 		});
 	},
 
+	/**
+	 * Hide the switch controls tooltip
+	 */
 	hide() {
 		if (!this.initialized) this._initialize();
 
@@ -230,6 +251,9 @@ Addons.switchControlsBox = {
 
 };
 
+/**
+ * Insert the switch controls button in the tank info box
+ */
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) => {
 	original(...args);
 
@@ -265,6 +289,9 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 	switchControlsButton.insertBefore(TankTrouble.TankInfoBox.infoAccount);
 });
 
+/**
+ * Show the switch controls button for own users
+ */
 ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {
 	original(...args);
 

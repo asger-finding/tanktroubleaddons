@@ -558,6 +558,9 @@ const makeAltLookup = async(adminId, playerId, abortSignal, newPlayerIdCallback)
 	return Array.from(uniques);
 };
 
+/**
+ * Inject message filters into the admin chat log overlay
+ */
 ProxyHelper.interceptFunction(TankTrouble.AdminChatLogOverlay, '_initialize', async(original, ...args) => {
 	const overlay = TankTrouble.AdminChatLogOverlay;
 	if (overlay.initialized) return;
@@ -591,6 +594,9 @@ ProxyHelper.interceptFunction(TankTrouble.AdminChatLogOverlay, '_initialize', as
 	});
 });
 
+/**
+ * Inject custom paginators for filtered content
+ */
 // eslint-disable-next-line complexity
 ProxyHelper.interceptFunction(TankTrouble.AdminChatLogOverlay, '_getChatMessagesByPlayerIds', async(original, ...args) => {
 	const overlay = TankTrouble.AdminChatLogOverlay;
@@ -626,6 +632,9 @@ ProxyHelper.interceptFunction(TankTrouble.AdminChatLogOverlay, '_getChatMessages
 	}
 });
 
+/**
+ * Inject alternative account lookup button and dialog when pressed
+ */
 ProxyHelper.interceptFunction(TankTrouble.AdminPlayerLookupOverlay, '_update', (original, ...args) => {
 	const overlay = TankTrouble.AdminPlayerLookupOverlay;
 
@@ -720,6 +729,9 @@ const limitDateRange = () => {
 	overlay.endDate.datepicker('option', 'minDate', overlay.startDate.datepicker('getDate'));
 };
 
+/**
+ * Inject custom admin statistics range to admin statistics
+ */
 ProxyHelper.interceptFunction(TankTrouble.AdminStatisticsOverlay, '_initialize', (original, ...args) => {
 	const overlay = TankTrouble.AdminStatisticsOverlay;
 
@@ -754,6 +766,9 @@ ProxyHelper.interceptFunction(TankTrouble.AdminStatisticsOverlay, '_initialize',
 	overlay.period.after(overlay.customRangeWrapper);
 });
 
+/**
+ * Logic for when user selects custom timerange
+ */
 ProxyHelper.interceptFunction(TankTrouble.AdminStatisticsOverlay, '_getStatistics', (original, ...args) => {
 	const overlay = TankTrouble.AdminStatisticsOverlay;
 

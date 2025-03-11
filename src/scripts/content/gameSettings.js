@@ -35,7 +35,13 @@ QualityManager.QUALITY_VALUES[QualityManager.QUALITY_SETTINGS.MINIMUM] = {
 
 UIConstants.classField('SETTINGS_QUALITY_MAX_OPTION_HEIGHT', 200);
 
+/**
+ * Add "minimum" quality setting to quality settings
+ */
 ProxyHelper.whenContentLoaded().then(() => {
+	/**
+	 * Insert minimum option element
+	 */
 	ProxyHelper.interceptFunction(TankTrouble.SettingsBox, 'init', (original, ...args) => {
 		original(...args);
 
@@ -45,8 +51,15 @@ ProxyHelper.whenContentLoaded().then(() => {
 	});
 
 	// FIXME: ProxyHelper.interceptFunction does not keep prototype context
+	/**
+	 * Don't emit tank rubble if quality is set to low or minimum
+	 * @param {object} tank Tankstate
+	 */
 	UIRubbleGroup.prototype.emit = function(tank) {
-		if (![QualityManager.QUALITY_SETTINGS.LOW, QualityManager.QUALITY_SETTINGS.MINIMUM].includes(QualityManager.getQuality())) {
+		if (![
+			QualityManager.QUALITY_SETTINGS.LOW,
+			QualityManager.QUALITY_SETTINGS.MINIMU
+		].includes(QualityManager.getQuality())) {
 			if (tank.getSpeed() !== 0.0 || tank.getRotationSpeed() !== 0.0) {
 				this.exists = true;
 				this.visible = true;

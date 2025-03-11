@@ -3,11 +3,17 @@ import UIGameIconScrollerGroup from './uigameiconscrollergroup.js';
 
 window.UIGameIconImage = UIGameIconImage;
 
+/**
+ * Increase pool size to 6 to include max possible games in server
+ */
 UIConstants.classFields({
 	GAME_ICON_POOL_SIZE: 6,
 	GAME_ICON_COUNT: 6
 });
 
+/**
+ * Inject game icon scroller to lobby state
+ */
 const createLobby = Game.UILobbyState.getMethod('create');
 Game.UILobbyState.method('create', function(...args) {
 	createLobby.apply(this, ...args);
@@ -20,6 +26,9 @@ Game.UILobbyState.method('create', function(...args) {
 	));
 });
 
+/**
+ * Override client event handler logic for TTClient.EVENTS.GAME_LIST_CHANGED for our scroller
+ */
 const lobbyClientEventHandler = Game.UILobbyState.getMethod('_clientEventHandler');
 // eslint-disable-next-line complexity
 Game.UILobbyState.method('_clientEventHandler', (...args) => {
@@ -86,6 +95,9 @@ Game.UILobbyState.method('_clientEventHandler', (...args) => {
 	}
 });
 
+/**
+ * Override resize handler for our group
+ */
 Game.UILobbyState.method('_onSizeChangeHandler', function() {
 	this.log.debug('SIZE CHANGE!');
 

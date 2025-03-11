@@ -30,6 +30,9 @@ TankTrouble.Statistics.handleStatisticsChange = function(change = 1) {
 	set('statisticsState', this.current);
 };
 
+/**
+ * Initialize statistics snippet
+ */
 ProxyHelper.interceptFunction(TankTrouble.Statistics, 'init', (original, ...args) => {
 	const result = original(...args);
 
@@ -59,6 +62,9 @@ ProxyHelper.interceptFunction(TankTrouble.Statistics, 'init', (original, ...args
 	return result;
 });
 
+/**
+ * Update statistics from data
+ */
 ProxyHelper.interceptFunction(TankTrouble.Statistics, '_updateStatistics', (original, ...args) => {
 	const [serverId = ClientManager.multiplayerServerId, ...rest] = args;
 

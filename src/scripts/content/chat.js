@@ -8,6 +8,10 @@ import { timeUntil } from '../utils/timeUtils.js';
 // TODO: add scroll
 
 /**
+ * @typedef {{word:string, range:[number, number]}} IndexiesOfWordInSelection
+ */
+
+/**
  * Add auto-complete for user mentions when typing @ in the chat input
  * @param chatInput Chat input instance
  */
@@ -50,10 +54,11 @@ const addAutocomplete = chatInput => {
 
 		/**
 		 * Filter the dropdown elements when searchterm is set
-		 * @param {string} term Term to match the dropdown registry for
-		 * @returns Setter result (term)
+		 * @param {any} term Term to match the dropdown registry for (string)
+		 * @returns {any} Setter result (term)
 		 */
 		set searchTerm(term) {
+			// FIXME: needs string validation
 			if (this.#searchTerm !== term) {
 				this.#removeExpired();
 
@@ -83,6 +88,16 @@ const addAutocomplete = chatInput => {
 			return this.#searchTerm;
 		}
 
+		/**
+		 * Create up/down autocomplete iterator
+		 * @example
+		 * // Get current
+		 * this.iterator.next(0).value;
+		 * // Move one down
+		 * this.iterator.next(1).value;
+		 * // Move two up
+		 * this.iterator.next(-2).value;
+		 */
 		iterator = (function* (options, that) {
 			let i = 0;
 			while (true) {
@@ -146,7 +161,7 @@ const addAutocomplete = chatInput => {
 
 		/**
 		 * Get data for the current position
-		 * @returns Identifier and data for the current dropdown position
+		 * @returns {[symbol, any]} Identifier and data for the current dropdown position
 		 */
 		getCurrent() {
 			return this.iterator.next(0).value;
@@ -285,7 +300,7 @@ const addAutocomplete = chatInput => {
 
 	/**
 	 * Get the word and start/end indexies of the input selectionEnd
-	 * @returns Object with word and range start/end
+	 * @returns {undefined|IndexiesOfWordInSelection} Object with word and range start/end
 	 */
 	const getIndexiesOfWordInCurrentSelection = () => {
 		// Separate string by whitespace and
@@ -309,7 +324,7 @@ const addAutocomplete = chatInput => {
 	/**
 	 * Returns the user that the selection is over,
 	 * from the input value, if prefixed by @
-	 * @returns Mention username or null
+	 * @returns {null|IndexiesOfWordInSelection} Mention username or null
 	 */
 	const getMentionFocus = () => {
 		const currentWord = getIndexiesOfWordInCurrentSelection();
@@ -328,7 +343,7 @@ const addAutocomplete = chatInput => {
 	/**
 	 * Returns the emoji that the selection is over,
 	 * from the input value, if prefixed by :
-	 * @returns Emoji identifier or null
+	 * @returns {null|IndexiesOfWordInSelection} Emoji identifier or null
 	 */
 	const getEmojiFocus = () => {
 		const currentWord = getIndexiesOfWordInCurrentSelection();
@@ -350,7 +365,7 @@ const addAutocomplete = chatInput => {
 	/**
 	 * Handle a dropdown submit event (enter, tab or click)
 	 * by autofilling the value to the input field
-	 * @param evt Event object
+	 * @param {Event} evt Event object
 	 */
 	const handleSubmit = evt => {
 		const content = getMentionFocus() || getEmojiFocus();
@@ -410,7 +425,7 @@ const addAutocomplete = chatInput => {
 
 	/**
 	 * Event handler for received chat messages
-	 * @param data Event data
+	 * @param {object} data Event data
 	 */
 	const handleNewChatMessage = data => {
 		const involvedPlayerIds = data.involvedPlayerIds || [...data.getFrom() || [], ...data.getTo() || []];
@@ -431,47 +446,45 @@ const addAutocomplete = chatInput => {
 		}
 	};
 
+	/**
+	 * Show or hide autocompletes
+	 */
+	// eslint-disable-next-line complexity
 	chatInput.addEventListener('input', ({ isComposing }) => {
 		if (isComposing) return;
 
+		// Handle username autocomplete
 		const userFocus = getMentionFocus();
 		if (userFocus === null) {
 			usernameAutocomplete.hide();
-			return;
+		} else {
+			usernameAutocomplete.searchTerm = userFocus.word;
+			if (!usernameAutocomplete.matches.length) {
+				usernameAutocomplete.hide();
+			} else {
+				usernameAutocomplete.show();
+				usernameAutocomplete.update();
+			}
 		}
 
-		usernameAutocomplete.searchTerm = userFocus.word;
-		if (!usernameAutocomplete.matches.length) {
-			usernameAutocomplete.hide();
-			return;
-		}
-
-		// Show UI
-		usernameAutocomplete.show();
-		usernameAutocomplete.update();
-	});
-
-	chatInput.addEventListener('input', ({ isComposing }) => {
-		if (isComposing) return;
-
+		// Handle emoji autocomplete
 		const emojiFocus = getEmojiFocus();
-		// console.log(emojiFocus)
 		if (emojiFocus === null) {
 			emojiAutocomplete.hide();
-			return;
+		} else {
+			emojiAutocomplete.searchTerm = emojiFocus.word;
+			if (!emojiAutocomplete.matches.length) {
+				emojiAutocomplete.hide();
+			} else {
+				emojiAutocomplete.show();
+				emojiAutocomplete.update();
+			}
 		}
-
-		emojiAutocomplete.searchTerm = emojiFocus.word;
-		if (!emojiAutocomplete.matches.length) {
-			emojiAutocomplete.hide();
-			return;
-		}
-
-		// Show UI
-		emojiAutocomplete.show();
-		emojiAutocomplete.update();
 	});
 
+	/**
+	 * Handle key events for autocompletes
+	 */
 	chatInput.addEventListener('keydown', evt => {
 		switch (evt.key) {
 			case 'Enter':
@@ -516,9 +529,9 @@ const addAutocomplete = chatInput => {
 
 	/**
 	 * Event handler for client state changes (connect, disconnect, handshaked, etc.)
-	 * @param _self Self reference
-	 * @param _oldState Old client state
-	 * @param newState New client state
+	 * @param {any} _self Self reference
+	 * @param {string} _oldState Old client state
+	 * @param {string} newState New client state
 	 */
 	const clientStateEventHandler = (_self, _oldState, newState) => {
 		switch (newState) {
@@ -532,9 +545,9 @@ const addAutocomplete = chatInput => {
 
 	/**
 	 * Event handler for new chat messages
-	 * @param _self Self reference
-	 * @param evt Event type
-	 * @param data Event data
+	 * @param {any} _self Self reference
+	 * @param {string} evt Event type
+	 * @param {any} data Event data
 	 */
 	// eslint-disable-next-line complexity
 	const clientEventHandler = (_self, evt, data) => {
@@ -560,10 +573,12 @@ const addAutocomplete = chatInput => {
 };
 
 /**
- * Prevent TankTrouble from clearing the chat when the client disconnects
+ * Prevent TankTrouble from clearing the chat when the client disconnects.
+ *
  * Print message to chat when client switches server to separate conversations
  */
 const preventServerChangeChatClear = () => {
+	/** Never clear chat if client is unconnected */
 	ProxyHelper.interceptFunction(TankTrouble.ChatBox, '_clearChat', (original, ...args) => {
 		const isUnconnected = ClientManager.getClient().getState() === TTClient.STATES.UNCONNECTED;
 
@@ -573,7 +588,13 @@ const preventServerChangeChatClear = () => {
 
 		return original(...args);
 	});
+};
 
+/**
+ * Show a welcome message with the server name instead of "Welcome to TankTrouble Comms"
+ */
+const betterWelcomeMessage = () => {
+	/** Intercept welcome message with more meaningful response */
 	ProxyHelper.interceptFunction(TankTrouble.ChatBox, '_updateStatusMessageAndAvailability', (original, ...args) => {
 		const [systemMessageText, guestPlayerIds] = args;
 
@@ -590,7 +611,7 @@ const preventServerChangeChatClear = () => {
 
 /**
  * If the server responds a chat with the 'You are temporarily banned from chatting'
- * system message, then intercept and give a more meaningful response
+ * system message, then intercept and give a more meaningful response (unban time)
  */
 const insertChatBanExpiryTime = () => {
 	ProxyHelper.interceptFunction(TankTrouble.ChatBox, 'addSystemMessage', (original, ...args) => {
@@ -645,7 +666,9 @@ const insertChatBanExpiryTime = () => {
 };
 
 /**
- * Replace non-ISO-8859-15-compliant characters with a question mark
+ * Replace non-ISO-8859-15-compliant characters with a question mark.
+ *
+ * TankTrouble cannot store message outside this standard, and the chat will otherwise stall permanently.
  */
 const escapeBadCharacters = () => {
 	ProxyHelper.interceptFunction(TankTrouble.ChatBox, '_sendChat', (original, ...args) => {
@@ -663,7 +686,7 @@ const escapeBadCharacters = () => {
 };
 
 /**
- * Adds emojis to chat messages
+ * Intercept chat messages and insert emojis in the :emoji: syntax
  */
 const insertEmojis = () => {
 	const pattern = new RegExp(`:(${Object.keys(dismoji).join('|')}):`, 'gu');
@@ -675,6 +698,9 @@ const insertEmojis = () => {
 	});
 };
 
+/**
+ * Initialize all chat mods
+ */
 ProxyHelper.whenContentInitialized().then(() => {
 	/* eslint-disable prefer-destructuring */
 	const chatBody = TankTrouble.ChatBox.chatBody[0];
@@ -683,6 +709,7 @@ ProxyHelper.whenContentInitialized().then(() => {
 
 	addAutocomplete(chatInput);
 	preventServerChangeChatClear();
+	betterWelcomeMessage();
 	escapeBadCharacters();
 	insertChatBanExpiryTime();
 	insertEmojis();

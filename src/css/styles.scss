@@ -192,9 +192,11 @@ $max-safe-integer: 2147483647;
 
 		.grid-item {
 			background: var(--background-color);
+			shape-rendering: optimizeSpeed;
 
 			svg {
 				user-select: none;
+				display: block;
 				width: 100%;
 				height: 100%;
 			}
@@ -448,6 +450,17 @@ $max-safe-integer: 2147483647;
 					border-bottom-right-radius: 8px;
 				}
 			}
+		}
+
+		&::before {
+			content: '';
+
+			position: absolute;
+			width: 2px;
+			height: 50px;
+			background-color: var(--border-accent-4);
+			top: -5px;
+			left: -1.5px;
 		}
 
 		&:not(:last-child)::after {

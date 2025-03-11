@@ -370,6 +370,7 @@ const json = () => src(paths.files.json)
  */
 const manifest = () => src(paths.manifest)
 	.pipe(changed(state.dest, { extension: '.json' }))
+	.pipe(conditionalReplacement())
 	.pipe(excludeFiles())
 	.pipe(yaml({ schema: 'DEFAULT_FULL_SCHEMA' }))
 	.pipe(jeditor(_json => {

@@ -15,6 +15,11 @@ action:
   default_title: __MSG_name__
 background:
   service_worker: scripts/service.js
+icons:
+  32: assets/icons/32.{{png|avif}}
+  64: assets/icons/64.{{png|avif}}
+  96: assets/icons/96.{{png|avif}}
+  128: assets/icons/128.{{png|avif}}
 declarative_net_request:
   rule_resources:
     - id: ruleset_1

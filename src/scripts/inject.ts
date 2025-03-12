@@ -1,13 +1,15 @@
 (() => {
+	const meta = JSON.parse(document.currentScript?.dataset.meta ?? '{}');
+
 	/**
 	 * Inject a script into the site
-	 * @param src Script source
+	 * @param path Path to script in extension
 	 * @param fetchPriority Should the script have priority?
 	 * @returns Promise when loaded
 	 */
-	const injectScript = (src: string, fetchPriority?: true) => {
+	const inject = (path: string, fetchPriority?: true) => {
 		const script = document.createElement('script');
-		script.src = src;
+		script.src = meta.extensionUrl + path;
 		script.type = 'module';
 		script.fetchPriority = fetchPriority ? 'high' : 'auto';
 
@@ -21,8 +23,6 @@
 			script.addEventListener('load', () => resolve());
 		});
 	};
-
-	const meta = JSON.parse(document.currentScript?.dataset.meta ?? '{}');
 
 	Object.defineProperty(window, 'Addons', {
 		value: {},
@@ -39,32 +39,34 @@
 		t_url: (url: string) => `${ meta.extensionUrl }${ url }`
 	});
 
-	// eslint-disable-next-line @typescript-eslint/no-implied-eval
-	Function(meta.loader)();
-
 	Promise.all([
-		injectScript(`${meta.extensionUrl}scripts/content/patches.js`, true),
-		injectScript(`${meta.extensionUrl}scripts/content/preload.js`, true),
-		injectScript(`${meta.extensionUrl}scripts/content/theme.js`, true)
-	]).then(() => {
-		injectScript(`${meta.extensionUrl}scripts/content/statisticsSnippet.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/strokedText.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/forum.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/menu.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/switchControls.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/maskUsernames.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/classicMouse.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/chat.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/lobby.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/gameSettings.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/tankNameOnClick.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/tintedBullets.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/killedByMessage.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/fullscreenGame.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/deathCount.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/texturePacks.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/emporium.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/accountMenu.js`);
-		injectScript(`${meta.extensionUrl}scripts/content/adminOverlays.js`);
+		inject('scripts/content/patches.js', true),
+		inject('scripts/content/preload.js', true),
+		inject('scripts/content/theme.js', true)
+	]).then(async() => {
+		await Promise.all([
+			inject('scripts/content/statisticsSnippet.js'),
+			inject('scripts/content/strokedText.js'),
+			inject('scripts/content/forum.js'),
+			inject('scripts/content/menu.js'),
+			inject('scripts/content/switchControls.js'),
+			inject('scripts/content/maskUsernames.js'),
+			inject('scripts/content/classicMouse.js'),
+			inject('scripts/content/chat.js'),
+			inject('scripts/content/lobby.js'),
+			inject('scripts/content/gameSettings.js'),
+			inject('scripts/content/tankNameOnClick.js'),
+			inject('scripts/content/tintedBullets.js'),
+			inject('scripts/content/killedByMessage.js'),
+			inject('scripts/content/fullscreenGame.js'),
+			inject('scripts/content/deathCount.js'),
+			inject('scripts/content/texturePacks.js'),
+			inject('scripts/content/emporium.js'),
+			inject('scripts/content/accountMenu.js'),
+			inject('scripts/content/adminOverlays.js')
+		]);
+
+		// eslint-disable-next-line @typescript-eslint/no-implied-eval
+		Function(meta.loader)();
 	});
 })();

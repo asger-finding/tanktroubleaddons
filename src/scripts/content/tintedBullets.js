@@ -140,7 +140,7 @@ UIProjectileImage.prototype.updateColor = function(enabled) {
 				this.colorFilter.uniforms.enabled.value = 1.0;
 			}
 		}, () => {}, () => {}, projectileData.getPlayerId(), Caches.getPlayerDetailsCache());
-	} else {
+	} else if (this.colorFilter) {
 		this.colorFilter.uniforms.enabled.value = 0.0;
 	}
 };

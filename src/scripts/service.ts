@@ -19,6 +19,33 @@ startSyncStore(defaultState);
 
 let lastWindowState: chrome.windows.windowStateEnum = 'normal';
 
+const disabledIconPaths = {
+	32: browser.runtime.getURL('meta/32-disabled.png'),
+	64: browser.runtime.getURL('meta/64-disabled.png'),
+	96: browser.runtime.getURL('meta/96-disabled.png'),
+	128: browser.runtime.getURL('meta/128-disabled.png')
+};
+const enabledIconPaths = {
+	32: browser.runtime.getURL('meta/32.png'),
+	64: browser.runtime.getURL('meta/64.png'),
+	96: browser.runtime.getURL('meta/96.png'),
+	128: browser.runtime.getURL('meta/128.png')
+};
+
+/**
+ * Check if url domain is TankTrouble
+ * @param url URL string
+ * @returns Is TankTrouble?
+ */
+function isTankTrouble(url: string) {
+	try {
+		const { hostname } = new URL(url);
+		return hostname === 'tanktrouble.com' || hostname.endsWith('.tanktrouble.com');
+	} catch {
+		return false;
+	}
+}
+
 /**
  * Get the focused tab
  * @returns Current tab (if any)
@@ -29,16 +56,6 @@ async function getFocusedTab() {
 		currentWindow: true
 	});
 	return (tabs.length > 0) ? tabs[0] : null;
-}
-
-/**
- * Check if url domain is TankTrouble
- * @param url URL string
- * @returns Is TankTrouble?
- */
-function isTankTrouble(url: string) {
-	const { hostname } = new URL(url);
-	return hostname === 'tanktrouble.com' || hostname.endsWith('.tanktrouble.com');
 }
 
 /**
@@ -65,6 +82,21 @@ async function toggleFullscreen(state?: 'on' | 'off') {
 		});
 	}
 }
+/**
+ * Function to update the icon based on the URL
+ * @param tabId Current tab id
+ */
+function updateIcon(tabId: number) {
+	chrome.tabs.get(tabId, tab => {
+		if (chrome.runtime.lastError) return;
+		if (typeof tab.url === 'undefined') return;
+
+		const icons = isTankTrouble(tab.url)
+			? enabledIconPaths
+			: disabledIconPaths;
+		chrome.action.setIcon({ tabId, path: icons });
+	});
+}
 
 /**
  * Event handler for onclick action.
@@ -87,8 +119,17 @@ async function toggleMenu() {
 // Event to toggle menu when extension's button is clicked
 browser.action.onClicked.addListener(toggleMenu);
 
+// Listen for tab updates
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+	if (changeInfo.status === 'complete') updateIcon(tabId);
+});
+
+// Listen for tab switches
+chrome.tabs.onActivated.addListener((activeInfo) => {
+	updateIcon(activeInfo.tabId);
+});
+
 // Listener for fetch requests from the content script
-// eslint-disable-next-line consistent-return
 browser.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 	if (request.action === 'CORS_EXEMPT_FETCH' && request.resource) {
 		const { resource, options, uuid } = request;
@@ -104,6 +145,8 @@ browser.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 
 		return true;
 	}
+
+	return null;
 });
 
 

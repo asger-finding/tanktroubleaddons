@@ -16,7 +16,7 @@ action:
 background:
   service_worker: scripts/service.js
 icons:
-  32: meta/32.png
+  32: meta/32-disabled.png
   64: meta/64.png
   96: meta/96.png
   128: meta/128.png

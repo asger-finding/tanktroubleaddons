@@ -4,7 +4,7 @@ version: __VERSION__
 default_locale: en
 author: Asger Finding
 manifest_version: 3
-homepage_url: "https://github.com/asger-finding/TankTroubleAddons/tree/v2"
+homepage_url: "https://github.com/asger-finding/tanktroubleaddons"
 permissions:
   - storage
   - declarativeNetRequest

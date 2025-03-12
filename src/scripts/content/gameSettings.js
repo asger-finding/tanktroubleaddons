@@ -35,8 +35,6 @@ QualityManager.QUALITY_VALUES[QualityManager.QUALITY_SETTINGS.MINIMUM] = {
 
 UIConstants.classField('SETTINGS_QUALITY_MAX_OPTION_HEIGHT', 200);
 
-console.log('loading minimum game setting');
-
 /**
  * Add "minimum" quality setting to quality settings
  */

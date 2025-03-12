@@ -350,6 +350,10 @@ const bitmap = () => src(paths.files.bitmap)
 	.pipe(dest(`${ state.dest }/assets`))
 	.pipe(hotReload());
 
+/**
+ * Pipe meta assets to the active folder
+ * @returns Gulp end signal
+ */
 const meta = () => src(paths.files.meta)
 	.pipe(changed(`${ state.dest }/meta`))
 	.pipe(excludeFiles())

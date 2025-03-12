@@ -56,6 +56,7 @@ UIGameIconImage.prototype.getTankIcons = function() {
 	}, []);
 };
 
+// eslint-disable-next-line max-params
 UIGameIconImage.prototype.spawn = function(x, y, gameState, favouriteActiveQueuedCounts, joinGameCb, lobbyCtx) {
 	this.reset(x, y);
 	this.gameId = gameState.getId();

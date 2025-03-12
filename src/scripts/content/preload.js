@@ -1,5 +1,3 @@
-import ProxyHelper from '../utils/proxyHelper.js';
-
 // Preload functions
 
 /**

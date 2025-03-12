@@ -1,7 +1,7 @@
 import { StoreEvent, get, onStateChange } from '../common/store.js';
 import { colord } from '@pixi/colord';
-import { smoothTransition } from '../utils/mathUtils.js';
 import { rgb as rgbContrast } from 'wcag-contrast';
+import { smoothTransition } from '../utils/mathUtils.js';
 
 let shouldBulletsTint = false;
 

@@ -24,7 +24,7 @@ export let get: ((key: string) => Promise<unknown>);
  * Write a key/value pair to the store
  * @param key Key to set
  * @param value Value to set
- * @returns FIXME RETURNS WHAT
+ * @returns Promise for value once set
  */
 export let set: ((key: string, value: any) => Promise<unknown>);
 

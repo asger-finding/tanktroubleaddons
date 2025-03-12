@@ -58,25 +58,26 @@ const addAutocomplete = chatInput => {
 		 * @returns {any} Setter result (term)
 		 */
 		set searchTerm(term) {
-			// FIXME: needs string validation
-			if (this.#searchTerm !== term) {
-				this.#removeExpired();
+			if (typeof term !== 'string') throw new Error('Autocomplete search term must be a string');
+			if (this.#searchTerm === term) return term;
 
-				const allSymbols = Array.from(this.options.keys());
-				this.matches = matchSorter(allSymbols, term, { keys: [symbol => symbol.description] });
+			this.#removeExpired();
 
-				for (const symbol of allSymbols) {
-					const element = this.options.get(symbol).display;
+			const allSymbols = Array.from(this.options.keys());
+			this.matches = matchSorter(allSymbols, term, { keys: [symbol => symbol.description] });
 
-					element.classList[this.matches.includes(symbol) ? 'add' : 'remove']('match');
-				}
+			allSymbols.forEach(symbol => {
+				const element = this.options.get(symbol).display;
+				element.classList.toggle('match', this.matches.includes(symbol));
+			});
 
-				for (const symbol of this.matches) this.wrapper.append(this.options.get(symbol).display);
+			this.matches.forEach(symbol => {
+				this.wrapper.append(this.options.get(symbol).display);
+			});
 
-				this.#resetToFirst();
-			}
-
+			this.#resetToFirst();
 			this.#searchTerm = term;
+
 			return term;
 		}
 

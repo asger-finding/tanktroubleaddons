@@ -214,6 +214,8 @@ export default class AddonsUI {
 					createNewWrapper.toggle(selectValue === 'new');
 
 					texturePackSelect.deleteselectmenu({
+						appendTo: this.content,
+
 						// eslint-disable-next-line jsdoc/require-jsdoc
 						change: (_event, { item }) => {
 							if (item.value === 'new') {

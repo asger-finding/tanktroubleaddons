@@ -41,14 +41,20 @@ UIKilledByGroup.prototype.postUpdate = function() {
 };
 
 UIKilledByGroup.prototype.spawn = function(x, y, killerPlayerId, victimPlayerId, animate) {
-	this.exists = true;
-	this.visible = true;
 	this.x = x;
 	this.y = y;
 	this.killerPlayerId = killerPlayerId;
 	this.victimPlayerId = victimPlayerId;
-	this.killedBy.revive();
-	this._setDeathMessage();
+
+	this._setDeathMessage(success => {
+		if (success) {
+			this.exists = true;
+			this.visible = true;
+			this.killedBy.revive();
+		} else {
+			this.remove();
+		}
+	});
 
 	if (this.removeTween) {
 		this.removeTween.stop();
@@ -67,7 +73,7 @@ UIKilledByGroup.prototype.spawn = function(x, y, killerPlayerId, victimPlayerId,
 	setTimeout(() => this.remove(), UIConstants.KILLED_BY_POP_OUT_TIME);
 };
 
-UIKilledByGroup.prototype._setDeathMessage = function() {
+UIKilledByGroup.prototype._setDeathMessage = function(onceMessageSet) {
 	Backend.getInstance().getPlayerDetails(result => {
 		if (typeof result === 'object') {
 			const username = result.getUsername();
@@ -75,6 +81,10 @@ UIKilledByGroup.prototype._setDeathMessage = function() {
 
 			if (killedSelf) this.killedBy.setText('Pwned yourself!');
 			else this.killedBy.setText(`Killed by ${ username }!`);
+
+			onceMessageSet(true);
+		} else {
+			onceMessageSet(false);
 		}
 	}, () => {}, () => {}, this.getKillerPlayerId(), Caches.getPlayerDetailsCache());
 };

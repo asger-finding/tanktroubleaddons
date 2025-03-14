@@ -5,7 +5,7 @@
  * @returns {Promise<IDBDatabase>} A promise that resolves to the initialized database.
  */
 const initDatabase = () => new Promise((resolve, reject) => {
-	const request = indexedDB.open('addons', 1);
+	const request = indexedDB.open('addons', 2);
 
 	/* eslint-disable jsdoc/require-jsdoc */
 	request.onupgradeneeded = (event) => {
@@ -27,6 +27,24 @@ const initDatabase = () => new Promise((resolve, reject) => {
 			const store = db.createObjectStore('texturePacks', { keyPath: 'name' });
 			store.createIndex('hashsum', 'hashsum', { unique: true });
 		}
+
+		// For any version upgrade, we clear the embedded texture packs
+		// in the assumption that they have been modified
+		const { transaction } = event.target;
+		const texturePacksStore = transaction.objectStore('texturePacks');
+
+		const texturePackReq = texturePacksStore.openCursor();
+		texturePackReq.onsuccess = evt => {
+			const cursor = evt.target.result;
+			if (cursor) {
+				const texturePack = cursor.value;
+				if (texturePack.builtin === true) cursor.delete();
+				cursor.continue();
+			}
+		};
+		texturePackReq.onerror = () => {
+			throw new Error('Error iterating through texture packs:', event.target.error);
+		};
 	};
 
 	request.onsuccess = (event) => resolve(event.target.result);

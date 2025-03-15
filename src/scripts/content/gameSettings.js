@@ -1,21 +1,9 @@
 import ProxyHelper from '../utils/proxyHelper.js';
 
+/**
+ * Add "minimum" quality constants to quality config
+ */
 QualityManager.QUALITY_SETTINGS.MINIMUM = 'minimum';
-QualityManager.QUALITY_VALUES.minimum = {
-	'tank explosion smoke count': 0,
-	'tank explosion fragment count': 0,
-	'missile launch smoke count': 0,
-	'missile smoke frequency': 360,
-	'crate land dust count': 0,
-	'aimer min segment length': 1,
-	'aimer off max segment length': 4,
-	'aimer on max segment length': 2,
-	'bullet puff count': 1,
-	'shield inverse bolt probability': 1,
-	'shield spark particles per emit': 0,
-	'spawn zone inverse unstable particle probability': 1,
-	'spawn zone num collapse particles': 0
-};
 QualityManager.QUALITY_VALUES[QualityManager.QUALITY_SETTINGS.MINIMUM] = {
 	'tank explosion smoke count': 1,
 	'tank explosion fragment count': 3,
@@ -36,9 +24,6 @@ QualityManager.QUALITY_VALUES[QualityManager.QUALITY_SETTINGS.MINIMUM] = {
 UIConstants.classField('SETTINGS_QUALITY_MAX_OPTION_HEIGHT', 200);
 
 /**
- * Add "minimum" quality setting to quality settings
- */
-/**
  * Insert minimum option element
  */
 ProxyHelper.interceptFunction(TankTrouble.SettingsBox, 'init', (original, ...args) => {
@@ -58,7 +43,7 @@ ProxyHelper.interceptFunction(TankTrouble.SettingsBox, 'init', (original, ...arg
 UIRubbleGroup.prototype.emit = function(tank) {
 	if (![
 		QualityManager.QUALITY_SETTINGS.LOW,
-		QualityManager.QUALITY_SETTINGS.MINIMU
+		QualityManager.QUALITY_SETTINGS.MINIMUM
 	].includes(QualityManager.getQuality())) {
 		if (tank.getSpeed() !== 0.0 || tank.getRotationSpeed() !== 0.0) {
 			this.exists = true;

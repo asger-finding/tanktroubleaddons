@@ -549,6 +549,7 @@ export default class IronVaultUI {
 	 * @param {object} playerDetails Player details
 	 * @returns {JQuery} Container HTMLDivElement
 	 */
+	// eslint-disable-next-line complexity
 	static #createPlayerDetails(playerDetails) {
 		const container = $('<div id="player-details"></div>');
 
@@ -582,7 +583,7 @@ export default class IronVaultUI {
 			[
 				'Last login',
 				Addons.t_url('assets/menu/ironvault/last-login.svg'),
-				timeAgo(new Date(playerDetails.getLastLogin() * 1000))
+				playerDetails.getLastLogin() === null ? 'Never logged in' : timeAgo(new Date(playerDetails.getLastLogin() * 1000))
 			],
 			[
 				'Player ID',

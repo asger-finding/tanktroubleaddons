@@ -6,7 +6,7 @@ import ProxyHelper from '../utils/proxyHelper.js';
 QualityManager.QUALITY_SETTINGS.MINIMUM = 'minimum';
 QualityManager.QUALITY_VALUES[QualityManager.QUALITY_SETTINGS.MINIMUM] = {
 	'tank explosion smoke count': 1,
-	'tank explosion fragment count': 3,
+	'tank explosion fragment count': 0,
 	'missile launch smoke count': 2,
 	'missile smoke frequency': 360,
 	'mine explosion smoke count': 0,
@@ -60,5 +60,13 @@ UIRubbleGroup.prototype.emit = function(tank) {
 		}
 	}
 };
+
+/**
+ * Don't add camera shake in minimum quality
+ */
+const addCameraShake = Game.UIGameState.getMethod('_addCameraShake');
+Game.UIGameState.method('_addCameraShake', function(...args) {
+	if (QualityManager.getQuality() !== QualityManager.QUALITY_SETTINGS.MINIMUM) addCameraShake.apply(this, ...args);
+});
 
 export const _isESmodule = true;

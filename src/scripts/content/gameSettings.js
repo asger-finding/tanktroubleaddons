@@ -66,7 +66,8 @@ UIRubbleGroup.prototype.emit = function(tank) {
  */
 const addCameraShake = Game.UIGameState.getMethod('_addCameraShake');
 Game.UIGameState.method('_addCameraShake', function(...args) {
-	if (QualityManager.getQuality() !== QualityManager.QUALITY_SETTINGS.MINIMUM) addCameraShake.apply(this, ...args);
+	const [shake] = args;
+	if (QualityManager.getQuality() !== QualityManager.QUALITY_SETTINGS.MINIMUM) addCameraShake.call(this, shake);
 });
 
 export const _isESmodule = true;

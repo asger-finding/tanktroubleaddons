@@ -411,6 +411,7 @@ const is2xFileEnding = urlOrFile => /@2x\.[a-zA-Z0-9]+$/u.test(urlOrFile);
  * @param {string} atlasKey key
  * @param {Record<string, Uint8Array>} files Texture pack data
  */
+// eslint-disable-next-line complexity
 Phaser.Loader.prototype.addTexturePack = async function(atlasKey, files) {
 	// Wait for the atlas to have loaded
 	if (!this.cache.hasFrameData(atlasKey)) {
@@ -426,25 +427,42 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, files) {
 	const is1x = !is2xFileEnding(sourceURL);
 
 	const [ spritesheet ] = await Promise.all([
-		loadSpritesheet(sourceURL),
+		loadSpritesheet(sourceURL).then(async sheet => {
+			if (is1x) {
+				const { width, height } = sheet;
+				const resized = await createImageBitmap(sheet, {
+					resizeWidth: width * 2,
+					resizeHeight: height * 2,
+					resizeQuality: 'pixelated'
+				});
+
+				data.frameData._frames.map(frame => {
+					frame.bottom *= 2;
+					frame.x *= 2;
+					frame.y *= 2;
+					frame.width *= 2;
+					frame.height *= 2;
+					frame.centerX *= 2;
+					frame.centerY *= 2;
+					frame.sourceSizeW *= 2;
+					frame.sourceSizeH *= 2;
+					frame.right *= 2;
+					frame.bottom *= 2;
+
+					return frame;
+				});
+
+				return resized;
+			}
+			return sheet;
+		}),
 		...Object.keys(files).map(async fileName => {
 			if (!fileName.endsWith('.png')) return;
 
 			// Load the image into buffer
 			const file = files[fileName];
 			const blob = new Blob([file], { type: 'image/png' });
-			let bmp = await createImageBitmap(blob);
-
-			// Resize to 1x if the user has low pixel density
-			if (is1x) {
-				const { width, height } = bmp;
-				bmp.close();
-				bmp = await createImageBitmap(blob, {
-					resizeWidth: width / 2,
-					resizeHeight: height / 2,
-					resizeQuality: 'pixelated'
-				});
-			}
+			const bmp = await createImageBitmap(blob);
 
 			// Create frame name from file name
 			const basename = fileName.split('/').at(-1);
@@ -566,7 +584,9 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, files) {
 
 	// Create image from canvas
 	const newImg = await loadSpritesheet(canvas.toDataURL());
-	data.base = new PIXI.BaseTexture(newImg);
+	this.cache._cache.image[atlasKey].base = new PIXI.BaseTexture(newImg);
+
+	if (is1x) this.cache._cache.image[atlasKey].base.resolution = 2;
 
 	packer.reset();
 };

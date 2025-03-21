@@ -73,12 +73,11 @@ async function toggleFullscreen(state?: 'on' | 'off') {
 		browser.windows.get(windowId, window => {
 			const currentState = window.state ?? 'normal';
 
-			// Update lastWindowState only if the current state is not fullscreen
-			if (currentState !== 'fullscreen') lastWindowState = currentState;
-
 			browser.windows.update(windowId, {
 				state: state === 'on' ? 'fullscreen' : lastWindowState
 			});
+
+			lastWindowState = currentState;
 		});
 	}
 }

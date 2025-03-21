@@ -1,8 +1,8 @@
 import UIFullscreenGameButtonGroup from './uifullscreengamebuttongroup.js';
 
 UIConstants.classFields({
-	FULLSCREEN_GAME_MARGIN_X: 68 * devicePixelRatio,
-	FULLSCREEN_GAME_MARGIN_Y: 28 * devicePixelRatio
+	FULLSCREEN_GAME_MARGIN_X: 68 * (devicePixelRatio > 1 ? devicePixelRatio : 1),
+	FULLSCREEN_GAME_MARGIN_Y: 28 * (devicePixelRatio > 1 ? devicePixelRatio : 1)
 });
 
 Game.UIGameState.field('fullscreenGameGroup', null);

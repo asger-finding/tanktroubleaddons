@@ -1,16 +1,16 @@
 import { spaceAround } from '../utils/mathUtils.js';
 
 UIConstants.classFields({
-	GAME_ICON_SCROLL_SPEED: 10 * devicePixelRatio,
-	GAME_ICON_MARGIN_FROM_BORDER: 30 * devicePixelRatio,
-	LOBBY_MAX_DRAG_SPEED: 850 * devicePixelRatio,
+	GAME_ICON_SCROLL_SPEED: 10 * (devicePixelRatio > 1 ? devicePixelRatio : 1),
+	GAME_ICON_MARGIN_FROM_BORDER: 30 * (devicePixelRatio > 1 ? devicePixelRatio : 1),
+	LOBBY_MAX_DRAG_SPEED: 850 * (devicePixelRatio > 1 ? devicePixelRatio : 1),
 	LOBBY_SNAP_DISTANCE_TO_SPEED_SCALE: 8,
 	LOBBY_SCROLL_DRAG: 0.9,
-	LOBBY_BUTTON_SCROLL_OFFSET: 30 * devicePixelRatio,
+	LOBBY_BUTTON_SCROLL_OFFSET: 30 * (devicePixelRatio > 1 ? devicePixelRatio : 1),
 
-	NO_GAMES_FONT_SIZE: 48 * devicePixelRatio,
-	NO_GAMES_STROKE_WIDTH: 4 * devicePixelRatio,
-	NO_GAMES_Y: 140 * devicePixelRatio
+	NO_GAMES_FONT_SIZE: 48 * (devicePixelRatio > 1 ? devicePixelRatio : 1),
+	NO_GAMES_STROKE_WIDTH: 4 * (devicePixelRatio > 1 ? devicePixelRatio : 1),
+	NO_GAMES_Y: 140 * (devicePixelRatio > 1 ? devicePixelRatio : 1)
 });
 
 /**

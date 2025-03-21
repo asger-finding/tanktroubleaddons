@@ -368,6 +368,7 @@ const meta = () => src(paths.files.meta)
  */
 const json = () => src(paths.files.json)
 	.pipe(changed(state.dest))
+	.pipe(conditionalReplacement())
 	.pipe(excludeFiles())
 	.pipe(jeditor(_json => _json, { beautify: !state.isProd }))
 	.pipe(dest(state.dest))

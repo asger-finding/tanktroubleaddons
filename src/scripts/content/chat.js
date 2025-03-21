@@ -301,7 +301,7 @@ const addAutocomplete = chatInput => {
 
 	/**
 	 * Get the word and start/end indexies of the input selectionEnd
-	 * @returns {undefined|IndexiesOfWordInSelection} Object with word and range start/end
+	 * @returns {IndexiesOfWordInSelection|undefined} Object with word and range start/end
 	 */
 	const getIndexiesOfWordInCurrentSelection = () => {
 		// Separate string by whitespace and
@@ -325,7 +325,7 @@ const addAutocomplete = chatInput => {
 	/**
 	 * Returns the user that the selection is over,
 	 * from the input value, if prefixed by @
-	 * @returns {null|IndexiesOfWordInSelection} Mention username or null
+	 * @returns {IndexiesOfWordInSelection|null} Mention username or null
 	 */
 	const getMentionFocus = () => {
 		const currentWord = getIndexiesOfWordInCurrentSelection();
@@ -344,7 +344,7 @@ const addAutocomplete = chatInput => {
 	/**
 	 * Returns the emoji that the selection is over,
 	 * from the input value, if prefixed by :
-	 * @returns {null|IndexiesOfWordInSelection} Emoji identifier or null
+	 * @returns {IndexiesOfWordInSelection|null} Emoji identifier or null
 	 */
 	const getEmojiFocus = () => {
 		const currentWord = getIndexiesOfWordInCurrentSelection();
@@ -384,12 +384,12 @@ const addAutocomplete = chatInput => {
 			chatInput.value = `${ beforeValue }${ after }`;
 
 			chatInput.setSelectionRange(...cursorPosition);
-		}
 
-		evt.stopPropagation();
-		evt.preventDefault();
-		chatInput.dispatchEvent(new InputEvent('input'));
-		chatInput.focus();
+			evt.stopPropagation();
+			evt.preventDefault();
+			chatInput.dispatchEvent(new InputEvent('input'));
+			chatInput.focus();
+		}
 	};
 
 	/**

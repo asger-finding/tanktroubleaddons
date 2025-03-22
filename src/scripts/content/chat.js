@@ -173,7 +173,7 @@ const addAutocomplete = chatInput => {
 		 * @param {string} key Search option
 		 * @param {HTMLElement} display Element to display in lookup
 		 * @param {number} lifetime How long until removed from dropdown matches?
-		 * @param {(...args: unknown) => void} submitCallback Event handler for mouseup
+		 * @param {(...args: unknown) => void} submitCallback Event handler for mousedown
 		 * @returns {boolean} Success in adding option?
 		 */
 		addOption(key, display, lifetime, submitCallback) {
@@ -185,7 +185,7 @@ const addAutocomplete = chatInput => {
 
 			const symbol = Symbol(key);
 
-			display.addEventListener('mouseup', evt => {
+			display.addEventListener('mousedown', evt => {
 				submitCallback(evt);
 
 				this.#resetToFirst();

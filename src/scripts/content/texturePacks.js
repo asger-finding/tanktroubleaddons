@@ -428,7 +428,7 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, files) {
 
 	const [ spritesheet ] = await Promise.all([
 		loadSpritesheet(sourceURL).then(async sheet => {
-			if (is1x) {
+			if (is1x && Object.keys(files).length) {
 				const { width, height } = sheet;
 				const resized = await createImageBitmap(sheet, {
 					resizeWidth: width * 2,

@@ -434,16 +434,13 @@ const addAutocomplete = chatInput => {
 		const foreignPlayerIds = involvedPlayerIds.filter(playerId => !loggedIn.includes(playerId));
 
 		for (const playerId of foreignPlayerIds) {
-			Backend.getInstance().getPlayerDetails(result => {
-				if (typeof result === 'object') {
-					const key = `@${ result.getUsername() }`;
-					const display = document.createElement('div');
-					const lifetime = 10 * 60 * 1000;
-					display.innerText = result.getUsername();
-
-					usernameAutocomplete.addOption(key, display, lifetime, handleSubmit);
-				}
-			}, () => {}, () => {}, playerId, Caches.getPlayerDetailsCache());
+			Backend.getInstance().getPlayerDetails(
+				insertMention,
+				() => {},
+				() => {},
+				playerId,
+				Caches.getPlayerDetailsCache()
+			);
 		}
 	};
 

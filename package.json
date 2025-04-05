@@ -1,6 +1,6 @@
 {
   "name": "tanktroubleaddons",
-  "version": "2.2.6",
+  "version": "2.2.7",
   "description": "TankTroubleAddons — the go-to extension for all your mayhem needs!",
   "scripts": {
     "build:prod": "gulp destroy && gulp --state=production --target=mv3 && gulp --state=production --target=mv2",

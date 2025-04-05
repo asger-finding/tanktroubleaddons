@@ -168,6 +168,7 @@ const storeDefaultTexturePacks = async() => {
 	const texturePacks = await Promise.all(
 		[
 			Addons.t_url('assets/texturepacks/Normal.zip'),
+			Addons.t_url('assets/texturepacks/Dark.zip'),
 			Addons.t_url('assets/texturepacks/3D Light.zip'),
 			Addons.t_url('assets/texturepacks/Classic.zip')
 		].map(url => fetch(url))

@@ -96,21 +96,6 @@ $max-safe-integer: 2147483647;
 	@include hide;
 }
 
-#navigation {
-	$tab-styles: (
-		'#garageTab img': (
-			width: 120px,
-			height: 60px,
-			selectors: (
-				".selected": "header/tab5Selected",
-				".deselected": "header/tab5"
-			)
-		)
-	);
-
-	@include generate-images($tab-styles);
-}
-
 // Wide content
 #content {
 	max-width: 1884px !important;

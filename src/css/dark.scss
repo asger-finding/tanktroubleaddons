@@ -310,7 +310,7 @@ $tooltipster-accent-dark: rgb(25 25 25);
 	#navigation {
 		$tab-styles: (
 			'#gameTab img': (
-				width: 320px,
+				width: 380px,
 				height: 60px,
 				selectors: (
 					".selected": "header/tab1Selected",
@@ -318,7 +318,7 @@ $tooltipster-accent-dark: rgb(25 25 25);
 				)
 			),
 			'#shopTab img': (
-				width: 120px,
+				width: 140px,
 				height: 60px,
 				selectors: (
 					".selected": "header/tab2Selected",
@@ -326,7 +326,7 @@ $tooltipster-accent-dark: rgb(25 25 25);
 				)
 			),
 			'#newsTab img': (
-				width: 120px,
+				width: 140px,
 				height: 60px,
 				selectors: (
 					".selected": "header/tab3Selected",
@@ -334,19 +334,11 @@ $tooltipster-accent-dark: rgb(25 25 25);
 				)
 			),
 			'#forumTab img': (
-				width: 120px,
+				width: 140px,
 				height: 60px,
 				selectors: (
 					".selected": "header/tab4Selected",
 					".deselected": "header/tab4"
-				)
-			),
-			'#garageTab img': (
-				width: 120px,
-				height: 60px,
-				selectors: (
-					".selected": "header/tab5Selected",
-					".deselected": "header/tab5"
 				)
 			)
 		);

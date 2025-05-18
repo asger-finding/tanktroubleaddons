@@ -495,7 +495,10 @@ const insertCustomMazeThemeInfo = metafile => {
  */
 const removeCustomMazeThemeInfo = () => {
 	const customThemeIndex = Constants.MAZE_THEME_INFO.findIndex(THEME => THEME.ADDONS);
-	if (customThemeIndex !== -1) Constants.MAZE_THEME_INFO.splice(customThemeIndex, 1);
+	if (customThemeIndex !== -1) {
+		delete MazeThemeManager.preparedThemes[customThemeIndex];
+		Constants.MAZE_THEME_INFO.splice(customThemeIndex, 1);
+	}
 
 	Addons._maze_theme = -1;
 };
@@ -541,18 +544,15 @@ const getTexturePackSwitches = () => Addons._texture_pack_switches ?? [];
  * @param {Record<string, Uint8Array>} files Texture pack data
  * @param {Record<string, any>} metafile Metafile config
  */
-// eslint-disable-next-line complexity
 const loadTexturePackIntoGame = async(files, metafile) => {
 	const game = GameManager.getGame();
 	if (!game) return;
 
-	const success = await game.load.addTexturePack('game', files);
-	if (!metafile || !success) {
-		removeCustomMazeThemeInfo();
-		return;
-	}
-
 	setTexturePackSwitches(metafile.features);
+	removeCustomMazeThemeInfo();
+
+	const success = await game.load.addTexturePack('game', files);
+	if (!success) return;
 
 	const themeIndex = insertCustomMazeThemeInfo(metafile);
 	const { frameData } = game.cache._cache.image.game;

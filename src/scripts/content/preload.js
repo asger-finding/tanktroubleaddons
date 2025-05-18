@@ -179,6 +179,11 @@ $.widget('custom.deleteselectmenu', $.ui.selectmenu, {
 				.prependTo(wrapper);
 		}
 
+		if (item.element.attr('tooltipster-content')) {
+			li.tooltipster({ position: 'right', offsetX: 5 });
+			li.tooltipster('content', item.element.attr('tooltipster-content'));
+		}
+
 		return li.append(wrapper).appendTo(ul);
 	}
 });

@@ -160,7 +160,8 @@ export default class AddonsUI {
 				const option = $('<option></option');
 				option.attr('value', texturePack.hashsum);
 				option.attr('removable', !texturePack.builtin);
-				option.text(texturePack.name);
+				option.text(texturePack.metafile.pack.name);
+				option.attr('tooltipster-content', texturePack.metafile.pack.description);
 				option.on('remove', () => {
 					Addons.removeTexturePack(texturePack.hashsum)
 						.then(result => {
@@ -176,9 +177,7 @@ export default class AddonsUI {
 			createNewSubmit.on('mouseup', async() => {
 				const [file] = createNewPicker.prop('files');
 				if (file) {
-					const [name] = file.name.split('.zip');
-
-					Addons.storeTexturePack(file, name)
+					Addons.storeTexturePack(file)
 						.then(hashsum => Addons.setActiveTexturePack(hashsum)
 							.then(texturePack => {
 								AddonsUI.#updateTooltipster(createNewSubmit, '');
@@ -202,7 +201,7 @@ export default class AddonsUI {
 
 			Addons.getAllTexturePacks()
 				.then(async texturePacks => {
-					texturePackSelect.append(texturePacks.map(pack => createNewOption(pack)));
+					texturePackSelect.append(texturePacks.map(texturePack => createNewOption(texturePack)));
 
 					const newTexturePackOption = $('<option value="new">Add from zip ...</option>');
 					texturePackSelect.append(newTexturePackOption);

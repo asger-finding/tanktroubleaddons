@@ -142,15 +142,13 @@ $tooltipster-accent-dark: rgb(25 25 25);
 		}
 	}
 
-	#secondaryContent .snippet,
-	#tertiaryContent .snippet,
-	#statisticsSnippet.snippet {
-		color: $primary-font-color;
-		background: linear-gradient(to bottom, $snippet-accent-light, $snippet-accent-dark) !important;
-	}
+	.snippet,
 	.newsPost.standard .wrapper {
 		color: $primary-font-color;
-		background: linear-gradient(to bottom, $snippet-accent-light, $snippet-accent-dark);
+		background-image: linear-gradient(to bottom, $snippet-accent-light, $snippet-accent-dark);
+	}
+	#statisticsSnippet.snippet {
+		background-image: linear-gradient(to bottom, $snippet-accent-light, $snippet-accent-dark) !important;
 	}
 
 	#adduser .content,

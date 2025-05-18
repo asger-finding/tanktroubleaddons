@@ -541,7 +541,7 @@ $max-safe-integer: 2147483647;
 	display: inline-block !important;
 
 	/* Selectors will override it with a solid colour if unset */
-	background: linear-gradient(to bottom, rgb(238 238 238 / 1.0), rgb(204 204 204 / 1.0)) !important;
+	background-image: linear-gradient(to bottom, rgb(238 238 238 / 1.0), rgb(204 204 204 / 1.0)) !important;
 
 	#onlinePlayerCount {
 		font-size: 40px;

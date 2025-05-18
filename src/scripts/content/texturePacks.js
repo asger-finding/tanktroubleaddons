@@ -508,6 +508,34 @@ const removeCustomMazeThemeInfo = () => {
 const getMazeThemeIndex = themeIfUnset => Addons._maze_theme !== -1 ? Addons._maze_theme : themeIfUnset;
 
 /**
+ * Set the custom features (switches) used by the texture pack
+ * @param {string[]} switchList Array over switches
+ */
+const setTexturePackSwitches = switchList => {
+	const validSwitches = [
+		'dontTintTurret',
+		'dontTintBase',
+		'dontTintTreads',
+		'dontTintHomingMissile',
+		'dontTintMines'
+	];
+	Addons._texture_pack_switches = switchList.filter(switchKey => {
+		if (!validSwitches.includes(switchKey)) {
+			console.warn(`setTexturePackSwitches: ${switchKey} is not a valid switch`);
+
+			return false;
+		}
+		return true;
+	});
+};
+
+/**
+ * Return a list of the features enabled by the current texture pack
+ * @returns {string[]} Array over feature identifiers
+ */
+const getTexturePackSwitches = () => Addons._texture_pack_switches ?? [];
+
+/**
  * Load a texture pack into the game
  * @public
  * @param {Record<string, Uint8Array>} files Texture pack data
@@ -523,6 +551,8 @@ const loadTexturePackIntoGame = async(files, metafile) => {
 		removeCustomMazeThemeInfo();
 		return;
 	}
+
+	setTexturePackSwitches(metafile.features);
 
 	const themeIndex = insertCustomMazeThemeInfo(metafile);
 	const { frameData } = game.cache._cache.image.game;
@@ -543,6 +573,7 @@ Object.assign(Addons, {
 	removeTexturePack,
 	getAllTexturePacks,
 	getMazeThemeIndex,
+	getTexturePackSwitches,
 	loadTexturePackIntoGame,
 	reloadGame
 });
@@ -757,6 +788,66 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, files) {
 };
 
 storeDefaultTexturePacks();
+
+const tankSpriteSpawn = UITankSprite.prototype.spawn;
+UITankSprite.prototype.spawn = function(...args) {
+	Object.defineProperty(this, 'tint', {
+		get() {
+			return this._tint;
+		},
+		set(tint) {
+			const switches = Addons.getTexturePackSwitches();
+			// We need to finish execution first
+			// because base tint is set before turret and treads
+			requestAnimationFrame(() => {
+				if (switches.includes('dontTintTurret')) this.turret.tint = 0xFFFFFF;
+				if (switches.includes('dontTintTreads')) this.leftTread.tint = this.rightTread.tint = 0xFFFFFF;
+				if (switches.includes('dontTintBase')) this._tint = 0xFFFFFF;
+				else this._tint = tint;
+			});
+			return switches.includes('dontTintBase') ? 0xFFFFFF : this._tint;
+		},
+		enumerable: true,
+		configurable: true
+	});
+	return tankSpriteSpawn.apply(this, args);
+};
+
+const mineSpriteSpawn = UIMineSprite.prototype.spawn;
+UIMineSprite.prototype.spawn = function(...args) {
+	Object.defineProperty(this, 'tint', {
+		get() {
+			return this._tint;
+		},
+		set(tint) {
+			this._tint = Addons.getTexturePackSwitches().includes('dontTintMine')
+				? 0xFFFFFF
+				: tint;
+			return this._tint;
+		},
+		enumerable: true,
+		configurable: true
+	});
+	return mineSpriteSpawn.apply(this, args);
+};
+
+const missileSpriteSpawn = UIMissileImage.prototype.spawn;
+UIMissileImage.prototype.spawn = function(...args) {
+	Object.defineProperty(this, 'tint', {
+		get() {
+			return this._tint;
+		},
+		set(tint) {
+			this._tint = Addons.getTexturePackSwitches().includes('dontTintMine')
+				? 0xFFFFFF
+				: tint;
+			return this._tint;
+		},
+		enumerable: true,
+		configurable: true
+	});
+	return missileSpriteSpawn.apply(this, args);
+};
 
 const calculateTheme = Maze.getMethod('_calculateBorderFloorsSpacesWallsAndDecorations');
 Maze.method('_calculateBorderFloorsSpacesWallsAndDecorations', function(...args) {

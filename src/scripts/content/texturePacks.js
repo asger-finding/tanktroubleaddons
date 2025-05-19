@@ -54,7 +54,6 @@ const rootTexturePack = decoded => {
 	const normalized = {};
 	for (const [path, data] of Object.entries(decoded)) {
 		if (path.startsWith(metaDir)) {
-			// Remove the metaDir prefix from the path
 			const newPath = path.substring(metaDir.length);
 			normalized[newPath] = data;
 		}
@@ -70,6 +69,7 @@ const rootTexturePack = decoded => {
  * @param {Record<string, Uint8Array>} decoded Texture pack
  * @returns {object} Decoded metafile or fallback
  */
+// eslint-disable-next-line complexity
 const createMetaFile = (file, decoded) => {
 	const [defaultPackName] = file.name.split('.zip');
 	const schema = {
@@ -81,22 +81,49 @@ const createMetaFile = (file, decoded) => {
 		themeConfig: Constants.MAZE_THEME_INFO[0]
 	};
 
+	let fatal = false;
 	try {
 		const { normalized, metaPath } = rootTexturePack(decoded);
 		if (!metaPath) throw new Error('No meta.json found in texture pack');
 
 		const metafile = normalized['meta.json'];
-		if (!metafile) throw new Error('Failed to access normalized meta.json');
+		if (!metafile) {
+			fatal = true;
+			throw new Error('meta.json exists, but accessing it failed');
+		}
 
 		try {
-			const text = new TextDecoder().decode(metafile);
-			const json = JSON.parse(text);
+			let text = null;
+			let json = null;
+			try {
+				text = new TextDecoder().decode(metafile);
+				json = JSON.parse(text);
+			} catch (err) {
+				fatal = true;
+				throw new Error(`Failed to parse meta.json: ${ err.message }`);
+			}
+
+			if (
+				json.themeConfig instanceof Object
+				&& Object.keys(json.themeConfig).length > 0
+				&& !json.features.includes('noMazeThemes')
+			) {
+				fatal = true;
+				throw new Error('Using a custom theme config only works with the `noMazeThemes` feature');
+			}
+
 			return mergeWithSchema(schema, json);
 		} catch (err) {
-			throw new Error('Failed to parse meta.json: ', err);
+			fatal = true;
+			throw new Error(err.message);
 		}
 	} catch (err) {
-		console.warn('createMetaFile:', err);
+		if (fatal) {
+			console.error('createMetaFile', err);
+			throw new Error(err.message);
+		} else {
+			console.warn('createMetaFile:', err);
+		}
 
 		return schema;
 	}
@@ -161,8 +188,15 @@ const addTexturePackToStore = async(file, builtIn) => {
 						return;
 					}
 
-					const { normalized } = rootTexturePack(decoded);
-					const metafile = createMetaFile(file, decoded);
+					let normalized = null;
+					let metafile = null;
+					try {
+						({ normalized } = rootTexturePack(decoded));
+						metafile = createMetaFile(file, decoded);
+					} catch (userReadableError) {
+						reject(userReadableError);
+						return;
+					}
 
 					const transaction = Addons.indexedDB.transaction([storeName], 'readwrite');
 					const store = transaction.objectStore(storeName);
@@ -483,10 +517,12 @@ const insertCustomMazeThemeInfo = metafile => {
 	if (customThemeIndex !== -1) Constants.MAZE_THEME_INFO.splice(customThemeIndex, 1, theme);
 	else Constants.MAZE_THEME_INFO.push(theme);
 
-	const index = customThemeIndex === -1 ? Constants.MAZE_THEME_INFO.length - 1 : customThemeIndex;
+	const index = Addons.texturePackHasSwitch('noMazeThemes')
+		? Constants.MAZE_THEME_INFO.length - 1
+		: -1;
 	Addons._maze_theme = index;
 
-	return index;
+	return customThemeIndex === -1 ? Constants.MAZE_THEME_INFO.length - 1 : customThemeIndex;
 };
 
 /**
@@ -520,7 +556,8 @@ const setTexturePackSwitches = switchList => {
 		'dontTintBase',
 		'dontTintTreads',
 		'dontTintHomingMissile',
-		'dontTintMines'
+		'dontTintMines',
+		'noMazeThemes'
 	];
 	Addons._texture_pack_switches = switchList.filter(switchKey => {
 		if (!validSwitches.includes(switchKey)) {
@@ -534,9 +571,10 @@ const setTexturePackSwitches = switchList => {
 
 /**
  * Return a list of the features enabled by the current texture pack
+ * @param {string} switchKey Switch identifier
  * @returns {string[]} Array over feature identifiers
  */
-const getTexturePackSwitches = () => Addons._texture_pack_switches ?? [];
+const texturePackHasSwitch = switchKey => (Addons._texture_pack_switches ?? []).includes(switchKey);
 
 /**
  * Load a texture pack into the game
@@ -573,7 +611,7 @@ Object.assign(Addons, {
 	removeTexturePack,
 	getAllTexturePacks,
 	getMazeThemeIndex,
-	getTexturePackSwitches,
+	texturePackHasSwitch,
 	loadTexturePackIntoGame,
 	reloadGame
 });
@@ -796,16 +834,15 @@ UITankSprite.prototype.spawn = function(...args) {
 			return this._tint;
 		},
 		set(tint) {
-			const switches = Addons.getTexturePackSwitches();
 			// We need to finish execution first
 			// because base tint is set before turret and treads
 			requestAnimationFrame(() => {
-				if (switches.includes('dontTintTurret')) this.turret.tint = 0xFFFFFF;
-				if (switches.includes('dontTintTreads')) this.leftTread.tint = this.rightTread.tint = 0xFFFFFF;
-				if (switches.includes('dontTintBase')) this._tint = 0xFFFFFF;
+				if (Addons.texturePackHasSwitch('dontTintTurret')) this.turret.tint = 0xFFFFFF;
+				if (Addons.texturePackHasSwitch('dontTintTreads')) this.leftTread.tint = this.rightTread.tint = 0xFFFFFF;
+				if (Addons.texturePackHasSwitch('dontTintBase')) this._tint = 0xFFFFFF;
 				else this._tint = tint;
 			});
-			return switches.includes('dontTintBase') ? 0xFFFFFF : this._tint;
+			return Addons.texturePackHasSwitch('dontTintBase') ? 0xFFFFFF : this._tint;
 		},
 		enumerable: true,
 		configurable: true
@@ -820,7 +857,7 @@ UIMineSprite.prototype.spawn = function(...args) {
 			return this._tint;
 		},
 		set(tint) {
-			this._tint = Addons.getTexturePackSwitches().includes('dontTintMine')
+			this._tint = Addons.texturePackHasSwitch('dontTintMine')
 				? 0xFFFFFF
 				: tint;
 			return this._tint;
@@ -838,7 +875,7 @@ UIMissileImage.prototype.spawn = function(...args) {
 			return this._tint;
 		},
 		set(tint) {
-			this._tint = Addons.getTexturePackSwitches().includes('dontTintMine')
+			this._tint = Addons.texturePackHasSwitch('dontTintMine')
 				? 0xFFFFFF
 				: tint;
 			return this._tint;

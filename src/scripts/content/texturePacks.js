@@ -597,6 +597,7 @@ const texturePackHasSwitch = switchKey => (Addons._texture_pack_switches ?? []).
  * @param {Record<string, Uint8Array>} files Texture pack data
  * @param {Record<string, any>} metafile Metafile config
  */
+// eslint-disable-next-line complexity
 const loadTexturePackIntoGame = async(files, metafile) => {
 	const game = GameManager.getGame();
 	if (!game) return;
@@ -604,7 +605,27 @@ const loadTexturePackIntoGame = async(files, metafile) => {
 	setTexturePackSwitches(metafile.features);
 	removeCustomMazeThemeInfo();
 
-	const success = await game.load.addTexturePack('game', files);
+	phaserUntil(game.state.onStateChange, (removeListener, newState) => {
+		if (newState === 'Lobby' || newState === 'Game') {
+			removeListener();
+
+			const soundFiles = Object.fromEntries(Object.entries(files).filter(([path]) => path.startsWith('sound/')));
+			for (const [path, soundData] of Object.entries(soundFiles)) {
+				const key = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
+				game.load.replaceSound(key, soundData.buffer);
+			}
+		}
+	});
+
+	const gameAtlasFiles = Object.fromEntries(
+		Object.entries(files)
+			.filter(([path]) => path.startsWith('game/') && path.endsWith('.png'))
+			.map(([path, imageData]) => {
+				const key = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
+				return [key, imageData];
+			})
+	);
+	const success = await game.load.addTexturePack('game', gameAtlasFiles);
 	if (!success) return;
 
 	const themeIndex = insertCustomMazeThemeInfo(metafile);
@@ -673,7 +694,7 @@ const is1xResolution = (url) => !/@2x\.[a-zA-Z0-9]+$/u.test(url);
 /**
  * Loads an image from a source
  * @private
- * @param {string} source - The image source
+ * @param {string} source The image source
  * @returns {Promise<HTMLImageElement>} Resolves with the loaded image
  */
 const loadImage = source =>
@@ -710,12 +731,12 @@ const scaleFrameData = frameData => {
  * @private
  * @param {string} sourceURL The original spritesheet URL
  * @param {boolean} is1x Whether the atlas is 1x resolution
- * @param {Record<string, Uint8Array>} files Texture pack files
+ * @param {Record<string, Uint8Array>} frames Texture pack frames
  * @returns {Promise<ImageBitmap | HTMLImageElement>} The spritesheet image
  */
-const loadSpritesheet = async(sourceURL, is1x, files) => {
+const loadSpritesheet = async(sourceURL, is1x, frames) => {
 	const sheet = await loadImage(sourceURL);
-	if (!is1x || !Object.keys(files).length) return sheet;
+	if (!is1x || !Object.keys(frames).length) return sheet;
 
 	const { width, height } = sheet;
 	return createImageBitmap(sheet, {
@@ -728,20 +749,15 @@ const loadSpritesheet = async(sourceURL, is1x, files) => {
 /**
  * Packs texture pack images into the image packer
  * @private
- * @param {Record<string, Uint8Array>} files - Texture pack files.
+ * @param {Record<string, Uint8Array>} frames Texture pack frames
  * @returns {Promise<void>}
  */
-const packTextures = async(files) => {
-	const imagePromises = Object.keys(files)
-		.filter((fileName) => fileName.startsWith('game/') && fileName.endsWith('.png'))
-		.map(async(fileName) => {
-			const file = files[fileName];
+const packTextures = async(frames) => {
+	const imagePromises = Object.keys(frames)
+		.map(async(frameName) => {
+			const file = frames[frameName];
 			const blob = new Blob([file], { type: 'image/png' });
 			const bmp = await createImageBitmap(blob);
-
-			const basename = fileName.split('/').at(-1);
-			const [ext] = basename.match(/\.(?:[^.]*?)(?=\?|#|$)/u) ?? [''];
-			const frameName = basename.slice(0, -ext.length);
 
 			return {
 				width: bmp.width,
@@ -810,21 +826,21 @@ const insertFrameData = (frameData, rect, spritesheetHeight) => {
  * Load texture pack from arraybuffer into an already-loaded sprite atlas, overriding existing textures in it.
  * @public
  * @param {string} atlasKey The Phaser atlas key
- * @param {Record<string, Uint8Array>} files Texture pack data
+ * @param {Record<string, Uint8Array>} frames Texture pack image object
  * @returns {Promise<boolean>} Success status
  */
 // eslint-disable-next-line complexity
-Phaser.Loader.prototype.addTexturePack = async function(atlasKey, files) {
+Phaser.Loader.prototype.addTexturePack = async function(atlasKey, frames) {
 	await waitForAtlas(this, atlasKey);
 
 	const data = this.cache._cache.image[atlasKey];
 	const { url: sourceURL, frameData } = data;
 	const is1x = is1xResolution(sourceURL);
 
-	const spritesheet = await loadSpritesheet(sourceURL, is1x, files);
-	if (is1x && Object.keys(files).length) scaleFrameData(frameData);
+	const spritesheet = await loadSpritesheet(sourceURL, is1x, frames);
+	if (is1x && Object.keys(frames).length) scaleFrameData(frameData);
 
-	await packTextures(files);
+	await packTextures(frames);
 
 	const bin = Phaser.Packer.bins[Phaser.Packer.bins.length - 1];
 	if (!bin) {
@@ -852,6 +868,29 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, files) {
 	canvas = null;
 
 	return true;
+};
+
+/**
+ * Replace a Phaser sound with new sound data
+ * @param {string} key Original sound key
+ * @param {Uint8Array} soundData New sound data
+ */
+Phaser.Loader.prototype.replaceSound = function(key, soundData) {
+	const sound = this.cache.getSound(key);
+	if (sound) {
+		try {
+			this.game.sound.context.decodeAudioData(soundData, buffer => {
+				if (buffer) {
+					this.cache.decodedSound(key, buffer);
+					this.game.sound.onSoundDecode.dispatch(key, sound);
+					this.cache.reloadSoundComplete(key);
+				}
+			});
+		} catch {
+			/* intentionally do nothing */
+		}
+	}
+
 };
 
 storeDefaultTexturePacks();

@@ -130,6 +130,20 @@ const createMetaFile = (file, decoded) => {
 };
 
 /**
+ * Parse styles.css, if any, and return it or default value
+ * @private
+ * @param {Record<string, Uint8Array>} normalized Texture pack with normalized paths
+ * @returns {string} Stylesheet or empty fallback
+ */
+const parseCSS = normalized => {
+	try {
+		return new TextDecoder().decode(normalized['styles.css']);
+	} catch {
+		return '';
+	}
+};
+
+/**
  * Generates a unique name for a texture pack by appending an incremental suffix if needed.
  * @private
  * @param {IDBObjectStore} store The IndexedDB object store
@@ -197,6 +211,7 @@ const addTexturePackToStore = async(file, builtIn) => {
 						reject(userReadableError);
 						return;
 					}
+					const css = parseCSS(normalized);
 
 					const transaction = Addons.indexedDB.transaction([storeName], 'readwrite');
 					const store = transaction.objectStore(storeName);
@@ -223,6 +238,7 @@ const addTexturePackToStore = async(file, builtIn) => {
 							hashsum,
 							timestamp,
 							metafile,
+							css,
 							builtin: builtIn,
 							texturepack: normalized
 						});
@@ -552,11 +568,10 @@ const getMazeThemeIndex = themeIfUnset => Addons._maze_theme !== -1 ? Addons._ma
  */
 const setTexturePackSwitches = switchList => {
 	const validSwitches = [
-		'dontTintTurret',
-		'dontTintBase',
-		'dontTintTreads',
-		'dontTintHomingMissile',
-		'dontTintMines',
+		'noTintBase',
+		'noTintTreads',
+		'noTintHomingMissiles',
+		'noTintMines',
 		'noMazeThemes'
 	];
 	Addons._texture_pack_switches = switchList.filter(switchKey => {
@@ -604,6 +619,19 @@ const loadTexturePackIntoGame = async(files, metafile) => {
 	}
 };
 
+/**
+ * Load the texture pack css into the document
+ * @param {string} css Texture pack css as a string
+ */
+const loadTexturePackCSS = css => {
+	if (!Addons._texture_pack_styles) {
+		Addons._texture_pack_styles = new CSSStyleSheet();
+		document.adoptedStyleSheets.push(Addons._texture_pack_styles);
+	}
+
+	Addons._texture_pack_styles.replace(css);
+};
+
 Object.assign(Addons, {
 	getActiveTexturePack,
 	setActiveTexturePack,
@@ -613,6 +641,7 @@ Object.assign(Addons, {
 	getMazeThemeIndex,
 	texturePackHasSwitch,
 	loadTexturePackIntoGame,
+	loadTexturePackCSS,
 	reloadGame
 });
 
@@ -837,12 +866,12 @@ UITankSprite.prototype.spawn = function(...args) {
 			// We need to finish execution first
 			// because base tint is set before turret and treads
 			requestAnimationFrame(() => {
-				if (Addons.texturePackHasSwitch('dontTintTurret')) this.turret.tint = 0xFFFFFF;
-				if (Addons.texturePackHasSwitch('dontTintTreads')) this.leftTread.tint = this.rightTread.tint = 0xFFFFFF;
-				if (Addons.texturePackHasSwitch('dontTintBase')) this._tint = 0xFFFFFF;
+				if (Addons.texturePackHasSwitch('noTintTurret')) this.turret.tint = 0xFFFFFF;
+				if (Addons.texturePackHasSwitch('noTintTreads')) this.leftTread.tint = this.rightTread.tint = 0xFFFFFF;
+				if (Addons.texturePackHasSwitch('noTintBase')) this._tint = 0xFFFFFF;
 				else this._tint = tint;
 			});
-			return Addons.texturePackHasSwitch('dontTintBase') ? 0xFFFFFF : this._tint;
+			return Addons.texturePackHasSwitch('noTintBase') ? 0xFFFFFF : this._tint;
 		},
 		enumerable: true,
 		configurable: true
@@ -857,7 +886,7 @@ UIMineSprite.prototype.spawn = function(...args) {
 			return this._tint;
 		},
 		set(tint) {
-			this._tint = Addons.texturePackHasSwitch('dontTintMine')
+			this._tint = Addons.texturePackHasSwitch('noTintMine')
 				? 0xFFFFFF
 				: tint;
 			return this._tint;
@@ -875,7 +904,7 @@ UIMissileImage.prototype.spawn = function(...args) {
 			return this._tint;
 		},
 		set(tint) {
-			this._tint = Addons.texturePackHasSwitch('dontTintMine')
+			this._tint = Addons.texturePackHasSwitch('noTintMine')
 				? 0xFFFFFF
 				: tint;
 			return this._tint;
@@ -906,8 +935,9 @@ const gamePreloadStage = Game.UIPreloadState.getMethod('preload');
 Game.UIPreloadState.method('preload', function(...args) {
 	const result = gamePreloadStage.apply(this, ...args);
 
-	Addons.getActiveTexturePack().then(({ texturepack, metafile }) => {
+	Addons.getActiveTexturePack().then(({ texturepack, metafile, css }) => {
 		Addons.loadTexturePackIntoGame(texturepack, metafile);
+		Addons.loadTexturePackCSS(css);
 	}).catch(() => {});
 
 	return result;

@@ -724,7 +724,7 @@ ProxyHelper.whenContentInitialized().then(() => {
 
 	const formWidth = new CSSStyleSheet();
 	formWidth.insertRule('#chat:is(.opening,.open) .content, #chat:is(.opening,.open) textarea { width: 208px; }', 0);
-	document.adoptedStyleSheets = [formWidth];
+	document.adoptedStyleSheets.push(formWidth);
 
 	// Create a mutation observer that looks for
 	// changes in the chatBody's attributes

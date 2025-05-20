@@ -517,6 +517,27 @@ const reloadGame = () => {
 };
 
 /**
+ * Loads an image from a source (URL or Uint8Array)
+ * @private
+ * @param {string|Uint8Array} source The image source as URL or binary data
+ * @returns {Promise<HTMLImageElement>} Resolves with the loaded image
+ */
+const loadImage = source =>
+	new Promise(resolve => {
+		const image = new Image();
+		image.crossOrigin = 'anonymous';
+
+		if (source instanceof Uint8Array) {
+			const blob = new Blob([source]);
+			image.src = URL.createObjectURL(blob);
+		} else {
+			image.src = source;
+		}
+
+		image.addEventListener('load', () => resolve(image));
+	});
+
+/**
  * Insert a custom texture pack theme configuration at the end of the maze themes
  * @private
  * @param {Record<string, any>} metafile Metafile config
@@ -557,6 +578,7 @@ const removeCustomMazeThemeInfo = () => {
 
 /**
  * Get the index for the addons theme or use the provided theme index
+ * @private
  * @param {number} themeIfUnset Fallback theme
  * @returns {number} Addons theme index or initial
  */
@@ -564,6 +586,7 @@ const getMazeThemeIndex = themeIfUnset => Addons._maze_theme !== -1 ? Addons._ma
 
 /**
  * Set the custom features (switches) used by the texture pack
+ * @private
  * @param {string[]} switchList Array over switches
  */
 const setTexturePackSwitches = switchList => {
@@ -586,6 +609,7 @@ const setTexturePackSwitches = switchList => {
 
 /**
  * Return a list of the features enabled by the current texture pack
+ * @public
  * @param {string} switchKey Switch identifier
  * @returns {string[]} Array over feature identifiers
  */
@@ -611,11 +635,21 @@ const loadTexturePackIntoGame = async(files, metafile) => {
 
 			const soundFiles = Object.fromEntries(Object.entries(files).filter(([path]) => path.startsWith('sound/')));
 			for (const [path, soundData] of Object.entries(soundFiles)) {
+				if (imageData.byteLength === 0) continue;
+
 				const key = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
 				game.load.replaceSound(key, soundData.buffer);
 			}
 		}
 	});
+
+	const imageFiles = Object.fromEntries(Object.entries(files).filter(([path]) => path.startsWith('image/')));
+	for (const [path, imageData] of Object.entries(imageFiles)) {
+		if (imageData.byteLength === 0) continue;
+
+		const key = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
+		loadImage(imageData).then(image => game.load.replaceImage(key, image));
+	}
 
 	const gameAtlasFiles = Object.fromEntries(
 		Object.entries(files)
@@ -667,17 +701,17 @@ Object.assign(Addons, {
 });
 
 /**
- * Waits for the atlas to load in the Phaser cache
+ * Waits for an image to load in the Phaser cache
  * @private
  * @param {Phaser.Loader} loader The Phaser loader instance
- * @param {string} atlasKey The key of the atlas to wait for
+ * @param {string} imageKey The key of the image to wait for
  * @returns {Promise<void>}
  */
-const waitForAtlas = async(loader, atlasKey) => {
-	if (!loader.cache.hasFrameData(atlasKey)) {
-		await new Promise((resolve) => {
+const waitForImageLoad = async(loader, imageKey) => {
+	if (!loader.cache.checkImageKey(imageKey) || !loader.cache.hasFrameData(imageKey)) {
+		await new Promise(resolve => {
 			loader.onFileComplete.add((_progress, key) => {
-				if (key === atlasKey) resolve();
+				if (key === imageKey) resolve();
 			});
 		});
 	}
@@ -690,21 +724,6 @@ const waitForAtlas = async(loader, atlasKey) => {
  * @returns {boolean} True if the atlas is 1x resolution
  */
 const is1xResolution = (url) => !/@2x\.[a-zA-Z0-9]+$/u.test(url);
-
-/**
- * Loads an image from a source
- * @private
- * @param {string} source The image source
- * @returns {Promise<HTMLImageElement>} Resolves with the loaded image
- */
-const loadImage = source =>
-	new Promise(resolve => {
-		const image = new Image();
-		image.crossOrigin = 'anonymous';
-		image.src = source;
-
-		image.addEventListener('load', () => resolve(image));
-	});
 
 /**
  * Scales frame data for 2x resolution.
@@ -831,7 +850,7 @@ const insertFrameData = (frameData, rect, spritesheetHeight) => {
  */
 // eslint-disable-next-line complexity
 Phaser.Loader.prototype.addTexturePack = async function(atlasKey, frames) {
-	await waitForAtlas(this, atlasKey);
+	await waitForImageLoad(this, atlasKey);
 
 	const data = this.cache._cache.image[atlasKey];
 	const { url: sourceURL, frameData } = data;
@@ -866,6 +885,19 @@ Phaser.Loader.prototype.addTexturePack = async function(atlasKey, frames) {
 
 	Phaser.Packer.reset();
 	canvas = null;
+
+	return true;
+};
+
+Phaser.Loader.prototype.replaceImage = async function(imageKey, newImg) {
+	await waitForImageLoad(this, imageKey);
+
+	const imageData = this.cache._cache.image[imageKey];
+	const { url: sourceURL } = imageData;
+	const is1x = is1xResolution(sourceURL);
+
+	this.cache._cache.image[imageKey].base = new PIXI.BaseTexture(newImg);
+	if (is1x) this.cache._cache.image[imageKey].base.resolution = 2;
 
 	return true;
 };

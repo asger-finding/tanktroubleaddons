@@ -177,7 +177,7 @@ UIGameIconScrollerGroup.prototype.spawnGameIcon = function(gameIcon) {
 
 	this._sortIcons();
 
-	const spawnParameters = this.unresolvedGameIcons.get(gameIcon);
+	const spawnParameters = this.unresolvedGameIcons.get(gameIcon) ?? [];
 
 	const x = this.leftMargin + this.iconSpacing * this.gameIcons.length;
 	const y = UIConstants.GAME_ICON_Y;

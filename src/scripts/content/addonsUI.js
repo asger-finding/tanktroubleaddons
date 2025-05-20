@@ -160,7 +160,8 @@ export default class AddonsUI {
 				const option = $('<option></option');
 				option.attr('value', texturePack.hashsum);
 				option.attr('removable', !texturePack.builtin);
-				option.text(texturePack.metafile.pack.name);
+				option.html(AddonsUI.#parseFormattedText(texturePack.metafile.pack.name));
+				option.attr('as-html', true);
 				option.attr('tooltipster-content', texturePack.metafile.pack.description);
 				option.on('remove', () => {
 					Addons.removeTexturePack(texturePack.hashsum)
@@ -270,6 +271,80 @@ export default class AddonsUI {
 	static #updateTooltipster(element, content) {
 		Utils.updateTooltip(element, content);
 		setTimeout(() => Utils.updateTooltip(element, ''), 1_500);
+	}
+
+	/**
+	 * Parse text to format with colors and styling
+	 * @param {string} input Text input
+	 * @returns {string} Formatted html
+	 */
+	// eslint-disable-next-line complexity
+	static #parseFormattedText(input) {
+		const codes = {
+			// Color codes (0-f) mapped to rainbow-like colors
+			'&0': 'color:#000000',
+			'&1': 'color:#0000AA',
+			'&2': 'color:#00AA00',
+			'&3': 'color:#00AAAA',
+			'&4': 'color:#AA0000',
+			'&5': 'color:#AA00AA',
+			'&6': 'color:#FFAA00',
+			'&7': 'color:#AAAAAA',
+			'&8': 'color:#555555',
+			'&9': 'color:#5555FF',
+			'&a': 'color:#55FF55',
+			'&b': 'color:#55FFFF',
+			'&c': 'color:#FF5555',
+			'&d': 'color:#FF55FF',
+			'&e': 'color:#FFFF55',
+			'&f': 'color:#FFFFFF',
+			// Style codes
+			'&l': 'font-weight:bold',
+			'&o': 'font-style:italic',
+			'&n': 'text-decoration:underline'
+			// &r: reset styling
+		};
+
+		// eslint-disable-next-line jsdoc/require-jsdoc
+		const escapeHtml = text => {
+			const escapeMap = {
+				'&': '&',
+				'<': '<',
+				'>': '>',
+				'"': '"',
+				"'": '\''
+			};
+			return text.replace(/[&<>"']/gu, (unsafe) => escapeMap[unsafe]);
+		};
+
+		let output = '';
+		let activeStyles = [];
+		let i = 0;
+
+		while (i < input.length) {
+			if (input[i] === '&' && i + 1 < input.length && codes[input.slice(i, i + 2)]) {
+				const code = input.slice(i, i + 2);
+				if (code === '&r') activeStyles = [];
+				else activeStyles.push(codes[code]);
+
+				i += 2;
+			} else {
+				// Collect text until next '&' or end
+				let text = '';
+				while (i < input.length && input[i] !== '&') {
+					text += input[i];
+					i++;
+				}
+				if (text) {
+					const escapedText = escapeHtml(text);
+					output += activeStyles.length
+						? `<span style="${activeStyles.join(';')}">${escapedText}</span>`
+						: escapedText;
+				}
+			}
+		}
+
+		return output;
 	}
 
 }

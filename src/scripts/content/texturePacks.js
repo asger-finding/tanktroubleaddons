@@ -152,7 +152,7 @@ const parseCSS = normalized => {
  * @returns {Promise<string>} Resolves with a unique name
  */
 const generateUniqueName = async(store, baseName, suffix = 0) => {
-	const sanitizedName = baseName.replace(/[^a-zA-Z0-9-_ ()]/gu, '').trim() || 'Unnamed texture pack';
+	const sanitizedName = baseName.trim() || 'Unnamed texture pack';
 	const candidateName = suffix === 0 ? sanitizedName : `${sanitizedName} (${suffix})`;
 
 	return new Promise((resolve, reject) => {

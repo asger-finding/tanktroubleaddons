@@ -161,9 +161,19 @@ $.widget('custom.deleteselectmenu', $.ui.selectmenu, {
 		this._super('_create');
 		this.menu.addClass('ui-deleteselectmenu');
 	},
+	_renderButtonItem( item ) {
+		const buttonItem = $( '<span>', {
+			'class': 'ui-selectmenu-text'
+		});
+		buttonItem.html(item.element.html() ?? '&#160;');
+
+		return buttonItem;
+	},
 	_renderItem(ul, item) {
 		const li = $('<li>');
-		const wrapper = $('<div>', { text: item.label });
+		const wrapper = item.element.attr('as-html') === 'true'
+			? $('<div>', { html: item.element.html() })
+			: $('<div>', { text: item.label });
 
 		if (item.disabled) li.addClass('ui-state-disabled');
 

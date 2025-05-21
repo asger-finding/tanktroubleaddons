@@ -9,7 +9,7 @@ const defaultState = {
 		classToken: 'normal',
 		colorScheme: 'light'
 	},
-	classicMouse: true,
+	showFullscreenButton: true,
 	tintedBullets: false,
 	fullscreen: false,
 	statisticsState: 'global'

@@ -1,4 +1,26 @@
+import { StoreEvent, get, onStateChange } from '../common/store.js';
 import { dispatchMessage } from '../common/ipcBridge.js';
+
+let showFullscreenButton = false;
+
+/**
+ * Set the fullscreen button option
+ * @param option Is the fullscreen button enabled?
+ */
+const setShowFullscreenButton = option => {
+	showFullscreenButton = option === true;
+};
+
+// Initialize showFullscreenButton setting
+get('showFullscreenButton').then(setShowFullscreenButton);
+
+// Handle state changes
+onStateChange(({ detail }) => {
+	if (
+		detail?.type === StoreEvent.STORE_CHANGE &&
+		typeof detail.data?.curr?.showFullscreenButton !== 'undefined'
+	) setShowFullscreenButton(detail.data.curr.showFullscreenButton);
+});
 
 /**
  * Create full screen toggle game button
@@ -55,7 +77,7 @@ UIFullscreenGameButtonGroup.prototype._unfullscreen = function() {
 
 UIFullscreenGameButtonGroup.prototype.spawn = function() {
 	this.exists = true;
-	this.visible = true;
+	this.visible = showFullscreenButton;
 	this.fullscreenGroup.spawn();
 	this.fullscreenGroup.enableInput();
 
@@ -69,6 +91,7 @@ UIFullscreenGameButtonGroup.prototype.update = function() {
 
 	// Call super.
 	Phaser.Group.prototype.update.call(this);
+	this.visible = showFullscreenButton;
 };
 
 UIFullscreenGameButtonGroup.prototype.postUpdate = function() {

@@ -51,7 +51,6 @@
 			inject('scripts/content/menu.js'),
 			inject('scripts/content/switchControls.js'),
 			inject('scripts/content/maskUsernames.js'),
-			inject('scripts/content/classicMouse.js'),
 			inject('scripts/content/chat.js'),
 			inject('scripts/content/lobby.js'),
 			inject('scripts/content/gameSettings.js'),

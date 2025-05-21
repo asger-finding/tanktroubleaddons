@@ -65,8 +65,8 @@ export default class AddonsUI {
 				<input type="radio" name="radio-1" id="radio-2" value="dark" data-set-color-scheme="dark">
 			`);
 			const checkboxWrapper = $('<div style="display: grid; grid-template-areas: \'title-1 title-2\' \'checkbox-1 checkbox-2\'"></div>');
-			const classicMouseCheckbox = $(`
-				<div class="heading" style="grid-area: title-1">Classic mouse</div>
+			const fullscreenButtonCheckbox = $(`
+				<div class="heading" style="grid-area: title-1">Fullscreen button</div>
 				<input type="checkbox" style="grid-area: checkbox-1">
 			`);
 			const tintedBulletsCheckbox = $(`
@@ -74,7 +74,7 @@ export default class AddonsUI {
 				<input type="checkbox" style="grid-area: checkbox-2">	
 			`);
 
-			checkboxWrapper.append([classicMouseCheckbox, tintedBulletsCheckbox]);
+			checkboxWrapper.append([fullscreenButtonCheckbox, tintedBulletsCheckbox]);
 			interfaceWidget.append([themeHeading, themeSelect, '<hr>', checkboxWrapper]);
 
 			get('theme').then(theme => {
@@ -95,12 +95,12 @@ export default class AddonsUI {
 				});
 			});
 
-			get('classicMouse').then(classicMouse => {
-				classicMouseCheckbox.filter('input[type="checkbox"]')
-					.prop('checked', classicMouse)
+			get('showFullscreenButton').then(showFullscreenButton => {
+				fullscreenButtonCheckbox.filter('input[type="checkbox"]')
+					.prop('checked', showFullscreenButton)
 					.checkboxtoggle({
 						// eslint-disable-next-line jsdoc/require-jsdoc
-						change: (_event, { item }) => set('classicMouse', item.value)
+						change: (_event, { item }) => set('showFullscreenButton', item.value)
 					});
 			});
 			get('tintedBullets').then(tintedBullets => {

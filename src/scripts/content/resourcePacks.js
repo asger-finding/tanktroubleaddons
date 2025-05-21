@@ -1,24 +1,10 @@
-import { MaxRectsPacker } from 'maxrects-packer';
+import './resourcePackPlugin.js';
 import { calculateFileHash } from '../utils/mathUtils.js';
 import { mergeWithSchema } from '../utils/objectUtils.js';
 import { unzip } from 'fflate';
 
-const storeName = 'texturePacks';
+const storeName = 'resourcePacks';
 
-/**
- * Frames in the format { [frameName: string]: url as string }
- * @typedef {Record<string, string>} FrameDetails
- */
-
-/** @protected */
-Phaser.Packer = new MaxRectsPacker(2048, 2048, 2, {
-	smart: true,
-	square: false,
-	pot: true,
-	allowRotation: false,
-	tag: false,
-	border: 1
-});
 
 /**
  * Listens to a Phaser event and returns callback with remove function.
@@ -40,7 +26,7 @@ const phaserUntil = (target, callback) => {
  * @param {Record<string, Uint8Array>} decoded The decoded zip file contents
  * @returns {{ normalized: Record<string, Uint8Array>, metaPath: string | null }} Normalized file paths and the path to meta.json
  */
-const rootTexturePack = decoded => {
+const normalizeResourcePack = decoded => {
 	const metaFilePath = Object.keys(decoded).find((file) => file.endsWith('meta.json'));
 	if (!metaFilePath) return { normalized: decoded, metaPath: null };
 
@@ -63,10 +49,24 @@ const rootTexturePack = decoded => {
 };
 
 /**
- * Parses the metafile from a texture pack decode
+ * Filter out directory paths
+ * @param {Record<string, Uint8Array>} decoded The decoded zip file contents
+ * @returns {Record<string, Uint8Array>} Filtered zip file
+ */
+const filterOutDirectories = decoded => {
+	const result = {};
+	for (const key in decoded) {
+		if (Object.prototype.hasOwnProperty.call(decoded, key) && !key.endsWith('/'))
+			result[key] = decoded[key];
+	}
+	return result;
+};
+
+/**
+ * Parses the metafile from a resource pack decode
  * @private
  * @param {File} file The zip file
- * @param {Record<string, Uint8Array>} decoded Texture pack
+ * @param {Record<string, Uint8Array>} decoded Resource pack
  * @returns {object} Decoded metafile or fallback
  */
 // eslint-disable-next-line complexity
@@ -83,8 +83,8 @@ const createMetaFile = (file, decoded) => {
 
 	let fatal = false;
 	try {
-		const { normalized, metaPath } = rootTexturePack(decoded);
-		if (!metaPath) throw new Error('No meta.json found in texture pack');
+		const { normalized, metaPath } = normalizeResourcePack(decoded);
+		if (!metaPath) throw new Error('No meta.json found in resource pack');
 
 		const metafile = normalized['meta.json'];
 		if (!metafile) {
@@ -132,7 +132,7 @@ const createMetaFile = (file, decoded) => {
 /**
  * Parse styles.css, if any, and return it or default value
  * @private
- * @param {Record<string, Uint8Array>} normalized Texture pack with normalized paths
+ * @param {Record<string, Uint8Array>} normalized Resource pack with normalized paths
  * @returns {string} Stylesheet or empty fallback
  */
 const parseCSS = normalized => {
@@ -144,15 +144,15 @@ const parseCSS = normalized => {
 };
 
 /**
- * Generates a unique name for a texture pack by appending an incremental suffix if needed.
+ * Generates a unique name for a resource pack by appending an incremental suffix if needed.
  * @private
  * @param {IDBObjectStore} store The IndexedDB object store
- * @param {string} baseName The base name of the texture pack
+ * @param {string} baseName The base name of the resource pack
  * @param {number} [suffix] The current suffix to try (default: 0, meaning no suffix)
  * @returns {Promise<string>} Resolves with a unique name
  */
 const generateUniqueName = async(store, baseName, suffix = 0) => {
-	const sanitizedName = baseName.trim() || 'Unnamed texture pack';
+	const sanitizedName = baseName.trim() || 'Unnamed resource pack';
 	const candidateName = suffix === 0 ? sanitizedName : `${sanitizedName} (${suffix})`;
 
 	return new Promise((resolve, reject) => {
@@ -176,10 +176,10 @@ const generateUniqueName = async(store, baseName, suffix = 0) => {
  * Add a zip file entry to the database, storing its extracted content
  * @private
  * @param {File} file The zip file to be added
- * @param {boolean} builtIn Is the texture pack user-added or built-in?
+ * @param {boolean} builtIn Is the resource pack user-added or built-in?
  * @returns {Promise<string>} Resolves with hashsum when the operation is complete
  */
-const addTexturePackToStore = async(file, builtIn) => {
+const addResourcePackToStore = async(file, builtIn) => {
 	if (!file.name.endsWith('.zip')) throw new Error('Only zip files are supported');
 
 	const timestamp = Date.now();
@@ -205,7 +205,8 @@ const addTexturePackToStore = async(file, builtIn) => {
 					let normalized = null;
 					let metafile = null;
 					try {
-						({ normalized } = rootTexturePack(decoded));
+						({ normalized } = normalizeResourcePack(decoded));
+						normalized = filterOutDirectories(normalized);
 						metafile = createMetaFile(file, decoded);
 					} catch (userReadableError) {
 						reject(userReadableError);
@@ -222,17 +223,17 @@ const addTexturePackToStore = async(file, builtIn) => {
 
 						// File with same hashsum exists
 						if (existingFile) {
-							reject(new Error('Texture pack already exists'));
+							reject(new Error('Resource pack already exists'));
 							return;
 						}
 
-						// Generate new name with suffix if a texture
+						// Generate new name with suffix if a resource
 						// pack with the same name already exists
 						const uniqueName = await generateUniqueName(store, metafile.pack.name);
 						// eslint-disable-next-line require-atomic-updates
 						metafile.pack.name = uniqueName;
 
-						// Store texture pack
+						// Store resource pack
 						store.add({
 							name: metafile.pack.name,
 							hashsum,
@@ -240,7 +241,7 @@ const addTexturePackToStore = async(file, builtIn) => {
 							metafile,
 							css,
 							builtin: builtIn,
-							texturepack: normalized
+							textures: normalized
 						});
 						resolve(hashsum);
 					};
@@ -261,7 +262,7 @@ const addTexturePackToStore = async(file, builtIn) => {
  * @private
  * @returns {Promise<Array<{ name: string, hashsum: string }>>} Resolves with an array of file entries
  */
-const getAllTexturePacksFromStore = () => new Promise((resolve, reject) => {
+const getAllResourcePacksFromStore = () => new Promise((resolve, reject) => {
 	const transaction = Addons.indexedDB.transaction(storeName, 'readonly');
 	const store = transaction.objectStore(storeName);
 	const request = store.getAll();
@@ -284,7 +285,7 @@ const getAllTexturePacksFromStore = () => new Promise((resolve, reject) => {
  * @param {string} hashsum The hashsum of the file to retrieve
  * @returns {Promise<{ name: string, hashsum: string, timestamp: number }>} Resolves with the file entry
  */
-const getTexturePackFromStore = hashsum => new Promise((resolve, reject) => {
+const getResourcePackFromStore = hashsum => new Promise((resolve, reject) => {
 	const transaction = Addons.indexedDB.transaction([storeName], 'readonly');
 	const store = transaction.objectStore(storeName);
 	const index = store.index('hashsum');
@@ -303,24 +304,24 @@ const getTexturePackFromStore = hashsum => new Promise((resolve, reject) => {
 });
 
 /**
- * Get the first available texture pack in the object store.
+ * Get the first available resource pack in the object store.
  * Returns false if the store is empty.
  * @private
- * @returns {Promise<object|false>} Resolves when texture pack is determined, or if none available, with null
+ * @returns {Promise<object|false>} Resolves when resource pack is determined, or if none available, with null
  */
-const getFirstTexturePackFromStore = async() => {
-	const texturePacks = await getAllTexturePacksFromStore();
-	if (texturePacks.length === 0) return false;
-	return getTexturePackFromStore(texturePacks[0].hashsum);
+const getFirstResourcePackFromStore = async() => {
+	const resourcePacks = await getAllResourcePacksFromStore();
+	if (resourcePacks.length === 0) return false;
+	return getResourcePackFromStore(resourcePacks[0].hashsum);
 };
 
 /**
- * Remove an entry from the texture packs object store
+ * Remove an entry from the resource packs object store
  * @private
  * @param {string} hashsum The hashsum of the entry to be removed
  * @returns {Promise<void>} Resolves if the entry is successfully removed or if it does not exist
  */
-const removeTexturePackFromStore = hashsum => new Promise((resolve, reject) => {
+const removeResourcePackFromStore = hashsum => new Promise((resolve, reject) => {
 	const transaction = Addons.indexedDB.transaction([storeName], 'readwrite');
 	const store = transaction.objectStore(storeName);
 	const index = store.index('hashsum');
@@ -337,7 +338,7 @@ const removeTexturePackFromStore = hashsum => new Promise((resolve, reject) => {
 			deleteRequest.onsuccess = () => { resolve(); };
 
 			deleteRequest.onerror = () => {
-				reject(new Error('Failed to delete the texture pack'));
+				reject(new Error('Failed to delete the resource pack'));
 			};
 		} else {
 			// Entry does not exist
@@ -345,33 +346,33 @@ const removeTexturePackFromStore = hashsum => new Promise((resolve, reject) => {
 		}
 	};
 
-	request.onerror = () => { reject(new Error('Failed to retrieve the texture pack')); };
+	request.onerror = () => { reject(new Error('Failed to retrieve the resource pack')); };
 	/* eslint-enable jsdoc/require-jsdoc */
 });
 
 /**
- * Add the default texture packs to the object store
+ * Add the default resource packs to the object store
  * @protected
  */
-const storeDefaultTexturePacks = async() => {
-	const texturePacks = await Promise.all(
+const storeDefaultResourcePacks = async() => {
+	const resourcePacks = await Promise.all(
 		[
-			Addons.t_url('assets/texturepacks/Normal.zip'),
-			Addons.t_url('assets/texturepacks/Dark.zip'),
-			Addons.t_url('assets/texturepacks/3D Light.zip'),
-			Addons.t_url('assets/texturepacks/Classic.zip')
+			Addons.t_url('assets/resourcepacks/Normal.zip'),
+			Addons.t_url('assets/resourcepacks/Dark.zip'),
+			Addons.t_url('assets/resourcepacks/3D Light.zip'),
+			Addons.t_url('assets/resourcepacks/Classic.zip')
 		].map(url => fetch(url))
 	);
 
-	for (const texturePack of texturePacks) {
-		const { url } = texturePack;
-		texturePack.arrayBuffer().then(arrayBuffer => {
+	for (const resourcePack of resourcePacks) {
+		const { url } = resourcePack;
+		resourcePack.arrayBuffer().then(arrayBuffer => {
 			const fileName = decodeURIComponent(url).replace(/^.*[\\/]/u, '');
 			const file = new File([arrayBuffer], fileName);
 			const builtIn = true;
 
-			addTexturePackToStore(file, builtIn)
-				// Texture packs are already stored.
+			addResourcePackToStore(file, builtIn)
+				// Resource pack is already stored.
 				// Intentionally do nothing.
 				.catch(() => {});
 		});
@@ -379,68 +380,68 @@ const storeDefaultTexturePacks = async() => {
 };
 
 /**
- * Get the user-loaded texture pack
+ * Get the user-loaded resource pack
  * @public
- * @returns {Uint8Array} Texture pack or error if unset
+ * @returns {Uint8Array} Resource pack or error if unset
  */
-const getActiveTexturePack = () => new Promise((resolve, reject) => {
-	const hashsum = localStorage.getItem('texturepack');
+const getActiveResourcePack = () => new Promise((resolve, reject) => {
+	const hashsum = localStorage.getItem('resourcepack');
 	if (hashsum === null) {
-		reject('Texture pack unset');
+		reject('Resource pack unset');
 		return;
 	}
 
 	if (/\b[a-fA-F0-9]{64}\b/u.test(hashsum)) {
-		getTexturePackFromStore(hashsum)
+		getResourcePackFromStore(hashsum)
 			.then(resolve)
 			.catch(reject);
 	} else {
-		reject('Texture pack has an invalid key');
+		reject('Resource pack has an invalid key');
 	}
 });
 
 /**
- * Store a new texture pack
+ * Store a new resource pack
  * @public
  * @param {File} file The zip file to be added.
  * @returns {Promise<string>} Resolves with hashsum or error if fail
  */
-const storeTexturePack = file => new Promise((resolve, reject) => {
-	addTexturePackToStore(file, false)
+const storeResourcePack = file => new Promise((resolve, reject) => {
+	addResourcePackToStore(file, false)
 		.then(resolve)
 		.catch(reject);
 });
 
 /**
- * Set the active texture pack in local storage
+ * Set the active resource pack in local storage
  * @public
- * @param {string} hashsum The unique hashsum of the texture pack.
- * @returns {Promise<object>} Resolves with texture pack object if successfully added, else rejects with error
+ * @param {string} hashsum The unique hashsum of the resource pack
+ * @returns {Promise<object>} Resolves with resource pack object if successfully added, else rejects with error
  */
-const setActiveTexturePack = hashsum => new Promise((resolve, reject) => {
+const setActiveResourcePack = hashsum => new Promise((resolve, reject) => {
 	if (!(/\b[a-fA-F0-9]{64}\b/u).test(hashsum)) {
-		reject('Texture pack key is invalid');
+		reject('Resource pack key is invalid');
 		return;
 	}
-	localStorage.setItem('texturepack', hashsum);
-	Addons.getActiveTexturePack()
+	localStorage.setItem('resourcepack', hashsum);
+	Addons.getActiveResourcePack()
 		.then(resolve)
 		.catch(reject);
 });
 
 /**
- * Remove a texture pack saved to the store
+ * Remove a resource pack saved to the store
  * @public
- * @param {string} hashsum The hashsum of the texture pack to remove
- * @returns {Promise<object>} Resolves when texture pack has been removed
+ * @param {string} hashsum The hashsum of the resource pack to remove
+ * @returns {Promise<object>} Resolves when resource pack has been removed
  */
-const removeTexturePack = hashsum => new Promise((resolve, reject) => {
-	removeTexturePackFromStore(hashsum).finally(() => {
-		localStorage.removeItem('texturepack');
+const removeResourcePack = hashsum => new Promise((resolve, reject) => {
+	removeResourcePackFromStore(hashsum).finally(() => {
+		localStorage.removeItem('resource');
 
-		getFirstTexturePackFromStore().then(result => {
+		getFirstResourcePackFromStore().then(result => {
 			if (result !== false) {
-				Addons.setActiveTexturePack(result.hashsum);
+				Addons.setActiveResourcePack(result.hashsum);
 				Addons.reloadGame();
 			}
 
@@ -454,7 +455,7 @@ const removeTexturePack = hashsum => new Promise((resolve, reject) => {
  * @public
  * @returns {Promise<Array<{ name: string, hashsum: string }>>} Resolves with an array of file entries.
  */
-const getAllTexturePacks = () => getAllTexturePacksFromStore();
+const getAllResourcePacks = () => getAllResourcePacksFromStore();
 
 /**
  * Reload the TankTrouble phaser game instance and rejoin the current game
@@ -538,7 +539,7 @@ const loadImage = source =>
 	});
 
 /**
- * Insert a custom texture pack theme configuration at the end of the maze themes
+ * Insert a custom resource pack theme configuration at the end of the maze themes
  * @private
  * @param {Record<string, any>} metafile Metafile config
  * @returns {number} Custom theme index in Constants.MAZE_THEME_INFO
@@ -554,7 +555,7 @@ const insertCustomMazeThemeInfo = metafile => {
 	if (customThemeIndex !== -1) Constants.MAZE_THEME_INFO.splice(customThemeIndex, 1, theme);
 	else Constants.MAZE_THEME_INFO.push(theme);
 
-	const index = Addons.texturePackHasSwitch('noMazeThemes')
+	const index = Addons.resourcePackHasSwitch('noMazeThemes')
 		? Constants.MAZE_THEME_INFO.length - 1
 		: -1;
 	Addons._maze_theme = index;
@@ -563,7 +564,7 @@ const insertCustomMazeThemeInfo = metafile => {
 };
 
 /**
- * Remove a custom texture pack theme configuration from the maze themes
+ * Remove a custom resource pack theme configuration from the maze themes
  * @private
  */
 const removeCustomMazeThemeInfo = () => {
@@ -585,11 +586,11 @@ const removeCustomMazeThemeInfo = () => {
 const getMazeThemeIndex = themeIfUnset => Addons._maze_theme !== -1 ? Addons._maze_theme : themeIfUnset;
 
 /**
- * Set the custom features (switches) used by the texture pack
+ * Set the custom features (switches) used by the resource pack
  * @private
  * @param {string[]} switchList Array over switches
  */
-const setTexturePackSwitches = switchList => {
+const setResourcePackSwitches = switchList => {
 	const validSwitches = [
 		'noTintBase',
 		'noTintTreads',
@@ -597,9 +598,9 @@ const setTexturePackSwitches = switchList => {
 		'noTintMines',
 		'noMazeThemes'
 	];
-	Addons._texture_pack_switches = switchList.filter(switchKey => {
+	Addons._resource_pack_switches = switchList.filter(switchKey => {
 		if (!validSwitches.includes(switchKey)) {
-			console.warn(`setTexturePackSwitches: ${switchKey} is not a valid switch`);
+			console.warn(`setResourcePackSwitches: ${switchKey} is not a valid switch`);
 
 			return false;
 		}
@@ -608,62 +609,70 @@ const setTexturePackSwitches = switchList => {
 };
 
 /**
- * Return a list of the features enabled by the current texture pack
+ * Return a list of the features enabled by the current resource pack
  * @public
  * @param {string} switchKey Switch identifier
  * @returns {string[]} Array over feature identifiers
  */
-const texturePackHasSwitch = switchKey => (Addons._texture_pack_switches ?? []).includes(switchKey);
+const resourcePackHasSwitch = switchKey => (Addons._resource_pack_switches ?? []).includes(switchKey);
 
 /**
- * Load a texture pack into the game
+ * Load a resource pack into the game using batch resource replacement
  * @public
- * @param {Record<string, Uint8Array>} files Texture pack data
+ * @param {Record<string, HTMLImageElement | ImageBitmap>} files Resource pack data
  * @param {Record<string, any>} metafile Metafile config
  */
-// eslint-disable-next-line complexity
-const loadTexturePackIntoGame = async(files, metafile) => {
+const insertResourcePackIntoGame = async(files, metafile) => {
 	const game = GameManager.getGame();
 	if (!game) return;
 
-	setTexturePackSwitches(metafile.features);
+	setResourcePackSwitches(metafile.features);
 	removeCustomMazeThemeInfo();
 
-	phaserUntil(game.state.onStateChange, (removeListener, newState) => {
-		if (newState === 'Lobby' || newState === 'Game') {
-			removeListener();
+	const resources = {
+		atlases: [],
+		images: {},
+		sounds: {}
+	};
 
-			const soundFiles = Object.fromEntries(Object.entries(files).filter(([path]) => path.startsWith('sound/')));
-			for (const [path, soundData] of Object.entries(soundFiles)) {
-				if (imageData.byteLength === 0) continue;
+	// Process sounds
+	Object.entries(files)
+		.filter(([path]) => path.startsWith('sound/'))
+		.forEach(([path, soundData]) => {
+			const key = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
+			resources.sounds[key] = soundData.buffer;
+		});
 
-				const key = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
-				game.load.replaceSound(key, soundData.buffer);
-			}
-		}
-	});
-
-	const imageFiles = Object.fromEntries(Object.entries(files).filter(([path]) => path.startsWith('image/')));
-	for (const [path, imageData] of Object.entries(imageFiles)) {
-		if (imageData.byteLength === 0) continue;
-
-		const key = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
-		loadImage(imageData).then(image => game.load.replaceImage(key, image));
-	}
-
-	const gameAtlasFiles = Object.fromEntries(
+	// Process images
+	await Promise.all(
 		Object.entries(files)
-			.filter(([path]) => path.startsWith('game/') && path.endsWith('.png'))
-			.map(([path, imageData]) => {
+			.filter(([path]) => path.startsWith('image/'))
+			.map(async([path, imageData]) => {
 				const key = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
-				return [key, imageData];
+				resources.images[key] = await loadImage(imageData);
 			})
 	);
-	const success = await game.load.addTexturePack('game', gameAtlasFiles);
+
+	// Process game atlas frames
+	const frames = Object.fromEntries(
+		await Promise.all(
+			Object.entries(files)
+				.filter(([path]) => path.startsWith('game/') && path.endsWith('.png'))
+				.map(async([path, imageData]) => {
+					const key = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
+					return [key, await loadImage(imageData)];
+				})
+		)
+	);
+
+	resources.atlases.push({ key: 'game', frames });
+
+	const success = await game.plugins.resourcePack.replaceResources(resources);
 	if (!success) return;
 
 	const themeIndex = insertCustomMazeThemeInfo(metafile);
 	const { frameData } = game.cache._cache.image.game;
+
 	for (const frameName in frameData._frameNames) {
 		const frame = frameData.getFrameByName(frameName);
 		const themeFrameKey = frameName.replace(/0-(?<_>.*)/u, `${themeIndex}-$1`);
@@ -675,257 +684,32 @@ const loadTexturePackIntoGame = async(files, metafile) => {
 };
 
 /**
- * Load the texture pack css into the document
- * @param {string} css Texture pack css as a string
+ * Insert the resource pack css into the document
+ * @param {string} css Resource pack css as a string
  */
-const loadTexturePackCSS = css => {
-	if (!Addons._texture_pack_styles) {
-		Addons._texture_pack_styles = new CSSStyleSheet();
-		document.adoptedStyleSheets.push(Addons._texture_pack_styles);
+const insertResourcePackCSS = css => {
+	if (!Addons._resource_pack_styles) {
+		Addons._resource_pack_styles = new CSSStyleSheet();
+		document.adoptedStyleSheets.push(Addons._resource_pack_styles);
 	}
 
-	Addons._texture_pack_styles.replace(css);
+	Addons._resource_pack_styles.replace(css);
 };
 
 Object.assign(Addons, {
-	getActiveTexturePack,
-	setActiveTexturePack,
-	storeTexturePack,
-	removeTexturePack,
-	getAllTexturePacks,
+	getActiveResourcePack,
+	setActiveResourcePack,
+	storeResourcePack,
+	removeResourcePack,
+	getAllResourcePacks,
 	getMazeThemeIndex,
-	texturePackHasSwitch,
-	loadTexturePackIntoGame,
-	loadTexturePackCSS,
+	resourcePackHasSwitch,
+	insertResourcePackIntoGame,
+	insertResourcePackCSS,
 	reloadGame
 });
 
-/**
- * Waits for an image to load in the Phaser cache
- * @private
- * @param {Phaser.Loader} loader The Phaser loader instance
- * @param {string} imageKey The key of the image to wait for
- * @returns {Promise<void>}
- */
-const waitForImageLoad = async(loader, imageKey) => {
-	if (!loader.cache.checkImageKey(imageKey) || !loader.cache.hasFrameData(imageKey)) {
-		await new Promise(resolve => {
-			loader.onFileComplete.add((_progress, key) => {
-				if (key === imageKey) resolve();
-			});
-		});
-	}
-};
-
-/**
- * Checks if the atlas URL uses the @2x convention, meaning Retina resolution
- * @private
- * @param {string} url The atlas URL identifier
- * @returns {boolean} True if the atlas is 1x resolution
- */
-const is1xResolution = (url) => !/@2x\.[a-zA-Z0-9]+$/u.test(url);
-
-/**
- * Scales frame data for 2x resolution.
- * @private
- * @param {Phaser.FrameData} frameData The frame data to scale
- */
-const scaleFrameData = frameData => {
-	frameData._frames.forEach(frame => {
-		frame.bottom *= 2;
-		frame.x *= 2;
-		frame.y *= 2;
-		frame.width *= 2;
-		frame.height *= 2;
-		frame.centerX *= 2;
-		frame.centerY *= 2;
-		frame.sourceSizeW *= 2;
-		frame.sourceSizeH *= 2;
-		frame.right *= 2;
-	});
-};
-
-/**
- * Loads and resizes the spritesheet if needed.
- * @private
- * @param {string} sourceURL The original spritesheet URL
- * @param {boolean} is1x Whether the atlas is 1x resolution
- * @param {Record<string, Uint8Array>} frames Texture pack frames
- * @returns {Promise<ImageBitmap | HTMLImageElement>} The spritesheet image
- */
-const loadSpritesheet = async(sourceURL, is1x, frames) => {
-	const sheet = await loadImage(sourceURL);
-	if (!is1x || !Object.keys(frames).length) return sheet;
-
-	const { width, height } = sheet;
-	return createImageBitmap(sheet, {
-		resizeWidth: width * 2,
-		resizeHeight: height * 2,
-		resizeQuality: 'pixelated'
-	});
-};
-
-/**
- * Packs texture pack images into the image packer
- * @private
- * @param {Record<string, Uint8Array>} frames Texture pack frames
- * @returns {Promise<void>}
- */
-const packTextures = async(frames) => {
-	const imagePromises = Object.keys(frames)
-		.map(async(frameName) => {
-			const file = frames[frameName];
-			const blob = new Blob([file], { type: 'image/png' });
-			const bmp = await createImageBitmap(blob);
-
-			return {
-				width: bmp.width,
-				height: bmp.height,
-				image: bmp,
-				frameName
-			};
-		});
-
-	const images = await Promise.all(imagePromises);
-	for (const { width, height, image, frameName } of images) Phaser.Packer.add({ width, height, image, frameName });
-};
-
-/**
- * Draws the image onto the canvas at the given coordinates, and draws a 1px padding around it.
- * @private
- * @param {CanvasRenderingContext2D} context The canvas context
- * @param {object} rect The packed rectangle data
- * @param {number} spritesheetHeight The height of the original spritesheet
- */
-const drawFrameToCanvas = (context, rect, spritesheetHeight) => {
-	const { x, y, width, height, image } = rect;
-	const drawY = y + spritesheetHeight;
-
-	// Draw image
-	context.drawImage(image, x, drawY);
-
-	// Draw additional 1px padding to correct sizing problems.
-	// Top, bottom, left, right borders
-	context.drawImage(image, 0, 0, width, 1, x, drawY - 1, width, 1);
-	context.drawImage(image, 0, height - 1, width, 1, x, drawY + height, width, 1);
-	context.drawImage(image, 0, 0, 1, height, x - 1, drawY, 1, height);
-	context.drawImage(image, width - 1, 0, 1, height, x + width, drawY, 1, height);
-
-	// Tl, tr, bl, br corners
-	context.drawImage(image, 0, 0, 1, 1, x - 1, drawY - 1, 1, 1);
-	context.drawImage(image, width - 1, 0, 1, 1, x + width, drawY - 1, 1, 1);
-	context.drawImage(image, 0, height - 1, 1, 1, x - 1, drawY + height, 1, 1);
-	context.drawImage(image, width - 1, height - 1, 1, 1, x + width, drawY + height, 1, 1);
-};
-
-/**
- * Inserts or updates the frame data for texture pack frames.
- * @private
- * @param {Phaser.FrameData} frameData The frame data to update
- * @param {object} rect The packed rectangle data
- * @param {number} spritesheetHeight The height of the original spritesheet
- */
-const insertFrameData = (frameData, rect, spritesheetHeight) => {
-	const exists = frameData.checkFrameName(rect.frameName);
-	const frame = exists
-		? frameData.getFrameByName(rect.frameName)
-		: new Phaser.Frame(frameData._frames.length, rect.x, rect.y + spritesheetHeight, rect.width, rect.height, rect.frameName);
-
-	if (exists) {
-		frame.x = rect.x;
-		frame.y = rect.y + spritesheetHeight;
-		frame.rotated = false;
-		frame.resize(rect.width, rect.height);
-	} else {
-		frameData.addFrame(frame);
-	}
-};
-
-/**
- * Load texture pack from arraybuffer into an already-loaded sprite atlas, overriding existing textures in it.
- * @public
- * @param {string} atlasKey The Phaser atlas key
- * @param {Record<string, Uint8Array>} frames Texture pack image object
- * @returns {Promise<boolean>} Success status
- */
-// eslint-disable-next-line complexity
-Phaser.Loader.prototype.addTexturePack = async function(atlasKey, frames) {
-	await waitForImageLoad(this, atlasKey);
-
-	const data = this.cache._cache.image[atlasKey];
-	const { url: sourceURL, frameData } = data;
-	const is1x = is1xResolution(sourceURL);
-
-	const spritesheet = await loadSpritesheet(sourceURL, is1x, frames);
-	if (is1x && Object.keys(frames).length) scaleFrameData(frameData);
-
-	await packTextures(frames);
-
-	const bin = Phaser.Packer.bins[Phaser.Packer.bins.length - 1];
-	if (!bin) {
-		Phaser.Packer.reset();
-		return false;
-	}
-
-	let canvas = document.createElement('canvas');
-	canvas.width = spritesheet.width;
-	canvas.height = spritesheet.height + bin.height;
-	const context = canvas.getContext('2d');
-	context.drawImage(spritesheet, 0, 0);
-
-	for (const rect of Phaser.Packer.rects) {
-		drawFrameToCanvas(context, rect, spritesheet.height);
-		insertFrameData(frameData, rect, spritesheet.height);
-		rect.image.close();
-	}
-
-	const newImg = await loadImage(canvas.toDataURL());
-	this.cache._cache.image[atlasKey].base = new PIXI.BaseTexture(newImg);
-	if (is1x) this.cache._cache.image[atlasKey].base.resolution = 2;
-
-	Phaser.Packer.reset();
-	canvas = null;
-
-	return true;
-};
-
-Phaser.Loader.prototype.replaceImage = async function(imageKey, newImg) {
-	await waitForImageLoad(this, imageKey);
-
-	const imageData = this.cache._cache.image[imageKey];
-	const { url: sourceURL } = imageData;
-	const is1x = is1xResolution(sourceURL);
-
-	this.cache._cache.image[imageKey].base = new PIXI.BaseTexture(newImg);
-	if (is1x) this.cache._cache.image[imageKey].base.resolution = 2;
-
-	return true;
-};
-
-/**
- * Replace a Phaser sound with new sound data
- * @param {string} key Original sound key
- * @param {Uint8Array} soundData New sound data
- */
-Phaser.Loader.prototype.replaceSound = function(key, soundData) {
-	const sound = this.cache.getSound(key);
-	if (sound) {
-		try {
-			this.game.sound.context.decodeAudioData(soundData, buffer => {
-				if (buffer) {
-					this.cache.decodedSound(key, buffer);
-					this.game.sound.onSoundDecode.dispatch(key, sound);
-					this.cache.reloadSoundComplete(key);
-				}
-			});
-		} catch {
-			/* intentionally do nothing */
-		}
-	}
-
-};
-
-storeDefaultTexturePacks();
+storeDefaultResourcePacks();
 
 const tankSpriteSpawn = UITankSprite.prototype.spawn;
 UITankSprite.prototype.spawn = function(...args) {
@@ -937,12 +721,12 @@ UITankSprite.prototype.spawn = function(...args) {
 			// We need to finish execution first
 			// because base tint is set before turret and treads
 			requestAnimationFrame(() => {
-				if (Addons.texturePackHasSwitch('noTintTurret')) this.turret.tint = 0xFFFFFF;
-				if (Addons.texturePackHasSwitch('noTintTreads')) this.leftTread.tint = this.rightTread.tint = 0xFFFFFF;
-				if (Addons.texturePackHasSwitch('noTintBase')) this._tint = 0xFFFFFF;
+				if (Addons.resourcePackHasSwitch('noTintTurret')) this.turret.tint = 0xFFFFFF;
+				if (Addons.resourcePackHasSwitch('noTintTreads')) this.leftTread.tint = this.rightTread.tint = 0xFFFFFF;
+				if (Addons.resourcePackHasSwitch('noTintBase')) this._tint = 0xFFFFFF;
 				else this._tint = tint;
 			});
-			return Addons.texturePackHasSwitch('noTintBase') ? 0xFFFFFF : this._tint;
+			return Addons.resourcePackHasSwitch('noTintBase') ? 0xFFFFFF : this._tint;
 		},
 		enumerable: true,
 		configurable: true
@@ -957,7 +741,7 @@ UIMineSprite.prototype.spawn = function(...args) {
 			return this._tint;
 		},
 		set(tint) {
-			this._tint = Addons.texturePackHasSwitch('noTintMine')
+			this._tint = Addons.resourcePackHasSwitch('noTintMine')
 				? 0xFFFFFF
 				: tint;
 			return this._tint;
@@ -975,7 +759,7 @@ UIMissileImage.prototype.spawn = function(...args) {
 			return this._tint;
 		},
 		set(tint) {
-			this._tint = Addons.texturePackHasSwitch('noTintMine')
+			this._tint = Addons.resourcePackHasSwitch('noTintMine')
 				? 0xFFFFFF
 				: tint;
 			return this._tint;
@@ -1002,15 +786,23 @@ Maze.constructor('withObject', function(obj) {
 	return result;
 });
 
-const gamePreloadStage = Game.UIPreloadState.getMethod('preload');
-Game.UIPreloadState.method('preload', function(...args) {
-	const result = gamePreloadStage.apply(this, ...args);
+const gameBootState = Game.UIBootState.getMethod('init');
+Game.UIBootState.method('init', function(...args) {
+	const result = gameBootState.apply(this, ...args);
 
-	Addons.getActiveTexturePack().then(({ texturepack, metafile, css }) => {
-		Addons.loadTexturePackIntoGame(texturepack, metafile);
-		Addons.loadTexturePackCSS(css);
+	this.game.plugins.resourcePack = this.game.plugins.add(Phaser.Plugin.ResourcePack);
+
+	return result;
+});
+
+const gamePreloadState = Game.UIPreloadState.getMethod('preload');
+Game.UIPreloadState.method('preload', function(...args) {
+	Addons.getActiveResourcePack().then(({ textures, metafile, css }) => {
+		Addons.insertResourcePackIntoGame(textures, metafile);
+		Addons.insertResourcePackCSS(css);
 	}).catch(() => {});
 
+	const result = gamePreloadState.apply(this, ...args);
 	return result;
 });
 

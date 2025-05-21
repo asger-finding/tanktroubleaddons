@@ -5,7 +5,7 @@
  * @returns {Promise<IDBDatabase>} A promise that resolves to the initialized database.
  */
 const initDatabase = () => new Promise((resolve, reject) => {
-	const request = indexedDB.open('addons', 4);
+	const request = indexedDB.open('addons', 5);
 
 	/* eslint-disable jsdoc/require-jsdoc */
 	request.onupgradeneeded = (event) => {
@@ -21,29 +21,28 @@ const initDatabase = () => new Promise((resolve, reject) => {
 			store.createIndex('senders', 'senders', { multiEntry: true });
 			store.createIndex('type', 'type');
 		}
-
-		// Ensure 'texturePacks' object store exists
-		if (!db.objectStoreNames.contains('texturePacks')) {
-			const store = db.createObjectStore('texturePacks', { keyPath: 'name' });
+		// Ensure `resourcePacks` object store exists
+		if (!db.objectStoreNames.contains('resourcePacks')) {
+			const store = db.createObjectStore('resourcePacks', { keyPath: 'name' });
 			store.createIndex('hashsum', 'hashsum', { unique: true });
 		}
 
-		// For any version upgrade, we clear the embedded texture packs
+		// For any version upgrade, we clear the embedded resource packs
 		// in the assumption that they have been modified
 		const { transaction } = event.target;
-		const texturePacksStore = transaction.objectStore('texturePacks');
+		const resourcePacksStore = transaction.objectStore('resourcePacks');
 
-		const texturePackReq = texturePacksStore.openCursor();
-		texturePackReq.onsuccess = evt => {
+		const resourcePackRequest = resourcePacksStore.openCursor();
+		resourcePackRequest.onsuccess = evt => {
 			const cursor = evt.target.result;
 			if (cursor) {
-				const texturePack = cursor.value;
-				if (texturePack.builtin === true) cursor.delete();
+				const resourcePack = cursor.value;
+				if (resourcePack.builtin === true) cursor.delete();
 				cursor.continue();
 			}
 		};
-		texturePackReq.onerror = () => {
-			throw new Error('Error iterating through texture packs:', event.target.error);
+		resourcePackRequest.onerror = () => {
+			throw new Error('Error iterating through resource packs:', event.target.error);
 		};
 	};
 

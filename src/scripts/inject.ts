@@ -60,7 +60,7 @@
 			inject('scripts/content/killedByMessage.js'),
 			inject('scripts/content/fullscreenGame.js'),
 			inject('scripts/content/deathCount.js'),
-			inject('scripts/content/texturePacks.js'),
+			inject('scripts/content/resourcePacks.js'),
 			inject('scripts/content/emporium.js'),
 			inject('scripts/content/accountMenu.js'),
 			inject('scripts/content/adminOverlays.js')

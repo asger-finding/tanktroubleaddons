@@ -15,7 +15,7 @@ With 30+ additions, Addons implements key features to the game, enhancing your u
 Key features include:
 
 - Dark theme
-- Texture packs
+- Resource packs
 - Classic-isque mouse control
 - IronVault integration
 - Forum, chat, game, lobby, emporium, player *and* admin quality-of-life improvements

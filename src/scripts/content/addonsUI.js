@@ -122,25 +122,27 @@ export default class AddonsUI {
 		// "Other" options
 		(() => {
 			const otherWidget = $('<div></div>');
-			const texturePackWrapper = $('<div></div>');
-			const texturePackHeading = $('<div class="heading">Texture packs</div>');
+			const resourcePackWrapper = $('<div></div>');
+			const resourcePackHeading = $('<div class="heading">Resource packs</div>');
 			const selectWrapper = $('<div></div>');
-			const texturePackSelect = $('<select></select>');
+			const resourcePackSelect = $('<select></select>');
 			const createNewWrapper = $('<div class="create-new-wrapper"></div>');
 
-			const createNewLabel = $('<label for="texturepackpicker" class="custom-file-upload">Select file</label>');
-			const createNewPicker = $('<input type="file" id="texturepackpicker" accept=".zip" style="display: none;"/>');
+			const createNewLabel = $('<label for="resourcepackpicker" class="custom-file-upload">Select file</label>');
+			const createNewPicker = $('<input type="file" id="resourcepackpicker" accept=".zip" style="display: none;"/>');
 			const createNewSubmit = $('<button type="submit">Add</button>');
 			createNewLabel.button();
 			createNewSubmit.button();
 
 			createNewWrapper.append(['<br>', createNewLabel, createNewPicker, createNewSubmit]);
-			selectWrapper.append(texturePackSelect);
+			selectWrapper.append(resourcePackSelect);
 
-			texturePackWrapper.append([selectWrapper, createNewWrapper]);
+			resourcePackWrapper.append([selectWrapper, createNewWrapper]);
 
+			createNewPicker.on('click', () => createNewPicker.val(''));
 			createNewPicker.on('change', async() => {
 				const [file] = createNewPicker.prop('files');
+				console.log(file);
 				createNewLabel.text(file ? file.name : 'Select file');
 			});
 
@@ -153,21 +155,21 @@ export default class AddonsUI {
 
 			/**
 			 * Create a new option for the select menu
-			 * @param texturePack Texture pack details
+			 * @param resourcePack Resource pack details
 			 * @returns New option element
 			 */
-			const createNewOption = texturePack => {
+			const createNewOption = resourcePack => {
 				const option = $('<option></option');
-				option.attr('value', texturePack.hashsum);
-				option.attr('removable', !texturePack.builtin);
-				option.html(AddonsUI.#parseFormattedText(texturePack.metafile.pack.name));
+				option.attr('value', resourcePack.hashsum);
+				option.attr('removable', !resourcePack.builtin);
+				option.html(AddonsUI.#parseFormattedText(resourcePack.metafile.pack.name));
 				option.attr('as-html', true);
-				option.attr('tooltipster-content', texturePack.metafile.pack.description);
+				option.attr('tooltipster-content', resourcePack.metafile.pack.description);
 				option.on('remove', () => {
-					Addons.removeTexturePack(texturePack.hashsum)
+					Addons.removeResourcePack(resourcePack.hashsum)
 						.then(result => {
-							texturePackSelect.val(result === false ? 'new' : result.hashsum);
-							texturePackSelect.deleteselectmenu('refresh');
+							resourcePackSelect.val(result === false ? 'new' : result.hashsum);
+							resourcePackSelect.deleteselectmenu('refresh');
 							createNewWrapper.toggle(!result);
 						});
 				});
@@ -178,19 +180,19 @@ export default class AddonsUI {
 			createNewSubmit.on('mouseup', async() => {
 				const [file] = createNewPicker.prop('files');
 				if (file) {
-					Addons.storeTexturePack(file)
-						.then(hashsum => Addons.setActiveTexturePack(hashsum)
-							.then(texturePack => {
+					Addons.storeResourcePack(file)
+						.then(hashsum => Addons.setActiveResourcePack(hashsum)
+							.then(resourcePack => {
 								AddonsUI.#updateTooltipster(createNewSubmit, '');
 								Utils.updateTooltip(createNewSubmit, '');
 								Addons.reloadGame();
 
-								const option = createNewOption(texturePack);
+								const option = createNewOption(resourcePack);
 
-								texturePackSelect.find('> :last').before(option);
+								resourcePackSelect.find('> :last').before(option);
 								createNewLabel.text('Select file');
-								texturePackSelect.val(hashsum);
-								texturePackSelect.deleteselectmenu('refresh');
+								resourcePackSelect.val(hashsum);
+								resourcePackSelect.deleteselectmenu('refresh');
 
 								createNewWrapper.hide();
 							}))
@@ -200,20 +202,20 @@ export default class AddonsUI {
 				}
 			});
 
-			Addons.getAllTexturePacks()
-				.then(async texturePacks => {
-					texturePackSelect.append(texturePacks.map(texturePack => createNewOption(texturePack)));
+			Addons.getAllResourcePacks()
+				.then(async resourcePacks => {
+					resourcePackSelect.append(resourcePacks.map(resourcePack => createNewOption(resourcePack)));
 
-					const newTexturePackOption = $('<option value="new">Add from zip ...</option>');
-					texturePackSelect.append(newTexturePackOption);
+					const newResourcePackOption = $('<option value="new">Add from zip ...</option>');
+					resourcePackSelect.append(newResourcePackOption);
 
-					const selectValue = await Addons.getActiveTexturePack()
+					const selectValue = await Addons.getActiveResourcePack()
 						.then(({ hashsum }) => hashsum)
 						.catch(() => 'new');
-					texturePackSelect.val(selectValue);
+					resourcePackSelect.val(selectValue);
 					createNewWrapper.toggle(selectValue === 'new');
 
-					texturePackSelect.deleteselectmenu({
+					resourcePackSelect.deleteselectmenu({
 						appendTo: this.content,
 
 						// eslint-disable-next-line jsdoc/require-jsdoc
@@ -222,14 +224,14 @@ export default class AddonsUI {
 								createNewWrapper.show();
 							} else {
 								createNewWrapper.hide();
-								Addons.setActiveTexturePack(item.value);
+								Addons.setActiveResourcePack(item.value);
 								Addons.reloadGame();
 							}
 						}
 					});
 				});
 
-			otherWidget.append([texturePackHeading, texturePackWrapper]);
+			otherWidget.append([resourcePackHeading, resourcePackWrapper]);
 
 			this.#createSection({
 				title: 'Other',

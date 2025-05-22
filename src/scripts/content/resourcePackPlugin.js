@@ -240,14 +240,14 @@ Phaser.Plugin.ResourcePack.prototype.insertFramesIntoAtlas = async function(atla
 	try {
 		await this.waitForImageLoad(atlasKey);
 
-		const data = this.game.cache.getItem(atlasKey, Phaser.Cache.IMAGE);
-		if (!data) return false;
+		const atlasData = this.game.cache.getItem(atlasKey, Phaser.Cache.IMAGE);
+		if (!atlasData) return false;
 
-		const { url: sourceURL, frameData, base: baseTexture } = data;
+		const { url: sourceURL, frameData } = atlasData;
 		const is1x = this.is1xResolution(sourceURL);
-		let spritesheet = baseTexture.source;
+		let spritesheet = atlasData.base.source;
 
-		// Resize atlas for 1x resolution if needed
+		// Resize atlas to fit the 2x frames if necessary
 		if (is1x && Object.keys(frames).length) {
 			const { width, height } = spritesheet;
 			spritesheet = await createImageBitmap(spritesheet, {
@@ -298,7 +298,11 @@ Phaser.Plugin.ResourcePack.prototype.insertFramesIntoAtlas = async function(atla
 
 		// Update atlas texture
 		const success = await this.replaceImage(atlasKey, newImg);
-		if (is1x) this.game.cache._cache.image[atlasKey].base.resolution = 2;
+		if (is1x) {
+			atlasData.base.resolution = 2;
+			atlasData.base.width *= 2;
+			atlasData.base.height *= 2;
+		}
 
 		spritesheet.close?.();
 		this.Packer.reset();
@@ -324,14 +328,18 @@ Phaser.Plugin.ResourcePack.prototype.replaceImage = async function(imageKey, new
 	try {
 		await this.waitForImageLoad(imageKey);
 
-		const imageData = this.game.cache._cache.image[imageKey];
+		const imageData = this.game.cache.getItem(imageKey, Phaser.Cache.IMAGE);
 		if (!imageData) return false;
 
 		const { url: sourceURL } = imageData;
 		const is1x = this.is1xResolution(sourceURL);
 
-		this.game.cache._cache.image[imageKey].base = new PIXI.BaseTexture(newImg);
-		if (is1x) this.game.cache._cache.image[imageKey].base.resolution = 2;
+		imageData.base = new PIXI.BaseTexture(newImg);
+		if (is1x) {
+			imageData.base.width /= 2;
+			imageData.base.height /= 2;
+		}
+		console.log(imageData);
 
 		return true;
 	} catch (error) {

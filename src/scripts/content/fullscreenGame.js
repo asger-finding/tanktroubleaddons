@@ -1,3 +1,4 @@
+import ProxyHelper from '../utils/proxyHelper.js';
 import UIFullscreenGameButtonGroup from './uifullscreengamebuttongroup.js';
 
 UIConstants.classFields({
@@ -21,41 +22,35 @@ UILeaveGameButtonGroup.prototype.spawn = function() {
 	this.game.add.tween(this.scale).to({ x: 1, y: 1 }, UIConstants.ELEMENT_POP_IN_TIME, Phaser.Easing.Back.Out, true);
 };
 
-/**
- * Inject fullscreen button group to game state
- */
-const createGameState = Game.UIGameState.getMethod('create');
-Game.UIGameState.method('create', function(...args) {
-	const result = createGameState.apply(this, ...args);
+ProxyHelper.interceptFunction(Game.UIGameState, 'create', function(original, ...args) {
+	const result = original(...args);
 
 	// Insert group before leave game button so that
 	// it doesn't overlay the leaving game text
-	this.fullscreenGameGroup = this.overlayGroup.addChildAt(new UIFullscreenGameButtonGroup(this.game, this.game.width - UIConstants.FULLSCREEN_GAME_MARGIN_X, UIConstants.FULLSCREEN_GAME_MARGIN_Y), 0);
+	this.fullscreenGameGroup = this.overlayGroup.addChildAt(
+		new UIFullscreenGameButtonGroup(
+			this.game,
+			this.game.width - UIConstants.FULLSCREEN_GAME_MARGIN_X,
+			UIConstants.FULLSCREEN_GAME_MARGIN_Y
+		), 0);
 	this.fullscreenGameGroup.spawn();
 
 	return result;
-});
+}, { isClassy: true });
 
-/**
- * Also retire fullscreen button group alongside rest
- */
-const retireUI = Game.UIGameState.getMethod('_retireUI');
-Game.UIGameState.method('_retireUI', function(...args) {
+/** Retire the fullscreen group */
+ProxyHelper.interceptFunction(Game.UIGameState, '_retireUI', function(original, ...args) {
 	this.fullscreenGameGroup.retire();
 
-	return retireUI.apply(this, ...args);
-});
+	original(...args);
+}, { isClassy: true });
 
-/**
- * Position fullscreen button on resize
- */
-const gameResizeHandler = Game.UIGameState.getMethod('_onSizeChangeHandler');
-Game.UIGameState.method('_onSizeChangeHandler', function(...args) {
-	const result = gameResizeHandler.apply(this, ...args);
 
+/** Position fullscreen button on resize */
+ProxyHelper.interceptFunction(Game.UIGameState, '_onSizeChangeHandler', function(original, ...args) {
+	const result = original(...args);
 	this.fullscreenGameGroup.position.x = this.game.width - UIConstants.FULLSCREEN_GAME_MARGIN_X;
-
 	return result;
-});
+}, { isClassy: true });
 
 export const _isESmodule = true;

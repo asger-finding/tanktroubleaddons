@@ -35,39 +35,18 @@ ProxyHelper.interceptFunction(TankTrouble.SettingsBox, 'init', (original, ...arg
 	TankTrouble.SettingsBox.settingsQualitySelect.iconselectmenu('refresh');
 });
 
-// FIXME: ProxyHelper.interceptFunction does not keep prototype context
-/**
- * Don't emit tank rubble if quality is set to low or minimum
- * @param {object} tank Tankstate
- */
-UIRubbleGroup.prototype.emit = function(tank) {
-	if (![
-		QualityManager.QUALITY_SETTINGS.LOW,
-		QualityManager.QUALITY_SETTINGS.MINIMUM
-	].includes(QualityManager.getQuality())) {
-		if (tank.getSpeed() !== 0.0 || tank.getRotationSpeed() !== 0.0) {
-			this.exists = true;
-			this.visible = true;
-			const rubbleFragmentSprite = this.fragmentGroup.getFirstExists(false);
-			if (rubbleFragmentSprite) {
-				rubbleFragmentSprite.spawn(UIUtils.mpx(tank.getX()),
-					UIUtils.mpx(tank.getY()),
-					tank.getRotation(),
-					tank.getSpeed());
-			}
-
-			this.emitter.emit(UIUtils.mpx(tank.getX()), UIUtils.mpx(tank.getY()), tank.getRotation(), tank.getSpeed());
-		}
-	}
-};
+/** Don't emit tank rubble if quality is set to minimum */
+ProxyHelper.interceptFunction(UIRubbleGroup.prototype, 'emit', (original, ...args) => {
+	if (QualityManager.getQuality() === QualityManager.QUALITY_SETTINGS.MINIMUM) return null;
+	return original(...args);
+}, { isPrototype: true });
 
 /**
  * Don't add camera shake in minimum quality
  */
-const addCameraShake = Game.UIGameState.getMethod('_addCameraShake');
-Game.UIGameState.method('_addCameraShake', function(...args) {
-	const [shake] = args;
-	if (QualityManager.getQuality() !== QualityManager.QUALITY_SETTINGS.MINIMUM) addCameraShake.call(this, shake);
-});
+ProxyHelper.interceptFunction(Game.UIGameState, '_addCameraShake', (original, ...args) => {
+	if (QualityManager.getQuality() !== QualityManager.QUALITY_SETTINGS.MINIMUM) return original(...args);
+	return null;
+}, { isClassy: true });
 
 export const _isESmodule = true;

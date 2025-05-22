@@ -1,4 +1,5 @@
 import { StoreEvent, get, onStateChange } from '../common/store.js';
+import ProxyHelper from '../utils/proxyHelper.js';
 import { colord } from '@pixi/colord';
 import { rgb as rgbContrast } from 'wcag-contrast';
 import { smoothTransition } from '../utils/mathUtils.js';
@@ -101,24 +102,10 @@ const instanceNewColorFilter = (game, color) => {
 	return filter;
 };
 
-const proto = UIProjectileImage.prototype;
-UIProjectileImage = function(game, gameController) {
-	Phaser.Image.call(this, game, 0, 0, 'game', '');
-	this.gameController = gameController;
-	this.anchor.setTo(0.5, 0.5);
-	this.scale.setTo(UIConstants.GAME_ASSET_SCALE, UIConstants.GAME_ASSET_SCALE);
-
-	this.kill();
-};
-
-UIProjectileImage.prototype = proto;
-
-UIProjectileImage.prototype.spawn = function(x, y, projectileId, frameName) {
-	this.frameName = frameName;
-	this.reset(x, y);
-	this.projectileId = projectileId;
+ProxyHelper.interceptFunction(UIProjectileImage.prototype, 'spawn', function(original, ...args) {
 	this.updateColor(shouldBulletsTint);
-};
+	return original(...args);
+}, { isPrototype: true });
 
 UIProjectileImage.prototype.updateColor = function(enabled) {
 	const projectileData = this.gameController.getProjectile(this.projectileId);

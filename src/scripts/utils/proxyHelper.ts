@@ -1,6 +1,11 @@
-type SomeObject = { [key: string]: unknown };
 type SomeFunction = (...args: unknown[]) => unknown;
 type InterceptHandler = (original: SomeFunction, ...args: unknown[]) => unknown;
+
+interface InterceptOptions {
+	isPrototype?: boolean;
+	isClassy?: boolean;
+	propertyAttributes?: PropertyDescriptor;
+}
 
 // eslint-disable-next-line @typescript-eslint/naming-convention, init-declarations
 declare const Content: {
@@ -11,24 +16,53 @@ export default class ProxyHelper {
 
 	/**
 	 * Pass a function to a hook with the correct context
-	 * @param {object} context Function context (e.g `window`)
-	 * @param funcName Function identifier in the context
-	 * @param handler Hook to call before the original
-	 * @param {any[]} attributes Optionally additional descriptors
+	 * @param {object} context The object containing the function to intercept
+	 * @param funcName Name of the function in the context
+	 * @param handler Function to call before the original
+	 * @param options Configuration options
 	 */
-	static interceptFunction(context: SomeObject, funcName: string, handler: InterceptHandler, attributes?: SomeObject) {
+	// eslint-disable-next-line complexity
+	static interceptFunction(
+		context: any,
+		funcName: string,
+		handler: InterceptHandler,
+		options?: InterceptOptions
+	) {
+		const { isPrototype = false, isClassy = false, propertyAttributes = {} } = options || {};
+
+		// Handle Classy library methods
+		if (isClassy) {
+			const original = context.getMethod(funcName);
+			if (typeof original !== 'function') throw new Error('Classy method is not a function');
+
+			context.method(funcName, function(this: any, ...args: any[]) {
+				return handler.apply(this, [original.bind(this), ...args]);
+			});
+			return;
+		}
+
 		const original = Reflect.get(context, funcName);
-		if (typeof original !== 'function') throw new Error('Item passed is not typeof function');
+		if (typeof original !== 'function') throw new Error('Item to intercept is not a function');
+
+		if (isPrototype) {
+			Reflect.defineProperty(context, funcName, {
+				value(this: any, ...args: any[]) {
+					const boundOriginal = original.bind(this);
+					return handler.call(this, boundOriginal, ...args);
+				},
+				...propertyAttributes
+			});
+			return;
+		}
 
 		Reflect.defineProperty(context, funcName, {
 			/**
-			 * Call the handler with the original function bound to its context
-			 * and supply with the arguments list
-			 * @param args Arguments passed from outside
-			 * @returns Original function return value
+			 * Default hook
+			 * @param args Function arguments
+			 * @returns Some return value
 			 */
-			value: (...args: unknown[]) => handler(original.bind(context), ...args),
-			...attributes
+			value: (...args: any[]) => handler(() => original.apply(context, args), ...args),
+			...propertyAttributes
 		});
 	}
 

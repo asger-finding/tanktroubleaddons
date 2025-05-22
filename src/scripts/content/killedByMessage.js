@@ -1,24 +1,17 @@
+import ProxyHelper from '../utils/proxyHelper.js';
 import UIKilledByGroup from './killedbygroup.js';
 
 Game.UIGameState.field('killedByGroup', null);
 
-/**
- * Inject killed by group to game state
- */
-const createGameState = Game.UIGameState.getMethod('create');
-Game.UIGameState.method('create', function(...args) {
-	const result = createGameState.apply(this, ...args);
-
+/** Inject killed by group to game state */
+ProxyHelper.interceptFunction(Game.UIGameState, 'create', function(original, ...args) {
+	const result = original(...args);
 	this.killedByGroup = this.overlayGroup.add(new UIKilledByGroup(this.game, this.gameController));
-
 	return result;
-});
+}, { isClassy: true });
 
-/**
- * Spawn killed by message if a local user is killed
- */
-const gameRoundEventHandler = Game.UIGameState.getMethod('_roundEventHandler');
-Game.UIGameState.method('_roundEventHandler', (...args) => {
+/** Spawn the killed by message if a local user is killed */
+ProxyHelper.interceptFunction(Game.UIGameState, '_roundEventHandler', (original, ...args) => {
 	const [self,, evt, data] = args;
 
 	if (evt === RoundModel._EVENTS.TANK_KILLED) {
@@ -30,29 +23,20 @@ Game.UIGameState.method('_roundEventHandler', (...args) => {
 		}
 	}
 
-	return gameRoundEventHandler(...args);
-});
+	return original(...args);
+}, { isClassy: true });
 
-/**
- * Retire group on cleanup
- */
-const gameCleanup = Game.UIGameState.getMethod('_cleanUp');
-Game.UIGameState.method('_cleanUp', function(...args) {
+/** Retire group on cleanup */
+ProxyHelper.interceptFunction(Game.UIGameState, '_cleanUp', function(original, ...args) {
 	this.killedByGroup.retire();
+	return original(...args);
+}, { isClassy: true });
 
-	return gameCleanup.apply(this, ...args);
-});
-
-/**
- * Position killed by group on resize
- */
-const gameResizeHandler = Game.UIGameState.getMethod('_onSizeChangeHandler');
-Game.UIGameState.method('_onSizeChangeHandler', function(...args) {
-	const result = gameResizeHandler.apply(this, ...args);
-
+/** Position killed by group on resize */
+ProxyHelper.interceptFunction(Game.UIGameState, '_onSizeChangeHandler', function(original, ...args) {
+	const result = original(...args);
 	this.killedByGroup.position.x = this.game.width / 2.0;
-
 	return result;
-});
+}, { isClassy: true });
 
 export const _isESmodule = true;

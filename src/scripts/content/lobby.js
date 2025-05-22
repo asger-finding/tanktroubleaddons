@@ -1,3 +1,4 @@
+import ProxyHelper from '../utils/proxyHelper.js';
 import UIGameIconImage from './uigameiconimage.js';
 import UIGameIconScrollerGroup from './uigameiconscrollergroup.js';
 
@@ -11,12 +12,9 @@ UIConstants.classFields({
 	GAME_ICON_COUNT: 6
 });
 
-/**
- * Inject game icon scroller to lobby state
- */
-const createLobby = Game.UILobbyState.getMethod('create');
-Game.UILobbyState.method('create', function(...args) {
-	createLobby.apply(this, ...args);
+/** Create the scroller group */
+ProxyHelper.interceptFunction(Game.UILobbyState, 'create', function(original, ...args) {
+	const result = original(...args);
 
 	this.gameIconScroller = this.gameIconGroup.add(new UIGameIconScrollerGroup(
 		this.game,
@@ -24,14 +22,13 @@ Game.UILobbyState.method('create', function(...args) {
 		UIConstants.GAME_ICON_HEIGHT,
 		UIConstants.GAME_ICON_SCROLL_SPEED
 	));
-});
 
-/**
- * Override client event handler logic for TTClient.EVENTS.GAME_LIST_CHANGED for our scroller
- */
-const lobbyClientEventHandler = Game.UILobbyState.getMethod('_clientEventHandler');
+	return result;
+}, { isClassy: true });
+
+/** Override client event handler logic for TTClient.EVENTS.GAME_LIST_CHANGED for our scroller */
 // eslint-disable-next-line complexity
-Game.UILobbyState.method('_clientEventHandler', (...args) => {
+ProxyHelper.interceptFunction(Game.UILobbyState, '_clientEventHandler', (original, ...args) => {
 	const [self, evt] = args;
 	if (evt === TTClient.EVENTS.GAME_LIST_CHANGED) {
 		self._updateGameButtons();
@@ -47,12 +44,7 @@ Game.UILobbyState.method('_clientEventHandler', (...args) => {
 		const gameIconsNoLongerNeeded = currentGameIds.filter(gameId => !newGameIds.includes(gameId));
 
 		const gameIconScroller = self.gameIconScroller.getFirstExists(false);
-		if (gameIconScroller) {
-			self.gameIconScroller.spawn(
-				0,
-				140
-			);
-		}
+		if (gameIconScroller) self.gameIconScroller.spawn(0, 140);
 
 		// Retire closed games icons
 		for (const gameIconSpriteId of gameIconsNoLongerNeeded) {
@@ -91,14 +83,12 @@ Game.UILobbyState.method('_clientEventHandler', (...args) => {
 		// Spawn enqueued game icons
 		for (const { icon } of Object.values(self.gameIcons)) self.gameIconScroller.spawnGameIcon(icon);
 	} else {
-		lobbyClientEventHandler(...args);
+		original(...args);
 	}
-});
+}, { isClassy: true });
 
-/**
- * Override resize handler for our group
- */
-Game.UILobbyState.method('_onSizeChangeHandler', function() {
+/** Override the lobby resize handler to call our group */
+ProxyHelper.interceptFunction(Game.UILobbyState, '_onSizeChangeHandler', function() {
 	this.log.debug('SIZE CHANGE!');
 
 	// Move offline message.
@@ -112,6 +102,6 @@ Game.UILobbyState.method('_onSizeChangeHandler', function() {
 	this.localGameButton.x = this.game.width / 2.0;
 
 	this.gameIconScroller.onSizeChangeHandler();
-});
+}, { isClassy: true });
 
 export const _isESmodule = true;

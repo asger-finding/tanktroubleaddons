@@ -142,7 +142,6 @@ export default class AddonsUI {
 			createNewPicker.on('click', () => createNewPicker.val(''));
 			createNewPicker.on('change', async() => {
 				const [file] = createNewPicker.prop('files');
-				console.log(file);
 				createNewLabel.text(file ? file.name : 'Select file');
 			});
 

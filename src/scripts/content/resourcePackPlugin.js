@@ -339,7 +339,6 @@ Phaser.Plugin.ResourcePack.prototype.replaceImage = async function(imageKey, new
 			imageData.base.width /= 2;
 			imageData.base.height /= 2;
 		}
-		console.log(imageData);
 
 		return true;
 	} catch (error) {

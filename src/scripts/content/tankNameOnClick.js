@@ -1,9 +1,9 @@
-/**
- * Show tank usernames below their name when clicked in-game.
- */
-const createUIGameState = Game.UIGameState.getMethod('create');
-Game.UIGameState.method('create', function(...args) {
-	createUIGameState.apply(this, args);
+import ProxyHelper from '../utils/proxyHelper.js';
+/** Show tank usernames below their name when clicked in-game. */
+
+
+ProxyHelper.interceptFunction(Game.UIGameState, 'create', function(original, ...args) {
+	const result = original(...args);
 
 	this.tankGroup.inputEnableChildren = true;
 	this.tankGroup.setAllChildren('inputEnabled', true);
@@ -23,6 +23,7 @@ Game.UIGameState.method('create', function(...args) {
 
 	this.tankGroup.onChildInputUp.add(onMouseUp, this);
 
-});
+	return result;
+}, { isClassy: true });
 
 export const _isESmodule = true;

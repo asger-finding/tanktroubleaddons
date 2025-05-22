@@ -1,4 +1,5 @@
 import './resourcePackPlugin.js';
+import ProxyHelper from '../utils/proxyHelper.js';
 import { calculateFileHash } from '../utils/mathUtils.js';
 import { mergeWithSchema } from '../utils/objectUtils.js';
 import { unzip } from 'fflate';
@@ -736,8 +737,34 @@ Object.assign(Addons, {
 
 storeDefaultResourcePacks();
 
-const tankSpriteSpawn = UITankSprite.prototype.spawn;
-UITankSprite.prototype.spawn = function(...args) {
+ProxyHelper.interceptFunction(Game.UIPreloadState, 'preload', (original, ...args) => {
+	Addons.getActiveResourcePack().then(({ textures, metafile, css }) => {
+		Addons.insertResourcePackIntoGame(textures, metafile);
+		Addons.insertResourcePackCSS(css);
+	}).catch(err => alert(`Error getting active texture pack: ${err}. This should never happen.`));
+
+	return original(...args);
+}, { isClassy: true });
+
+const withObjectConstructor = Maze.getConstructor('withObject');
+Maze.constructor('withObject', function(obj) {
+	const result = withObjectConstructor.call(this, obj);
+	this._calculateBorderFloorsSpacesWallsAndDecorations();
+	return result;
+});
+
+ProxyHelper.interceptFunction(Maze, '_calculateBorderFloorsSpacesWallsAndDecorations', function(original, ...args) {
+	this.data.theme = Addons.getMazeThemeIndex(this.data.theme);
+	return original(this, ...args);
+}, { isClassy: true });
+
+ProxyHelper.interceptFunction(Game.UIBootState, 'init', function(original, ...args) {
+	const result = original(this, ...args);
+	this.game.plugins.resourcePack = this.game.plugins.add(Phaser.Plugin.ResourcePack);
+	return result;
+}, { isClassy: true });
+
+ProxyHelper.interceptFunction(UITankSprite.prototype, 'spawn', function(original, ...args) {
 	Object.defineProperty(this, 'tint', {
 		get() {
 			return this._tint;
@@ -758,11 +785,10 @@ UITankSprite.prototype.spawn = function(...args) {
 		enumerable: true,
 		configurable: true
 	});
-	return tankSpriteSpawn.apply(this, args);
-};
+	return original(...args);
+}, { isPrototype: true });
 
-const mineSpriteSpawn = UIMineSprite.prototype.spawn;
-UIMineSprite.prototype.spawn = function(...args) {
+ProxyHelper.interceptFunction(UIMineSprite.prototype, 'spawn', function(original, ...args) {
 	Object.defineProperty(this, 'tint', {
 		get() {
 			return this._tint;
@@ -776,17 +802,16 @@ UIMineSprite.prototype.spawn = function(...args) {
 		enumerable: true,
 		configurable: true
 	});
-	return mineSpriteSpawn.apply(this, args);
-};
+	return original(...args);
+}, { isPrototype: true });
 
-const missileSpriteSpawn = UIMissileImage.prototype.spawn;
-UIMissileImage.prototype.spawn = function(...args) {
+ProxyHelper.interceptFunction(UIMissileImage.prototype, 'spawn', function(original, ...args) {
 	Object.defineProperty(this, 'tint', {
 		get() {
 			return this._tint;
 		},
 		set(tint) {
-			this._tint = Addons.getResourcePackSwitch('noTintMine').value
+			this._tint = Addons.getResourcePackSwitch('noTintHomingMissile').value
 				? 0xFFFFFF
 				: tint;
 			return this._tint;
@@ -794,12 +819,11 @@ UIMissileImage.prototype.spawn = function(...args) {
 		enumerable: true,
 		configurable: true
 	});
-	return missileSpriteSpawn.apply(this, args);
-};
+	return original(...args);
+}, { isPrototype: true });
 
-const buttonGroupSpawn = UIButtonGroup.prototype.spawn;
 // eslint-disable-next-line complexity
-UIButtonGroup.prototype.spawn = function(...args) {
+ProxyHelper.interceptFunction(UIButtonGroup.prototype, 'spawn', function(original, ...args) {
 	switch (this.text) {
 		case 'Random':
 			this.setText(Addons.getResourcePackSwitch('randomText').value ?? this.text);
@@ -813,49 +837,13 @@ UIButtonGroup.prototype.spawn = function(...args) {
 		default:
 			break;
 	}
+
 	if (this.buttonText.exists) {
 		const textFill = Addons.getResourcePackSwitch('buttonTextFill').value;
 		if (textFill) this.buttonText.fill = textFill;
 	}
 
-	buttonGroupSpawn.apply(this, args);
-};
-
-const calculateTheme = Maze.getMethod('_calculateBorderFloorsSpacesWallsAndDecorations');
-Maze.method('_calculateBorderFloorsSpacesWallsAndDecorations', function(...args) {
-	// Set theme here
-	this.data.theme = Addons.getMazeThemeIndex(this.data.theme);
-	return calculateTheme.apply(this, ...args);
-});
-
-const withObjectConstructor = Maze.getConstructor('withObject');
-Maze.constructor('withObject', function(obj) {
-	const result = withObjectConstructor.call(this, obj);
-
-	this._calculateBorderFloorsSpacesWallsAndDecorations();
-
-	return result;
-});
-
-const gameBootState = Game.UIBootState.getMethod('init');
-Game.UIBootState.method('init', function(...args) {
-	const result = gameBootState.apply(this, ...args);
-
-	this.game.plugins.resourcePack = this.game.plugins.add(Phaser.Plugin.ResourcePack);
-
-	return result;
-});
-
-const gamePreloadState = Game.UIPreloadState.getMethod('preload');
-Game.UIPreloadState.method('preload', function(...args) {
-	Addons.getActiveResourcePack().then(({ textures, metafile, css }) => {
-		console.log(metafile);
-		Addons.insertResourcePackIntoGame(textures, metafile);
-		Addons.insertResourcePackCSS(css);
-	}).catch(err => alert(`Error getting active texture pack: ${err}. This should never happen.`));
-
-	const result = gamePreloadState.apply(this, ...args);
-	return result;
-});
+	original(...args);
+}, { isPrototype: true });
 
 export const _isESmodule = true;

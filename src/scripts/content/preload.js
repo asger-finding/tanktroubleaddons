@@ -1,3 +1,4 @@
+import ProxyHelper from '../utils/proxyHelper.js';
 // Preload functions
 
 /**
@@ -80,12 +81,9 @@ Object.assign(Addons, {
 	indexedDB: await initDatabase()
 });
 
-/**
- * Load custom images in preload
- */
-const gamePreloadStage = Game.UIPreloadState.getMethod('preload');
-Game.UIPreloadState.method('preload', function(...args) {
-	const result = gamePreloadStage.apply(this, ...args);
+/** Load addons images in game preload and optimize WebGL rendering */
+ProxyHelper.interceptFunction(Game.UIPreloadState, 'preload', function(original, ...args) {
+	const result = original(this, ...args);
 
 	this.load.removeFile('image', 'gameiconplaceholder');
 	this.load.image('gameiconplaceholder', Addons.t_url('assets/lobby/game.{{png|avif}}'));
@@ -104,7 +102,7 @@ Game.UIPreloadState.method('preload', function(...args) {
 
 	// Optimization flags should preferably
 	// be done in the Boot state, but we might
-	// as well recycle this function for this
+	// as well recycle this hook for it
 	const { gl } = this.game.renderer;
 	gl.disable(gl.DEPTH_TEST);
 	gl.disable(gl.CULL_FACE);
@@ -116,7 +114,7 @@ Game.UIPreloadState.method('preload', function(...args) {
 	gl.disable(gl.SCISSOR_TEST);
 
 	return result;
-});
+}, { isClassy: true });
 
 /**
  * Custom checkbox JQuery UI widget

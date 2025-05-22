@@ -555,7 +555,7 @@ const insertCustomMazeThemeInfo = metafile => {
 	if (customThemeIndex !== -1) Constants.MAZE_THEME_INFO.splice(customThemeIndex, 1, theme);
 	else Constants.MAZE_THEME_INFO.push(theme);
 
-	const index = Addons.resourcePackHasSwitch('noMazeThemes')
+	const index = Addons.getResourcePackSwitch('noMazeThemes').value
 		? Constants.MAZE_THEME_INFO.length - 1
 		: -1;
 	Addons._maze_theme = index;
@@ -596,11 +596,16 @@ const setResourcePackSwitches = switchList => {
 		'noTintTreads',
 		'noTintHomingMissiles',
 		'noTintMines',
-		'noMazeThemes'
+		'noMazeThemes',
+		'localGameText',
+		'randomText',
+		'newGameText',
+		'buttonTextFill'
 	];
 	Addons._resource_pack_switches = switchList.filter(switchKey => {
-		if (!validSwitches.includes(switchKey)) {
-			console.warn(`setResourcePackSwitches: ${switchKey} is not a valid switch`);
+		const [parsedKey] = switchKey.match(/^[^=]*(?==|$)/u);
+		if (!validSwitches.includes(parsedKey)) {
+			console.warn(`setResourcePackSwitches: ${parsedKey} is not a valid switch`);
 
 			return false;
 		}
@@ -609,12 +614,27 @@ const setResourcePackSwitches = switchList => {
 };
 
 /**
- * Return a list of the features enabled by the current resource pack
- * @public
- * @param {string} switchKey Switch identifier
- * @returns {string[]} Array over feature identifiers
+ * Gets a switch-value pair from the resource pack features (formatted as "switch=value" or "switch").
+ * @param {string} switchKey Key to search for
+ * @returns {{key: string, value: string|true|null}} Object with switch and found value
  */
-const resourcePackHasSwitch = switchKey => (Addons._resource_pack_switches ?? []).includes(switchKey);
+const getResourcePackSwitch = switchKey => {
+	if (!Addons._resource_pack_switches) return { key: switchKey, value: false };
+
+	const foundItem = Addons._resource_pack_switches.find(item => {
+		const [key] = item.split('=');
+		return key === switchKey;
+	});
+
+	if (!foundItem) return { key: switchKey, value: null };
+
+	const [key, ...valueParts] = foundItem.split('=');
+	const value = valueParts.length === 0
+		? true
+		: valueParts.join('=');
+
+	return { key, value };
+};
 
 /**
  * Load a resource pack into the game using batch resource replacement
@@ -703,7 +723,7 @@ Object.assign(Addons, {
 	removeResourcePack,
 	getAllResourcePacks,
 	getMazeThemeIndex,
-	resourcePackHasSwitch,
+	getResourcePackSwitch,
 	insertResourcePackIntoGame,
 	insertResourcePackCSS,
 	reloadGame
@@ -721,12 +741,14 @@ UITankSprite.prototype.spawn = function(...args) {
 			// We need to finish execution first
 			// because base tint is set before turret and treads
 			requestAnimationFrame(() => {
-				if (Addons.resourcePackHasSwitch('noTintTurret')) this.turret.tint = 0xFFFFFF;
-				if (Addons.resourcePackHasSwitch('noTintTreads')) this.leftTread.tint = this.rightTread.tint = 0xFFFFFF;
-				if (Addons.resourcePackHasSwitch('noTintBase')) this._tint = 0xFFFFFF;
+				if (Addons.getResourcePackSwitch('noTintTurret').value) this.turret.tint = 0xFFFFFF;
+				if (Addons.getResourcePackSwitch('noTintTreads').value) this.leftTread.tint = this.rightTread.tint = 0xFFFFFF;
+				if (Addons.getResourcePackSwitch('noTintBase').value) this._tint = 0xFFFFFF;
 				else this._tint = tint;
 			});
-			return Addons.resourcePackHasSwitch('noTintBase') ? 0xFFFFFF : this._tint;
+			return Addons.getResourcePackSwitch('noTintBase').value
+				? 0xFFFFFF
+				: this._tint;
 		},
 		enumerable: true,
 		configurable: true
@@ -741,7 +763,7 @@ UIMineSprite.prototype.spawn = function(...args) {
 			return this._tint;
 		},
 		set(tint) {
-			this._tint = Addons.resourcePackHasSwitch('noTintMine')
+			this._tint = Addons.getResourcePackSwitch('noTintMine').value
 				? 0xFFFFFF
 				: tint;
 			return this._tint;
@@ -759,7 +781,7 @@ UIMissileImage.prototype.spawn = function(...args) {
 			return this._tint;
 		},
 		set(tint) {
-			this._tint = Addons.resourcePackHasSwitch('noTintMine')
+			this._tint = Addons.getResourcePackSwitch('noTintMine').value
 				? 0xFFFFFF
 				: tint;
 			return this._tint;
@@ -768,6 +790,30 @@ UIMissileImage.prototype.spawn = function(...args) {
 		configurable: true
 	});
 	return missileSpriteSpawn.apply(this, args);
+};
+
+const buttonGroupSpawn = UIButtonGroup.prototype.spawn;
+// eslint-disable-next-line complexity
+UIButtonGroup.prototype.spawn = function(...args) {
+	switch (this.text) {
+		case 'Random':
+			this.setText(Addons.getResourcePackSwitch('randomText').value ?? this.text);
+			break;
+		case 'New game':
+			this.setText(Addons.getResourcePackSwitch('newGameText').value ?? this.text);
+			break;
+		case 'Local game':
+			this.setText(Addons.getResourcePackSwitch('localGameText').value ?? this.text);
+			break;
+		default:
+			break;
+	}
+	if (this.buttonText.exists) {
+		const textFill = Addons.getResourcePackSwitch('buttonTextFill').value;
+		if (textFill) this.buttonText.fill = textFill;
+	}
+
+	buttonGroupSpawn.apply(this, args);
 };
 
 const calculateTheme = Maze.getMethod('_calculateBorderFloorsSpacesWallsAndDecorations');

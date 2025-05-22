@@ -177,12 +177,12 @@ const generateUniqueName = async(store, baseName, suffix = 0) => {
  * @private
  * @param {File} file The zip file to be added
  * @param {boolean} builtIn Is the resource pack user-added or built-in?
+ * @param {number?} timestamp When the resource pack was added to the store
  * @returns {Promise<string>} Resolves with hashsum when the operation is complete
  */
-const addResourcePackToStore = async(file, builtIn) => {
+const addResourcePackToStore = async(file, builtIn, timestamp = Date.now()) => {
 	if (!file.name.endsWith('.zip')) throw new Error('Only zip files are supported');
 
-	const timestamp = Date.now();
 	const hashsum = await calculateFileHash(file);
 
 	return new Promise((resolve, reject) => {
@@ -293,11 +293,8 @@ const getResourcePackFromStore = hashsum => new Promise((resolve, reject) => {
 
 	/* eslint-disable jsdoc/require-jsdoc */
 	request.onsuccess = () => {
-		if (request.result)
-			resolve(request.result);
-		else
-			reject(new Error('No file found'));
-
+		if (request.result) resolve(request.result);
+		else reject(new Error('No file found'));
 	};
 	request.onerror = () => reject(request.error);
 	/* eslint-enable jsdoc/require-jsdoc */
@@ -364,14 +361,16 @@ const storeDefaultResourcePacks = async() => {
 		].map(url => fetch(url))
 	);
 
-	for (const resourcePack of resourcePacks) {
+	for (let i = 0; i < resourcePacks.length; i++) {
+		const index = i;
+		const resourcePack = resourcePacks[index];
 		const { url } = resourcePack;
 		resourcePack.arrayBuffer().then(arrayBuffer => {
 			const fileName = decodeURIComponent(url).replace(/^.*[\\/]/u, '');
 			const file = new File([arrayBuffer], fileName);
 			const builtIn = true;
 
-			addResourcePackToStore(file, builtIn)
+			addResourcePackToStore(file, builtIn, index)
 				// Resource pack is already stored.
 				// Intentionally do nothing.
 				.catch(() => {});
@@ -382,22 +381,28 @@ const storeDefaultResourcePacks = async() => {
 /**
  * Get the user-loaded resource pack
  * @public
- * @returns {Uint8Array} Resource pack or error if unset
+ * @returns {Promise<Uint8Array>} Resource pack or error if unset
  */
 const getActiveResourcePack = () => new Promise((resolve, reject) => {
-	const hashsum = localStorage.getItem('resourcepack');
-	if (hashsum === null) {
-		reject('Resource pack unset');
-		return;
-	}
+	/**
+	 * Fallback to first resource pack in store if error
+	 * @returns {Promise<Uint8Array>} Pack or reject
+	 */
+	const handleError = () => getFirstResourcePackFromStore()
+		.then(result => {
+			if (result !== false) resolve(result);
+			else reject('Resource pack unset');
+		});
 
-	if (/\b[a-fA-F0-9]{64}\b/u.test(hashsum)) {
+	const hashsum = localStorage.getItem('resourcepack');
+	if (hashsum === null || !/\b[a-fA-F0-9]{64}\b/u.test(hashsum)) {
+		handleError();
+	} else {
 		getResourcePackFromStore(hashsum)
 			.then(resolve)
-			.catch(reject);
-	} else {
-		reject('Resource pack has an invalid key');
+			.catch(handleError());
 	}
+
 });
 
 /**
@@ -844,9 +849,10 @@ Game.UIBootState.method('init', function(...args) {
 const gamePreloadState = Game.UIPreloadState.getMethod('preload');
 Game.UIPreloadState.method('preload', function(...args) {
 	Addons.getActiveResourcePack().then(({ textures, metafile, css }) => {
+		console.log(metafile);
 		Addons.insertResourcePackIntoGame(textures, metafile);
 		Addons.insertResourcePackCSS(css);
-	}).catch(() => {});
+	}).catch(err => alert(`Error getting active texture pack: ${err}. This should never happen.`));
 
 	const result = gamePreloadState.apply(this, ...args);
 	return result;

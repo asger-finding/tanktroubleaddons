@@ -304,19 +304,24 @@ export default class AddonsUI {
 			'&l': 'font-weight:bold',
 			'&o': 'font-style:italic',
 			'&n': 'text-decoration:underline'
-			// &r: reset styling
+			// &r: reset styling (handled separately)
 		};
 
-		// eslint-disable-next-line jsdoc/require-jsdoc
+		/**
+		 * Escapes HTML special characters to prevent XSS and ensure proper rendering.
+		 * @private
+		 * @param {string} text - The text to escape.
+		 * @returns {string} Escaped text.
+		 */
 		const escapeHtml = text => {
 			const escapeMap = {
-				'&': '&',
-				'<': '<',
-				'>': '>',
-				'"': '"',
-				"'": '\''
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
+				'"': '&quot;',
+				"'": '&#39;'
 			};
-			return text.replace(/[&<>"']/gu, (unsafe) => escapeMap[unsafe]);
+			return text.replace(/[&<>"']/gu, unsafe => escapeMap[unsafe]);
 		};
 
 		let output = '';
@@ -324,7 +329,7 @@ export default class AddonsUI {
 		let i = 0;
 
 		while (i < input.length) {
-			if (input[i] === '&' && i + 1 < input.length && codes[input.slice(i, i + 2)]) {
+			if (input[i] === '&' && i + 1 < input.length && (codes[input.slice(i, i + 2)] || input.slice(i, i + 2) === '&r')) {
 				const code = input.slice(i, i + 2);
 				if (code === '&r') activeStyles = [];
 				else activeStyles.push(codes[code]);

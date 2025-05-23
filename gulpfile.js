@@ -23,7 +23,7 @@ const paths = {
 	excludePattern: '**/DELETEME.*',
 	files: {
 		script: `${origin}/**/*.@(js|ts)`,
-		styles: [`${origin}/css/styles.scss`, `${origin}/css/*.css`],
+		styles: [`${origin}/css/*.scss`, `${origin}/css/*.css`],
 		html: `${origin}/html/*.html`,
 		assets: `${origin}/assets/**/*.@(avif|gif|svg|zip)`,
 		bitmap: `${origin}/assets/**/*.@(png|jpg|jpeg)`,
@@ -299,7 +299,6 @@ const styles = () => {
 	const plugins = [autoprefixer()];
 
 	return src(paths.files.styles)
-		.pipe(changed(`${ state.dest }/css`, { extension: '.css' }))
 		.pipe(excludeFiles())
 		.pipe(sass({
 			silenceDeprecations: ['legacy-js-api'],

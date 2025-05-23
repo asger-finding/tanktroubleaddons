@@ -289,7 +289,6 @@ TankTrouble.AdminChatLogOverlay._getChatMessagesByTimeAndReplaceStatic = functio
 	const disabled = this.chatMessages.find(`#${ clickedChatMessageId } > button`).prop('disabled', true);
 	this.chatMessages.find(`#${ clickedChatMessageId }`).after(pointer);
 
-	// eslint-disable-next-line complexity
 	Backend.getInstance().getChatMessagesByTime(result => {
 		if (typeof(result) == 'object') {
 			for (let i = 0; i < result.length; i++) {
@@ -414,7 +413,6 @@ const renderChatMessage = async(chatMessage, adminId) => {
  * @param {typeof FILTERS} filter Filter identitifier
  * @returns {Promise<chatMessage[]>} Array of filtered chat messages
  */
-// eslint-disable-next-line complexity
 TankTrouble.AdminChatLogOverlay.filterAndRenderMessages = async function(offset, limit, filter) {
 	this.wrapper.find(':not(.navigation):not(.paginator) button, .paginator button').prop('disabled', true);
 	this.chatMessages.empty();
@@ -597,7 +595,6 @@ ProxyHelper.interceptFunction(TankTrouble.AdminChatLogOverlay, '_initialize', as
 /**
  * Inject custom paginators for filtered content
  */
-// eslint-disable-next-line complexity
 ProxyHelper.interceptFunction(TankTrouble.AdminChatLogOverlay, '_getChatMessagesByPlayerIds', async(original, ...args) => {
 	const overlay = TankTrouble.AdminChatLogOverlay;
 

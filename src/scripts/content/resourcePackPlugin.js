@@ -235,7 +235,6 @@ Phaser.Plugin.ResourcePack.prototype.replaceResources = async function(resources
  * @param {Record<string, HTMLImageElement | ImageBitmap>} frames Resource pack images with frame names as keys
  * @returns {Promise<boolean>} Resolves to true if successful, false otherwise
  */
-// eslint-disable-next-line complexity
 Phaser.Plugin.ResourcePack.prototype.insertFramesIntoAtlas = async function(atlasKey, frames) {
 	try {
 		await this.waitForImageLoad(atlasKey);

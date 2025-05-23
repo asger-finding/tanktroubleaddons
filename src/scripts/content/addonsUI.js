@@ -248,7 +248,6 @@ export default class AddonsUI {
 	 * @param  {Widget[]} widgets JQuery UI widgets
 	 * @returns {JQuery} New section
 	 */
-	// eslint-disable-next-line complexity
 	#createSection(sectionOpts, widgets = []) {
 		const wrapper = $(`<fieldset id="${ sectionOpts.id }"></fieldset>`);
 		const legend = $(`<legend>${ sectionOpts.title }</legend>`);
@@ -279,7 +278,6 @@ export default class AddonsUI {
 	 * @param {string} input Text input
 	 * @returns {string} Formatted html
 	 */
-	// eslint-disable-next-line complexity
 	static #parseFormattedText(input) {
 		const codes = {
 			// Color codes (0-f) mapped to rainbow-like colors

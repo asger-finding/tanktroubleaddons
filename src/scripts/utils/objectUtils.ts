@@ -38,3 +38,5 @@ export const mergeWithSchema = (
 
 	return output;
 };
+
+export const _isESmodule = true;

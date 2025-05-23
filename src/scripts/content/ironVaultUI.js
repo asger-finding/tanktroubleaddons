@@ -549,7 +549,6 @@ export default class IronVaultUI {
 	 * @param {object} playerDetails Player details
 	 * @returns {JQuery} Container HTMLDivElement
 	 */
-	// eslint-disable-next-line complexity
 	static #createPlayerDetails(playerDetails) {
 		const container = $('<div id="player-details"></div>');
 

@@ -15,7 +15,6 @@ const ranges: { [key in RelativeTimeUnit]: number } = {
  * @param date Date object
  * @returns Relative time ago as a string
  */
-// eslint-disable-next-line complexity
 export const timeAgo = (date: Date): string => {
 	const formatter = new Intl.RelativeTimeFormat('en');
 	const now = Date.now();
@@ -58,3 +57,5 @@ export const timeUntil = (date: Date): string => {
 
 	return 'now';
 };
+
+export const _isESmodule = true;

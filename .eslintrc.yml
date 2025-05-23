@@ -69,6 +69,7 @@ rules:
   no-trailing-spaces: [error, { ignoreComments: true }]
   import/extensions: [error, ignorePackages]
   multiline-comment-style: [error, separate-lines]
+  complexity: 0
   linebreak-style: 0
   sort-keys: 0
   no-labels: 0

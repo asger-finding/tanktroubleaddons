@@ -21,7 +21,6 @@ export default class ProxyHelper {
 	 * @param handler Function to call before the original
 	 * @param options Configuration options
 	 */
-	// eslint-disable-next-line complexity
 	static interceptFunction(
 		context: any,
 		funcName: string,

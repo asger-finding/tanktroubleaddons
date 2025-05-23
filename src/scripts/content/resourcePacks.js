@@ -70,7 +70,6 @@ const filterOutDirectories = decoded => {
  * @param {Record<string, Uint8Array>} decoded Resource pack
  * @returns {object} Decoded metafile or fallback
  */
-// eslint-disable-next-line complexity
 const createMetaFile = (file, decoded) => {
 	const [defaultPackName] = file.name.split('.zip');
 	const schema = {
@@ -120,7 +119,7 @@ const createMetaFile = (file, decoded) => {
 		}
 	} catch (err) {
 		if (fatal) {
-			console.error('createMetaFile', err);
+			console.error('createMetaFile:', err);
 			throw new Error(err.message);
 		} else {
 			console.warn('createMetaFile:', err);
@@ -153,8 +152,8 @@ const parseCSS = normalized => {
  * @returns {Promise<string>} Resolves with a unique name
  */
 const generateUniqueName = async(store, baseName, suffix = 0) => {
-	const sanitizedName = baseName.trim() || 'Unnamed resource pack';
-	const candidateName = suffix === 0 ? sanitizedName : `${sanitizedName} (${suffix})`;
+	const name = baseName.trim() || 'Unnamed resource pack';
+	const candidateName = suffix === 0 ? name : `${name} (${suffix})`;
 
 	return new Promise((resolve, reject) => {
 		const request = store.get(candidateName);
@@ -163,7 +162,7 @@ const generateUniqueName = async(store, baseName, suffix = 0) => {
 			if (!request.result) {
 				resolve(candidateName);
 			} else {
-				generateUniqueName(store, sanitizedName, suffix + 1)
+				generateUniqueName(store, name, suffix + 1)
 					.then(resolve)
 					.catch(reject);
 			}
@@ -252,7 +251,7 @@ const addResourcePackToStore = async(file, builtIn, timestamp = Date.now()) => {
 				reject(new Error(`Failed to process zip file: ${err.message}`));
 			}
 		});
-		reader.onerror = () => reject(new Error(`Failed to read file: ${reader.error?.message || 'Unknown error'}`));
+		reader.onerror = () => reject(new Error(`Failed to read zip file: ${reader.error?.message || 'Unknown error'}`));
 		reader.readAsArrayBuffer(file);
 		/* eslint-enable jsdoc/require-jsdoc */
 	});
@@ -822,7 +821,6 @@ ProxyHelper.interceptFunction(UIMissileImage.prototype, 'spawn', function(origin
 	return original(...args);
 }, { isPrototype: true });
 
-// eslint-disable-next-line complexity
 ProxyHelper.interceptFunction(UIButtonGroup.prototype, 'spawn', function(original, ...args) {
 	switch (this.text) {
 		case 'Random':

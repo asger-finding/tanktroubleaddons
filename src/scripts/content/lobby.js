@@ -27,7 +27,6 @@ ProxyHelper.interceptFunction(Game.UILobbyState, 'create', function(original, ..
 }, { isClassy: true });
 
 /** Override client event handler logic for TTClient.EVENTS.GAME_LIST_CHANGED for our scroller */
-// eslint-disable-next-line complexity
 ProxyHelper.interceptFunction(Game.UILobbyState, '_clientEventHandler', (original, ...args) => {
 	const [self, evt] = args;
 	if (evt === TTClient.EVENTS.GAME_LIST_CHANGED) {

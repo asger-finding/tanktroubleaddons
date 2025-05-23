@@ -64,7 +64,6 @@ export default function UIGameIconScrollerGroup(game, itemWidth, itemHeight, max
 UIGameIconScrollerGroup.prototype = Object.create(Phaser.Group.prototype);
 UIGameIconScrollerGroup.prototype.constructor = UIGameIconScrollerGroup;
 
-// eslint-disable-next-line complexity
 UIGameIconScrollerGroup.prototype.update = function() {
 	if (!this.exists) return;
 

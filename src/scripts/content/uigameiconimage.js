@@ -103,7 +103,6 @@ UIGameIconImage.prototype._addPlaceholder = function(placement) {
 	}
 };
 
-// eslint-disable-next-line complexity
 UIGameIconImage.prototype._updateUI = function() {
 	const iconFrame = UIConstants.GAME_MODE_NAME_INFO[this.mode].ICON;
 	if (iconFrame < 0) {

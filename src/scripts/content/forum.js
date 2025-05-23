@@ -5,7 +5,6 @@ import { timeAgo } from '../utils/timeUtils.js';
  * @param {object} threadOrReply Post data
  * @param {JQuery} threadOrReplyElement Post element
  */
-// eslint-disable-next-line complexity
 const insertMultipleCreators = (threadOrReply, threadOrReplyElement) => {
 	// Remove original tank preview
 	threadOrReplyElement.find('.tank').remove();
@@ -261,7 +260,6 @@ const getPostType = data => {
  * Handle an incoming post item (proxy handler)
  * @param {...any} args Function arguments
  */
-// eslint-disable-next-line complexity
 const postHandler = (...args) => {
 	const [postItem] = args;
 	const { model } = Forum.getInstance();

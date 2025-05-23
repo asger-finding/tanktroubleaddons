@@ -447,8 +447,7 @@ const addAutocomplete = chatInput => {
 	/**
 	 * Show or hide autocompletes
 	 */
-	// eslint-disable-next-line complexity
-	chatInput.addEventListener('input', ({ isComposing }) => {
+		chatInput.addEventListener('input', ({ isComposing }) => {
 		if (isComposing) return;
 
 		// Handle username autocomplete
@@ -547,8 +546,7 @@ const addAutocomplete = chatInput => {
 	 * @param {string} evt Event type
 	 * @param {any} data Event data
 	 */
-	// eslint-disable-next-line complexity
-	const clientEventHandler = (_self, evt, data) => {
+		const clientEventHandler = (_self, evt, data) => {
 		switch (evt) {
 			case TTClient.EVENTS.USER_CHAT_POSTED:
 			case TTClient.EVENTS.GLOBAL_CHAT_POSTED:

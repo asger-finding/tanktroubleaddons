@@ -1,6 +1,6 @@
 # TankTroubleAddons
 
-[![Chrome Web Store](https://img.shields.io/badge/Chrome-21262d.svg?&style=flat-square&logo=google-chrome&logoColor=c9d1d9)](https://chrome.google.com/webstore/detail/tanktroubleaddons/iaahklbbofakekcbhbjnpjbgaadhedhm)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome-21262d.svg?&style=flat-square&logo=google-chrome&logoColor=c9d1d9)](https://chromewebstore.google.com/detail/tanktroubleaddons/ekjcldgkpfdnnffgliempinlpnjioebk)
 <!--
 [![Apple App Store](https://img.shields.io/badge/Safari-21262d.svg?&style=flat-square&logo=safari&logoColor=c9d1d9)]()
 [![Edge Addons](https://img.shields.io/badge/Edge-21262d.svg?&style=flat-square&logo=microsoft-edge&logoColor=c9d1d9)]()
@@ -16,7 +16,6 @@ Key features include:
 
 - Dark theme
 - Resource packs
-- Classic-isque mouse control
 - IronVault integration
 - Forum, chat, game, lobby, emporium, player *and* admin quality-of-life improvements
 
@@ -34,8 +33,8 @@ For legacy TankTroubleAddons, see [turtlesteak/TankTroubleAddonsFinale](https://
 ### Requirements
 
 - Browser (Chromium, Firefox or Webkit)
-- nvm or node >= 16
-- pnpm (our package manager)
+- node >= 16
+- pnpm (project package manager)
 
 ### Minimum browser version
 
@@ -70,6 +69,6 @@ TankTroubleAddons compiles to ES2023 spec. The minimum browser version required 
      3. Press the `Load Temporary Add-on...` button.
      4. Select the manifest.json file in your folder of need.
    - **Safari**
-     1. See [here](https://stackoverflow.com/a/41543650/11452298) or [here](https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension#3744467)!
+     1. See [this](https://stackoverflow.com/a/41543650/11452298) or [this](https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension#3744467)!
 
 Happy hacking!

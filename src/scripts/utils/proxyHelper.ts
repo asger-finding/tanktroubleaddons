@@ -2,7 +2,6 @@ type SomeFunction = (...args: unknown[]) => unknown;
 type InterceptHandler = (original: SomeFunction, ...args: unknown[]) => unknown;
 
 interface InterceptOptions {
-	isPrototype?: boolean;
 	isClassy?: boolean;
 	propertyAttributes?: PropertyDescriptor;
 }
@@ -27,7 +26,7 @@ export default class ProxyHelper {
 		handler: InterceptHandler,
 		options?: InterceptOptions
 	) {
-		const { isPrototype = false, isClassy = false, propertyAttributes = {} } = options || {};
+		const { isClassy = false, propertyAttributes = {} } = options || {};
 
 		// Handle Classy library methods
 		if (isClassy) {
@@ -43,24 +42,11 @@ export default class ProxyHelper {
 		const original = Reflect.get(context, funcName);
 		if (typeof original !== 'function') throw new Error('Item to intercept is not a function');
 
-		if (isPrototype) {
-			Reflect.defineProperty(context, funcName, {
-				value(this: any, ...args: any[]) {
-					const boundOriginal = original.bind(this);
-					return handler.call(this, boundOriginal, ...args);
-				},
-				...propertyAttributes
-			});
-			return;
-		}
-
 		Reflect.defineProperty(context, funcName, {
-			/**
-			 * Default hook
-			 * @param args Function arguments
-			 * @returns Some return value
-			 */
-			value: (...args: any[]) => handler(() => original.apply(context, args), ...args),
+			value(this: any, ...args: any[]) {
+				const boundOriginal = original.bind(this);
+				return handler.call(this, boundOriginal, ...args);
+			},
 			...propertyAttributes
 		});
 	}

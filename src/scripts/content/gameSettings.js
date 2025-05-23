@@ -26,20 +26,21 @@ UIConstants.classField('SETTINGS_QUALITY_MAX_OPTION_HEIGHT', 200);
 /**
  * Insert minimum option element
  */
-ProxyHelper.interceptFunction(TankTrouble.SettingsBox, 'init', (original, ...args) => {
+ProxyHelper.interceptFunction(TankTrouble.SettingsBox, 'init', function(original, ...args) {
 	original(...args);
 
 	const minQuality = $(`<option value="${ QualityManager.QUALITY_SETTINGS.MINIMUM }">Minimum</option>`);
-	TankTrouble.SettingsBox.settingsQualityOptions.push(minQuality);
-	TankTrouble.SettingsBox.settingsQualitySelect.append(minQuality);
-	TankTrouble.SettingsBox.settingsQualitySelect.iconselectmenu('refresh');
+	this.settingsQualityOptions.push(minQuality);
+	this.settingsQualitySelect.append(minQuality);
+	this.settingsQualitySelect.val(QualityManager.getQuality());
+	this.settingsQualitySelect.iconselectmenu('refresh');
 });
 
 /** Don't emit tank rubble if quality is set to minimum */
 ProxyHelper.interceptFunction(UIRubbleGroup.prototype, 'emit', (original, ...args) => {
 	if (QualityManager.getQuality() === QualityManager.QUALITY_SETTINGS.MINIMUM) return null;
 	return original(...args);
-}, { isPrototype: true });
+});
 
 /**
  * Don't add camera shake in minimum quality

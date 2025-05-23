@@ -105,7 +105,7 @@ const instanceNewColorFilter = (game, color) => {
 ProxyHelper.interceptFunction(UIProjectileImage.prototype, 'spawn', function(original, ...args) {
 	this.updateColor(shouldBulletsTint);
 	return original(...args);
-}, { isPrototype: true });
+});
 
 UIProjectileImage.prototype.updateColor = function(enabled) {
 	const projectileData = this.gameController.getProjectile(this.projectileId);

@@ -785,7 +785,7 @@ ProxyHelper.interceptFunction(UITankSprite.prototype, 'spawn', function(original
 		configurable: true
 	});
 	return original(...args);
-}, { isPrototype: true });
+});
 
 ProxyHelper.interceptFunction(UIMineSprite.prototype, 'spawn', function(original, ...args) {
 	Object.defineProperty(this, 'tint', {
@@ -802,7 +802,7 @@ ProxyHelper.interceptFunction(UIMineSprite.prototype, 'spawn', function(original
 		configurable: true
 	});
 	return original(...args);
-}, { isPrototype: true });
+});
 
 ProxyHelper.interceptFunction(UIMissileImage.prototype, 'spawn', function(original, ...args) {
 	Object.defineProperty(this, 'tint', {
@@ -819,7 +819,7 @@ ProxyHelper.interceptFunction(UIMissileImage.prototype, 'spawn', function(origin
 		configurable: true
 	});
 	return original(...args);
-}, { isPrototype: true });
+});
 
 ProxyHelper.interceptFunction(UIButtonGroup.prototype, 'spawn', function(original, ...args) {
 	switch (this.text) {
@@ -842,6 +842,6 @@ ProxyHelper.interceptFunction(UIButtonGroup.prototype, 'spawn', function(origina
 	}
 
 	original(...args);
-}, { isPrototype: true });
+});
 
 export const _isESmodule = true;

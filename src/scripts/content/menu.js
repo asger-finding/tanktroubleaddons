@@ -10,10 +10,6 @@ import { listen } from '../common/ipcBridge.js';
  * @property {boolean} requiresReload Does the site need to reload for the change to take effect?
  */
 
-/**
- * @typedef {JQuery} Widget
- */
-
 class Menu {
 	wrapper = $('<div id="addons-menu"></div>');
 

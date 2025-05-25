@@ -1,9 +1,23 @@
 import { StoreEvent, get, onStateChange } from '../common/store.js';
-import { interceptFunction } from '../utils/gameUtils.js';
 import { colord } from '@pixi/colord';
+import { interceptFunction } from '../utils/gameUtils.js';
 import { rgb as rgbContrast } from 'wcag-contrast';
 import { smoothTransition } from '../utils/mathUtils.js';
 
+// Constants
+/* eslint-disable @typescript-eslint/naming-convention */
+const MIN_CONTRAST_SCORE = 8.0;
+const MAZE_BACKGROUND = [228, 230, 232];
+const FILTER_RESOLUTION = 16;
+const APPLICABLE_WEAPON_TYPES = new Set([
+	Constants.WEAPON_TYPES.BULLET,
+	Constants.WEAPON_TYPES.DOUBLE_BARREL,
+	Constants.WEAPON_TYPES.SHOTGUN,
+	Constants.WEAPON_TYPES.GATLING_GUN
+]);
+/* eslint-enable @typescript-eslint/naming-convention */
+
+// State
 let shouldBulletsTint = false;
 
 /**
@@ -18,7 +32,7 @@ const setTintedBullets = option => {
 
 	const state = game.state.getCurrentState();
 	const alive = state.projectileGroup.iterate('alive', true, Phaser.Group.RETURN_ALL);
-	for (const projectile of alive) projectile.updateColor(shouldBulletsTint);
+	for (const projectile of alive) projectile.updateColor?.(shouldBulletsTint);
 };
 
 // Initialize tintedBullets setting
@@ -60,11 +74,11 @@ void main(void) {
  * @returns {object} Hard to see?
  */
 const adjustColorToMaze = ({ r, g, b }) => {
-	const score = rgbContrast([r, g, b], [228, 230, 232]);
-	if (score < 8.0) {
+	const score = rgbContrast([r, g, b], MAZE_BACKGROUND);
+	if (score < MIN_CONTRAST_SCORE) {
 		// Make adjustments to darken the color
 		const hsl = colord({ r, g, b }).toHsl();
-		const adjustment = smoothTransition(score, 1.0, 8.0, -20, 0);
+		const adjustment = smoothTransition(score, 1.0, MIN_CONTRAST_SCORE, -20, 0);
 
 		// eslint-disable-next-line id-length
 		return colord({ h: hsl.h, s: hsl.s, l: Math.floor(hsl.l + adjustment) }).toRgb();
@@ -73,55 +87,48 @@ const adjustColorToMaze = ({ r, g, b }) => {
 	return { r, g, b };
 };
 
-// TODO:
-// We need some kind of symbol logic so that we can do Symbol(key)
-// and add it to a WeakMap so that we can garbage collect filters
-
 /**
  * Create a new filter by its color
  * @param {Phaser.Game} game Phaser game instance
- * @param {{ r: number, g: number, b: number }} color RGB color channels
+ * @param {string} hex Hex color
  * @returns {Phaser.Filter} New or existing phaser filter
  */
-const instanceNewColorFilter = (game, color) => {
+const instanceNewProjectileFilter = (game, hex) => {
 	game.filters ??= new Map();
 
-	const key = colord(color).toHex();
-	const cached = game.filters.get(key);
+	const cached = game.filters.get(hex);
 	if (typeof cached !== 'undefined') return cached;
 
 	// Add new filter for the color
+	const { r, g, b } = adjustColorToMaze(colord(hex).toRgb());
 	const filter = new Phaser.Filter(game, {
-		color: { type: '3fv', value: [color.r / 255, color.g / 255, color.b / 255] },
+		color: { type: '3fv', value: [r / 255, g / 255, b / 255] },
 		enabled: { type: '1f', value: 0.0 }
 	}, solidColorFragShader);
-	filter.setResolution(16, 16);
+	filter.setResolution(FILTER_RESOLUTION, FILTER_RESOLUTION);
 
-	game.filters.set(key, filter);
+	game.filters.set(hex, filter);
 
 	return filter;
 };
 
 interceptFunction(UIProjectileImage.prototype, 'spawn', function(original, ...args) {
+	const result = original(...args);
 	this.updateColor(shouldBulletsTint);
-	return original(...args);
+	return result;
 });
 
 UIProjectileImage.prototype.updateColor = function(enabled) {
 	const projectileData = this.gameController.getProjectile(this.projectileId);
 	if (projectileData && enabled) {
-		if (![
-			Constants.WEAPON_TYPES.BULLET,
-			Constants.WEAPON_TYPES.DOUBLE_BARREL,
-			Constants.WEAPON_TYPES.SHOTGUN
-		].includes(projectileData.getType())) return;
+		if (!APPLICABLE_WEAPON_TYPES.has(projectileData.getType())) return;
 
 		Backend.getInstance().getPlayerDetails(result => {
 			if (typeof result === 'object') {
 				const turret = result.getTurretColour();
-				const { r, g, b } = adjustColorToMaze(colord(turret.numericValue.replace('0x', '#')).toRgb());
+				const hex = turret.numericValue.replace('0x', '#');
 
-				this.colorFilter = instanceNewColorFilter(this.game, { r, g, b });
+				this.colorFilter = instanceNewProjectileFilter(this.game, hex);
 				this.filters = [this.colorFilter];
 
 				this.colorFilter.uniforms.enabled.value = 1.0;

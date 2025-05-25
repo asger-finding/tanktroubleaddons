@@ -1,4 +1,4 @@
-import ProxyHelper from '../utils/proxyHelper.js';
+import { interceptFunction } from '../utils/gameUtils.js';
 
 /**
  * Add "minimum" quality constants to quality config
@@ -26,7 +26,7 @@ UIConstants.classField('SETTINGS_QUALITY_MAX_OPTION_HEIGHT', 200);
 /**
  * Insert minimum option element
  */
-ProxyHelper.interceptFunction(TankTrouble.SettingsBox, 'init', function(original, ...args) {
+interceptFunction(TankTrouble.SettingsBox, 'init', function(original, ...args) {
 	original(...args);
 
 	const minQuality = $(`<option value="${ QualityManager.QUALITY_SETTINGS.MINIMUM }">Minimum</option>`);
@@ -37,7 +37,7 @@ ProxyHelper.interceptFunction(TankTrouble.SettingsBox, 'init', function(original
 });
 
 /** Don't emit tank rubble if quality is set to minimum */
-ProxyHelper.interceptFunction(UIRubbleGroup.prototype, 'emit', (original, ...args) => {
+interceptFunction(UIRubbleGroup.prototype, 'emit', (original, ...args) => {
 	if (QualityManager.getQuality() === QualityManager.QUALITY_SETTINGS.MINIMUM) return null;
 	return original(...args);
 });
@@ -45,7 +45,7 @@ ProxyHelper.interceptFunction(UIRubbleGroup.prototype, 'emit', (original, ...arg
 /**
  * Don't add camera shake in minimum quality
  */
-ProxyHelper.interceptFunction(Game.UIGameState, '_addCameraShake', (original, ...args) => {
+interceptFunction(Game.UIGameState, '_addCameraShake', (original, ...args) => {
 	if (QualityManager.getQuality() !== QualityManager.QUALITY_SETTINGS.MINIMUM) return original(...args);
 	return null;
 }, { isClassy: true });

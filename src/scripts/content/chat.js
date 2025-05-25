@@ -1,4 +1,4 @@
-import ProxyHelper from '../utils/proxyHelper.js';
+import { interceptFunction, whenContentInitialized } from '../utils/gameUtils.js';
 import { decode } from 'iso-8859-15';
 import dismoji from 'discord_emoji';
 import { matchSorter } from 'match-sorter';
@@ -447,7 +447,7 @@ const addAutocomplete = chatInput => {
 	/**
 	 * Show or hide autocompletes
 	 */
-		chatInput.addEventListener('input', ({ isComposing }) => {
+	chatInput.addEventListener('input', ({ isComposing }) => {
 		if (isComposing) return;
 
 		// Handle username autocomplete
@@ -546,7 +546,7 @@ const addAutocomplete = chatInput => {
 	 * @param {string} evt Event type
 	 * @param {any} data Event data
 	 */
-		const clientEventHandler = (_self, evt, data) => {
+	const clientEventHandler = (_self, evt, data) => {
 		switch (evt) {
 			case TTClient.EVENTS.USER_CHAT_POSTED:
 			case TTClient.EVENTS.GLOBAL_CHAT_POSTED:
@@ -575,7 +575,7 @@ const addAutocomplete = chatInput => {
  */
 const preventServerChangeChatClear = () => {
 	/** Never clear chat if client is unconnected */
-	ProxyHelper.interceptFunction(TankTrouble.ChatBox, '_clearChat', (original, ...args) => {
+	interceptFunction(TankTrouble.ChatBox, '_clearChat', (original, ...args) => {
 		const isUnconnected = ClientManager.getClient().getState() === TTClient.STATES.UNCONNECTED;
 
 		// Void the call if the client is unconnected
@@ -591,7 +591,7 @@ const preventServerChangeChatClear = () => {
  */
 const betterWelcomeMessage = () => {
 	/** Intercept welcome message with more meaningful response */
-	ProxyHelper.interceptFunction(TankTrouble.ChatBox, '_updateStatusMessageAndAvailability', (original, ...args) => {
+	interceptFunction(TankTrouble.ChatBox, '_updateStatusMessageAndAvailability', (original, ...args) => {
 		const [systemMessageText, guestPlayerIds] = args;
 
 		// Check for a welcome message. If match.
@@ -610,7 +610,7 @@ const betterWelcomeMessage = () => {
  * system message, then intercept and give a more meaningful response (unban time)
  */
 const insertChatBanExpiryTime = () => {
-	ProxyHelper.interceptFunction(TankTrouble.ChatBox, 'addSystemMessage', (original, ...args) => {
+	interceptFunction(TankTrouble.ChatBox, 'addSystemMessage', (original, ...args) => {
 		const [, message] = args;
 		if (message === 'You are temporarily banned from chatting') {
 			const playerIds = Users.getAllPlayerIds();
@@ -667,7 +667,7 @@ const insertChatBanExpiryTime = () => {
  * TankTrouble cannot store message outside this standard, and the chat will otherwise stall permanently.
  */
 const escapeBadCharacters = () => {
-	ProxyHelper.interceptFunction(TankTrouble.ChatBox, '_sendChat', (original, ...args) => {
+	interceptFunction(TankTrouble.ChatBox, '_sendChat', (original, ...args) => {
 		const message = args.pop();
 
 		try {
@@ -687,7 +687,7 @@ const escapeBadCharacters = () => {
 const insertEmojis = () => {
 	const pattern = new RegExp(`:(${Object.keys(dismoji).join('|')}):`, 'gu');
 
-	ProxyHelper.interceptFunction(TankTrouble.ChatBox, '_renderChatMessage', (original, ...args) => {
+	interceptFunction(TankTrouble.ChatBox, '_renderChatMessage', (original, ...args) => {
 		args[6] = args[6].replace(pattern, match => dismoji[match.slice(1, -1)]);
 
 		return original(...args);
@@ -697,7 +697,7 @@ const insertEmojis = () => {
 /**
  * Initialize all chat mods
  */
-ProxyHelper.whenContentInitialized().then(() => {
+whenContentInitialized().then(() => {
 	/* eslint-disable prefer-destructuring */
 	const chatBody = TankTrouble.ChatBox.chatBody[0];
 	const chatInput = TankTrouble.ChatBox.chatInput[0];

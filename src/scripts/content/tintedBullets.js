@@ -1,5 +1,5 @@
 import { StoreEvent, get, onStateChange } from '../common/store.js';
-import ProxyHelper from '../utils/proxyHelper.js';
+import { interceptFunction } from '../utils/gameUtils.js';
 import { colord } from '@pixi/colord';
 import { rgb as rgbContrast } from 'wcag-contrast';
 import { smoothTransition } from '../utils/mathUtils.js';
@@ -102,7 +102,7 @@ const instanceNewColorFilter = (game, color) => {
 	return filter;
 };
 
-ProxyHelper.interceptFunction(UIProjectileImage.prototype, 'spawn', function(original, ...args) {
+interceptFunction(UIProjectileImage.prototype, 'spawn', function(original, ...args) {
 	this.updateColor(shouldBulletsTint);
 	return original(...args);
 });

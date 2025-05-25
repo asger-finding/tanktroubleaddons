@@ -1,5 +1,5 @@
 import { get, set } from '../common/store.js';
-import ProxyHelper from '../utils/proxyHelper.js';
+import { interceptFunction, whenContentInitialized } from '../utils/gameUtils.js';
 
 TankTrouble.Statistics.STATISTICS_SETTINGS = {
 	LOCAL: 'local',
@@ -33,7 +33,7 @@ TankTrouble.Statistics.handleStatisticsChange = function(change = 1) {
 /**
  * Initialize statistics snippet
  */
-ProxyHelper.interceptFunction(TankTrouble.Statistics, 'init', (original, ...args) => {
+interceptFunction(TankTrouble.Statistics, 'init', (original, ...args) => {
 	const result = original(...args);
 
 	TankTrouble.Statistics.wrapper = $('<div id="statisticsSnippet" class="snippet teaser standard">');
@@ -65,7 +65,7 @@ ProxyHelper.interceptFunction(TankTrouble.Statistics, 'init', (original, ...args
 /**
  * Update statistics from data
  */
-ProxyHelper.interceptFunction(TankTrouble.Statistics, '_updateStatistics', (original, ...args) => {
+interceptFunction(TankTrouble.Statistics, '_updateStatistics', (original, ...args) => {
 	const [serverId = ClientManager.multiplayerServerId, ...rest] = args;
 
 	// Handle statistics for type local ("how many in server?")
@@ -101,7 +101,7 @@ TankTrouble.Statistics._clientEventHandler = function(_self, evt) {
 	}
 };
 
-ProxyHelper.whenContentInitialized().then(() => {
+whenContentInitialized().then(() => {
 	ClientManager.getClient().addEventListener(TankTrouble.Statistics._clientEventHandler, TankTrouble.Statistics);
 });
 

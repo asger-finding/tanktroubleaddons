@@ -1,6 +1,6 @@
 import AddonsUI from './addonsUI.js';
 import IronVaultUI from './ironVaultUI.js';
-import ProxyHelper from '../utils/proxyHelper.js';
+import { interceptFunction } from '../utils/gameUtils.js';
 import { listen } from '../common/ipcBridge.js';
 
 /**
@@ -344,7 +344,7 @@ listen(['TOGGLE_MENU'], () => Addons.menu.toggle());
 /**
  * Insert addons button and addons (ironvault) lookup buttons on TankInfoBox initialize
  */
-ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) => {
+interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) => {
 	original(...args);
 
 	const addonsButton = TankTrouble.TankInfoBox.infoAddons = $('<div class="button" title=""/>');
@@ -410,7 +410,7 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 /**
  * Show Addons button on own user or IronVault lookup button on foreign user
  */
-ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {
+interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {
 	original(...args);
 
 	const [,, playerId] = args;

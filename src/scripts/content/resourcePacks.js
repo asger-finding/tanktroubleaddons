@@ -1,6 +1,6 @@
 import './resourcePackPlugin.js';
-import ProxyHelper from '../utils/proxyHelper.js';
 import { calculateFileHash } from '../utils/mathUtils.js';
+import { interceptFunction } from '../utils/gameUtils.js';
 import { mergeWithSchema } from '../utils/objectUtils.js';
 import { unzip } from 'fflate';
 
@@ -736,7 +736,7 @@ Object.assign(Addons, {
 
 storeDefaultResourcePacks();
 
-ProxyHelper.interceptFunction(Game.UIPreloadState, 'preload', (original, ...args) => {
+interceptFunction(Game.UIPreloadState, 'preload', (original, ...args) => {
 	Addons.getActiveResourcePack().then(({ textures, metafile, css }) => {
 		Addons.insertResourcePackIntoGame(textures, metafile);
 		Addons.insertResourcePackCSS(css);
@@ -752,18 +752,18 @@ Maze.constructor('withObject', function(obj) {
 	return result;
 });
 
-ProxyHelper.interceptFunction(Maze, '_calculateBorderFloorsSpacesWallsAndDecorations', function(original, ...args) {
+interceptFunction(Maze, '_calculateBorderFloorsSpacesWallsAndDecorations', function(original, ...args) {
 	this.data.theme = Addons.getMazeThemeIndex(this.data.theme);
 	return original(this, ...args);
 }, { isClassy: true });
 
-ProxyHelper.interceptFunction(Game.UIBootState, 'init', function(original, ...args) {
+interceptFunction(Game.UIBootState, 'init', function(original, ...args) {
 	const result = original(this, ...args);
 	this.game.plugins.resourcePack = this.game.plugins.add(Phaser.Plugin.ResourcePack);
 	return result;
 }, { isClassy: true });
 
-ProxyHelper.interceptFunction(UITankSprite.prototype, 'spawn', function(original, ...args) {
+interceptFunction(UITankSprite.prototype, 'spawn', function(original, ...args) {
 	Object.defineProperty(this, 'tint', {
 		get() {
 			return this._tint;
@@ -787,7 +787,7 @@ ProxyHelper.interceptFunction(UITankSprite.prototype, 'spawn', function(original
 	return original(...args);
 });
 
-ProxyHelper.interceptFunction(UIMineSprite.prototype, 'spawn', function(original, ...args) {
+interceptFunction(UIMineSprite.prototype, 'spawn', function(original, ...args) {
 	Object.defineProperty(this, 'tint', {
 		get() {
 			return this._tint;
@@ -804,7 +804,7 @@ ProxyHelper.interceptFunction(UIMineSprite.prototype, 'spawn', function(original
 	return original(...args);
 });
 
-ProxyHelper.interceptFunction(UIMissileImage.prototype, 'spawn', function(original, ...args) {
+interceptFunction(UIMissileImage.prototype, 'spawn', function(original, ...args) {
 	Object.defineProperty(this, 'tint', {
 		get() {
 			return this._tint;
@@ -821,7 +821,7 @@ ProxyHelper.interceptFunction(UIMissileImage.prototype, 'spawn', function(origin
 	return original(...args);
 });
 
-ProxyHelper.interceptFunction(UIButtonGroup.prototype, 'spawn', function(original, ...args) {
+interceptFunction(UIButtonGroup.prototype, 'spawn', function(original, ...args) {
 	switch (this.text) {
 		case 'Random':
 			this.setText(Addons.getResourcePackSwitch('randomText').value ?? this.text);

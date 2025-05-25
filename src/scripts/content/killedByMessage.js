@@ -1,17 +1,17 @@
-import ProxyHelper from '../utils/proxyHelper.js';
 import UIKilledByGroup from './killedbygroup.js';
+import { interceptFunction } from '../utils/gameUtils.js';
 
 Game.UIGameState.field('killedByGroup', null);
 
 /** Inject killed by group to game state */
-ProxyHelper.interceptFunction(Game.UIGameState, 'create', function(original, ...args) {
+interceptFunction(Game.UIGameState, 'create', function(original, ...args) {
 	const result = original(...args);
 	this.killedByGroup = this.overlayGroup.add(new UIKilledByGroup(this.game, this.gameController));
 	return result;
 }, { isClassy: true });
 
 /** Spawn the killed by message if a local user is killed */
-ProxyHelper.interceptFunction(Game.UIGameState, '_roundEventHandler', (original, ...args) => {
+interceptFunction(Game.UIGameState, '_roundEventHandler', (original, ...args) => {
 	const [self,, evt, data] = args;
 
 	if (evt === RoundModel._EVENTS.TANK_KILLED) {
@@ -27,13 +27,13 @@ ProxyHelper.interceptFunction(Game.UIGameState, '_roundEventHandler', (original,
 }, { isClassy: true });
 
 /** Retire group on cleanup */
-ProxyHelper.interceptFunction(Game.UIGameState, '_cleanUp', function(original, ...args) {
+interceptFunction(Game.UIGameState, '_cleanUp', function(original, ...args) {
 	this.killedByGroup.retire();
 	return original(...args);
 }, { isClassy: true });
 
 /** Position killed by group on resize */
-ProxyHelper.interceptFunction(Game.UIGameState, '_onSizeChangeHandler', function(original, ...args) {
+interceptFunction(Game.UIGameState, '_onSizeChangeHandler', function(original, ...args) {
 	const result = original(...args);
 	this.killedByGroup.position.x = this.game.width / 2.0;
 	return result;

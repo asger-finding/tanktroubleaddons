@@ -1,4 +1,4 @@
-import ProxyHelper from '../utils/proxyHelper.js';
+import { interceptFunction } from '../utils/gameUtils.js';
 // Preload functions
 
 /**
@@ -82,7 +82,7 @@ Object.assign(Addons, {
 });
 
 /** Load addons images in game preload and optimize WebGL rendering */
-ProxyHelper.interceptFunction(Game.UIPreloadState, 'preload', function(original, ...args) {
+interceptFunction(Game.UIPreloadState, 'preload', function(original, ...args) {
 	const result = original(this, ...args);
 
 	this.load.removeFile('image', 'gameiconplaceholder');

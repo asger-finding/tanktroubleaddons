@@ -1,8 +1,8 @@
-import ProxyHelper from '../utils/proxyHelper.js';
+import { interceptFunction } from '../utils/gameUtils.js';
 /** Show tank usernames below their name when clicked in-game. */
 
 
-ProxyHelper.interceptFunction(Game.UIGameState, 'create', function(original, ...args) {
+interceptFunction(Game.UIGameState, 'create', function(original, ...args) {
 	const result = original(...args);
 
 	this.tankGroup.inputEnableChildren = true;

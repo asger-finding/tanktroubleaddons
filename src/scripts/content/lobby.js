@@ -1,6 +1,6 @@
-import ProxyHelper from '../utils/proxyHelper.js';
 import UIGameIconImage from './uigameiconimage.js';
 import UIGameIconScrollerGroup from './uigameiconscrollergroup.js';
+import { interceptFunction } from '../utils/gameUtils.js';
 
 window.UIGameIconImage = UIGameIconImage;
 
@@ -13,7 +13,7 @@ UIConstants.classFields({
 });
 
 /** Create the scroller group */
-ProxyHelper.interceptFunction(Game.UILobbyState, 'create', function(original, ...args) {
+interceptFunction(Game.UILobbyState, 'create', function(original, ...args) {
 	const result = original(...args);
 
 	this.gameIconScroller = this.gameIconGroup.add(new UIGameIconScrollerGroup(
@@ -27,7 +27,7 @@ ProxyHelper.interceptFunction(Game.UILobbyState, 'create', function(original, ..
 }, { isClassy: true });
 
 /** Override client event handler logic for TTClient.EVENTS.GAME_LIST_CHANGED for our scroller */
-ProxyHelper.interceptFunction(Game.UILobbyState, '_clientEventHandler', (original, ...args) => {
+interceptFunction(Game.UILobbyState, '_clientEventHandler', (original, ...args) => {
 	const [self, evt] = args;
 	if (evt === TTClient.EVENTS.GAME_LIST_CHANGED) {
 		self._updateGameButtons();
@@ -87,7 +87,7 @@ ProxyHelper.interceptFunction(Game.UILobbyState, '_clientEventHandler', (origina
 }, { isClassy: true });
 
 /** Override the lobby resize handler to call our group */
-ProxyHelper.interceptFunction(Game.UILobbyState, '_onSizeChangeHandler', function() {
+interceptFunction(Game.UILobbyState, '_onSizeChangeHandler', function() {
 	this.log.debug('SIZE CHANGE!');
 
 	// Move offline message.

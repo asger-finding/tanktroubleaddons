@@ -1,5 +1,5 @@
-import ProxyHelper from '../utils/proxyHelper.js';
 import UIFullscreenGameButtonGroup from './uifullscreengamebuttongroup.js';
+import { interceptFunction } from '../utils/gameUtils.js';
 
 UIConstants.classFields({
 	FULLSCREEN_GAME_MARGIN_X: 68 * (devicePixelRatio > 1 ? devicePixelRatio : 1),
@@ -22,7 +22,7 @@ UILeaveGameButtonGroup.prototype.spawn = function() {
 	this.game.add.tween(this.scale).to({ x: 1, y: 1 }, UIConstants.ELEMENT_POP_IN_TIME, Phaser.Easing.Back.Out, true);
 };
 
-ProxyHelper.interceptFunction(Game.UIGameState, 'create', function(original, ...args) {
+interceptFunction(Game.UIGameState, 'create', function(original, ...args) {
 	const result = original(...args);
 
 	// Insert group before leave game button so that
@@ -39,7 +39,7 @@ ProxyHelper.interceptFunction(Game.UIGameState, 'create', function(original, ...
 }, { isClassy: true });
 
 /** Retire the fullscreen group */
-ProxyHelper.interceptFunction(Game.UIGameState, '_retireUI', function(original, ...args) {
+interceptFunction(Game.UIGameState, '_retireUI', function(original, ...args) {
 	this.fullscreenGameGroup.retire();
 
 	original(...args);
@@ -47,7 +47,7 @@ ProxyHelper.interceptFunction(Game.UIGameState, '_retireUI', function(original, 
 
 
 /** Position fullscreen button on resize */
-ProxyHelper.interceptFunction(Game.UIGameState, '_onSizeChangeHandler', function(original, ...args) {
+interceptFunction(Game.UIGameState, '_onSizeChangeHandler', function(original, ...args) {
 	const result = original(...args);
 	this.fullscreenGameGroup.position.x = this.game.width - UIConstants.FULLSCREEN_GAME_MARGIN_X;
 	return result;

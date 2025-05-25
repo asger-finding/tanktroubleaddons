@@ -1,4 +1,4 @@
-import ProxyHelper from '../utils/proxyHelper.js';
+import { interceptFunction } from '../utils/gameUtils.js';
 
 /**
  * Pretty printed alias for input set id
@@ -254,7 +254,7 @@ Addons.switchControlsBox = {
 /**
  * Insert the switch controls button in the tank info box
  */
-ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) => {
+interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) => {
 	original(...args);
 
 	const switchControlsButton = TankTrouble.TankInfoBox.infoSwitchControls = $('<div class="button" title=""/>');
@@ -292,7 +292,7 @@ ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original,
 /**
  * Show the switch controls button for own users
  */
-ProxyHelper.interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {
+interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {
 	original(...args);
 
 	const [,, playerId] = args;

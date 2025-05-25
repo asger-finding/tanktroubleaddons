@@ -1,10 +1,10 @@
-import ProxyHelper from '../utils/proxyHelper.js';
+import { interceptFunction } from '../utils/gameUtils.js';
 import { timeAgo } from '../utils/timeUtils.js';
 
 /**
  * Insert creation date and player id elements
  */
-ProxyHelper.interceptFunction(TankTrouble.AccountOverlay, '_initialize', (original, ...args) => {
+interceptFunction(TankTrouble.AccountOverlay, '_initialize', (original, ...args) => {
 	original(...args);
 
 	TankTrouble.AccountOverlay.accountCreatedText = $('<div></div>');
@@ -19,7 +19,7 @@ ProxyHelper.interceptFunction(TankTrouble.AccountOverlay, '_initialize', (origin
 /**
  * Render creation date and player id to the menu
  */
-ProxyHelper.interceptFunction(TankTrouble.AccountOverlay, 'show', (original, ...args) => {
+interceptFunction(TankTrouble.AccountOverlay, 'show', (original, ...args) => {
 	original(...args);
 
 	Backend.getInstance().getPlayerDetails(result => {

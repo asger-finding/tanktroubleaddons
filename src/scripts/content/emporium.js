@@ -1,9 +1,9 @@
-import ProxyHelper from '../utils/proxyHelper.js';
+import { interceptFunction } from '../utils/gameUtils.js';
 
 /**
  * Insert wallet elements in shop overlay navigator
  */
-ProxyHelper.interceptFunction(TankTrouble.VirtualShopOverlay, '_initialize', (original, ...args) => {
+interceptFunction(TankTrouble.VirtualShopOverlay, '_initialize', (original, ...args) => {
 	original(...args);
 
 	// Initialize wallet elements
@@ -15,7 +15,7 @@ ProxyHelper.interceptFunction(TankTrouble.VirtualShopOverlay, '_initialize', (or
 /**
  * Show wallet coins and diamonds in shop navigator
  */
-ProxyHelper.interceptFunction(TankTrouble.VirtualShopOverlay, 'show', (original, ...args) => {
+interceptFunction(TankTrouble.VirtualShopOverlay, 'show', (original, ...args) => {
 	original(...args);
 
 	const [params] = args;

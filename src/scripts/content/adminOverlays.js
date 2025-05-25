@@ -1,4 +1,4 @@
-import ProxyHelper from '../utils/proxyHelper.js';
+import { interceptFunction } from '../utils/gameUtils.js';
 
 /**
  * @typedef {object} ChatLogMessage
@@ -559,7 +559,7 @@ const makeAltLookup = async(adminId, playerId, abortSignal, newPlayerIdCallback)
 /**
  * Inject message filters into the admin chat log overlay
  */
-ProxyHelper.interceptFunction(TankTrouble.AdminChatLogOverlay, '_initialize', async(original, ...args) => {
+interceptFunction(TankTrouble.AdminChatLogOverlay, '_initialize', async(original, ...args) => {
 	const overlay = TankTrouble.AdminChatLogOverlay;
 	if (overlay.initialized) return;
 
@@ -595,7 +595,7 @@ ProxyHelper.interceptFunction(TankTrouble.AdminChatLogOverlay, '_initialize', as
 /**
  * Inject custom paginators for filtered content
  */
-ProxyHelper.interceptFunction(TankTrouble.AdminChatLogOverlay, '_getChatMessagesByPlayerIds', async(original, ...args) => {
+interceptFunction(TankTrouble.AdminChatLogOverlay, '_getChatMessagesByPlayerIds', async(original, ...args) => {
 	const overlay = TankTrouble.AdminChatLogOverlay;
 
 	if (overlay.messageTypeFilter.val() === FILTERS.ALL) {
@@ -632,12 +632,12 @@ ProxyHelper.interceptFunction(TankTrouble.AdminChatLogOverlay, '_getChatMessages
 /**
  * Inject alternative account lookup button and dialog when pressed
  */
-ProxyHelper.interceptFunction(TankTrouble.AdminPlayerLookupOverlay, '_update', (original, ...args) => {
+interceptFunction(TankTrouble.AdminPlayerLookupOverlay, '_update', (original, ...args) => {
 	const overlay = TankTrouble.AdminPlayerLookupOverlay;
 
 	original(...args);
 
-	ProxyHelper.interceptFunction(overlay.details, 'append', (scopedAppend, ...appendArgs) => {
+	interceptFunction(overlay.details, 'append', (scopedAppend, ...appendArgs) => {
 		scopedAppend(...appendArgs);
 
 		const chatlogButton = overlay.details.find('.section button:contains("Chat log")');
@@ -729,7 +729,7 @@ const limitDateRange = () => {
 /**
  * Inject custom admin statistics range to admin statistics
  */
-ProxyHelper.interceptFunction(TankTrouble.AdminStatisticsOverlay, '_initialize', (original, ...args) => {
+interceptFunction(TankTrouble.AdminStatisticsOverlay, '_initialize', (original, ...args) => {
 	const overlay = TankTrouble.AdminStatisticsOverlay;
 
 	if (overlay.initialized) return;
@@ -766,7 +766,7 @@ ProxyHelper.interceptFunction(TankTrouble.AdminStatisticsOverlay, '_initialize',
 /**
  * Logic for when user selects custom timerange
  */
-ProxyHelper.interceptFunction(TankTrouble.AdminStatisticsOverlay, '_getStatistics', (original, ...args) => {
+interceptFunction(TankTrouble.AdminStatisticsOverlay, '_getStatistics', (original, ...args) => {
 	const overlay = TankTrouble.AdminStatisticsOverlay;
 
 	if (overlay.period.val() === 'custom') {

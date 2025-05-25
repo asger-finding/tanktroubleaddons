@@ -1,4 +1,4 @@
-import ProxyHelper from '../utils/proxyHelper.js';
+import { interceptFunction } from '../utils/gameUtils.js';
 
 /**
  * Patch a sprite that doesn't have a .log bound to it, resulting in a rare game-crashing error
@@ -68,7 +68,7 @@ const proxyWidget = (function*() {
 /**
  * Apply widget proxy
  */
-ProxyHelper.interceptFunction($.widget, 'bridge', (original, ...args) => {
+interceptFunction($.widget, 'bridge', (original, ...args) => {
 	const result = original(...args);
 
 	const [name] = args;

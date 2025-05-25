@@ -142,13 +142,12 @@ $tooltipster-accent-dark: rgb(25 25 25);
 		}
 	}
 
-	.snippet,
-	.newsPost.standard .wrapper {
+	.newsPost.standard .wrapper,
+	.snippet.standard,
+	#statisticsSnippet,
+	#messagesSnippet {
 		color: $primary-font-color;
-		background-image: linear-gradient(to bottom, $snippet-accent-light, $snippet-accent-dark);
-	}
-	#statisticsSnippet.snippet {
-		background-image: linear-gradient(to bottom, $snippet-accent-light, $snippet-accent-dark) !important;
+		background: linear-gradient(to bottom, $snippet-accent-light, $snippet-accent-dark);
 	}
 
 	#adduser .content,

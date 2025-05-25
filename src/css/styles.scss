@@ -86,6 +86,8 @@ $max-safe-integer: 2147483647;
 :root {
 	--highlight-post-background-color: rgb(220 255 204 / 1.0);
 	--highlight-post-border-color: rgb(160 233 0 / 1.0);
+
+	overflow-x: hidden;
 }
 
 .horizontalAdSlot,
@@ -537,11 +539,11 @@ $max-safe-integer: 2147483647;
 }
 
 /* Statistics sidebar snippet */
-#statisticsSnippet {
+div#statisticsSnippet {
 	display: inline-block !important;
 
 	/* Selectors will override it with a solid colour if unset */
-	background-image: linear-gradient(to bottom, rgb(238 238 238 / 1.0), rgb(204 204 204 / 1.0)) !important;
+	background: linear-gradient(to bottom, rgb(238 238 238 / 1.0), rgb(204 204 204 / 1.0));
 
 	#onlinePlayerCount {
 		font-size: 40px;

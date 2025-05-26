@@ -358,5 +358,14 @@
             "urlFilter": "https://cdn.tanktrouble.com/RELEASE-*/assets/images/accessories/back32-320@2x.png",
             "resourceTypes": ["image"]
         }
+    },
+    {
+        "id": 41,
+        "priority": 1,
+        "action": { "type": "redirect" , "redirect": { "url": "https://github.com/phaserjs/phaser-ce/releases/download/v2.20.2/phaser{{|.min}}.js" } },
+        "condition": {
+            "urlFilter": "https://cdn.tanktrouble.com/RELEASE-*/js/phaser/phaser.min.js*",
+            "resourceTypes": ["script"]
+        }
     }
 ]

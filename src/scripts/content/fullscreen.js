@@ -1,11 +1,6 @@
 import UIFullscreenGameButtonGroup from './uifullscreengamebuttongroup.js';
 import { interceptFunction } from '../utils/gameUtils.js';
 
-UIConstants.classFields({
-	FULLSCREEN_GAME_MARGIN_X: 68 * (devicePixelRatio > 1 ? devicePixelRatio : 1),
-	FULLSCREEN_GAME_MARGIN_Y: 28 * (devicePixelRatio > 1 ? devicePixelRatio : 1)
-});
-
 Game.UIGameState.field('fullscreenGameGroup', null);
 
 /**

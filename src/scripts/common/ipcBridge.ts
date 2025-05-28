@@ -1,4 +1,4 @@
-import { setBrowserNamespace } from '../common/set-browser-namespace.js';
+import { setBrowserNamespace } from './set-browser-namespace.js';
 
 setBrowserNamespace();
 

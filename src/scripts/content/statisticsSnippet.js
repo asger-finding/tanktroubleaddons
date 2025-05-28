@@ -33,31 +33,31 @@ TankTrouble.Statistics.handleStatisticsChange = function(change = 1) {
 /**
  * Initialize statistics snippet
  */
-interceptFunction(TankTrouble.Statistics, 'init', (original, ...args) => {
+interceptFunction(TankTrouble.Statistics, 'init', function(original, ...args) {
 	const result = original(...args);
 
-	TankTrouble.Statistics.wrapper = $('<div id="statisticsSnippet" class="snippet teaser standard">');
-	TankTrouble.Statistics.content = $('<div class="content">');
-	TankTrouble.Statistics.header = $('<div class="header">Who has deployed?</div>');
-	TankTrouble.Statistics.playerCount = $('<div id="onlinePlayerCount">');
-	TankTrouble.Statistics.gameCount = $('<div id="onlineGameCount">');
-	TankTrouble.Statistics.statisticsType = $('<div class="managedNavigation"></div>');
+	this.wrapper = $('<div id="statisticsSnippet" class="snippet teaser standard">');
+	this.content = $('<div class="content">');
+	this.header = $('<div class="header">Who has deployed?</div>');
+	this.playerCount = $('<div id="onlinePlayerCount">');
+	this.gameCount = $('<div id="onlineGameCount">');
+	this.statisticsType = $('<div class="managedNavigation"></div>');
 
 	get('statisticsState').then(state => {
-		TankTrouble.Statistics.current = state;
-		TankTrouble.Statistics.handleStatisticsChange(0);
-		TankTrouble.Statistics.statisticsType.on('mouseup', () => TankTrouble.Statistics.handleStatisticsChange(1));
+		this.current = state;
+		this.handleStatisticsChange(0);
+		this.statisticsType.on('mouseup', () => this.handleStatisticsChange(1));
 	});
 
-	TankTrouble.Statistics.content.append([
-		TankTrouble.Statistics.header,
-		TankTrouble.Statistics.playerCount,
-		TankTrouble.Statistics.gameCount,
-		TankTrouble.Statistics.statisticsType
+	this.content.append([
+		this.header,
+		this.playerCount,
+		this.gameCount,
+		this.statisticsType
 	]);
-	TankTrouble.Statistics.wrapper.append([TankTrouble.Statistics.content]);
+	this.wrapper.append([this.content]);
 
-	$('#secondaryContent').append(TankTrouble.Statistics.wrapper);
+	$('#secondaryContent').append(this.wrapper);
 
 	return result;
 });
@@ -65,14 +65,14 @@ interceptFunction(TankTrouble.Statistics, 'init', (original, ...args) => {
 /**
  * Update statistics from data
  */
-interceptFunction(TankTrouble.Statistics, '_updateStatistics', (original, ...args) => {
+interceptFunction(TankTrouble.Statistics, '_updateStatistics', function(original, ...args) {
 	const [serverId = ClientManager.multiplayerServerId, ...rest] = args;
 
 	// Handle statistics for type local ("how many in server?")
-	if (TankTrouble.Statistics.current === TankTrouble.Statistics.STATISTICS_SETTINGS.LOCAL) {
+	if (this.current === this.STATISTICS_SETTINGS.LOCAL) {
 		ClientManager._getSelectedServerStats(serverId, (_success, _serverId, _latency, gameCount, playerCount) => {
-			TankTrouble.Statistics._updateNumber(TankTrouble.Statistics.playerCount, playerCount);
-			TankTrouble.Statistics._updateNumber(TankTrouble.Statistics.gameCount, gameCount, 'game');
+			this._updateNumber(this.playerCount, playerCount);
+			this._updateNumber(this.gameCount, gameCount, 'game');
 
 			$('#statisticsSnippet').css('display', 'inline-block');
 		});
@@ -86,14 +86,15 @@ interceptFunction(TankTrouble.Statistics, '_updateStatistics', (original, ...arg
 
 /**
  * Handle client events
- * @param {any} _self `this` context
+ * @param {this} self `this` context
  * @param {string} evt Client event type
  */
-TankTrouble.Statistics._clientEventHandler = function(_self, evt) {
+// eslint-disable-next-line consistent-this
+TankTrouble.Statistics._clientEventHandler = function(self, evt) {
 	switch (evt) {
 		case TTClient.EVENTS.PLAYERS_AUTHENTICATED:
 		{
-			TankTrouble.Statistics._updateStatistics(ClientManager.multiplayerServerId);
+			self._updateStatistics(ClientManager.multiplayerServerId);
 			break;
 		}
 		default:

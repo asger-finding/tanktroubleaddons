@@ -254,10 +254,10 @@ Addons.switchControlsBox = {
 /**
  * Insert the switch controls button in the tank info box
  */
-interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) => {
+interceptFunction(TankTrouble.TankInfoBox, '_initialize', function(original, ...args) {
 	original(...args);
 
-	const switchControlsButton = TankTrouble.TankInfoBox.infoSwitchControls = $('<div class="button" title=""/>');
+	const switchControlsButton = this.infoSwitchControls = $('<div class="button" title=""/>');
 	for (const inputSet of Inputs.getAllInputSetIds()) {
 		const inputButton = $('<div/>');
 
@@ -278,30 +278,30 @@ interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) =>
 
 	switchControlsButton.on('mouseup', () => {
 		Addons.switchControlsBox.show(
-			TankTrouble.TankInfoBox.playerId,
-			TankTrouble.TankInfoBox.infoSwitchControls.offset().left + TankTrouble.TankInfoBox.infoSwitchControls.outerWidth() * 0.5,
-			TankTrouble.TankInfoBox.infoSwitchControls.offset().top + TankTrouble.TankInfoBox.infoSwitchControls.outerHeight() * 0.5,
+			this.playerId,
+			this.infoSwitchControls.offset().left + this.infoSwitchControls.outerWidth() * 0.5,
+			this.infoSwitchControls.offset().top + this.infoSwitchControls.outerHeight() * 0.5,
 			'top',
 			25
 		);
 	});
 
-	switchControlsButton.insertBefore(TankTrouble.TankInfoBox.infoAccount);
+	switchControlsButton.insertBefore(this.infoAccount);
 });
 
 /**
  * Show the switch controls button for own users
  */
-interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {
+interceptFunction(TankTrouble.TankInfoBox, 'show', function(original, ...args) {
 	original(...args);
 
 	const [,, playerId] = args;
 
-	TankTrouble.TankInfoBox.infoSwitchControls.toggle(Users.getAllPlayerIds().includes(playerId));
-	TankTrouble.TankInfoBox.infoSwitchControls.tooltipster('content', 'Switch controls');
+	this.infoSwitchControls.toggle(Users.getAllPlayerIds().includes(playerId));
+	this.infoSwitchControls.tooltipster('content', 'Switch controls');
 
 	const assignedInputSetId = Inputs.getAssignedInputSetId(playerId);
-	TankTrouble.TankInfoBox.infoSwitchControls.find(':data("inputsetid")').each((_i, el) => {
+	this.infoSwitchControls.find(':data("inputsetid")').each((_i, el) => {
 		const inputButton = $(el);
 		const shouldShow = inputButton.data('inputsetid') === assignedInputSetId;
 

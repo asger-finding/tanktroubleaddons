@@ -343,11 +343,11 @@ listen(['TOGGLE_MENU'], () => Addons.menu.toggle());
 interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) => {
 	original(...args);
 
-	const addonsButton = TankTrouble.TankInfoBox.infoAddons = $('<div class="button" title=""/>');
+	const addonsButton = this.infoAddons = $('<div class="button" title=""/>');
 	const standardAddons = Addons.addImageWithClasses(addonsButton, 'standard', 'assets/menu/menu.{{png|avif}}');
 	const activeAddons = Addons.addImageWithClasses(addonsButton, 'active', 'assets/menu/menuActive.{{png|avif}}');
 
-	const addonsLookupButton = TankTrouble.TankInfoBox.infoAddonsLookup = $('<div class="button" title=""/>');
+	const addonsLookupButton = this.infoAddonsLookup = $('<div class="button" title=""/>');
 	const standardAddonsLookup = Addons.addImageWithClasses(addonsLookupButton, 'standard', 'assets/menu/menu.{{png|avif}}');
 	const activeAddonsLookup = Addons.addImageWithClasses(addonsLookupButton, 'active', 'assets/menu/menuActive.{{png|avif}}');
 
@@ -372,14 +372,14 @@ interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) =>
 		});
 
 	addonsButton.on('mouseup', () => {
-		if (TankTrouble.TankInfoBox.showing) {
-			TankTrouble.TankInfoBox.hide();
+		if (this.showing) {
+			this.hide();
 			Addons.menu.toggle();
 		}
 	});
 
 	addonsLookupButton.on('mouseup', () =>{
-		if (TankTrouble.TankInfoBox.showing) {
+		if (this.showing) {
 			Addons.menu.init();
 			Addons.menu.currentPage = 'ironvault';
 			Addons.menu.goToCurrentPage();
@@ -391,16 +391,16 @@ interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) =>
 					Addons.menu.ironvault.search(username);
 					Addons.menu.show();
 
-					TankTrouble.TankInfoBox.hide();
+					this.hide();
 				}
-			}, () => {}, () => {}, TankTrouble.TankInfoBox.playerId, Caches.getPlayerDetailsCache());
+			}, () => {}, () => {}, this.playerId, Caches.getPlayerDetailsCache());
 		}
 	});
 
 	addonsButton.append([standardAddons, activeAddons]);
 	addonsLookupButton.append([standardAddonsLookup, activeAddonsLookup]);
-	addonsButton.insertBefore(TankTrouble.TankInfoBox.infoAccount);
-	addonsLookupButton.insertBefore(TankTrouble.TankInfoBox.infoAdminLookup);
+	addonsButton.insertBefore(this.infoAccount);
+	addonsLookupButton.insertBefore(this.infoAdminLookup);
 });
 
 /**
@@ -413,35 +413,35 @@ interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {
 
 	// Local user
 	if (Users.getAllPlayerIds().includes(playerId)) {
-		TankTrouble.TankInfoBox.infoAddons.show();
-		TankTrouble.TankInfoBox.infoAddonsLookup.hide();
-		TankTrouble.TankInfoBox.infoAddons.tooltipster('content', 'TankTroubleAddons');
+		this.infoAddons.show();
+		this.infoAddonsLookup.hide();
+		this.infoAddons.tooltipster('content', 'TankTroubleAddons');
 
 		Backend.getInstance().getPlayerDetails(result => {
 			if (typeof result === 'object') {
 				if (result.getGmLevel() !== null) {
-					TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'position', 'left');
-					TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'offsetX', 5);
+					this.infoAddons.tooltipster('option', 'position', 'left');
+					this.infoAddons.tooltipster('option', 'offsetX', 5);
 				} else {
-					TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'position', 'top');
-					TankTrouble.TankInfoBox.infoAddons.tooltipster('option', 'offsetX', 0);
+					this.infoAddons.tooltipster('option', 'position', 'top');
+					this.infoAddons.tooltipster('option', 'offsetX', 0);
 				}
 			}
 		}, () => {}, () => {}, playerId, Caches.getPlayerDetailsCache());
 	} else {
-		TankTrouble.TankInfoBox.infoAddons.hide();
+		this.infoAddons.hide();
 
 		const canUserAdminLookup = Users.getHighestGmLevel() >= UIConstants.ADMIN_LEVEL_PLAYER_LOOKUP;
 		if (canUserAdminLookup) {
-			TankTrouble.TankInfoBox.infoAddonsLookup.hide();
+			this.infoAddonsLookup.hide();
 			return;
 		}
 
-		TankTrouble.TankInfoBox.infoAddonsLookup.show();
+		this.infoAddonsLookup.show();
 		Backend.getInstance().getPlayerDetails(result => {
 			if (typeof result === 'object') {
 				const username = result.getUsername();
-				TankTrouble.TankInfoBox.infoAddonsLookup.tooltipster('content', `Look up ${ username }`);
+				this.infoAddonsLookup.tooltipster('content', `Look up ${ username }`);
 			}
 		}, () => {}, () => {}, playerId, Caches.getPlayerDetailsCache());
 	}

@@ -1,11 +1,6 @@
 import UIPlaceholderIconImage from './uiplaceholdericonimage.js';
 import { createPolygon } from '../utils/mathUtils.js';
 
-UIConstants.classFields({
-	GAME_ICON_TANK_COUNT: UIConstants.TANK_POOL_SIZE,
-	GAME_ICON_JOIN_GAME_BUTTON_Y: 130 * (devicePixelRatio > 1 ? devicePixelRatio : 1)
-});
-
 const resolutionScale = UIUtils.getLoadedAssetResolutionScale(devicePixelRatio);
 
 /**

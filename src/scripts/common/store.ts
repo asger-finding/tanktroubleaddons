@@ -1,7 +1,7 @@
 /* eslint-disable init-declarations */
 import { Callback, dispatchMessage, listen, once } from './ipcBridge.js';
 import { SyncStoreOptions } from 'webext-sync';
-import { setBrowserNamespace } from '../common/set-browser-namespace.js';
+import { setBrowserNamespace } from './set-browser-namespace.js';
 
 setBrowserNamespace();
 

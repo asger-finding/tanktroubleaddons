@@ -1,4 +1,4 @@
-import { AddonsMeta } from './index.ts';
+import { AddonsMeta } from './index.js';
 
 (() => {
 	const metaString = document.currentScript?.dataset.meta;
@@ -63,6 +63,7 @@ import { AddonsMeta } from './index.ts';
 	Promise.all([
 		inject('scripts/content/patches.js', true),
 		inject('scripts/content/preload.js', true),
+		inject('scripts/content/constants.js', true),
 		inject('scripts/content/theme.js', true)
 	]).then(async() => {
 		await Promise.all([
@@ -78,7 +79,7 @@ import { AddonsMeta } from './index.ts';
 			inject('scripts/content/tankNameOnClick.js'),
 			inject('scripts/content/tintedBullets.js'),
 			inject('scripts/content/killedByMessage.js'),
-			inject('scripts/content/fullscreenGame.js'),
+			inject('scripts/content/fullscreen.js'),
 			inject('scripts/content/deathCount.js'),
 			inject('scripts/content/resourcePacks.js'),
 			inject('scripts/content/emporium.js'),

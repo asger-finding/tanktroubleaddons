@@ -4,14 +4,6 @@ import { interceptFunction } from '../utils/gameUtils.js';
 
 window.UIGameIconImage = UIGameIconImage;
 
-/**
- * Increase pool size to 6 to include max possible games in server
- */
-UIConstants.classFields({
-	GAME_ICON_POOL_SIZE: 6,
-	GAME_ICON_COUNT: 6
-});
-
 /** Create the scroller group */
 interceptFunction(Game.UILobbyState, 'create', function(original, ...args) {
 	const result = original(...args);

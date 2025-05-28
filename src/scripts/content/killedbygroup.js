@@ -1,10 +1,3 @@
-UIConstants.classFields({
-	KILLED_BY_FONT_SIZE: 24 *  (devicePixelRatio > 1 ? devicePixelRatio : 1),
-	KILLED_BY_STROKE_WIDTH: 4 * (devicePixelRatio > 1 ? devicePixelRatio : 1),
-	//ms
-	KILLED_BY_POP_OUT_TIME: 2_000
-});
-
 /**
  * Sprite to show a "killed by" text message when someone on the
  * player's end, dies.

@@ -4,22 +4,22 @@ import { timeAgo } from '../utils/timeUtils.js';
 /**
  * Insert creation date and player id elements
  */
-interceptFunction(TankTrouble.AccountOverlay, '_initialize', (original, ...args) => {
+interceptFunction(TankTrouble.AccountOverlay, '_initialize', function(original, ...args) {
 	original(...args);
 
-	TankTrouble.AccountOverlay.accountCreatedText = $('<div></div>');
-	TankTrouble.AccountOverlay.playerIdText = $('<div></div>');
+	this.accountCreatedText = $('<div></div>');
+	this.playerIdText = $('<div></div>');
 
-	TankTrouble.AccountOverlay.accountHeadline.after([
-		TankTrouble.AccountOverlay.accountCreatedText,
-		TankTrouble.AccountOverlay.playerIdText
+	this.accountHeadline.after([
+		this.accountCreatedText,
+		this.playerIdText
 	]);
 });
 
 /**
  * Render creation date and player id to the menu
  */
-interceptFunction(TankTrouble.AccountOverlay, 'show', (original, ...args) => {
+interceptFunction(TankTrouble.AccountOverlay, 'show', function(original, ...args) {
 	original(...args);
 
 	Backend.getInstance().getPlayerDetails(result => {
@@ -27,10 +27,10 @@ interceptFunction(TankTrouble.AccountOverlay, 'show', (original, ...args) => {
 			const created = new Date(result.getCreated() * 1000);
 			const formatted = new Intl.DateTimeFormat('en-GB', { dateStyle: 'full' }).format(created);
 
-			TankTrouble.AccountOverlay.accountCreatedText.text(`Created: ${formatted} (${timeAgo(created)})`);
-			TankTrouble.AccountOverlay.playerIdText.text(`Player ID: #${ result.getPlayerId() }`);
+			this.accountCreatedText.text(`Created: ${formatted} (${timeAgo(created)})`);
+			this.playerIdText.text(`Player ID: #${ result.getPlayerId() }`);
 		}
-	}, () => {}, () => {}, TankTrouble.AccountOverlay.playerId, Caches.getPlayerDetailsCache());
+	}, () => {}, () => {}, this.playerId, Caches.getPlayerDetailsCache());
 });
 
 export const _isESmodule = true;

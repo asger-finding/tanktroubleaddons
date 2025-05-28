@@ -3,55 +3,55 @@ import { interceptFunction } from '../utils/gameUtils.js';
 /**
  * Initialize death count elements
  */
-interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) => {
+interceptFunction(TankTrouble.TankInfoBox, '_initialize', function(original, ...args) {
 	original(...args);
 
 	// Initialize death info elements
-	TankTrouble.TankInfoBox.infoDeathsDiv = $('<tr/>');
-	TankTrouble.TankInfoBox.infoDeathsIcon = $(`<img class="standard" src="${Addons.t_url('assets/tankInfo/deaths.{{png|avif}}')}" srcset="${Addons.t_url('assets/tankInfo/deaths@2x.{{png|avif}}')} 2x"/>`);
-	TankTrouble.TankInfoBox.infoDeaths = $('<div/>');
+	this.infoDeathsDiv = $('<tr/>');
+	this.infoDeathsIcon = $(`<img class="standard" src="${Addons.t_url('assets/tankInfo/deaths.{{png|avif}}')}" srcset="${Addons.t_url('assets/tankInfo/deaths@2x.{{png|avif}}')} 2x"/>`);
+	this.infoDeaths = $('<div/>');
 
 	// Align to center
-	TankTrouble.TankInfoBox.infoDeathsDiv.css({
+	this.infoDeathsDiv.css({
 		display: 'flex',
 		'align-items': 'center',
 		margin: '0 auto',
 		width: 'fit-content'
 	});
 
-	TankTrouble.TankInfoBox.infoDeathsDiv.tooltipster({
+	this.infoDeathsDiv.tooltipster({
 		position: 'left',
 		offsetX: 5
 	});
 
-	TankTrouble.TankInfoBox.infoDeathsDiv.append(TankTrouble.TankInfoBox.infoDeathsIcon);
-	TankTrouble.TankInfoBox.infoDeathsDiv.append(TankTrouble.TankInfoBox.infoDeaths);
-	TankTrouble.TankInfoBox.infoDeathsDiv.insertAfter(TankTrouble.TankInfoBox.infoTable);
+	this.infoDeathsDiv.append(this.infoDeathsIcon);
+	this.infoDeathsDiv.append(this.infoDeaths);
+	this.infoDeathsDiv.insertAfter(this.infoTable);
 
-	TankTrouble.TankInfoBox.infoDeaths.svg({
+	this.infoDeaths.svg({
 		settings: {
 			width: UIConstants.TANK_INFO_MAX_NUMBER_WIDTH,
 			height: 34
 		}
 	});
-	TankTrouble.TankInfoBox.infoDeathsSvg = TankTrouble.TankInfoBox.infoDeaths.svg('get');
+	this.infoDeathsSvg = this.infoDeaths.svg('get');
 });
 
 /**
  * Show death count elements to user
  */
-interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {
+interceptFunction(TankTrouble.TankInfoBox, 'show', function(original, ...args) {
 	original(...args);
 
-	TankTrouble.TankInfoBox.infoDeathsDiv.tooltipster('content', 'Deaths');
-	TankTrouble.TankInfoBox.infoDeathsSvg.clear();
+	this.infoDeathsDiv.tooltipster('content', 'Deaths');
+	this.infoDeathsSvg.clear();
 
 	const [,, playerId] = args;
 
 	Backend.getInstance().getPlayerDetails(result => {
 		const deaths = typeof result === 'object' ? result.getDeaths() : 'N/A';
 
-		const deathsText = TankTrouble.TankInfoBox.infoDeathsSvg.text(1, 22, deaths.toString(), {
+		const deathsText = this.infoDeathsSvg.text(1, 22, deaths.toString(), {
 			textAnchor: 'start',
 			fontFamily: 'Arial Black',
 			fontSize: 14,
@@ -68,7 +68,7 @@ interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {
 		});
 
 		const scaleAndTranslate = Utils.getSVGScaleAndTranslateToFit(UIConstants.TANK_INFO_MAX_NUMBER_WIDTH, deathsLength + 7, 34, 'left');
-		TankTrouble.TankInfoBox.infoDeathsSvg.configure(deathsText, { transform: scaleAndTranslate });
+		this.infoDeathsSvg.configure(deathsText, { transform: scaleAndTranslate });
 	}, () => {}, () => {}, playerId, Caches.getPlayerDetailsCache());
 });
 

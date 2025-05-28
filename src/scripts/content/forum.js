@@ -1,246 +1,270 @@
 import { timeAgo } from '../utils/timeUtils.js';
 
 /**
- * Add tank previews for all thread creators, not just the primary creator
- * @param {object} threadOrReply Post data
- * @param {JQuery} threadOrReplyElement Post element
+ * Map post creators to a new object
+ * @private
+ * @param {object} post Post data
+ * @returns {object} Creators in an object
  */
-const insertMultipleCreators = (threadOrReply, threadOrReplyElement) => {
-	// Remove original tank preview
-	threadOrReplyElement.find('.tank').remove();
+const buildCreatorMap = post => {
+	if (!post) return {};
 
-	const creators = {
-		...{ creator: threadOrReply.creator },
-		...threadOrReply.coCreator1 && { coCreator1: threadOrReply.coCreator1 },
-		...threadOrReply.coCreator2 && { coCreator2: threadOrReply.coCreator2 }
+	return {
+		creator: post.creator,
+		...(post.coCreator1 && { coCreator1: post.coCreator1 }),
+		...(post.coCreator2 && { coCreator2: post.coCreator2 })
 	};
-	const creatorsContainer = $('<div/>')
-		.addClass(`tanks tankCount${Object.keys(creators).length}`)
-		.insertBefore(threadOrReplyElement.find('.container'));
-
-	// Render all creator tanks in canvas
-	for (const [creatorType, playerId] of Object.entries(creators)) {
-		const id = playerId === null ? '-1' : playerId;
-
-		const wrapper = document.createElement('div');
-		wrapper.classList.add('tank', creatorType);
-
-		const canvas = document.createElement('canvas');
-		canvas.width = UIConstants.TANK_ICON_WIDTH_SMALL;
-		canvas.height = UIConstants.TANK_ICON_HEIGHT_SMALL;
-		canvas.style.width = `${UIConstants.TANK_ICON_RESOLUTIONS[UIConstants.TANK_ICON_SIZES.SMALL] }px`;
-		canvas.style.height = `${UIConstants.TANK_ICON_RESOLUTIONS[UIConstants.TANK_ICON_SIZES.SMALL] * 0.6 }px`;
-		// eslint-disable-next-line @typescript-eslint/no-loop-func
-		canvas.addEventListener('mouseup', () => {
-			const rect = canvas.getBoundingClientRect();
-			const win = canvas.ownerDocument.defaultView;
-
-			const top = rect.top + win.scrollY;
-			const left = rect.left + win.scrollX;
-
-			TankTrouble.TankInfoBox.show(left + (canvas.clientWidth / 2), top + (canvas.clientHeight / 2), id, canvas.clientWidth / 2, canvas.clientHeight / 4);
-		});
-		UITankIcon.loadPlayerTankIcon(canvas, UIConstants.TANK_ICON_SIZES.SMALL, id);
-
-		wrapper.append(canvas);
-		creatorsContainer.append(wrapper);
-	}
-	// Render name of primary creator
-	Backend.getInstance().getPlayerDetails(result => {
-		const username = typeof result === 'object' ? Utils.maskUnapprovedUsername(result) : 'Scrapped';
-		const width = UIConstants.TANK_ICON_RESOLUTIONS[UIConstants.TANK_ICON_SIZES.SMALL] + 10;
-		const height = 25;
-
-		const playerName = $(`<stroked-text text="${ username }" width="${ width }" height="${ height }"></stroked-text>`);
-		creatorsContainer.find('.tank.creator').append(playerName);
-	}, () => {}, () => {}, creators.creator || '-1', Caches.getPlayerDetailsCache());
 };
 
 /**
  * Scroll a post into view if it's not already
  * and highlight it once in view
- * @param {object} threadOrReply Post element
+ * @private
+ * @param {HTMLElement} postElement Post element
  */
-const highlightThreadOrReply = threadOrReply => {
-	const observer = new IntersectionObserver(entries => {
-		const [entry] = entries;
-		const inView = entry.isIntersecting;
+const scrollToPost = postElement => {
+	if (!postElement) return;
 
-		threadOrReply[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-		if (inView) {
-			threadOrReply.addClass('highlight');
-
+	const observer = new IntersectionObserver(([entry]) => {
+		postElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		if (entry.isIntersecting) {
+			postElement.classList.add('highlight');
 			observer.disconnect();
 		}
 	});
 
-	observer.observe(threadOrReply[0]);
+	observer.observe(postElement);
 };
 
 /**
- * Insert a share button to the thread or reply that copies the link to the post to clipboard
- * @param {object} threadOrReply Post data
- * @param {JQuery} threadOrReplyElement Post element
+ * Escape a HTML string
+ * @private
+ * @param {string} str HTML to sanitize
+ * @returns Escaped HTML
  */
-const addShare = (threadOrReply, threadOrReplyElement) => {
-	const isReply = Boolean(threadOrReply.threadId);
+const sanitizeHTML = str => {
+	const div = document.createElement('div');
+	div.textContent = str;
+	return div.innerHTML;
+};
 
+/**
+ * Add tank previews for all thread creators, not just the primary creator
+ * @param {object} post Post data
+ * @param {HTMLElement} postElement Post element
+ */
+const insertMultipleCreatorsInPost = (post, postElement) => {
+	if (!post || !postElement) return;
+
+	// Remove existing tank previews
+	postElement.querySelectorAll('.tank').forEach(el => el.remove());
+
+	// Remove tank canvas and name setter script
+	postElement.querySelector('script')?.remove();
+
+	const creators = buildCreatorMap(post);
+	const creatorsContainer = document.createElement('div');
+	creatorsContainer.className = `tanks tankCount${Object.keys(creators).length}`;
+
+	const container = postElement.querySelector('.container');
+	if (!container) return;
+	container.before(creatorsContainer);
+
+	const fragment = document.createDocumentFragment();
+	for (const [creatorType, playerId] of Object.entries(creators)) {
+		const id = playerId ?? '-1';
+		const wrapper = document.createElement('div');
+		wrapper.className = `tank ${creatorType}`;
+
+		const canvas = document.createElement('canvas');
+		canvas.width = UIConstants.TANK_ICON_WIDTH_SMALL;
+		canvas.height = UIConstants.TANK_ICON_HEIGHT_SMALL;
+		canvas.style.width = `${UIConstants.TANK_ICON_RESOLUTIONS[UIConstants.TANK_ICON_SIZES.SMALL]}px`;
+		canvas.style.height = `${UIConstants.TANK_ICON_RESOLUTIONS[UIConstants.TANK_ICON_SIZES.SMALL] * 0.6}px`;
+
+		canvas.addEventListener('mouseup', () => {
+			const rect = canvas.getBoundingClientRect();
+			const win = canvas.ownerDocument.defaultView;
+			const top = rect.top + win.scrollY;
+			const left = rect.left + win.scrollX;
+
+			TankTrouble.TankInfoBox.show(
+				left + canvas.clientWidth / 2,
+				top + canvas.clientHeight / 2,
+				id,
+				canvas.clientWidth / 2,
+				canvas.clientHeight / 4
+			);
+		});
+
+		UITankIcon.loadPlayerTankIcon(canvas, UIConstants.TANK_ICON_SIZES.SMALL, id);
+		wrapper.append(canvas);
+		fragment.append(wrapper);
+	}
+	creatorsContainer.append(fragment);
+
+	// Render primary creator name
+	Backend.getInstance().getPlayerDetails(result => {
+		const username = typeof result === 'object' ? Utils.maskUnapprovedUsername(result) : 'Scrapped';
+		const width = UIConstants.TANK_ICON_RESOLUTIONS[UIConstants.TANK_ICON_SIZES.SMALL] + 10;
+		const height = 25;
+
+		const tempWrapper = document.createElement('div');
+		tempWrapper.innerHTML = `<stroked-text text="${sanitizeHTML(username)}" width="${width}" height="${height}"></stroked-text>`;
+		const playerName = tempWrapper.firstElementChild;
+		creatorsContainer.querySelector('.tank.creator')?.append(playerName);
+	}, () => {}, () => {}, creators.creator || '-1', Caches.getPlayerDetailsCache());
+};
+
+/**
+ * Add a share button to copy the post link to the clipboard
+ * @param {object} post - Post data
+ * @param {HTMLElement} postElement - Post element
+ */
+const addShareButton = (post, postElement) => {
+	if (!post || !postElement) return;
+
+	const isReply = Boolean(post.threadId);
 	const url = new URL(window.location.href);
 	const wasWindowOpenedFromPostShare = url.searchParams.get('ref') === 'share';
-	if (wasWindowOpenedFromPostShare && isReply) {
-		const urlReplyId = Number(url.searchParams.get('id'));
-		if (urlReplyId === threadOrReply.id) highlightThreadOrReply(threadOrReplyElement);
-	}
 
-	const likeAction = threadOrReplyElement.find('.action.like');
+	if (wasWindowOpenedFromPostShare && isReply && Number(url.searchParams.get('id')) === post.id) scrollToPost(postElement);
 
-	let shareAction = $('<div class="action share"></div>');
-	const shareActionStandardImage = $(`<img class="standard" src="${Addons.t_url('assets/forum/share.{{png|avif}}')}" srcset="${Addons.t_url('assets/forum/share@2x.{{png|avif}}')} 2x"/>`);
-	const shareActionActiveImage = $(`<img class="active" src="${Addons.t_url('assets/forum/shareActive.{{png|avif}}')}" srcset="${Addons.t_url('assets/forum/shareActive@2x.{{png|avif}}')} 2x"/>`);
+	const likeAction = postElement.querySelector('.action.like');
+	if (!likeAction) return;
 
-	shareAction.append([shareActionStandardImage, shareActionActiveImage]);
+	const shareAction = document.createElement('div');
+	shareAction.className = 'action share';
+
+	const standardImg = document.createElement('img');
+	standardImg.className = 'standard';
+	standardImg.src = Addons.t_url('assets/forum/share.{{png|avif}}');
+	standardImg.srcset = `${Addons.t_url('assets/forum/share@2x.{{png|avif}}')} 2x`;
+
+	const activeImg = document.createElement('img');
+	activeImg.className = 'active';
+	activeImg.src = Addons.t_url('assets/forum/shareActive.{{png|avif}}');
+	activeImg.srcset = `${Addons.t_url('assets/forum/shareActive@2x.{{png|avif}}')} 2x`;
+
+	shareAction.append(standardImg, activeImg);
 	likeAction.after(shareAction);
 
-	// Replies have a duplicate actions container for
-	// both right and left-facing replies.
-	// So when the share button is appended, there may be multiple
-	// and so we need to realize those instances as well
-	shareAction = threadOrReplyElement.find('.action.share');
-
-	shareAction.tooltipster({
+	// Initialize tooltip
+	$(shareAction).tooltipster({
 		position: 'top',
 		offsetY: 5,
 
 		/** Reset tooltipster when mouse leaves */
 		functionAfter: () => {
-			shareAction.tooltipster('content', 'Copy link to clipboard');
+			$(shareAction).tooltipster('content', 'Copy link to clipboard');
 		}
-	});
-	shareAction.tooltipster('content', 'Copy link to clipboard');
+	}).tooltipster('content', 'Copy link to clipboard');
 
-	shareAction.on('mouseup', () => {
+	shareAction.addEventListener('mouseup', () => {
 		const urlConstruct = new URL('/forum', window.location.origin);
-
 		if (isReply) {
-			urlConstruct.searchParams.set('id', threadOrReply.id);
-			urlConstruct.searchParams.set('threadId', threadOrReply.threadId);
+			urlConstruct.searchParams.set('id', post.id);
+			urlConstruct.searchParams.set('threadId', post.threadId);
 		} else {
-			urlConstruct.searchParams.set('threadId', threadOrReply.id);
+			urlConstruct.searchParams.set('threadId', post.id);
 		}
-
 		urlConstruct.searchParams.set('ref', 'share');
 
 		ClipboardManager.copy(urlConstruct.href);
-
-		shareAction.tooltipster('content', 'Copied!');
+		$(shareAction).tooltipster('content', 'Copied!');
 	});
 };
 
 /**
- * Add text to details that shows when a post was last edited
- * @param {object} threadOrReply Post data
- * @param {JQuery} threadOrReplyElement Post element
+ * Add last edited timestamp to post details
+ * @param {object} post Post data
+ * @param {HTMLElement} postElement Post element
  */
-const addLastEdited = (threadOrReply, threadOrReplyElement) => {
-	const { created, latestEdit } = threadOrReply;
+const addLastEdited = (post, postElement) => {
+	if (!post || !postElement || !post.latestEdit) return;
 
-	if (latestEdit) {
-		const details = threadOrReplyElement.find('.bubble .details');
-		const detailsText = details.text();
-		const replyIndex = detailsText.indexOf('-');
-		const lastReply = replyIndex !== -1
-			? ` - ${ detailsText.slice(replyIndex + 1).trim()}`
-			: '';
+	const details = postElement.querySelector('.bubble .details');
+	if (!details) return;
 
-		// We remake creation time since the timeAgo
-		// function estimates months slightly off
-		// which may result in instances where the
-		// edited happened longer ago than the thread
-		// creation date
-		const createdAgo = timeAgo(new Date(created * 1000));
-		const editedAgo = `, edited ${ timeAgo(new Date(latestEdit * 1000)) }`;
+	const detailsText = details.textContent;
+	const replyIndex = detailsText.indexOf('-');
+	const lastReply = replyIndex !== -1 ? ` - ${detailsText.slice(replyIndex + 1).trim()}` : '';
 
-		details.text(`Created ${createdAgo}${editedAgo}${lastReply}`);
-	}
+	const createdAgo = timeAgo(new Date(post.created * 1000));
+	const editedAgo = `, edited ${timeAgo(new Date(post.latestEdit * 1000))}`;
+	details.textContent = `Created ${createdAgo}${editedAgo}${lastReply}`;
 };
 
 /**
- * Add anchor tags to links in posts
- * @param {object} _threadOrReply Post data
- * @param {JQuery} threadOrReplyElement Post element
+ * Add anchor tags to URLs in post content
+ * @param {object} _post Post data
+ * @param {HTMLElement} postElement Post element
  */
-const addHyperlinks = (_threadOrReply, threadOrReplyElement) => {
-	const threadOrReplyContent = threadOrReplyElement.find('.bubble .content');
+const addTextAnchors = (_post, postElement) => {
+	const postContent = postElement?.querySelector('.bubble .content');
+	if (!postContent) return;
 
-	if (threadOrReplyContent.length) {
-		const urlRegex = /(?<_>https?:\/\/[\w\-_]+(?:\.[\w\-_]+)+(?:[\w\-.,@?^=%&amp;:/~+#]*[\w\-@?^=%&amp;/~+#])?)/gu;
-		const messageWithLinks = threadOrReplyContent.html().replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
-		threadOrReplyContent.html(messageWithLinks);
-	}
+	const urlRegex = /https?:\/\/[\w\-_]+(?:\.[\w\-_]+)+(?:[\w\-.,@?^=%&:/~+#]*[\w\-@?^=%&/~+#])?/gu;
+	const html = postContent.innerHTML.replace(urlRegex, url => `<a href="${sanitizeHTML(url)}" target="_blank">${sanitizeHTML(url)}</a>`);
+	postContent.innerHTML = html;
 };
 
 /**
- * Check the latest three replies of a forum thread
- * and highlight the thread if any of them are unmoderated
- * @param {object} threadOrReply Post data
- * @param {JQuery} threadOrReplyElement Post element
+ * Highlight threads with unmoderated replies
+ * @param {object} post Post data
+ * @param {HTMLElement} postElement Post element
  */
-const addUnmoderatedHighlight = (threadOrReply, threadOrReplyElement) => {
-	const { hasAnyReplies } = threadOrReply;
-	if (hasAnyReplies) {
-		if (Users.getHighestGmLevel() < UIConstants.ADMIN_LEVEL_DELETE_THREAD_OR_REPLY) return;
+const addUnmoderatedHighlight = (post, postElement) => {
+	if (!post?.hasAnyReplies || Users.getHighestGmLevel() < UIConstants.ADMIN_LEVEL_DELETE_THREAD_OR_REPLY) return;
 
-		Backend.getInstance().getForumReplies(result => {
-			if (typeof result === 'object') {
-				if (!result.result) return;
+	Backend.getInstance().getForumReplies(result => {
+		if (typeof result === 'object') {
+			if (!result.result?.data?.replies) return;
 
-				const { replies } = result.result.data;
-				const hasUnmoderatedReplies = replies.some(reply => reply.moderatedBy === null);
-
-				if (hasUnmoderatedReplies) threadOrReplyElement.attr('data-unmoderated', 'true');
-				else threadOrReplyElement.attr('data-unmoderated', '');
-			}
-		}, null, null, threadOrReply.id, Number.MAX_SAFE_INTEGER, 'older', 0, 3);
-	}
+			const hasUnmoderatedReplies = result.result.data.replies.some(reply => reply.moderatedBy === null);
+			postElement.setAttribute('data-unmoderated', hasUnmoderatedReplies ? 'true' : '');
+		}
+	}, () => {}, () => {}, post.id, Number.MAX_SAFE_INTEGER, 'older', 0, 3);
 };
 
 /**
  * Add extra features to a thread or reply
- * @param {object} threadOrReply Post data
- * @param {JQuery} threadOrReplyElement Post element
+ * @param {object} post Post data
+ * @param {HTMLElement} postElement Post element
  */
-const addFeaturesToThreadOrReply = (threadOrReply, threadOrReplyElement) => {
-	insertMultipleCreators(threadOrReply, threadOrReplyElement);
-	addLastEdited(threadOrReply, threadOrReplyElement);
-	addShare(threadOrReply, threadOrReplyElement);
-	addHyperlinks(threadOrReply, threadOrReplyElement);
-	addUnmoderatedHighlight(threadOrReply, threadOrReplyElement);
+const addFeaturesToPost = (post, postElement) => {
+	insertMultipleCreatorsInPost(post, postElement);
+	addLastEdited(post, postElement);
+	addShareButton(post, postElement);
+	addTextAnchors(post, postElement);
+	addUnmoderatedHighlight(post, postElement);
 };
 
 /**
- * Handle a thread  or reply
- * @param {object} threadOrReply Post data
+ * Handle a thread or reply
+ * @param {object} post - Post data
  */
-const handleThreadOrReply = threadOrReply => {
-	if (threadOrReply === null) return;
+const handlePost = post => {
+	if (!post?.html) return;
 
-	const [key] = Object.keys(threadOrReply.html);
-	const html = threadOrReply.html[key];
+	const [key] = Object.keys(post.html);
+	if (typeof post.html[key] === 'string') {
+		let postElement = document.createElement('div');
+		postElement.innerHTML = post.html[key];
+		postElement = postElement.firstElementChild;
 
-	if (typeof html === 'string') {
-		const threadOrReplyElement = $($.parseHTML(html));
+		addFeaturesToPost(post, postElement);
 
-		addFeaturesToThreadOrReply(threadOrReply, threadOrReplyElement);
-		threadOrReply.html[key] = threadOrReplyElement;
-		threadOrReply.html._backup = html;
-	} else if (html instanceof $) {
-		// For some reason, the post breaks if it's already
-		// been parsed through here. Therefore, we pull
-		// from the backup html we set, and re-apply the changes
-		const threadOrReplyElement = $($.parseHTML(threadOrReply.html._backup));
+		post.html[key] = $(postElement);
+		post.html._backup = post.html[key];
+	} else if (post.html[key] instanceof $) {
+		let postElement = document.createElement('div');
+		postElement.innerHTML = post.html._backup;
+		postElement = postElement.firstElementChild;
 
-		addFeaturesToThreadOrReply(threadOrReply, threadOrReplyElement);
-		threadOrReply.html[key] = threadOrReplyElement;
+		addFeaturesToPost(post, postElement);
+
+		post.html[key] = $(postElement);
 	}
 };
 
@@ -268,13 +292,13 @@ const postHandler = (...args) => {
 		case 'postId':
 			// Both thread and reply with id might exist
 			// but the chances are very slim so we ignore that
-			handleThreadOrReply(model.getThreadById(postItem) || model.getReplyById(postItem));
+			handlePost(model.getThreadById(postItem) || model.getReplyById(postItem));
 			break;
 		case 'postList':
-			for (const post of postItem) handleThreadOrReply(post);
+			for (const post of postItem) handlePost(post);
 			break;
 		case 'post':
-			handleThreadOrReply(postItem);
+			handlePost(postItem);
 			break;
 		default:
 			break;
@@ -283,7 +307,7 @@ const postHandler = (...args) => {
 	// Whenever a change happens we must handle the selected thread
 	// as well, as its set by the getter functions, and not sent through
 	// the change event listeners
-	handleThreadOrReply(Forum.getInstance().model.getSelectedThread());
+	handlePost(Forum.getInstance().model.getSelectedThread());
 };
 
 const proxy = new Proxy({}, {
@@ -302,9 +326,10 @@ const proxy = new Proxy({}, {
 const { getInstance } = Forum;
 Forum.classMethod('getInstance', function(...args) {
 	const instance = getInstance.apply(this, args);
+	const { model } = instance;
 
-	instance.model.threadListChangeListeners = Array.from(new Set([proxy, ...instance.model.threadListChangeListeners]));
-	instance.model.replyListChangeListeners = Array.from(new Set([proxy, ...instance.model.replyListChangeListeners]));
+	model.threadListChangeListeners = [...new Set([proxy, ...model.threadListChangeListeners])];
+	model.replyListChangeListeners = [...new Set([proxy, ...model.replyListChangeListeners])];
 
 	return instance;
 });

@@ -1,29 +1,6 @@
 import { interceptFunction } from '../utils/gameUtils.js';
 
 /**
- * Add "minimum" quality constants to quality config
- */
-QualityManager.QUALITY_SETTINGS.MINIMUM = 'minimum';
-QualityManager.QUALITY_VALUES[QualityManager.QUALITY_SETTINGS.MINIMUM] = {
-	'tank explosion smoke count': 1,
-	'tank explosion fragment count': 0,
-	'missile launch smoke count': 2,
-	'missile smoke frequency': 360,
-	'mine explosion smoke count': 0,
-	'crate land dust count': 2,
-	'aimer min segment length': 0.5,
-	'aimer off max segment length': 2,
-	'aimer on max segment length': 1,
-	'bullet puff count': 1,
-	'shield inverse bolt probability': 1.0,
-	'shield spark particles per emit': 1,
-	'spawn zone inverse unstable particle probability': 1.0,
-	'spawn zone num collapse particles': 10
-};
-
-UIConstants.classField('SETTINGS_QUALITY_MAX_OPTION_HEIGHT', 200);
-
-/**
  * Insert minimum option element
  */
 interceptFunction(TankTrouble.SettingsBox, 'init', function(original, ...args) {

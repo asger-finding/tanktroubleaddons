@@ -195,48 +195,4 @@ $.widget('custom.deleteselectmenu', $.ui.selectmenu, {
 	}
 });
 
-(() => {
-	if (Phaser.VERSION === '2.6.2') return;
-
-	// Reintroduce missing time variables for Phaser CE >= 2.17.0
-	const originalTime = Phaser.Time.prototype;
-	Phaser.Time.prototype = Object.create(originalTime);
-
-	Object.defineProperty(Phaser.Time.prototype, 'physicsElapsed', {
-		get() {
-			return this.delta / 1000;
-		},
-		set(value) {
-			this.delta = value * 1000;
-		}
-	});
-
-	Object.defineProperty(Phaser.Time.prototype, 'physicsElapsedMS', {
-		get() {
-			return this.delta;
-		},
-		set(value) {
-			this.delta = value;
-		}
-	});
-
-	/* eslint-disable */
-	// https://github.com/phaserjs/phaser-ce/commit/52a89aaa09170bcc8a46b495a650bedb9ce76cc4
-	// This bug fix breaks functionality for UIAimerGraphics. Restore original function.
-	Phaser.Point.multiplyAdd = function(a, b, s, out) {
-		if (out === undefined) { out = new Phaser.Point(); }
-
-		return out.setTo(a.x + b.x * s, a.y + b.y * s);
-	};
-	/* eslint-enable */
-
-	// There is a bug in Phaser CE <2.8.2 which fails flipX for a Phaser Spine
-	// This is fixed after, but means that Laika will be "wrongly" flipped. We reverse the flip.
-	interceptFunction(UITankAvatarGroup.prototype, 'spawn', function(original, ...args) {
-		const result = original(...args);
-		if (this.avatarSpine) this.avatarSpine.skeleton.flipX = false;
-		return result;
-	});
-})();
-
 export const _isESmodule = true;

@@ -5,27 +5,34 @@ import { setupStoreHandler } from './common/store.js';
 setBrowserNamespace();
 setupStoreHandler();
 
+export interface AddonsMeta {
+	extensionUrl: string;
+	release: string;
+	data: string;
+	loader: string;
+}
+
 class Addons {
 
-	inject: HTMLScriptElement;
+	private inject: HTMLScriptElement;
 
-	meta = <{
-		extensionUrl: string;
-		release: string;
-		data: string;
-		loader: string;
-	}>{};
+	private meta: AddonsMeta = {
+		extensionUrl: '',
+		release: '',
+		data: '',
+		loader: ''
+	};
 
-	/** Create new addons class */
+	/** Create a new Addons instance */
 	constructor() {
 		this.inject = document.createElement('script');
 		this.inject.src = browser.runtime.getURL('scripts/inject.js');
 	}
 
 	/**
-	 * Load the extension into the website
+	 * Load the extension into the website by injecting the script and parsing loader metadata
 	 */
-	public load() {
+	public load(): void {
 		Addons.setupFetchNoCors();
 		Addons.setupFullscreen();
 
@@ -33,12 +40,16 @@ class Addons {
 			const code = String(loader.textContent);
 			loader.textContent = '';
 
-			const coreText = code.slice(
-				code.indexOf('.load(') + 6,
-				code.indexOf(',function(')
-			);
-			const releaseVersion = coreText.slice(1, coreText.indexOf('/content.php'));
-			const data = coreText.slice(coreText.indexOf('/content.php') + 14);
+			const loadStart = code.indexOf('.load(');
+			const funcStart = code.indexOf(',function(');
+			if (loadStart === -1 || funcStart === -1) throw new Error('Loader structure not recognized');
+
+			const coreText = code.slice(loadStart + 6, funcStart);
+			const releaseEnd = coreText.indexOf('/content.php');
+			if (releaseEnd === -1) throw new Error('Release version marker not found');
+
+			const releaseVersion = coreText.slice(1, releaseEnd);
+			const data = coreText.slice(releaseEnd + 14);
 
 			this.meta.extensionUrl = browser.runtime.getURL('');
 			this.meta.release = releaseVersion;
@@ -52,86 +63,69 @@ class Addons {
 	}
 
 	/**
-	 * Observe the nodetree for new elements and resolve for the initialization script
+	 * Wait for the loader script containing 'content.php' to appear in the document
+	 * @returns {Promise<HTMLScriptElement>} Resolves with the found script element
 	 */
 	private static waitForLoader(): Promise<HTMLScriptElement> {
-		/**
-		 * Traverse a callback from a MutationObserver event and run the callback
-		 * on any HTMLScriptElement in document.body
-		 * @param mutations Mutation record
-		 * @param cb Callback method
-		 */
-		const traverse = (mutations: MutationRecord[], cb: (node: HTMLScriptElement) => void): void => {
-			for (const mutationRecord of mutations) {
-				if (mutationRecord.target !== document.body) continue;
-
-				for (const node of mutationRecord.addedNodes) {
-					if (node instanceof HTMLScriptElement) {
-						// We found what might be the init script
-						// eslint-disable-next-line callback-return
-						cb(node);
-						break;
+		return new Promise(resolve => {
+			const observer = new MutationObserver((mutations, obs) => {
+				for (const mutation of mutations) {
+					for (const node of mutation.addedNodes) {
+						if (node instanceof HTMLScriptElement && node.textContent?.includes('content.php')) {
+							obs.disconnect();
+							resolve(node);
+							return;
+						}
 					}
 				}
-			}
-		};
-
-		return new Promise(resolve => {
-			new MutationObserver((mutations, observer) => {
-				traverse(mutations, node => {
-					if (node.textContent?.includes('content.php')) {
-						observer.disconnect();
-						resolve(node);
-					}
-				});
-			}).observe(document.documentElement, {
+			});
+			observer.observe(document.documentElement, {
 				childList: true,
 				subtree: true
 			});
 		});
-
 	}
 
 	/**
-	 * Get value(s) from the store
-	 * @param keys Array of keys to retrieve
-	 * @returns Value to the key
+	 * Retrieve multiple values from the browser store
+	 * @param {Array<string>} keys Array of keys to retrieve
+	 * @returns {Promise<Record<string, any>>} Resolves with key-value pairs
 	 */
-	static get(keys: Array<string>) {
+	static get(keys: Array<string>): Promise<Record<string, any>> {
 		return browser.storage.local.get(keys);
 	}
 
 	/**
-	 * Get a value from the store with a fallback value if undefined
-	 * @param key Key identifier
-	 * @param fallback Fallback value
-	 * @returns Value to the key or fallback value
+	 * Retrieve a value from the browser store or return a fallback if undefined
+	 * @param {string} key Key identifier
+	 * @param {any} fallback Fallback value if key is missing
+	 * @returns {Promise<any>} Resolves with the stored value or fallback
 	 */
-	static getWithFallback(key: string, fallback: any) {
-		return new Promise<string>(resolve => {
+	static getWithFallback(key: string, fallback: any): Promise<any> {
+		return new Promise(resolve => {
 			browser.storage.local.get(key, result => {
-				resolve(result[key] ?? fallback);
+				resolve(typeof result[key] !== 'undefined' ? result[key] : fallback);
 			});
 		});
 	}
 
 	/**
-	 * Set a value to the store given a key-value pair
-	 * @param key Key
-	 * @param value Value
+	 * Set a key-value pair in the browser store
+	 * @param {string} key Key to set
+	 * @param {any} value Value to assign
+	 * @returns {Promise<void>} Resolves when the value is set
 	 */
-	static set(key: string, value: string): void {
-		browser.storage.local.set({ [key]: value });
+	static set(key: string, value: any): Promise<void> {
+		return browser.storage.local.set({ [key]: value });
 	}
 
 	/**
-	 * Bypass cors for sites exempt in `host_permissions` in manifest
-	 * @param args Fetch arguments
-	 * @returns Resolves when fetch finalizes
+	 * Perform a CORS-exempt fetch via extension background message
+	 * @param {RequestInfo} resource Resource to fetch
+	 * @param {RequestInit} [options] Fetch options
+	 * @returns {Promise<unknown>} Resolves with the fetched data
 	 */
-	static async fetchNoCors(...args: Parameters<typeof fetch>): Promise<unknown> {
-		const [resource, options] = args;
-
+	static async fetchNoCors(resource: RequestInfo, options?: RequestInit): Promise<unknown> {
 		return new Promise((resolve, reject) => {
 			browser.runtime.sendMessage({
 				action: 'CORS_EXEMPT_FETCH',
@@ -139,52 +133,66 @@ class Addons {
 				options
 			}, response => {
 				if (response && response.success) resolve(response.data);
-				else reject(response.error || 'Unknown error');
+				else reject(response?.error || 'Unknown error');
 			});
 		});
 	}
 
 	/**
-	 * Set up listener for cors-bypass fetch requests from the inject scripts
+	 * Set up listener for CORS-exempt fetch requests from injected scripts
 	 */
-	static setupFetchNoCors() {
-		listen(['CORS_EXEMPT_FETCH'], ({ detail }) => {
-			if (!detail) throw new Error('No details provided for cors exempt fetch');
+	static setupFetchNoCors(): void {
+		listen<{ resource: string; options?: RequestInit; uuid?: string }>(
+			['CORS_EXEMPT_FETCH'],
+			(evt) => {
+				const { detail } = evt;
+				if (!detail) throw new Error('No details provided for CORS-exempt fetch');
 
-			const resource = detail.data?.resource;
-			if (!resource) throw new Error('No url provided for cors exempt fetch');
+				const { resource, options, uuid } = detail.data ?? {};
+				if (!resource) throw new Error('No resource provided for CORS-exempt fetch');
 
-			Addons.fetchNoCors(resource, detail.data?.options ?? {})
-				.then(result => {
-					dispatchMessage(null, {
-						type: 'CORS_EXEMPT_FETCH_RESULT',
-						data: {
-							result,
-							uuid: detail.data?.uuid
-						}
+				Addons.fetchNoCors(resource, options ?? {})
+					.then((result) => {
+						dispatchMessage(null, {
+							type: 'CORS_EXEMPT_FETCH_RESULT',
+							data: { result, uuid }
+						});
+					})
+					.catch((error) => {
+						dispatchMessage(null, {
+							type: 'CORS_EXEMPT_FETCH_ERROR',
+							data: { error, uuid }
+						});
 					});
-				});
-		});
+			}
+		);
 	}
 
 	/**
-	 * Set up listener for fullscreen toggle
+	 * Set up listener for fullscreen toggle requests from injected scripts
 	 */
-	static setupFullscreen() {
-		listen(['FULLSCREEN'], ({ detail }) => new Promise((resolve, reject) => {
+	static setupFullscreen(): void {
+		listen<{ state: string }>(['FULLSCREEN'], ({ detail }) => {
 			if (!detail) throw new Error('No details provided for fullscreen request');
 
 			const state = detail.data?.state;
 			if (!state) throw new Error('No state provided for fullscreen request');
 
-			browser.runtime.sendMessage({
-				action: 'FULLSCREEN',
-				state
-			}, response => {
-				if (response && response.success) resolve(response.data);
-				else reject(response.error || 'Unknown error');
+			return new Promise((resolve, reject) => {
+				browser.runtime.sendMessage({
+					action: 'FULLSCREEN',
+					state
+				}, response => {
+					if (response && response.success) resolve(response.data);
+					else reject(response?.error || 'Unknown error');
+				});
+			}).catch(error => {
+				dispatchMessage(null, {
+					type: 'FULLSCREEN_ERROR',
+					data: { error }
+				});
 			});
-		}));
+		});
 	}
 
 }

@@ -1,28 +1,29 @@
+import { AddonsMeta } from './index.ts';
+
 (() => {
-	const meta = JSON.parse(document.currentScript?.dataset.meta ?? '{}');
+	const metaString = document.currentScript?.dataset.meta;
+	if (typeof metaString === 'undefined') throw new Error('Inject failed to get meta string');
 
-	/**
-	 * Inject a script into the site
-	 * @param path Path to script in extension
-	 * @param fetchPriority Should the script have priority?
-	 * @returns Promise when loaded
-	 */
-	const inject = (path: string, fetchPriority?: true) => {
-		const script = document.createElement('script');
-		script.src = meta.extensionUrl + path;
-		script.type = 'module';
-		script.fetchPriority = fetchPriority ? 'high' : 'auto';
-
-		document.head.append(script);
-
-		return new Promise<void>(resolve => {
-			/**
-			 * Resolves once script onload is triggered
-			 * @returns void
-			 */
-			script.addEventListener('load', () => resolve());
-		});
+	let meta: AddonsMeta = {
+		extensionUrl: '',
+		release: '',
+		data: '',
+		loader: ''
 	};
+
+	try {
+		const parsed = JSON.parse(metaString);
+		if (
+			typeof parsed.extensionUrl !== 'string'
+			|| typeof parsed.release !== 'string'
+			|| typeof parsed.data !== 'string'
+			|| typeof parsed.loader !== 'string'
+		) throw new Error();
+
+		meta = parsed;
+	} catch {
+		throw new Error('Inject failed to parse valid meta structure');
+	}
 
 	Object.defineProperty(window, 'Addons', {
 		value: {},
@@ -33,11 +34,31 @@
 	Object.assign(Addons, {
 		/**
 		 * Create a link to an extension resource
-		 * @param url Path to file
-		 * @returns Url to concate
+		 * @param path Path to file
+		 * @returns Concatenated url
 		 */
-		t_url: (url: string) => `${ meta.extensionUrl }${ url }`
+		t_url: (path: string) => `${ meta.extensionUrl }${ path }`
 	});
+
+	/**
+	 * Inject a script into the main site
+	 * @param path Path to script in extension
+	 * @param highPriority Should the script have fetch priority?
+	 * @returns Resolves when the script has loaded
+	 */
+	const inject = (path: string, highPriority?: true) => {
+		const script = document.createElement('script');
+		script.src = `${ meta.extensionUrl }${ path }`;
+		script.type = 'module';
+		script.fetchPriority = highPriority ? 'high' : 'auto';
+
+		document.head.append(script);
+
+		return new Promise<void>((resolve, reject) => {
+			script.addEventListener('load', () => resolve());
+			script.addEventListener('error', () => reject(new Error(`Failed to load script: ${path}`)));
+		});
+	};
 
 	Promise.all([
 		inject('scripts/content/patches.js', true),
@@ -65,7 +86,10 @@
 			inject('scripts/content/adminOverlays.js')
 		]);
 
+		// Run TankTrouble loader
 		// eslint-disable-next-line @typescript-eslint/no-implied-eval
 		Function(meta.loader)();
+	}).catch(error => {
+		throw new Error(`Addons loader failed: ${ error.message }`);
 	});
 })();

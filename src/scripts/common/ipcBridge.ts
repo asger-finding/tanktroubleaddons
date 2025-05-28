@@ -2,17 +2,17 @@ import { setBrowserNamespace } from '../common/set-browser-namespace.js';
 
 setBrowserNamespace();
 
-type MessageData = {
+type MessageData<T = Record<string, any>> = {
 	type: string;
 	key?: string;
-	data?: Record<string, any>;
+	data?: T;
 };
 
-interface CustomIpcEvent extends Partial<Event> {
-	detail?: MessageData
+interface CustomIpcEvent<T = Record<string, any>> extends Event {
+	detail?: MessageData<T>;
 }
 
-export type Callback = (evt: CustomIpcEvent) => void;
+export type Callback<T = Record<string, any>> = (evt: CustomIpcEvent<T>) => void;
 
 export enum Process {
 	MAIN = 'addons_main',
@@ -28,56 +28,61 @@ const foreignProcess: Process = typeof browser.runtime === 'undefined'
 
 /**
  * Dispatch a message over custom ipc
- * @param to Recepient
+ * @param to Recipient process or null for self
  * @param data Message data
  */
-export const dispatchMessage = (to: Process | null, data: MessageData) => {
+export const dispatchMessage = <T>(to: Process | null, data: MessageData<T>): void => {
 	const eventName = to || thisProcess;
 	const event = new CustomEvent(eventName, { detail: data });
 	dispatchEvent(event);
 };
 
 /**
- * Receive ipc messages
- * @param types Only subscribe to certain messages
- * @param cb Callback function
- * @param from Expected sender (optional)
+ * Subscribe to ipc messages
+ * @param types Specific message types or null for all
+ * @param cb Callback to execute
+ * @param from Expected sender process or null
  */
-export const listen = (types: MessageData['type'][] | null, cb: Callback, from?: Process | null) => {
+export const listen = <T>(types: Array<MessageData['type']> | null, cb: Callback<T>, from?: Process | null): void => {
 	const eventName = from || foreignProcess;
-	addEventListener(eventName, (evt: CustomIpcEvent) => {
-		const type = evt.detail?.type;
-		if (types === null || (type && types.includes(type))) return cb(evt);
+	addEventListener(eventName, (evt: Event) => {
+		const customEvt = evt as CustomIpcEvent<T>;
+		const type = customEvt.detail?.type;
+
+		if (types === null || (type && types.includes(type))) return cb(customEvt);
 		return null;
 	}, { passive: true });
 };
 
 /**
- * Receive a specific ipc message once, then destroy listener
- * @param type Message to listen for
- * @param conditional Specific key identifier to match against
- * @param cb Callback function
- * @param from Expected sender (optional)
+ * Subscribe once to a specific ipc message, then remove listener
+ * @param type Message type to listen for
+ * @param conditional Filter function
+ * @param cb Callback to execute on match
+ * @param from Expected sender process or null
  */
-export const once = (type: MessageData['type'], conditional: (evt: CustomIpcEvent) => boolean, cb: Callback, from?: Process | null) => {
+export const once = <T>(
+	type: MessageData['type'],
+	conditional: (evt: CustomIpcEvent<T>) => boolean,
+	cb: Callback<T>,
+	from?: Process | null
+): void => {
 	const eventName = from || foreignProcess;
 
 	/**
 	 * One-time listener
 	 * @param evt Event object
-	 * @returns void
 	 */
-	const listener = (evt: CustomIpcEvent) => {
-		if (evt.detail?.type === type) {
-			if (conditional !== null && !conditional(evt)) return null;
-
+	const listener = (evt: Event): void => {
+		const customEvt = evt as CustomIpcEvent<T>;
+		if (customEvt.detail?.type === type && conditional(customEvt)) {
 			removeEventListener(eventName, listener);
-			return cb(evt);
+			// eslint-disable-next-line callback-return
+			cb(customEvt);
 		}
-
-		return null;
 	};
-	addEventListener(eventName, listener, { passive: true });
+
+	addEventListener(eventName, listener, { passive: false });
 };
 
 export const _isESmodule = true;

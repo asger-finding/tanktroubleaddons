@@ -34,10 +34,12 @@ const enabledIconPaths = {
 
 /**
  * Check if url domain is TankTrouble
- * @param url URL string
+ * @param url Tab URL
  * @returns Is TankTrouble?
  */
-function isTankTrouble(url: string) {
+function isTankTrouble(url: chrome.tabs.Tab['url']) {
+	if (typeof url === 'undefined') return false;
+
 	try {
 		const { hostname } = new URL(url);
 		return hostname === 'tanktrouble.com' || hostname.endsWith('.tanktrouble.com');
@@ -65,7 +67,6 @@ async function getFocusedTab() {
 async function toggleFullscreen(state?: 'on' | 'off') {
 	const tab = await getFocusedTab();
 	if (tab === null) return;
-	if (typeof tab.url === 'undefined') return;
 
 	const { windowId } = tab;
 
@@ -85,10 +86,11 @@ async function toggleFullscreen(state?: 'on' | 'off') {
  * Function to update the icon based on the URL
  * @param tabId Current tab id
  */
-function updateIcon(tabId: number) {
+function updateIcon(tabId: chrome.tabs.Tab['id']) {
+	if (typeof tabId === 'undefined') return;
+
 	chrome.tabs.get(tabId, tab => {
 		if (chrome.runtime.lastError) return;
-		if (typeof tab.url === 'undefined') return;
 
 		const icons = isTankTrouble(tab.url)
 			? enabledIconPaths
@@ -104,7 +106,6 @@ async function toggleMenu() {
 	const tab = await getFocusedTab();
 
 	if (tab === null) return;
-	if (typeof tab.url === 'undefined') return;
 	if (typeof tab.id === 'undefined') return;
 
 	if (isTankTrouble(tab.url)) {
@@ -147,6 +148,5 @@ browser.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 
 	return null;
 });
-
 
 //# HMRBackground

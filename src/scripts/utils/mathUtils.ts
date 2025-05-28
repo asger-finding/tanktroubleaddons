@@ -1,8 +1,8 @@
-type PolygonPoint = {
+interface PolygonPoint {
 	x: number;
 	y: number;
 	flipped: boolean;
-};
+}
 
 /**
  * Rounds a float to the nearest decimal point `precision`
@@ -92,9 +92,8 @@ export const calculateFileHash = async(file: File) => {
 
 /**
  * Generate a new UUID
+ * http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript/21963136#21963136
  * @author Jeff Ward (jcward.com)
- * @license MIT license
- * @link http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript/21963136#21963136
  * @returns RFC4122 version 4 compliant UUID
  */
 export const generateUUID = (() => {

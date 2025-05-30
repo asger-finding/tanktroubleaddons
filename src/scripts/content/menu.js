@@ -340,23 +340,23 @@ listen(['TOGGLE_MENU'], () => Addons.menu.toggle());
 /**
  * Insert addons button and addons (ironvault) lookup buttons on TankInfoBox initialize
  */
-interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) => {
+interceptFunction(TankTrouble.TankInfoBox, '_initialize', function(original, ...args) {
 	original(...args);
 
-	const addonsButton = this.infoAddons = $('<div class="button" title=""/>');
-	const standardAddons = Addons.addImageWithClasses(addonsButton, 'standard', 'assets/menu/menu.{{png|avif}}');
-	const activeAddons = Addons.addImageWithClasses(addonsButton, 'active', 'assets/menu/menuActive.{{png|avif}}');
+	this.infoAddons = $('<div class="button" title=""/>');
+	const standardAddons = Addons.addImageWithClasses(this.infoAddons, 'standard', 'assets/menu/menu.{{png|avif}}');
+	const activeAddons = Addons.addImageWithClasses(this.infoAddons, 'active', 'assets/menu/menuActive.{{png|avif}}');
 
-	const addonsLookupButton = this.infoAddonsLookup = $('<div class="button" title=""/>');
-	const standardAddonsLookup = Addons.addImageWithClasses(addonsLookupButton, 'standard', 'assets/menu/menu.{{png|avif}}');
-	const activeAddonsLookup = Addons.addImageWithClasses(addonsLookupButton, 'active', 'assets/menu/menuActive.{{png|avif}}');
+	this.infoAddonsLookup = $('<div class="button" title=""/>');
+	const standardAddonsLookup = Addons.addImageWithClasses(this.infoAddonsLookup, 'standard', 'assets/menu/menu.{{png|avif}}');
+	const activeAddonsLookup = Addons.addImageWithClasses(this.infoAddonsLookup, 'active', 'assets/menu/menuActive.{{png|avif}}');
 
-	addonsButton.tooltipster({
+	this.infoAddons.tooltipster({
 		position: 'right',
 		offsetX: 5
 	});
 
-	addonsLookupButton.tooltipster({
+	this.infoAddonsLookup.tooltipster({
 		position: 'left',
 		offsetX: 5
 	});
@@ -371,14 +371,14 @@ interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) =>
 			height: '52px'
 		});
 
-	addonsButton.on('mouseup', () => {
+	this.infoAddons.on('mouseup', () => {
 		if (this.showing) {
 			this.hide();
 			Addons.menu.toggle();
 		}
 	});
 
-	addonsLookupButton.on('mouseup', () =>{
+	this.infoAddonsLookup.on('mouseup', () =>{
 		if (this.showing) {
 			Addons.menu.init();
 			Addons.menu.currentPage = 'ironvault';
@@ -397,16 +397,16 @@ interceptFunction(TankTrouble.TankInfoBox, '_initialize', (original, ...args) =>
 		}
 	});
 
-	addonsButton.append([standardAddons, activeAddons]);
-	addonsLookupButton.append([standardAddonsLookup, activeAddonsLookup]);
-	addonsButton.insertBefore(this.infoAccount);
-	addonsLookupButton.insertBefore(this.infoAdminLookup);
+	this.infoAddons.append([standardAddons, activeAddons]);
+	this.infoAddonsLookup.append([standardAddonsLookup, activeAddonsLookup]);
+	this.infoAddons.insertBefore(this.infoAccount);
+	this.infoAddonsLookup.insertBefore(this.infoAdminLookup);
 });
 
 /**
  * Show Addons button on own user or IronVault lookup button on foreign user
  */
-interceptFunction(TankTrouble.TankInfoBox, 'show', (original, ...args) => {
+interceptFunction(TankTrouble.TankInfoBox, 'show', function(original, ...args) {
 	original(...args);
 
 	const [,, playerId] = args;

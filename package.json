@@ -57,6 +57,8 @@
     "iso-8859-15": "^3.0.4",
     "match-sorter": "^6.3.4",
     "maxrects-packer": "^2.7.3",
+    "micromark": "^4.0.2",
+    "micromark-extension-gfm-autolink-literal": "^2.1.0",
     "wcag-contrast": "^3.0.0",
     "webext-sync": "^2.0.4"
   }

@@ -792,6 +792,15 @@ stroked-text {
 	}
 
 	.thread, .reply {
+		.bubble .content {
+			white-space: normal;
+
+			* {
+				margin-top: 0;
+				margin-bottom: 0;
+			}
+		}
+
 		.share {
 			&:active .active,
 			&:not(:active) .standard {

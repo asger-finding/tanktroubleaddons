@@ -1,3 +1,8 @@
+import {
+  gfmAutolinkLiteral,
+  gfmAutolinkLiteralHtml
+} from 'micromark-extension-gfm-autolink-literal';
+import { micromark } from 'micromark';
 import { timeAgo } from '../utils/timeUtils.js';
 
 /**
@@ -37,12 +42,12 @@ const scrollToPost = postElement => {
 };
 
 /**
- * Escape a HTML string
+ * Escape a HTML string to prevent XSS
  * @private
- * @param {string} str HTML to sanitize
+ * @param {string} str HTML string to sanitize
  * @returns Escaped HTML
  */
-const sanitizeHTML = str => {
+const escapeHTML = str => {
 	const div = document.createElement('div');
 	div.textContent = str;
 	return div.innerHTML;
@@ -110,7 +115,7 @@ const insertMultipleCreatorsInPost = (post, postElement) => {
 		const height = 25;
 
 		const tempWrapper = document.createElement('div');
-		tempWrapper.innerHTML = `<stroked-text text="${sanitizeHTML(username)}" width="${width}" height="${height}"></stroked-text>`;
+		tempWrapper.innerHTML = `<stroked-text text="${escapeHTML(username)}" width="${width}" height="${height}"></stroked-text>`;
 		const playerName = tempWrapper.firstElementChild;
 		creatorsContainer.querySelector('.tank.creator')?.append(playerName);
 	}, () => {}, () => {}, creators.creator || '-1', Caches.getPlayerDetailsCache());
@@ -196,17 +201,48 @@ const addLastEdited = (post, postElement) => {
 };
 
 /**
- * Add anchor tags to URLs in post content
- * @param {object} _post Post data
+ * Get the nth line of a text
+ * @private
+ * @param {string} text Text to extract line from
+ * @param {number} line Line index
+ * @returns {string|null} Line content or null
+ */
+function getLine(text, line) {
+	const lines = text.split('\n');
+	return typeof lines[line] !== 'undefined' ? `${lines[line]  }\n` : null;
+}
+
+/**
+ * Add markdown language to posts
+ * @param {object} post Post data
  * @param {HTMLElement} postElement Post element
  */
-const addTextAnchors = (_post, postElement) => {
+const addMarkdown = (post, postElement) => {
 	const postContent = postElement?.querySelector('.bubble .content');
 	if (!postContent) return;
 
-	const urlRegex = /https?:\/\/[\w\-_]+(?:\.[\w\-_]+)+(?:[\w\-.,@?^=%&:/~+#]*[\w\-@?^=%&/~+#])?/gu;
-	const html = postContent.innerHTML.replace(urlRegex, url => `<a href="${sanitizeHTML(url)}" target="_blank">${sanitizeHTML(url)}</a>`);
-	postContent.innerHTML = html;
+	postContent.innerHTML = micromark(post.message, {
+		lineEndingStyle: '<br>',
+		extensions: [gfmAutolinkLiteral()],
+		htmlExtensions: [
+			gfmAutolinkLiteralHtml(),
+			{
+				// Preserve newlines
+				enter: {
+					lineEnding(token) {
+						this.raw(
+							getLine(post.message, token.start.line).trim() === ''
+								? ''
+								: '<br>'
+						);
+					},
+					lineEndingBlank() {
+						this.raw('<br>');
+					}
+				}
+			}
+		]
+	});
 };
 
 /**
@@ -236,7 +272,7 @@ const addFeaturesToPost = (post, postElement) => {
 	insertMultipleCreatorsInPost(post, postElement);
 	addLastEdited(post, postElement);
 	addShareButton(post, postElement);
-	addTextAnchors(post, postElement);
+	addMarkdown(post, postElement);
 	addUnmoderatedHighlight(post, postElement);
 };
 
@@ -333,5 +369,3 @@ Forum.classMethod('getInstance', function(...args) {
 
 	return instance;
 });
-
-export const _isESmodule = true;

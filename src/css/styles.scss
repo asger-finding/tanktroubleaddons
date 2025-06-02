@@ -795,6 +795,10 @@ stroked-text {
 		.bubble .content {
 			white-space: normal;
 
+			.CodeMirror .CodeMirror-cursors {
+				display: none;
+			}
+
 			* {
 				margin-top: 0;
 				margin-bottom: 0;

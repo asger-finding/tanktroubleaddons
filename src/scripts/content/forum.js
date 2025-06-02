@@ -1,6 +1,7 @@
+import { StoreEvent, onStateChange } from '../common/store.js';
 import {
-  gfmAutolinkLiteral,
-  gfmAutolinkLiteralHtml
+	gfmAutolinkLiteral,
+	gfmAutolinkLiteralHtml
 } from 'micromark-extension-gfm-autolink-literal';
 import { micromark } from 'micromark';
 import { timeAgo } from '../utils/timeUtils.js';
@@ -22,6 +23,80 @@ const buildCreatorMap = post => {
 };
 
 /**
+ * Escape a HTML string to prevent XSS
+ * @private
+ * @param {string} str HTML string to sanitize
+ * @returns Escaped HTML
+ */
+const escapeHTML = str => {
+	const div = document.createElement('div');
+	div.textContent = str;
+	return div.innerHTML;
+};
+
+/**
+ * Get the nth line of a text
+ * @private
+ * @param {string} text Text to extract line from
+ * @param {number} line Line index
+ * @returns {string|null} Line content or null
+ */
+const getLine = (text, line) => {
+	const lines = text.split('\n');
+	return typeof lines[line] !== 'undefined' ? `${lines[line]  }\n` : null;
+};
+
+/**
+ * Refresh code block appearances based on the site theme
+ * @param {HTMLElement} parentElement Wrapper element
+ * @param {boolean} isDarkTheme Is the site dark?
+ */
+const refreshCodeMirrorTheme = (parentElement, isDarkTheme) => {
+	const cmInstances = parentElement.querySelectorAll('.forum .bubble .content code .CodeMirror');
+	for (const cm of cmInstances) {
+		cm.classList.replace(
+			isDarkTheme ? 'cm-s-default' : 'cm-s-blackboard',
+			isDarkTheme ? 'cm-s-blackboard' : 'cm-s-default'
+		);
+	}
+};
+
+/**
+ * Initialize codemirror for all codeblocks in the post
+ * @private
+ * @param {HTMLElement} postContent Post content element
+ */
+const initializeCodeBlocks = postContent => {
+	const codeblocks = postContent.querySelectorAll('code');
+	for (const codeblock of codeblocks) {
+		const value = codeblock.textContent;
+		const [, language] = codeblock.className.split('-');
+		codeblock.innerHTML = '';
+
+		// eslint-disable-next-line new-cap
+		const editor = CodeMirror(codeblock, {
+			value,
+			mode: language || 'javacript',
+			theme: 'default',
+			lineNumbers: false,
+			readOnly: true
+		});
+
+		const isDarkTheme = document.documentElement.classList.contains('dark');
+		if (isDarkTheme) editor.options.theme = 'blackboard';
+
+		// https://stackoverflow.com/questions/8349571/codemirror-editor-is-not-loading-content-until-clicked
+		setTimeout(() => {
+			// Refresh CodeMirror
+			editor.refresh();
+
+			// Refresh HTMLElement
+			refreshCodeMirrorTheme(postContent, isDarkTheme);
+		}, 1);
+	}
+};
+
+/**
  * Scroll a post into view if it's not already
  * and highlight it once in view
  * @private
@@ -39,18 +114,6 @@ const scrollToPost = postElement => {
 	});
 
 	observer.observe(postElement);
-};
-
-/**
- * Escape a HTML string to prevent XSS
- * @private
- * @param {string} str HTML string to sanitize
- * @returns Escaped HTML
- */
-const escapeHTML = str => {
-	const div = document.createElement('div');
-	div.textContent = str;
-	return div.innerHTML;
 };
 
 /**
@@ -201,27 +264,15 @@ const addLastEdited = (post, postElement) => {
 };
 
 /**
- * Get the nth line of a text
- * @private
- * @param {string} text Text to extract line from
- * @param {number} line Line index
- * @returns {string|null} Line content or null
- */
-function getLine(text, line) {
-	const lines = text.split('\n');
-	return typeof lines[line] !== 'undefined' ? `${lines[line]  }\n` : null;
-}
-
-/**
  * Add markdown language to posts
- * @param {object} post Post data
+ * @param {object} _post Post data
  * @param {HTMLElement} postElement Post element
  */
-const addMarkdown = (post, postElement) => {
+const addMarkdown = (_post, postElement) => {
 	const postContent = postElement?.querySelector('.bubble .content');
 	if (!postContent) return;
 
-	postContent.innerHTML = micromark(post.message, {
+	postContent.innerHTML = micromark(_post.message, {
 		lineEndingStyle: '<br>',
 		extensions: [gfmAutolinkLiteral()],
 		htmlExtensions: [
@@ -231,7 +282,7 @@ const addMarkdown = (post, postElement) => {
 				enter: {
 					lineEnding(token) {
 						this.raw(
-							getLine(post.message, token.start.line).trim() === ''
+							getLine(_post.message, token.start.line).trim() === ''
 								? ''
 								: '<br>'
 						);
@@ -243,6 +294,8 @@ const addMarkdown = (post, postElement) => {
 			}
 		]
 	});
+
+	initializeCodeBlocks(postContent);
 };
 
 /**
@@ -368,4 +421,17 @@ Forum.classMethod('getInstance', function(...args) {
 	model.replyListChangeListeners = [...new Set([proxy, ...model.replyListChangeListeners])];
 
 	return instance;
+});
+
+onStateChange(change => {
+	const { detail } = change;
+
+	if (
+		detail?.type === StoreEvent.STORE_CHANGE
+		&& detail.data
+		&& detail.data.curr.theme ) {
+		const { curr } = detail.data;
+
+		refreshCodeMirrorTheme(document.body, curr.theme.colorScheme === 'dark');
+	}
 });

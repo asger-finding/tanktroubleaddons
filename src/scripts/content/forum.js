@@ -3,6 +3,7 @@ import {
 	gfmAutolinkLiteral,
 	gfmAutolinkLiteralHtml
 } from 'micromark-extension-gfm-autolink-literal';
+import { interceptFunction } from '../utils/gameUtils.js';
 import { micromark } from 'micromark';
 import { timeAgo } from '../utils/timeUtils.js';
 
@@ -35,15 +36,38 @@ const escapeHTML = str => {
 };
 
 /**
- * Get the nth line of a text
- * @private
- * @param {string} text Text to extract line from
- * @param {number} line Line index
- * @returns {string|null} Line content or null
+ * Micromark extension to match newlines to the native forum layout
+ * @param {string} text Text of markdown object
+ * @returns {object} Extension
  */
-const getLine = (text, line) => {
-	const lines = text.split('\n');
-	return typeof lines[line] !== 'undefined' ? `${lines[line]  }\n` : null;
+const gfmFixNewlines = text => {
+
+	/**
+	 * Get the nth line of the text
+	 * @private
+	 * @param {number} line Line index
+	 * @returns {string|null} Line content or null
+	 */
+	const getLine = line => {
+		const lines = text.split('\n');
+		return typeof lines[line] !== 'undefined' ? `${lines[line]  }\n` : null;
+	};
+
+	return {
+		// Preserve newlines
+		enter: {
+			lineEnding(token) {
+				this.raw(
+					getLine(token.start.line).trim() === ''
+						? ''
+						: '<br>'
+				);
+			},
+			lineEndingBlank() {
+				this.raw('<br>');
+			}
+		}
+	};
 };
 
 /**
@@ -67,23 +91,22 @@ const refreshCodeMirrorTheme = (parentElement, isDarkTheme) => {
  * @param {HTMLElement} postContent Post content element
  */
 const initializeCodeBlocks = postContent => {
-	const codeblocks = postContent.querySelectorAll('code');
+	const codeblocks = postContent.querySelectorAll('pre code');
 	for (const codeblock of codeblocks) {
 		const value = codeblock.textContent;
 		const [, language] = codeblock.className.split('-');
 		codeblock.innerHTML = '';
 
+		const isDarkTheme = document.documentElement.classList.contains('dark');
+
 		// eslint-disable-next-line new-cap
 		const editor = CodeMirror(codeblock, {
 			value,
 			mode: language || 'javacript',
-			theme: 'default',
+			theme: isDarkTheme ? 'blackboard' : 'default',
 			lineNumbers: false,
 			readOnly: true
 		});
-
-		const isDarkTheme = document.documentElement.classList.contains('dark');
-		if (isDarkTheme) editor.options.theme = 'blackboard';
 
 		// https://stackoverflow.com/questions/8349571/codemirror-editor-is-not-loading-content-until-clicked
 		setTimeout(() => {
@@ -94,6 +117,60 @@ const initializeCodeBlocks = postContent => {
 			refreshCodeMirrorTheme(postContent, isDarkTheme);
 		}, 1);
 	}
+};
+
+/**
+ * Render markdown on an element
+ * @private
+ * @param {HTMLElement} element Target element
+ * @param {string} text Markdown text
+ */
+const renderMarkdown = (element, text) => {
+	element.innerHTML = micromark(text, {
+		lineEndingStyle: '<br>',
+		extensions: [gfmAutolinkLiteral()],
+		htmlExtensions: [
+			gfmAutolinkLiteralHtml(),
+			gfmFixNewlines(text)
+		]
+	});
+
+	initializeCodeBlocks(element);
+};
+
+/**
+ * Add a markdown tab switcher to a textfield
+ * @private
+ * @param {JQuery} wrapper Wrapper element
+ * @param {JQuery} textarea Textarea element
+ */
+const addMarkdownPreview = (wrapper, textarea) => {
+	const editor = $('<div class="editor"></div>');
+	const tabs = $('<div class="editor-tabs"></div>');
+	const editTab = $('<button type="button" class="editor-tab active" data-target="edit">Edit your post</button>');
+	const previewTab = $('<button type="button" class="editor-tab" data-target="preview">Preview post</button>');
+	const editPane = $('<div class="edit-pane active"></div>');
+	const previewPane = $('<div class="preview-pane"></div>');
+
+	renderMarkdown(previewPane[0], textarea.val());
+
+	editPane.append(textarea);
+	tabs.append([editTab, previewTab]);
+	editor.append([tabs, editPane, previewPane]);
+	wrapper.append(editor);
+
+	// Tab switching logic
+	tabs.on('click', '.editor-tab', function() {
+		const target = $(this).data('target');
+
+		tabs.find('.editor-tab').removeClass('active');
+		$(this).addClass('active');
+
+		editor.find('.edit-pane, .preview-pane').removeClass('active');
+		editor.find(`.${target}-pane`).addClass('active');
+
+		if (target === 'preview') renderMarkdown(previewPane[0], textarea.val());
+	});
 };
 
 /**
@@ -265,37 +342,18 @@ const addLastEdited = (post, postElement) => {
 
 /**
  * Add markdown language to posts
- * @param {object} _post Post data
+ * @param {object} post Post data
  * @param {HTMLElement} postElement Post element
  */
-const addMarkdown = (_post, postElement) => {
+const addMarkdownToPost  = (post, postElement) => {
 	const postContent = postElement?.querySelector('.bubble .content');
 	if (!postContent) return;
 
-	postContent.innerHTML = micromark(_post.message, {
-		lineEndingStyle: '<br>',
-		extensions: [gfmAutolinkLiteral()],
-		htmlExtensions: [
-			gfmAutolinkLiteralHtml(),
-			{
-				// Preserve newlines
-				enter: {
-					lineEnding(token) {
-						this.raw(
-							getLine(_post.message, token.start.line).trim() === ''
-								? ''
-								: '<br>'
-						);
-					},
-					lineEndingBlank() {
-						this.raw('<br>');
-					}
-				}
-			}
-		]
-	});
+	renderMarkdown(postContent, post.message);
 
-	initializeCodeBlocks(postContent);
+	const edit = postElement.querySelector('.bubble .edit');
+	if (!edit) return;
+	addMarkdownPreview($(edit), $(edit).find('textarea'));
 };
 
 /**
@@ -317,6 +375,19 @@ const addUnmoderatedHighlight = (post, postElement) => {
 };
 
 /**
+ * Add a markdown preview button to the compose field
+ */
+const addMarkdownPreviewToComposeFields = () => {
+	const compose = $('#threadsWrapper .compose .bubble')
+		.add('#repliesWrapper .compose .bubble');
+
+	compose.each(function() {
+		const $this = $(this);
+		if ($this.find('.editor').length === 0) addMarkdownPreview($this, $this.find('textarea'));
+	});
+};
+
+/**
  * Add extra features to a thread or reply
  * @param {object} post Post data
  * @param {HTMLElement} postElement Post element
@@ -325,7 +396,7 @@ const addFeaturesToPost = (post, postElement) => {
 	insertMultipleCreatorsInPost(post, postElement);
 	addLastEdited(post, postElement);
 	addShareButton(post, postElement);
-	addMarkdown(post, postElement);
+	addMarkdownToPost(post, postElement);
 	addUnmoderatedHighlight(post, postElement);
 };
 
@@ -419,6 +490,12 @@ Forum.classMethod('getInstance', function(...args) {
 
 	model.threadListChangeListeners = [...new Set([proxy, ...model.threadListChangeListeners])];
 	model.replyListChangeListeners = [...new Set([proxy, ...model.replyListChangeListeners])];
+
+	interceptFunction(instance, 'updateComposeAndStatus', (original, ...funcArgs) => {
+		addMarkdownPreviewToComposeFields();
+
+		return original(...funcArgs);
+	});
 
 	return instance;
 });

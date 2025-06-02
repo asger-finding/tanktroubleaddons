@@ -407,6 +407,17 @@ $tooltipster-accent-dark: rgb(25 25 25);
 		.editing .bubble {
 			background: rgb(32 32 32);
 		}
+
+		.editor .editor-tab {
+			color: rgb(122 122 122);
+			border-color: rgb(22 22 22);
+			background: $body-color;
+
+			&.active {
+				color: rgb(255 255 255);
+				background: rgb(32 32 32);
+			}
+		}
 		
 		.approvable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble,
 		.deletable:not(.approved):not(.deleted):not(.banned):not(.editing) .bubble,

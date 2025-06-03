@@ -1,5 +1,5 @@
 const { src, dest, watch: gulpWatch, series, parallel } = require('gulp');
-const { dirname, basename, extname } = require('path');
+const { dirname, basename, extname, relative } = require('path');
 const yargs = require('yargs');
 const package = require('./package.json');
 const del = require('del');
@@ -195,8 +195,12 @@ const esbuildTransform = () => new Transform({
 			plugins: [{
 				name: 'bundle-only-node-modules',
 				setup(build) {
-					build.onResolve({ filter: /[\s\S]*/u }, ({ path }) => {
-						const external = isModule ? /^(?:\.\/|\.\.\/)/u.test(path) : false;
+					build.onResolve({ filter: /[\s\S]*/u }, ({ path, resolveDir }) => {
+						if (relative(__dirname, resolveDir).startsWith('node_modules/')) return { external: false };
+
+						const external = isModule
+							? /^(?:\.\/|\.\.\/)/u.test(path)
+							: false;
 						return { external };
 					});
 				}

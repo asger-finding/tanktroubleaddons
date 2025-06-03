@@ -1,10 +1,5 @@
-import { StoreEvent, onStateChange } from '../common/store.js';
-import {
-	gfmAutolinkLiteral,
-	gfmAutolinkLiteralHtml
-} from 'micromark-extension-gfm-autolink-literal';
 import { interceptFunction } from '../utils/gameUtils.js';
-import { micromark } from 'micromark';
+import { renderMarkdown } from './markdown.js';
 import { timeAgo } from '../utils/timeUtils.js';
 
 /**
@@ -33,144 +28,6 @@ const escapeHTML = str => {
 	const div = document.createElement('div');
 	div.textContent = str;
 	return div.innerHTML;
-};
-
-/**
- * Micromark extension to match newlines to the native forum layout
- * @param {string} text Text of markdown object
- * @returns {object} Extension
- */
-const gfmFixNewlines = text => {
-
-	/**
-	 * Get the nth line of the text
-	 * @private
-	 * @param {number} line Line index
-	 * @returns {string|null} Line content or null
-	 */
-	const getLine = line => {
-		const lines = text.split('\n');
-		return typeof lines[line] !== 'undefined' ? `${lines[line]  }\n` : null;
-	};
-
-	return {
-		// Preserve newlines
-		enter: {
-			lineEnding(token) {
-				this.raw(
-					getLine(token.start.line).trim() === ''
-						? ''
-						: '<br>'
-				);
-			},
-			lineEndingBlank() {
-				this.raw('<br>');
-			}
-		}
-	};
-};
-
-/**
- * Refresh code block appearances based on the site theme
- * @param {HTMLElement} parentElement Wrapper element
- * @param {boolean} isDarkTheme Is the site dark?
- */
-const refreshCodeMirrorTheme = (parentElement, isDarkTheme) => {
-	const cmInstances = parentElement.querySelectorAll('.forum .bubble .content code .CodeMirror');
-	for (const cm of cmInstances) {
-		cm.classList.replace(
-			isDarkTheme ? 'cm-s-default' : 'cm-s-blackboard',
-			isDarkTheme ? 'cm-s-blackboard' : 'cm-s-default'
-		);
-	}
-};
-
-/**
- * Initialize codemirror for all codeblocks in the post
- * @private
- * @param {HTMLElement} postContent Post content element
- */
-const initializeCodeBlocks = postContent => {
-	const codeblocks = postContent.querySelectorAll('pre code');
-	for (const codeblock of codeblocks) {
-		const value = codeblock.textContent;
-		const [, language] = codeblock.className.split('-');
-		codeblock.innerHTML = '';
-
-		const isDarkTheme = document.documentElement.classList.contains('dark');
-
-		// eslint-disable-next-line new-cap
-		const editor = CodeMirror(codeblock, {
-			value,
-			mode: language || 'javacript',
-			theme: isDarkTheme ? 'blackboard' : 'default',
-			lineNumbers: false,
-			readOnly: true
-		});
-
-		// https://stackoverflow.com/questions/8349571/codemirror-editor-is-not-loading-content-until-clicked
-		setTimeout(() => {
-			// Refresh CodeMirror
-			editor.refresh();
-
-			// Refresh HTMLElement
-			refreshCodeMirrorTheme(postContent, isDarkTheme);
-		}, 1);
-	}
-};
-
-/**
- * Render markdown on an element
- * @private
- * @param {HTMLElement} element Target element
- * @param {string} text Markdown text
- */
-const renderMarkdown = (element, text) => {
-	element.innerHTML = micromark(text, {
-		lineEndingStyle: '<br>',
-		extensions: [gfmAutolinkLiteral()],
-		htmlExtensions: [
-			gfmAutolinkLiteralHtml(),
-			gfmFixNewlines(text)
-		]
-	});
-
-	initializeCodeBlocks(element);
-};
-
-/**
- * Add a markdown tab switcher to a textfield
- * @private
- * @param {JQuery} wrapper Wrapper element
- * @param {JQuery} textarea Textarea element
- */
-const addMarkdownPreview = (wrapper, textarea) => {
-	const editor = $('<div class="editor"></div>');
-	const tabs = $('<div class="editor-tabs"></div>');
-	const editTab = $('<button type="button" class="editor-tab active" data-target="edit">Edit your post</button>');
-	const previewTab = $('<button type="button" class="editor-tab" data-target="preview">Preview post</button>');
-	const editPane = $('<div class="edit-pane active"></div>');
-	const previewPane = $('<div class="preview-pane"></div>');
-
-	renderMarkdown(previewPane[0], textarea.val());
-
-	editPane.append(textarea);
-	tabs.append([editTab, previewTab]);
-	editor.append([tabs, editPane, previewPane]);
-	wrapper.append(editor);
-
-	// Tab switching logic
-	tabs.on('click', '.editor-tab', function() {
-		const target = $(this).data('target');
-
-		tabs.find('.editor-tab').removeClass('active');
-		$(this).addClass('active');
-
-		editor.find('.edit-pane, .preview-pane').removeClass('active');
-		editor.find(`.${target}-pane`).addClass('active');
-
-		if (target === 'preview') renderMarkdown(previewPane[0], textarea.val());
-	});
 };
 
 /**
@@ -341,19 +198,15 @@ const addLastEdited = (post, postElement) => {
 };
 
 /**
- * Add markdown language to posts
+ * Add markdown parsing to posts
  * @param {object} post Post data
  * @param {HTMLElement} postElement Post element
  */
-const addMarkdownToPost  = (post, postElement) => {
+const renderMarkdownInPost  = (post, postElement) => {
 	const postContent = postElement?.querySelector('.bubble .content');
 	if (!postContent) return;
 
 	renderMarkdown(postContent, post.message);
-
-	const edit = postElement.querySelector('.bubble .edit');
-	if (!edit) return;
-	addMarkdownPreview($(edit), $(edit).find('textarea'));
 };
 
 /**
@@ -378,12 +231,11 @@ const addUnmoderatedHighlight = (post, postElement) => {
  * Add a markdown preview button to the compose field
  */
 const addMarkdownPreviewToComposeFields = () => {
-	const compose = $('#threadsWrapper .compose .bubble')
-		.add('#repliesWrapper .compose .bubble');
+	const compose = $('#threadsWrapper > .compose .bubble textarea')
+		.add('#repliesWrapper > .compose .bubble textarea');
 
 	compose.each(function() {
-		const $this = $(this);
-		if ($this.find('.editor').length === 0) addMarkdownPreview($this, $this.find('textarea'));
+		$(this).mdeditor();
 	});
 };
 
@@ -396,7 +248,7 @@ const addFeaturesToPost = (post, postElement) => {
 	insertMultipleCreatorsInPost(post, postElement);
 	addLastEdited(post, postElement);
 	addShareButton(post, postElement);
-	addMarkdownToPost(post, postElement);
+	renderMarkdownInPost(post, postElement);
 	addUnmoderatedHighlight(post, postElement);
 };
 
@@ -500,15 +352,28 @@ Forum.classMethod('getInstance', function(...args) {
 	return instance;
 });
 
-onStateChange(change => {
-	const { detail } = change;
+interceptFunction(ForumView, 'threadEditStarted', (original, ...args) => {
+	const [id] = args;
+	$(`#thread-${ id } .bubble .edit textarea`).mdeditor();
 
-	if (
-		detail?.type === StoreEvent.STORE_CHANGE
-		&& detail.data
-		&& detail.data.curr.theme ) {
-		const { curr } = detail.data;
+	return original(...args);
+}, { isClassy: true });
 
-		refreshCodeMirrorTheme(document.body, curr.theme.colorScheme === 'dark');
-	}
-});
+interceptFunction(ForumView, 'replyEditStarted', (original, ...args) => {
+	const [id] = args;
+	$(`#reply-${ id } .bubble .edit textarea`).mdeditor();
+
+	return original(...args);
+}, { isClassy: true });
+
+interceptFunction(ForumView, 'threadEditFinished', (original, ...args) => {
+	$('#threadsContainer .thread .bubble .edit textarea').mdeditor('remove');
+
+	return original(...args);
+}, { isClassy: true });
+
+interceptFunction(ForumView, 'replyEditFinished', (original, ...args) => {
+	$('#repliesContainer .reply .bubble .edit textarea').mdeditor('remove');
+
+	return original(...args);
+}, { isClassy: true });

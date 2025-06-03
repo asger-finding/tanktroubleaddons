@@ -718,6 +718,87 @@ stroked-text {
 	display: block;
 }
 
+/* Markdown editor toolbar */
+.mdeditor-toolbar {
+	$toolbar-height: 26px;
+
+	--color-primary: rgb(117 117 117);
+	--color-active-bg: rgb(238 238 238);
+	--color-active-fg: rgb(0 0 0);
+	--color-border: rgb(204 204 204);
+	--color-scrollbar: rgb(204 204 204);
+	--color-scrollbar-bg: rgb(255 255 255 / 0);
+
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	height: $toolbar-height;
+	margin: 3px 5px;
+	color: var(--color-primary);
+	border: inherit;
+	border-left: none;
+	border-right: none;
+	overflow-y: hidden;
+	overflow-x: overlay;
+
+	@supports not (overflow-x: overlay) {
+		overflow-x: auto;
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-bg);
+	}
+
+	.mdeditor-toolbar-tool {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-width: #{ $toolbar-height - 8px };
+		height: #{ $toolbar-height - 6px };
+		margin: 1px;
+		padding: 0 2px;
+		border: 2px solid transparent;
+		border-radius: 6px;
+		text-align: center;
+		user-select: none;
+		white-space: nowrap;
+		transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+
+		svg {
+			fill: var(--color-primary);
+			stroke: var(--color-primary);
+			stroke-width: 0;
+		}
+
+		&.active svg {
+			fill: var(--color-active-fg);
+			stroke: var(--color-active-fg);
+		}
+
+		&:hover {
+			color: var(--color-active-fg);
+			background-color: var(--color-active-bg);
+			border-color: var(--color-border);
+		}
+	}
+
+	.mdeditor-toolbar-separator {
+		width: 0;
+		height: $toolbar-height - 3px;
+		margin: 0 3px;
+		border-left: 2px solid var(--color-border);
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar {
+		height: 4px;
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color-scrollbar);
+		border-radius: 0;
+	}
+}
+
 /* Forum improvements */
 .forum {
 	@keyframes highlight-post {
@@ -760,12 +841,20 @@ stroked-text {
 		}
 	}
 
-	.bubble .content, .bubble .preview-pane {
+	.mdeditor-preview {
+		min-height: 32px;
+	}
+
+	.bubble .content, .bubble .mdeditor-preview {
 		white-space: normal;
 
 		p code {
 			background-color: #00000050;
 			font-family: 'Commodore', monospace;
+		}
+
+		img {
+			display: block;
 		}
 
 		.CodeMirror .CodeMirror-cursors {
@@ -778,10 +867,16 @@ stroked-text {
 		}
 	}
 
-	.bubble .edit .editor {
-		.preview-pane img,
-		.editor-tabs button {
-			display: block !important;
+	.compose .bubble .mdeditor-toolbar ~ textarea {
+		padding: 3px;
+	}
+
+	.thread .bubble:has(.edit .mdeditor-toolbar),
+	.reply .bubble:has(.edit .mdeditor-toolbar) {
+		padding-top: 3px;
+
+		.mdeditor-toolbar {
+			margin-bottom: 6px;
 		}
 	}
 
@@ -822,43 +917,6 @@ stroked-text {
 			&:not(:active) .standard {
 				display: inherit;
 			}
-		}
-	}
-
-	.editor {
-		.edit-pane, .preview-pane {
-			display: none;
-			padding: 4px;
-
-			&.active {
-				display: block;
-			}
-		}
-
-		.editor-tabs {
-			display: flex;
-			justify-content: space-between;
-
-			.editor-tab {
-				background: inherit;
-				color: rgb(124 124 124 / 1.0);
-				font-family: Arial, sans-serif;
-				border: 2px solid rgb(204 204 204 / 1.0);
-				border-radius: 4px;
-				box-shadow: none;
-				width: 100%;
-				margin: 2px;
-				padding: 2px 0;
-				
-				&.active {
-					background: rgb(238 238 238 / 1.0);
-					color: rgb(0 0 0 / 1.0);
-				}
-			}
-		}
-
-		.preview-pane {
-			min-height: 32px;
 		}
 	}
 

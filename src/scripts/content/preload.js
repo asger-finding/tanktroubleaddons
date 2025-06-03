@@ -1,3 +1,4 @@
+import './mdeditor.js';
 import { interceptFunction } from '../utils/gameUtils.js';
 // Preload functions
 

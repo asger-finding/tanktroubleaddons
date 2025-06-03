@@ -126,6 +126,8 @@ export const renderMarkdown = (element, text) => {
 		]
 	});
 
+	for (const anchor of element.querySelectorAll('a')) anchor.target = '_blank';
+
 	initializeCodeBlocks(element);
 };
 

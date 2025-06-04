@@ -257,27 +257,25 @@ const addFeaturesToPost = (post, postElement) => {
  * @param {object} post - Post data
  */
 const handlePost = post => {
-	if (!post?.html) return;
+	if (!post || !post?.html) return;
 
-	const [key] = Object.keys(post.html);
-	if (typeof post.html[key] === 'string') {
-		let postElement = document.createElement('div');
-		postElement.innerHTML = post.html[key];
-		postElement = postElement.firstElementChild;
+	const keys = Object.keys(post.html);
+	if (keys.length === 0) return;
 
-		addFeaturesToPost(post, postElement);
+	const [postOrReply] = keys;
+	let html = post.html[postOrReply];
+	if (post.html[postOrReply] instanceof $) html = post.html.original;
 
-		post.html[key] = $(postElement);
-		post.html._backup = post.html[key];
-	} else if (post.html[key] instanceof $) {
-		let postElement = document.createElement('div');
-		postElement.innerHTML = post.html._backup;
-		postElement = postElement.firstElementChild;
+	if (!html) return;
 
-		addFeaturesToPost(post, postElement);
+	let postElement = document.createElement('div');
+	postElement.innerHTML = html;
+	postElement = postElement.firstElementChild;
 
-		post.html[key] = $(postElement);
-	}
+	addFeaturesToPost(post, postElement);
+
+	post.html[postOrReply] = $(postElement);
+	post.html.original ??= html;
 };
 
 /**
@@ -298,13 +296,15 @@ const getPostType = data => {
  */
 const postHandler = (...args) => {
 	const [postItem] = args;
-	const { model } = Forum.getInstance();
 
 	switch (getPostType(postItem)) {
 		case 'postId':
-			// Both thread and reply with id might exist
-			// but the chances are very slim so we ignore that
-			handlePost(model.getThreadById(postItem) || model.getReplyById(postItem));
+			// Both a thread and a reply with the  sameid might exist
+			// but the chances are very slim so lets ignore that
+			handlePost(
+				Forum.getInstance().model.getThreadById(postItem)
+				|| Forum.getInstance().model.getReplyById(postItem)
+			);
 			break;
 		case 'postList':
 			for (const post of postItem) handlePost(post);
@@ -317,8 +317,8 @@ const postHandler = (...args) => {
 	}
 
 	// Whenever a change happens we must handle the selected thread
-	// as well, as its set by the getter functions, and not sent through
-	// the change event listeners
+	// as well, as its set by the getter functions, and not sent
+	// through the change event listeners
 	handlePost(Forum.getInstance().model.getSelectedThread());
 };
 

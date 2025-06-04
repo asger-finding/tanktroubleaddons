@@ -861,6 +861,8 @@ stroked-text {
 
 		img {
 			display: block;
+			max-width: 100%;
+			max-height: 100vh;
 		}
 
 		.CodeMirror .CodeMirror-cursors {
@@ -874,7 +876,8 @@ stroked-text {
 	}
 
 	.compose .bubble .mdeditor-toolbar ~ textarea {
-		padding: 3px;
+		padding: 5px;
+		width: calc(100% - 10px);
 	}
 
 	.thread .bubble:has(.edit .mdeditor-toolbar),

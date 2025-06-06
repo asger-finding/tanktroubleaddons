@@ -268,13 +268,22 @@ const handlePost = post => {
 
 	if (!html) return;
 
-	let postElement = document.createElement('div');
-	postElement.innerHTML = html;
-	postElement = postElement.firstElementChild;
+	const temp = document.createElement('template');
+	temp.innerHTML = html.trim();
+	const newElement = temp.content.firstChild;
 
-	addFeaturesToPost(post, postElement);
+	const existingElement = $(html).get(0) || document.getElementById(newElement.id);
+	if (existingElement) {
+		// Update post contents
+		existingElement.innerHTML = newElement.innerHTML;
+		addFeaturesToPost(post, existingElement);
+		post.html[postOrReply] = $(existingElement);
+	} else {
+		// Proceed with the new element
+		addFeaturesToPost(post, newElement);
+		post.html[postOrReply] = $(newElement);
+	}
 
-	post.html[postOrReply] = $(postElement);
 	post.html.original ??= html;
 };
 

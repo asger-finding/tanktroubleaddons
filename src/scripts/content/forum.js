@@ -275,9 +275,9 @@ const handlePost = post => {
 	const existingElement = $(html).get(0) || document.getElementById(newElement.id);
 	if (existingElement) {
 		// Update post contents
-		existingElement.innerHTML = newElement.innerHTML;
-		addFeaturesToPost(post, existingElement);
-		post.html[postOrReply] = $(existingElement);
+		addFeaturesToPost(post, newElement);
+		existingElement.replaceWith(newElement);
+		post.html[postOrReply] = $(newElement);
 	} else {
 		// Proceed with the new element
 		addFeaturesToPost(post, newElement);

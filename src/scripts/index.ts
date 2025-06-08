@@ -14,8 +14,6 @@ export interface AddonsMeta {
 
 class Addons {
 
-	private inject: HTMLScriptElement;
-
 	private meta: AddonsMeta = {
 		extensionUrl: '',
 		release: '',
@@ -23,22 +21,15 @@ class Addons {
 		loader: ''
 	};
 
-	/** Create a new Addons instance */
-	constructor() {
-		this.inject = document.createElement('script');
-		this.inject.src = browser.runtime.getURL('scripts/inject.js');
-	}
-
 	/**
 	 * Load the extension into the website by injecting the script and parsing loader metadata
 	 */
 	public load(): void {
-		Addons.setupFetchNoCors();
-		Addons.setupFullscreen();
+		Addons.setupFetchNoCorsBridge();
+		Addons.setupFullscreenBridge();
 
 		Addons.waitForLoader().then(loader => {
 			const code = String(loader.textContent);
-			loader.textContent = '';
 
 			const loadStart = code.indexOf('.load(');
 			const funcStart = code.indexOf(',function(');
@@ -56,9 +47,14 @@ class Addons {
 			this.meta.data = data;
 			this.meta.loader = code;
 
-			this.inject.dataset.meta = JSON.stringify(this.meta);
+			const inject = document.createElement('script');
+			inject.src = browser.runtime.getURL('scripts/inject.js');
+			inject.dataset.meta = JSON.stringify(this.meta);
 
-			document.body.insertBefore(this.inject, loader);
+			document.body.insertBefore(inject, loader);
+
+			loader.textContent = '';
+			loader.remove();
 		});
 	}
 
@@ -82,29 +78,6 @@ class Addons {
 			observer.observe(document.documentElement, {
 				childList: true,
 				subtree: true
-			});
-		});
-	}
-
-	/**
-	 * Retrieve multiple values from the browser store
-	 * @param {Array<string>} keys Array of keys to retrieve
-	 * @returns {Promise<Record<string, any>>} Resolves with key-value pairs
-	 */
-	static get(keys: Array<string>): Promise<Record<string, any>> {
-		return browser.storage.local.get(keys);
-	}
-
-	/**
-	 * Retrieve a value from the browser store or return a fallback if undefined
-	 * @param {string} key Key identifier
-	 * @param {any} fallback Fallback value if key is missing
-	 * @returns {Promise<any>} Resolves with the stored value or fallback
-	 */
-	static getWithFallback(key: string, fallback: any): Promise<any> {
-		return new Promise(resolve => {
-			browser.storage.local.get(key, result => {
-				resolve(typeof result[key] !== 'undefined' ? result[key] : fallback);
 			});
 		});
 	}
@@ -141,7 +114,7 @@ class Addons {
 	/**
 	 * Set up listener for CORS-exempt fetch requests from injected scripts
 	 */
-	static setupFetchNoCors(): void {
+	static setupFetchNoCorsBridge(): void {
 		listen<{ resource: string; options?: RequestInit; uuid?: string }>(
 			['CORS_EXEMPT_FETCH'],
 			(evt) => {
@@ -171,7 +144,7 @@ class Addons {
 	/**
 	 * Set up listener for fullscreen toggle requests from injected scripts
 	 */
-	static setupFullscreen(): void {
+	static setupFullscreenBridge(): void {
 		listen<{ state: string }>(['FULLSCREEN'], ({ detail }) => {
 			if (!detail) throw new Error('No details provided for fullscreen request');
 

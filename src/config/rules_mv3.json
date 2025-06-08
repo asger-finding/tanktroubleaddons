@@ -4,16 +4,16 @@
         "priority": 1,
         "action": { "type": "redirect", "redirect": { "url": "https://cdn.jsdelivr.net/combine/npm/jquery@3.7.1/dist/jquery.min.js,npm/jquery-migrate@1.4.1/dist/jquery-migrate.min.js" } },
         "condition": {
-            "urlFilter": "https://code.jquery.com/jquery-1.11.2.min.js",
+            "urlFilter": "https://code.jquery.com/jquery-1.*.*.min.js",
             "resourceTypes": ["script"]
         }
     },
     {
         "id": 2,
         "priority": 1,
-        "action": { "type": "redirect", "redirect": { "url": "https://code.jquery.com/ui/1.14.0/jquery-ui.min.js" } },
+        "action": { "type": "redirect", "redirect": { "url": "https://code.jquery.com/ui/1.14.1/jquery-ui.min.js" } },
         "condition": {
-            "urlFilter": "https://code.jquery.com/ui/1.11.4/jquery-ui.min.js",
+            "urlFilter": "https://code.jquery.com/ui/1.*.*/jquery-ui*.js",
             "resourceTypes": ["script"]
         }
     },
@@ -22,7 +22,7 @@
         "priority": 1,
         "action": { "type": "redirect", "redirect": { "extensionPath": "/css/jquery-ui.css" } },
         "condition": {
-            "urlFilter": "https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css",
+            "urlFilter": "https://code.jquery.com/ui/1.*.*/themes/smoothness/jquery-ui*.css",
             "resourceTypes": ["stylesheet"]
         }
     },

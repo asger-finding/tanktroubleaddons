@@ -1,6 +1,6 @@
 import { AddonsMeta } from './index.js';
 
-(() => {
+(async() => {
 	const metaString = document.currentScript?.dataset.meta;
 	if (typeof metaString === 'undefined') throw new Error('Inject failed to get meta string');
 
@@ -60,37 +60,35 @@ import { AddonsMeta } from './index.js';
 		});
 	};
 
-	Promise.all([
-		inject('scripts/content/patches.js', true),
-		inject('scripts/content/preload.js', true),
-		inject('scripts/content/constants.js', true),
-		inject('scripts/content/theme.js', true)
-	]).then(async() => {
-		await Promise.all([
-			inject('scripts/content/statisticsSnippet.js'),
-			inject('scripts/content/strokedText.js'),
-			inject('scripts/content/forum.js'),
-			inject('scripts/content/menu.js'),
-			inject('scripts/content/switchControls.js'),
-			inject('scripts/content/maskUsernames.js'),
-			inject('scripts/content/chat.js'),
-			inject('scripts/content/lobby.js'),
-			inject('scripts/content/gameSettings.js'),
-			inject('scripts/content/tankNameOnClick.js'),
-			inject('scripts/content/tintedBullets.js'),
-			inject('scripts/content/killedByMessage.js'),
-			inject('scripts/content/fullscreen.js'),
-			inject('scripts/content/deathCount.js'),
-			inject('scripts/content/resourcePacks.js'),
-			inject('scripts/content/emporium.js'),
-			inject('scripts/content/accountMenu.js'),
-			inject('scripts/content/adminOverlays.js')
-		]);
+	await inject('scripts/content/constants.js', true);
+	await inject('scripts/content/preload.js', true);
+	await inject('scripts/content/patches.js', true);
+	await inject('scripts/content/theme.js', true);
 
-		// Run TankTrouble loader
-		// eslint-disable-next-line @typescript-eslint/no-implied-eval
-		Function(meta.loader)();
-	}).catch(error => {
+	await Promise.all([
+		inject('scripts/content/statisticsSnippet.js'),
+		inject('scripts/content/strokedText.js'),
+		inject('scripts/content/forum.js'),
+		inject('scripts/content/menu.js'),
+		inject('scripts/content/switchControls.js'),
+		inject('scripts/content/maskUsernames.js'),
+		inject('scripts/content/chat.js'),
+		inject('scripts/content/lobby.js'),
+		inject('scripts/content/gameSettings.js'),
+		inject('scripts/content/tankNameOnClick.js'),
+		inject('scripts/content/tintedBullets.js'),
+		inject('scripts/content/killedByMessage.js'),
+		inject('scripts/content/fullscreen.js'),
+		inject('scripts/content/deathCount.js'),
+		inject('scripts/content/resourcePacks.js'),
+		inject('scripts/content/emporium.js'),
+		inject('scripts/content/accountMenu.js'),
+		inject('scripts/content/adminOverlays.js')
+	]).catch(error => {
 		throw new Error(`Addons loader failed: ${ error.message }`);
 	});
+
+	// Run TankTrouble loader
+	// eslint-disable-next-line @typescript-eslint/no-implied-eval
+	Function(meta.loader)();
 })();

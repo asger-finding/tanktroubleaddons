@@ -57,6 +57,8 @@ UIGameIconImage.prototype.spawn = function(x, y, gameState, favouriteActiveQueue
 	this.gameId = gameState.getId();
 	this.mode = gameState.getMode();
 	this.ranked = gameState.getRanked();
+	this.symmetric = gameState.getSymmetric();
+	this.premium = gameState.getPremium();
 	this.playerStates = gameState.getPlayerStates().sort((first, sec) => first.getQueued() - sec.getQueued());
 	this.iconPlacements = createPolygon(gameState.getMaxActivePlayerCount(), 140 * resolutionScale, 95 * resolutionScale);
 	this.favouriteActiveQueuedCounts = favouriteActiveQueuedCounts;
@@ -78,6 +80,8 @@ UIGameIconImage.prototype.spawn = function(x, y, gameState, favouriteActiveQueue
 UIGameIconImage.prototype.refresh = function(gameState, favouriteActiveQueuedCounts) {
 	this.mode = gameState.getMode();
 	this.ranked = gameState.getRanked();
+	this.symmetric = gameState.getSymmetric();
+	this.premium = gameState.getPremium();
 	this.playerStates = gameState.getPlayerStates();
 	this.iconPlacements = createPolygon(gameState.getMaxActivePlayerCount(), 140 * resolutionScale, 95 * resolutionScale);
 	this.favouriteActiveQueuedCounts = favouriteActiveQueuedCounts;
@@ -99,11 +103,12 @@ UIGameIconImage.prototype._addPlaceholder = function(placement) {
 };
 
 UIGameIconImage.prototype._updateUI = function() {
+	this.frame = (this.symmetric ? 1 : 0) * 2 + (this.premium ? 1 : 0);
 	const iconFrame = UIConstants.GAME_MODE_NAME_INFO[this.mode].ICON;
 	if (iconFrame < 0) {
 		this.gameModeIcon.visible = false;
 	} else {
-		this.gameModeIcon.frame = iconFrame;
+		this.gameModeIcon.frame = iconFrame * 2 + (this.premium ? 1 : 0);
 		this.gameModeIcon.visible = true;
 	}
 

@@ -214,6 +214,10 @@ const esbuildTransform = () => new Transform({
 				plugins: [{
 					name: 'bundle-only-node-modules',
 					setup(build) {
+						// Stub out remove-accents with a passthrough (used by match-sorter but unnecessary for ASCII inputs)
+						build.onResolve({ filter: /^remove-accents$/ }, () => ({ path: 'remove-accents', namespace: 'stub' }));
+						build.onLoad({ filter: /.*/, namespace: 'stub' }, () => ({ contents: 'export default v => v', loader: 'js' }));
+
 						build.onResolve({ filter: /[\s\S]*/ }, ({ path, resolveDir }) => {
 							if (relative(__dirname, resolveDir).startsWith('node_modules/')) return { external: false };
 

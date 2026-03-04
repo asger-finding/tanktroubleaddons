@@ -64,7 +64,7 @@ const addAutocomplete = chatInput => {
 			this.#removeExpired();
 
 			const allSymbols = Array.from(this.options.keys());
-			this.matches = matchSorter(allSymbols, term, { keys: [symbol => symbol.description] });
+			this.matches = matchSorter(allSymbols, term, { keys: [symbol => symbol.description], keepDiacritics: true });
 
 			allSymbols.forEach(symbol => {
 				const element = this.options.get(symbol).display;

@@ -50,7 +50,7 @@
     "yargs": "^18.0.0"
   },
   "dependencies": {
-    "@pixi/colord": "^2.9.6",
+    "but-unzip": "^0.1.10",
     "discord_emoji": "github:asger-finding/discord_emoji",
     "fflate": "^0.8.2",
     "iso-8859-15": "^3.0.4",
@@ -58,7 +58,6 @@
     "maxrects-packer": "^2.7.3",
     "micromark": "^4.0.2",
     "micromark-extension-gfm-autolink-literal": "^2.1.0",
-    "wcag-contrast": "^3.0.0",
     "webext-sync": "^2.0.4"
   }
 }

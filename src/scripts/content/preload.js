@@ -70,8 +70,7 @@ Object.assign(Addons, {
 
 		// Image is of type PNG, also set responsive image (@2x)
 		if (src.endsWith('.png') || src.endsWith('.avif')) {
-			const ending = src.split('.').pop();
-			const srcset = `${Addons.t_url(`${src.substring(0, src.length - ending.length - 1)  }@2x.${ ending }`)  } 2x`;
+			const srcset = `${Addons.t_url(src.replace(/\.([^.]+)$/u, '@2x.$1'))} 2x`;
 			image.attr('srcset', srcset);
 		}
 

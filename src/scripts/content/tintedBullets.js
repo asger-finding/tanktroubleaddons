@@ -136,6 +136,7 @@ UIProjectileImage.prototype.updateColor = function(enabled) {
 		}, () => {}, () => {}, projectileData.getPlayerId(), Caches.getPlayerDetailsCache());
 	} else if (this.colorFilter) {
 		this.colorFilter.uniforms.enabled.value = 0.0;
+		this.filters = null;
 	}
 };
 

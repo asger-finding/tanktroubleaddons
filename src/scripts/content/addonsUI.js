@@ -130,7 +130,9 @@ export default class AddonsUI extends MenuOverlay {
 				option.on('remove', () => {
 					Addons.removeResourcePack(resourcePack.hashsum)
 						.then(result => {
-							resourcePackSelect.val(result === false ? 'new' : result.hashsum);
+							if (result === false) return;
+
+							resourcePackSelect.val(result ? result.hashsum : 'new');
 							resourcePackSelect.deleteselectmenu('refresh');
 							createNewWrapper.toggle(!result);
 						});

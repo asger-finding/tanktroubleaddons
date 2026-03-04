@@ -208,9 +208,9 @@ Phaser.Plugin.ResourcePack.prototype.constructor = Phaser.Plugin.ResourcePack;
  */
 Phaser.Plugin.ResourcePack.prototype.replaceResources = async function(resources) {
 	try {
-		const atlasPromises = (resources.atlases || []).map(async atlas => this.insertFramesIntoAtlas(atlas.key, atlas.frames));
-		const imagePromises = Object.entries(resources.images || {}).map(async([key, image]) => this.replaceImage(key, image));
-		const soundPromises = Object.entries(resources.sounds || {}).map(async([key, soundData]) => this.replaceSound(key, soundData));
+		const atlasPromises = (resources.atlases || []).map(atlas => this.insertFramesIntoAtlas(atlas.key, atlas.frames));
+		const imagePromises = Object.entries(resources.images || {}).map(([key, image]) => this.replaceImage(key, image));
+		const soundPromises = Object.entries(resources.sounds || {}).map(([key, soundData]) => this.replaceSound(key, soundData));
 
 		const results = await Promise.all([
 			...atlasPromises,
@@ -258,15 +258,9 @@ Phaser.Plugin.ResourcePack.prototype.insertFramesIntoAtlas = async function(atla
 		}
 
 		// Pack textures
-		const images = await Promise.all(
-			Object.keys(frames).map(async frameName => ({
-				width: frames[frameName].width,
-				height: frames[frameName].height,
-				image: frames[frameName],
-				frameName
-			}))
-		);
-		for (const { width, height, image, frameName } of images) this.Packer.add({ width, height, image, frameName });
+		for (const [frameName, image] of Object.entries(frames)) {
+			this.Packer.add({ width: image.width, height: image.height, image, frameName });
+		}
 
 		const bin = this.Packer.bins[this.Packer.bins.length - 1];
 		if (!bin) {
@@ -293,7 +287,10 @@ Phaser.Plugin.ResourcePack.prototype.insertFramesIntoAtlas = async function(atla
 		// Create image from canvas
 		const newImg = new Image();
 		newImg.src = canvas.toDataURL();
-		await new Promise(resolve => { newImg.onload = resolve; });
+		await new Promise((resolve, reject) => {
+			newImg.onload = resolve;
+			newImg.onerror = () => reject(new Error('Failed to load atlas canvas image'));
+		});
 
 		// Update atlas texture
 		const success = await this.replaceImage(atlasKey, newImg);

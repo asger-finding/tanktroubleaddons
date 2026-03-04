@@ -102,8 +102,7 @@ import { renderMarkdown } from './markdown.js';
 	 * Initialize the markdown editor
 	 * @param {JQuery} target Editor target textarea
 	 */
-	const initEditor = target => {
-		const textarea = target;
+	const initEditor = textarea => {
 
 		const toolbar = $(`<div class="${editorDefs.TOOLBAR_CLASS}"></div>`);
 		const preview = $(`<div class="${editorDefs.PREVIEW_CLASS}"></div>`);

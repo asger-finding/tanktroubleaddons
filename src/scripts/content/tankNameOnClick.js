@@ -1,7 +1,6 @@
 import { interceptFunction } from '../utils/gameUtils.js';
+
 /** Show tank usernames below their name when clicked in-game. */
-
-
 interceptFunction(Game.UIGameState, 'create', function(original, ...args) {
 	const result = original(...args);
 

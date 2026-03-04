@@ -151,25 +151,22 @@ const parseCSS = normalized => {
  * @param {number} [suffix] The current suffix to try (default: 0, meaning no suffix)
  * @returns {Promise<string>} Resolves with a unique name
  */
-const generateUniqueName = async(store, baseName, suffix = 0) => {
+const generateUniqueName = async(store, baseName) => {
 	const name = baseName.trim() || 'Unnamed resource pack';
-	const candidateName = suffix === 0 ? name : `${name} (${suffix})`;
 
-	return new Promise((resolve, reject) => {
-		const request = store.get(candidateName);
-		/* eslint-disable jsdoc/require-jsdoc */
-		request.onsuccess = () => {
-			if (!request.result) {
-				resolve(candidateName);
-			} else {
-				generateUniqueName(store, name, suffix + 1)
-					.then(resolve)
-					.catch(reject);
-			}
-		};
-		request.onerror = () => reject(request.error);
-		/* eslint-enable jsdoc/require-jsdoc */
-	});
+	for (let suffix = 0; ; suffix++) {
+		const candidateName = suffix === 0 ? name : `${name} (${suffix})`;
+
+		const exists = await new Promise((resolve, reject) => {
+			const request = store.get(candidateName);
+			/* eslint-disable jsdoc/require-jsdoc */
+			request.onsuccess = () => resolve(Boolean(request.result));
+			request.onerror = () => reject(request.error);
+			/* eslint-enable jsdoc/require-jsdoc */
+		});
+
+		if (!exists) return candidateName;
+	}
 };
 
 /**
@@ -361,15 +358,14 @@ const storeDefaultResourcePacks = async() => {
 	);
 
 	for (let i = 0; i < resourcePacks.length; i++) {
-		const index = i;
-		const resourcePack = resourcePacks[index];
+		const resourcePack = resourcePacks[i];
 		const { url } = resourcePack;
 		resourcePack.arrayBuffer().then(arrayBuffer => {
 			const fileName = decodeURIComponent(url).replace(/^.*[\\/]/u, '');
 			const file = new File([arrayBuffer], fileName);
 			const builtIn = true;
 
-			addResourcePackToStore(file, builtIn, index)
+			addResourcePackToStore(file, builtIn, i)
 				// Resource pack is already stored.
 				// Intentionally do nothing.
 				.catch(() => {});
@@ -435,18 +431,24 @@ const setActiveResourcePack = hashsum => new Promise((resolve, reject) => {
  * @param {string} hashsum The hashsum of the resource pack to remove
  * @returns {Promise<object>} Resolves when resource pack has been removed
  */
-const removeResourcePack = hashsum => removeResourcePackFromStore(hashsum).finally(() => {
-	localStorage.removeItem('resource');
+const removeResourcePack = hashsum => {
+	const wasActive = localStorage.getItem('resourcepack') === hashsum;
 
-	return getFirstResourcePackFromStore().then(result => {
-		if (result !== false) {
-			Addons.setActiveResourcePack(result.hashsum);
-			Addons.reloadGame();
-		}
+	return removeResourcePackFromStore(hashsum).then(() => {
+		if (!wasActive) return false;
 
-		return result;
+		localStorage.removeItem('resourcepack');
+
+		return getFirstResourcePackFromStore().then(result => {
+			if (result !== false) {
+				Addons.setActiveResourcePack(result.hashsum);
+				Addons.reloadGame();
+			}
+
+			return result;
+		});
 	});
-});
+};
 
 /**
  * Retrieve all hashsums and names.
@@ -522,11 +524,12 @@ const reloadGame = () => {
  * @returns {Promise<HTMLImageElement>} Resolves with the loaded image
  */
 const loadImage = source =>
-	new Promise(resolve => {
+	new Promise((resolve, reject) => {
 		const image = new Image();
 		image.crossOrigin = 'anonymous';
 
-		if (source instanceof Uint8Array) {
+		const isBlob = source instanceof Uint8Array;
+		if (isBlob) {
 			const blob = new Blob([source]);
 			image.src = URL.createObjectURL(blob);
 		} else {
@@ -534,8 +537,12 @@ const loadImage = source =>
 		}
 
 		image.addEventListener('load', () => {
-			if (source instanceof Uint8Array) URL.revokeObjectURL(image.src);
+			if (isBlob) URL.revokeObjectURL(image.src);
 			resolve(image);
+		});
+		image.addEventListener('error', () => {
+			if (isBlob) URL.revokeObjectURL(image.src);
+			reject(new Error(`Failed to load image: ${image.src}`));
 		});
 	});
 
@@ -604,7 +611,7 @@ const setResourcePackSwitches = switchList => {
 		'buttonTextFill'
 	];
 	Addons._resource_pack_switches = switchList.filter(switchKey => {
-		const [parsedKey] = switchKey.match(/^[^=]*(?==|$)/u);
+		const parsedKey = switchKey.split('=')[0];
 		if (!validSwitches.includes(parsedKey)) {
 			console.warn(`setResourcePackSwitches: ${parsedKey} is not a valid switch`);
 
@@ -656,36 +663,22 @@ const insertResourcePackIntoGame = async(files, metafile) => {
 		sounds: {}
 	};
 
-	// Process sounds
-	Object.entries(files)
-		.filter(([path]) => path.startsWith('sound/'))
-		.forEach(([path, soundData]) => {
-			const key = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
-			resources.sounds[key] = soundData.buffer;
-		});
+	const frames = {};
+	const imagePromises = [];
 
-	// Process images
-	await Promise.all(
-		Object.entries(files)
-			.filter(([path]) => path.startsWith('image/'))
-			.map(async([path, imageData]) => {
-				const key = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
-				resources.images[key] = await loadImage(imageData);
-			})
-	);
+	for (const [path, data] of Object.entries(files)) {
+		const key = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
 
-	// Process game atlas frames
-	const frames = Object.fromEntries(
-		await Promise.all(
-			Object.entries(files)
-				.filter(([path]) => path.startsWith('game/') && path.endsWith('.png'))
-				.map(async([path, imageData]) => {
-					const key = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
-					return [key, await loadImage(imageData)];
-				})
-		)
-	);
+		if (path.startsWith('sound/')) {
+			resources.sounds[key] = data.buffer;
+		} else if (path.startsWith('image/')) {
+			imagePromises.push(loadImage(data).then(img => { resources.images[key] = img; }));
+		} else if (path.startsWith('game/') && path.endsWith('.png')) {
+			imagePromises.push(loadImage(data).then(img => { frames[key] = img; }));
+		}
+	}
 
+	await Promise.all(imagePromises);
 	resources.atlases.push({ key: 'game', frames });
 
 	const success = await game.plugins.resourcePack.replaceResources(resources);
@@ -694,10 +687,10 @@ const insertResourcePackIntoGame = async(files, metafile) => {
 	const themeIndex = insertCustomMazeThemeInfo(metafile);
 	const { frameData } = game.cache._cache.image.game;
 
-	for (const frameName in frameData._frameNames) {
-		const frame = frameData.getFrameByName(frameName);
+	for (const frameName of Object.keys(frameData._frameNames)) {
 		const themeFrameKey = frameName.replace(/0-(?<_>.*)/u, `${themeIndex}-$1`);
 		if (frameName !== themeFrameKey) {
+			const frame = frameData.getFrameByName(frameName);
 			frame.name = themeFrameKey;
 			frameData.addFrame(frame);
 		}
@@ -760,6 +753,10 @@ interceptFunction(Game.UIBootState, 'init', function(original, ...args) {
 }, { isClassy: true });
 
 interceptFunction(UITankSprite.prototype, 'spawn', function(original, ...args) {
+	const noTintTurret = Addons.getResourcePackSwitch('noTintTurret').value;
+	const noTintTreads = Addons.getResourcePackSwitch('noTintTreads').value;
+	const noTintBase = Addons.getResourcePackSwitch('noTintBase').value;
+
 	Object.defineProperty(this, 'tint', {
 		get() {
 			return this._tint;
@@ -768,12 +765,12 @@ interceptFunction(UITankSprite.prototype, 'spawn', function(original, ...args) {
 			// We need to finish execution first
 			// because base tint is set before turret and treads
 			requestAnimationFrame(() => {
-				if (Addons.getResourcePackSwitch('noTintTurret').value) this.turret.tint = 0xFFFFFF;
-				if (Addons.getResourcePackSwitch('noTintTreads').value) this.leftTread.tint = this.rightTread.tint = 0xFFFFFF;
-				if (Addons.getResourcePackSwitch('noTintBase').value) this._tint = 0xFFFFFF;
+				if (noTintTurret) this.turret.tint = 0xFFFFFF;
+				if (noTintTreads) this.leftTread.tint = this.rightTread.tint = 0xFFFFFF;
+				if (noTintBase) this._tint = 0xFFFFFF;
 				else this._tint = tint;
 			});
-			return Addons.getResourcePackSwitch('noTintBase').value
+			return noTintBase
 				? 0xFFFFFF
 				: this._tint;
 		},
@@ -784,14 +781,14 @@ interceptFunction(UITankSprite.prototype, 'spawn', function(original, ...args) {
 });
 
 interceptFunction(UIMineSprite.prototype, 'spawn', function(original, ...args) {
+	const noTintMine = Addons.getResourcePackSwitch('noTintMine').value;
+
 	Object.defineProperty(this, 'tint', {
 		get() {
 			return this._tint;
 		},
 		set(tint) {
-			this._tint = Addons.getResourcePackSwitch('noTintMine').value
-				? 0xFFFFFF
-				: tint;
+			this._tint = noTintMine ? 0xFFFFFF : tint;
 			return this._tint;
 		},
 		enumerable: true,
@@ -801,14 +798,14 @@ interceptFunction(UIMineSprite.prototype, 'spawn', function(original, ...args) {
 });
 
 interceptFunction(UIMissileImage.prototype, 'spawn', function(original, ...args) {
+	const noTintHomingMissile = Addons.getResourcePackSwitch('noTintHomingMissile').value;
+
 	Object.defineProperty(this, 'tint', {
 		get() {
 			return this._tint;
 		},
 		set(tint) {
-			this._tint = Addons.getResourcePackSwitch('noTintHomingMissile').value
-				? 0xFFFFFF
-				: tint;
+			this._tint = noTintHomingMissile ? 0xFFFFFF : tint;
 			return this._tint;
 		},
 		enumerable: true,

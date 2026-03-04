@@ -56,18 +56,19 @@ export const listen = <T>(types: Array<MessageData['type']> | null, cb: Callback
 
 /**
  * Subscribe once to a specific ipc message, then remove listener
- * @param type Message type to listen for
+ * @param types Message type or types to listen for
  * @param conditional Filter function
  * @param cb Callback to execute on match
  * @param from Expected sender process or null
  */
 export const once = <T>(
-	type: MessageData['type'],
+	types: MessageData['type'] | Array<MessageData['type']>,
 	conditional: (evt: CustomIpcEvent<T>) => boolean,
 	cb: Callback<T>,
 	from?: Process | null
 ): void => {
 	const eventName = from || foreignProcess;
+	const typeList = Array.isArray(types) ? types : [types];
 
 	/**
 	 * One-time listener
@@ -75,7 +76,7 @@ export const once = <T>(
 	 */
 	const listener = (evt: Event): void => {
 		const customEvt = evt as CustomIpcEvent<T>;
-		if (customEvt.detail?.type === type && conditional(customEvt)) {
+		if (customEvt.detail?.type && typeList.includes(customEvt.detail.type) && conditional(customEvt)) {
 			removeEventListener(eventName, listener);
 			// eslint-disable-next-line callback-return
 			cb(customEvt);

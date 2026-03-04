@@ -24,14 +24,12 @@ const getOrdinal = number => {
 
 export default class IronVaultUI extends MenuOverlay {
 
-	id = 'ironvault';
-
 	/**
 	 * Construct IronVault overlay
 	 * @param {class} parent Menu class
 	 */
 	constructor(parent) {
-		super(parent, Addons.t_url('assets/menu/ironvault.svg'));
+		super('ironvault', parent, Addons.t_url('assets/menu/ironvault.svg'));
 	}
 
 	/**
@@ -215,8 +213,8 @@ export default class IronVaultUI extends MenuOverlay {
 				uuid
 			}
 		});
-		once('CORS_EXEMPT_FETCH_RESULT', evt => evt.detail?.data?.uuid === uuid, ({ detail }) => {
-			if (!detail) return;
+		once(['CORS_EXEMPT_FETCH_RESULT', 'CORS_EXEMPT_FETCH_ERROR'], evt => evt.detail?.data?.uuid === uuid, ({ detail }) => {
+			if (!detail || detail.type === 'CORS_EXEMPT_FETCH_ERROR') return;
 
 			const { result } = detail.data;
 			if (!result.badges) return;
@@ -377,8 +375,8 @@ export default class IronVaultUI extends MenuOverlay {
 				uuid
 			}
 		});
-		once('CORS_EXEMPT_FETCH_RESULT', evt => evt.detail?.data?.uuid === uuid, ({ detail }) => {
-			if (!detail) return;
+		once(['CORS_EXEMPT_FETCH_RESULT', 'CORS_EXEMPT_FETCH_ERROR'], evt => evt.detail?.data?.uuid === uuid, ({ detail }) => {
+			if (!detail || detail.type === 'CORS_EXEMPT_FETCH_ERROR') return;
 
 			const { result } = detail.data;
 			if (!result.competitions) return;

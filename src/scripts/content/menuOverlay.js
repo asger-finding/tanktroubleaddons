@@ -3,8 +3,6 @@
  */
 export default class MenuOverlay {
 
-	content = $(`<div class="content ${ this.id }"></div>`);
-
 	icon = $('<div class="menuicon"></div>');
 
 	#initialized = false;
@@ -35,10 +33,14 @@ export default class MenuOverlay {
 
 	/**
 	 * Construct the overlay
+	 * @param {string} id Overlay identifier
 	 * @param {class} parent Menu class instance
 	 * @param {string} iconUrl URL to the SVG icon
 	 */
-	constructor(parent, iconUrl) {
+	constructor(id, parent, iconUrl) {
+		this.id = id;
+		this.content = $(`<div class="content ${ id }"></div>`);
+
 		fetch(iconUrl)
 			.then(result => result.text())
 			.then(body => {

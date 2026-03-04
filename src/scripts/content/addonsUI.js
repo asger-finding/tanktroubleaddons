@@ -3,14 +3,12 @@ import MenuOverlay from './menuOverlay.js';
 
 export default class AddonsUI extends MenuOverlay {
 
-	id = 'addons';
-
 	/**
 	 * Construct the addons content
 	 * @param {class} parent Menu class instance
 	 */
 	constructor(parent) {
-		super(parent, Addons.t_url('assets/menu/addons/addons.svg'));
+		super('addons', parent, Addons.t_url('assets/menu/addons/addons.svg'));
 	}
 
 	/**

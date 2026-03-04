@@ -58,21 +58,18 @@ UIGameIconScrollerGroup.prototype.update = function() {
 
 	for (const item of this.gameIcons) item.position.x += this.velocity;
 
-	if (!this.scrolling) {
-		let { velocity } = this;
+	if (!this.scrolling && this.gameIcons.length > 0) {
+		// Find the nearest grid-aligned offset using the first visible icon
+		const referenceIcon = this.gameIcons.find(({ x }) => x > 0 && x < this.game.width) ?? this.gameIcons.at(0);
+		const currentOffset = referenceIcon.x - this.leftMargin;
+		const nearestSlot = Math.round(currentOffset / this.iconSpacing);
+		const snapTarget = this.leftMargin + nearestSlot * this.iconSpacing;
+		const gridDistanceDiff = snapTarget - referenceIcon.x;
 
-		const targetX = this.velocity > 0
-			? this.gameIcons.at(0)?.x ?? 0
-			: this.gameIcons.findLast(({ position }) => position.x < this.game.width)?.x ?? this.game.width;
+		let snapVelocity = gridDistanceDiff / 3;
+		snapVelocity = Math.min(Math.abs(snapVelocity), this.maxScrollSpeed) * Math.sign(snapVelocity);
 
-		const gridDistanceDiff = this.velocity > 0
-			? (this.iconSpacing / 2) - targetX
-			: this.game.width - (this.iconSpacing / 2) - targetX;
-
-		velocity += gridDistanceDiff / 3;
-		velocity = Math.min(Math.abs(velocity), this.maxScrollSpeed) * Math.sign(velocity);
-
-		for (const item of this.gameIcons) item.position.x += velocity;
+		for (const item of this.gameIcons) item.position.x += snapVelocity;
 	}
 
 	// Apply drag to velocity
@@ -98,22 +95,21 @@ UIGameIconScrollerGroup.prototype.update = function() {
 		if (!isNaN(scale) && !isTweening) gameIcon.scale.set(scale);
 	}
 
-	// Carousel logic
+	// Carousel wrap: when an icon passes half a spacing beyond the viewport edge,
+	// wrap it to the opposite side of the ring
 	if (this.velocity > 0) {
-		const firstFromRight = this.gameIcons.at(0);
-		if (firstFromRight.x > this.iconSpacing) {
-			// Insert new at right to fill void
-			const newGameIcon = this.gameIcons.at(-1);
-			newGameIcon.position.x = 0;
+		const rightmost = this.gameIcons.at(-1);
+		if (rightmost.x > this.game.width + this.iconSpacing / 2) {
+			const leftmost = this.gameIcons.at(0);
+			rightmost.position.x = leftmost.x - this.iconSpacing;
 
 			this.leftArrow.releaseClick();
 		}
 	} else if (this.velocity < 0) {
-		const firstFromLeft = this.gameIcons.findLast(({ position }) => position.x < this.game.width);
-		if (firstFromLeft.position.x < this.game.width - this.iconSpacing) {
-			// Insert new at left to fill void
-			const newGameIcon = this.gameIcons.at(0);
-			newGameIcon.position.x = this.gameIcons.at(-1).position.x + this.iconSpacing;
+		const leftmost = this.gameIcons.at(0);
+		if (leftmost.x < -this.iconSpacing / 2) {
+			const rightmost = this.gameIcons.at(-1);
+			leftmost.position.x = rightmost.x + this.iconSpacing;
 
 			this.rightArrow.releaseClick();
 		}
@@ -165,7 +161,10 @@ UIGameIconScrollerGroup.prototype.spawnGameIcon = function(gameIcon) {
 
 	const spawnParameters = this.unresolvedGameIcons.get(gameIcon) ?? [];
 
-	const x = this.leftMargin + this.iconSpacing * this.gameIcons.length;
+	// Spawn excess icons at x=0 (hidden by visibility check), visible ones at grid positions
+	const x = this.gameIcons.length < 3
+		? this.leftMargin + this.iconSpacing * this.gameIcons.length
+		: 0;
 	const y = UIConstants.GAME_ICON_Y;
 	gameIcon.spawn(x, y, ...spawnParameters);
 
@@ -210,11 +209,24 @@ UIGameIconScrollerGroup.prototype._distributeGameIcons = function() {
 	this.scrolling = true;
 	this.velocity = 0.0;
 
-	Promise.all(this.gameIcons.map((gameIcon, i) => new Promise(resolve => {
-		const x = this.leftMargin + this.iconSpacing * i;
-		const tween = this.game.add.tween(gameIcon.position).to({ x }, 300, Phaser.Easing.Cubic.InOut, true);
-		tween.onComplete.add(() => resolve(), {});
-	}))).then(() => { this.scrolling = false; });
+	const visibleCount = Math.min(this.gameIcons.length, 3);
+	const tweens = [];
+
+	this.gameIcons.forEach((gameIcon, i) => {
+		if (i < visibleCount) {
+			// Tween visible icons to their grid positions
+			const x = this.leftMargin + this.iconSpacing * i;
+			tweens.push(new Promise(resolve => {
+				const tween = this.game.add.tween(gameIcon.position).to({ x }, 300, Phaser.Easing.Cubic.InOut, true);
+				tween.onComplete.add(() => resolve(), {});
+			}));
+		} else {
+			// Place excess icons behind the visible area (left of viewport)
+			gameIcon.position.x = this.leftMargin - this.iconSpacing * (i - visibleCount + 1);
+		}
+	});
+
+	Promise.all(tweens).then(() => { this.scrolling = false; });
 };
 
 UIGameIconScrollerGroup.prototype._calculateIconSpacing = function(count) {

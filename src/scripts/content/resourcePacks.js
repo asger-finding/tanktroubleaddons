@@ -421,7 +421,10 @@ const setActiveResourcePack = hashsum => new Promise((resolve, reject) => {
 	}
 	localStorage.setItem('resourcepack', hashsum);
 	Addons.getActiveResourcePack()
-		.then(resolve)
+		.then(pack => {
+			insertResourcePackCSS(pack.css);
+			resolve(pack);
+		})
 		.catch(reject);
 });
 
@@ -724,6 +727,11 @@ Object.assign(Addons, {
 });
 
 storeDefaultResourcePacks();
+
+// Apply resource pack CSS immediately so global styles don't wait for the game to load
+getActiveResourcePack()
+	.then(({ css }) => insertResourcePackCSS(css))
+	.catch(() => {});
 
 interceptFunction(Game.UIPreloadState, 'preload', (original, ...args) => {
 	Addons.getActiveResourcePack().then(({ textures, metafile, css }) => {

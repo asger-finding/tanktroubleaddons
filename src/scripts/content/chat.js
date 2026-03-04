@@ -691,6 +691,101 @@ const escapeBadCharacters = () => {
 };
 
 /**
+ * Allow scrolling through chat history instead of removing overflowing messages.
+ * Adds a custom scrollbar on the left side of the chat body.
+ * @param {HTMLElement} chatBody Chat body DOM element
+ */
+const addChatScroll = chatBody => {
+	const maxChatMessages = 200;
+	UIConstants.CHAT_BOX_MAX_NUM_MESSAGES = maxChatMessages;
+
+	// Prevent draggable from capturing scroll events on the chat body
+	TankTrouble.ChatBox.chat.draggable('option', 'cancel', 'input, textarea, button, select, option, .body, .chat-scrollbar');
+
+	// Move resize handle out of .body so it's not affected by the fade mask
+	const $handle = TankTrouble.ChatBox.chatBodyResizeHandle;
+	TankTrouble.ChatBox.chat[0].appendChild($handle[0]);
+	$handle.show = () => $handle.stop(true).css('display', '').animate({ opacity: 1 }, 200);
+	$handle.hide = () => $handle.stop(true).animate({ opacity: 0 }, 200, function() { $(this).css('display', 'none'); });
+
+	// Sync handle position to bottom-right of .body
+	const syncHandle = () => {
+		$handle[0].style.left = `${chatBody.offsetLeft + chatBody.offsetWidth - $handle[0].offsetWidth}px`;
+		$handle[0].style.top = `${chatBody.offsetTop + chatBody.offsetHeight - $handle[0].offsetHeight}px`;
+	};
+	new ResizeObserver(syncHandle).observe(chatBody);
+	new MutationObserver(syncHandle).observe(chatBody, { attributes: true, attributeFilter: ['style'] });
+
+	interceptFunction(TankTrouble.ChatBox, '_updateChat', () => {
+		const messages = TankTrouble.ChatBox.chatBody.find('div.chatMessage');
+		messages.slice(maxChatMessages).remove();
+	});
+
+	// Custom scrollbar
+	const scrollbar = document.createElement('div');
+	scrollbar.className = 'chat-scrollbar';
+	const thumb = document.createElement('div');
+	thumb.className = 'chat-scrollbar-thumb';
+	scrollbar.appendChild(thumb);
+
+	TankTrouble.ChatBox.chat[0].appendChild(scrollbar);
+
+	let dragging = false;
+
+	const updateThumb = () => {
+		const { scrollTop, scrollHeight, clientHeight } = chatBody;
+		if (scrollHeight <= clientHeight) {
+			scrollbar.style.display = 'none';
+			return;
+		}
+		scrollbar.style.display = '';
+
+		if (!dragging) {
+			scrollbar.style.left = `${chatBody.offsetLeft - 12}px`;
+			scrollbar.style.top = `${chatBody.offsetTop}px`;
+			scrollbar.style.height = `${clientHeight}px`;
+		}
+
+		const thumbHeight = Math.max(20, (clientHeight / scrollHeight) * clientHeight);
+		const maxScroll = scrollHeight - clientHeight;
+		const thumbTop = (scrollTop / maxScroll) * (clientHeight - thumbHeight);
+		thumb.style.height = `${thumbHeight}px`;
+		thumb.style.top = `${thumbTop}px`;
+	};
+
+	chatBody.addEventListener('scroll', updateThumb, { passive: true });
+	new ResizeObserver(updateThumb).observe(chatBody);
+	new MutationObserver(mutations => {
+		const relevant = mutations.some(m =>
+			m.type === 'childList' || m.target.classList.contains('chatMessage')
+		);
+		if (relevant) updateThumb();
+	}).observe(chatBody, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+
+	// Thumb drag handling
+	let startY, startScroll;
+	thumb.addEventListener('mousedown', e => {
+		dragging = true;
+		startY = e.clientY;
+		startScroll = chatBody.scrollTop;
+		thumb.classList.add('dragging');
+		e.preventDefault();
+	});
+	addEventListener('mousemove', e => {
+		if (!dragging) return;
+		const { scrollHeight, clientHeight } = chatBody;
+		const maxScroll = scrollHeight - clientHeight;
+		const thumbHeight = Math.max(20, (clientHeight / scrollHeight) * clientHeight);
+		chatBody.scrollTop = startScroll + (e.clientY - startY) * (maxScroll / (clientHeight - thumbHeight));
+	});
+	addEventListener('mouseup', () => {
+		if (!dragging) return;
+		dragging = false;
+		thumb.classList.remove('dragging');
+	});
+};
+
+/**
  * Intercept chat messages and insert emojis in the :emoji: syntax
  */
 const insertEmojis = () => {
@@ -713,6 +808,7 @@ whenContentInitialized().then(() => {
 	addAutocomplete(chatInput);
 	preventServerChangeChatClear();
 	betterWelcomeMessage();
+	addChatScroll(chatBody);
 	escapeBadCharacters();
 	insertChatBanExpiryTime();
 	insertEmojis();

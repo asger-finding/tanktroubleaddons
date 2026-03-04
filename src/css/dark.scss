@@ -288,6 +288,11 @@ $tooltipster-accent-dark: rgb(25 25 25);
 				--accent: #{$chat-global-accent} !important;
 			}
 		}
+
+		> .chat-scrollbar .chat-scrollbar-thumb {
+			background: $chat-normal-bg;
+			outline-color: rgb(255 255 255 / 0.15);
+		}
 	}
 
 	body:not(.premium) {

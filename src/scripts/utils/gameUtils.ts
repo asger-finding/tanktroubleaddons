@@ -75,36 +75,40 @@ const loadImage = (src: string): Promise<HTMLImageElement> => new Promise((resol
  */
 const trimCanvas = (ctx: CanvasRenderingContext2D, threshold = 0) => {
 	const { canvas } = ctx;
-	const { width } = canvas;
-	const { height } = canvas;
-	const imageData = ctx.getImageData(0, 0, width, height);
-	const tlCorner = { x: width + 1, y: height + 1 };
-	const brCorner = { x:-1, y:-1 };
+	const { width, height } = canvas;
+	const { data } = ctx.getImageData(0, 0, width, height);
 
-	for (let y = 0; y < height; y++) {
-		for (let x = 0; x < width; x++) {
-			if (imageData.data[((y * width + x) * 4) + 3] > threshold) {
-				tlCorner.x = Math.min(x, tlCorner.x);
-				tlCorner.y = Math.min(y, tlCorner.y);
-				brCorner.x = Math.max(x, brCorner.x);
-				brCorner.y = Math.max(y, brCorner.y);
-			}
-		}
+	let top = 0, bottom = height - 1, left = width, right = 0;
+
+	// Find top row
+	outer_top:
+	for (; top < height; top++)
+		for (let x = 0; x < width; x++)
+			if (data[((top * width + x) * 4) + 3] > threshold) break outer_top;
+
+	// Find bottom row
+	outer_bottom:
+	for (; bottom > top; bottom--)
+		for (let x = 0; x < width; x++)
+			if (data[((bottom * width + x) * 4) + 3] > threshold) break outer_bottom;
+
+	// Find left and right within the vertical bounds
+	for (let y = top; y <= bottom; y++) {
+		for (let x = 0; x < left; x++)
+			if (data[((y * width + x) * 4) + 3] > threshold) { left = x; break; }
+		for (let x = width - 1; x > right; x--)
+			if (data[((y * width + x) * 4) + 3] > threshold) { right = x; break; }
 	}
 
-	const cut = ctx.getImageData(
-		tlCorner.x,
-		tlCorner.y,
-		brCorner.x - tlCorner.x,
-		brCorner.y - tlCorner.y
-	);
+	const trimW = right - left;
+	const trimH = bottom - top;
+	const cut = ctx.getImageData(left, top, trimW, trimH);
 
-	canvas.width = brCorner.x - tlCorner.x;
-	canvas.height = brCorner.y - tlCorner.y;
-
+	canvas.width = trimW;
+	canvas.height = trimH;
 	ctx.putImageData(cut, 0, 0);
 
-	return { width: canvas.width, height: canvas.height, x: tlCorner.x, y: tlCorner.y };
+	return { width: trimW, height: trimH, x: left, y: top };
 };
 
 /**
@@ -143,9 +147,9 @@ const layerImageData = (baseLayer: ImageData, onTopLayer: ImageData): ImageData 
 		const alpha = a1 + a2 * (1 - a1);
 
 		// Calculate the resulting color
-		const r = Math.round((r1 * a1 + r2 * a2 * (1 - a1)) / alpha);
-		const g = Math.round((g1 * a1 + g2 * a2 * (1 - a1)) / alpha);
-		const b = Math.round((b1 * a1 + b2 * a2 * (1 - a1)) / alpha);
+		const r = alpha > 0 ? Math.round((r1 * a1 + r2 * a2 * (1 - a1)) / alpha) : 0;
+		const g = alpha > 0 ? Math.round((g1 * a1 + g2 * a2 * (1 - a1)) / alpha) : 0;
+		const b = alpha > 0 ? Math.round((b1 * a1 + b2 * a2 * (1 - a1)) / alpha) : 0;
 
 		// Set the resulting pixel data
 		resultData[i] = r;
@@ -319,13 +323,11 @@ export const renderTankIcon = (
 				return Promise.reject(new Error('Tank part must be "shade", "accessory", or "base"'));
 		}
 	})).then((results: TankPartResult[]) => {
-		const result = results.filter((res): res is TankPartResult => !(res instanceof Error));
-
 		const { width, height } = canvas;
-		const initialBuffer = ctx.getImageData(0, 0, width, height);
+		let currentBuffer = ctx.getImageData(0, 0, width, height);
 
-		result.reduce((currentBuffer, part) => {
-			if (part === null) return currentBuffer;
+		for (const part of results) {
+			if (part === null) continue;
 
 			const [fill, image] = part;
 
@@ -336,7 +338,8 @@ export const renderTankIcon = (
 				ctx.putImageData(currentBuffer, 0, 0);
 				ctx.drawImage(image, 0, 0, width, height);
 
-				return ctx.getImageData(0, 0, width, height);
+				currentBuffer = ctx.getImageData(0, 0, width, height);
+				continue;
 			}
 
 			// We need to mask a shape with an image or fill color
@@ -359,8 +362,8 @@ export const renderTankIcon = (
 			}
 
 			const maskBuffer = ctx.getImageData(0, 0, width, height);
-			return layerImageData(currentBuffer, maskBuffer);
-		}, initialBuffer);
+			currentBuffer = layerImageData(currentBuffer, maskBuffer);
+		}
 	}).catch(async() => {
 		// An image errored. Show the 404 tank
 		await loadImage(Addons.t_url('assets/menu/ironvault/404-tank.{{png|avif}}'))

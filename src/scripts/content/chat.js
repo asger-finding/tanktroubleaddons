@@ -325,6 +325,7 @@ const addAutocomplete = chatInput => {
 	/**
 	 * Returns the user that the selection is over,
 	 * from the input value, if prefixed by @
+	 * @param {IndexiesOfWordInSelection} currentWord Current word at cursor position
 	 * @returns {IndexiesOfWordInSelection|null} Mention username or null
 	 */
 	const getMentionFocus = (currentWord = getIndexiesOfWordInCurrentSelection()) => {
@@ -343,6 +344,7 @@ const addAutocomplete = chatInput => {
 	/**
 	 * Returns the emoji that the selection is over,
 	 * from the input value, if prefixed by :
+	 * @param {IndexiesOfWordInSelection} currentWord Current word at cursor position
 	 * @returns {IndexiesOfWordInSelection|null} Emoji identifier or null
 	 */
 	const getEmojiFocus = (currentWord = getIndexiesOfWordInCurrentSelection()) => {
@@ -505,6 +507,9 @@ const addAutocomplete = chatInput => {
 
 	/** Event handler for TTClient.EVENTS.GAME_LIST_CHANGED */
 	const fetchedPlayerIds = new Set();
+	/**
+	 *
+	 */
 	const handleGameListChanged = () => {
 		const gameStates = ClientManager.getClient().getAvailableGameStates();
 
@@ -690,7 +695,7 @@ const escapeBadCharacters = () => {
  */
 const insertEmojis = () => {
 	interceptFunction(TankTrouble.ChatBox, '_renderChatMessage', (original, ...args) => {
-		args[6] = args[6].replace(/:([a-zA-Z0-9_]+):/gu, (match, key) => dismoji[key] ?? match);
+		args[6] = args[6].replace(/:(?<name>[a-zA-Z0-9_]+):/gu, (match, key) => dismoji[key] ?? match);
 
 		return original(...args);
 	});

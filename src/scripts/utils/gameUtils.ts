@@ -78,19 +78,21 @@ const trimCanvas = (ctx: CanvasRenderingContext2D, threshold = 0) => {
 	const { width, height } = canvas;
 	const { data } = ctx.getImageData(0, 0, width, height);
 
-	let top = 0, bottom = height - 1, left = width, right = 0;
+	let bottom = height - 1, left = width, right = 0, top = 0;
 
 	// Find top row
 	outer_top:
-	for (; top < height; top++)
+	for (; top < height; top++) {
 		for (let x = 0; x < width; x++)
 			if (data[((top * width + x) * 4) + 3] > threshold) break outer_top;
+	}
 
 	// Find bottom row
 	outer_bottom:
-	for (; bottom > top; bottom--)
+	for (; bottom > top; bottom--) {
 		for (let x = 0; x < width; x++)
 			if (data[((bottom * width + x) * 4) + 3] > threshold) break outer_bottom;
+	}
 
 	// Find left and right within the vertical bounds
 	for (let y = top; y <= bottom; y++) {

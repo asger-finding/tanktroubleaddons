@@ -1,4 +1,5 @@
 import './resourcePackPlugin.js';
+import * as logger from '../common/logger.js';
 import { calculateFileHash } from '../utils/mathUtils.js';
 import { interceptFunction } from '../utils/gameUtils.js';
 import { mergeWithSchema } from '../utils/objectUtils.js';
@@ -119,10 +120,10 @@ const createMetaFile = (file, decoded) => {
 		}
 	} catch (err) {
 		if (fatal) {
-			console.error('createMetaFile:', err);
+			logger.error('createMetaFile:', err);
 			throw new Error(err.message);
 		} else {
-			console.warn('createMetaFile:', err);
+			logger.warn('createMetaFile:', err);
 		}
 
 		return schema;
@@ -148,16 +149,15 @@ const parseCSS = normalized => {
  * @private
  * @param {IDBObjectStore} store The IndexedDB object store
  * @param {string} baseName The base name of the resource pack
- * @param {number} [suffix] The current suffix to try (default: 0, meaning no suffix)
  * @returns {Promise<string>} Resolves with a unique name
  */
 const generateUniqueName = async(store, baseName) => {
 	const name = baseName.trim() || 'Unnamed resource pack';
 
-	for (let suffix = 0; ; suffix++) {
+	for (let suffix = 0; ; suffix++) { // eslint-disable-line no-await-in-loop
 		const candidateName = suffix === 0 ? name : `${name} (${suffix})`;
 
-		const exists = await new Promise((resolve, reject) => {
+		const exists = await new Promise((resolve, reject) => { // eslint-disable-line no-await-in-loop
 			const request = store.get(candidateName);
 			/* eslint-disable jsdoc/require-jsdoc */
 			request.onsuccess = () => resolve(Boolean(request.result));
@@ -194,10 +194,10 @@ const addResourcePackToStore = async(file, builtIn, timestamp = Date.now()) => {
 					return;
 				}
 
-				const decoded = {};
-				for (const entry of entries)
-					decoded[entry.filename] = await entry.read();
-
+				const decodedEntries = await Promise.all(
+					entries.map(async entry => ({ filename: entry.filename, data: await entry.read() }))
+				);
+				const decoded = Object.fromEntries(decodedEntries.map(({ filename, data }) => [filename, data]));
 
 				let normalized = null;
 				let metafile = null;
@@ -215,7 +215,7 @@ const addResourcePackToStore = async(file, builtIn, timestamp = Date.now()) => {
 				const store = transaction.objectStore(storeName);
 				const index = store.index('hashsum');
 				const hashRequest = index.get(hashsum);
-				hashRequest.onsuccess = async() => {
+				hashRequest.onsuccess = async() => { // eslint-disable-line require-atomic-updates
 					const existingFile = hashRequest.result;
 
 					// File with same hashsum exists
@@ -406,6 +406,19 @@ const getActiveResourcePack = () => new Promise((resolve, reject) => {
  * @returns {Promise<string>} Resolves with hashsum or error if fail
  */
 const storeResourcePack = file => addResourcePackToStore(file, false);
+
+/**
+ * Insert the resource pack css into the document
+ * @param {string} css Resource pack css as a string
+ */
+const insertResourcePackCSS = css => {
+	if (!Addons._resource_pack_styles) {
+		Addons._resource_pack_styles = new CSSStyleSheet();
+		document.adoptedStyleSheets.push(Addons._resource_pack_styles);
+	}
+
+	Addons._resource_pack_styles.replace(css);
+};
 
 /**
  * Set the active resource pack in local storage
@@ -613,9 +626,9 @@ const setResourcePackSwitches = switchList => {
 		'buttonTextFill'
 	];
 	Addons._resource_pack_switches = switchList.filter(switchKey => {
-		const parsedKey = switchKey.split('=')[0];
+		const [parsedKey] = switchKey.split('=');
 		if (!validSwitches.includes(parsedKey)) {
-			console.warn(`setResourcePackSwitches: ${parsedKey} is not a valid switch`);
+			logger.warn(`setResourcePackSwitches: ${parsedKey} is not a valid switch`);
 
 			return false;
 		}
@@ -689,26 +702,13 @@ const insertResourcePackIntoGame = async(files, metafile) => {
 	const { frameData } = game.cache._cache.image.game;
 
 	for (const frameName of Object.keys(frameData._frameNames)) {
-		const themeFrameKey = frameName.replace(/0-(?<_>.*)/u, `${themeIndex}-$1`);
+		const themeFrameKey = frameName.replace(/0-(?<ext>.*)/u, `${themeIndex}-$1`);
 		if (frameName !== themeFrameKey) {
 			const frame = frameData.getFrameByName(frameName);
 			frame.name = themeFrameKey;
 			frameData.addFrame(frame);
 		}
 	}
-};
-
-/**
- * Insert the resource pack css into the document
- * @param {string} css Resource pack css as a string
- */
-const insertResourcePackCSS = css => {
-	if (!Addons._resource_pack_styles) {
-		Addons._resource_pack_styles = new CSSStyleSheet();
-		document.adoptedStyleSheets.push(Addons._resource_pack_styles);
-	}
-
-	Addons._resource_pack_styles.replace(css);
 };
 
 Object.assign(Addons, {
@@ -735,7 +735,7 @@ interceptFunction(Game.UIPreloadState, 'preload', (original, ...args) => {
 	Addons.getActiveResourcePack().then(({ textures, metafile, css }) => {
 		Addons.insertResourcePackIntoGame(textures, metafile);
 		Addons.insertResourcePackCSS(css);
-	}).catch(err => alert(`Error getting active texture pack: ${err}. This should never happen.`));
+	}).catch(err => alert(`Error getting active texture pack: ${err}. This should never happen.`)); // eslint-disable-line no-alert
 
 	return original(...args);
 }, { isClassy: true });

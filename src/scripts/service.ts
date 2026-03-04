@@ -78,7 +78,7 @@ async function toggleFullscreen(state?: 'on' | 'off') {
 			state: state === 'on' ? 'fullscreen' : lastWindowState
 		});
 
-		lastWindowState = currentState;
+		lastWindowState = currentState; // eslint-disable-line require-atomic-updates
 	}
 }
 /**

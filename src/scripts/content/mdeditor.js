@@ -100,7 +100,7 @@ import { renderMarkdown } from './markdown.js';
 
 	/**
 	 * Initialize the markdown editor
-	 * @param {JQuery} target Editor target textarea
+	 * @param {JQuery} textarea Editor target textarea
 	 */
 	const initEditor = textarea => {
 

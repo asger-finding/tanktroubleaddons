@@ -63,6 +63,7 @@ export default class MenuOverlay {
 	 * Subclass initialization hook
 	 * @abstract
 	 */
+	// eslint-disable-next-line @typescript-eslint/class-methods-use-this
 	_init() {}
 
 	/**

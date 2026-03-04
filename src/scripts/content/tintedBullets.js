@@ -2,86 +2,105 @@ import { StoreEvent, get, onStateChange } from '../common/store.js';
 import { interceptFunction } from '../utils/gameUtils.js';
 import { smoothTransition } from '../utils/mathUtils.js';
 
+/* eslint-disable id-length */
+
 /**
  * Parse a hex color string to an RGB object
  * @param {string} hex Hex color string (e.g. "#ff0000" or "#f00")
- * @returns {{ r: number, g: number, b: number }}
+ * @returns {{ r: number, g: number, b: number }} RGB color object
  */
 const hexToRgb = hex => {
-	let h = hex.replace('#', '');
-	if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-	const n = parseInt(h, 16);
-	return { r: n >> 16, g: (n >> 8) & 255, b: n & 255 };
+	let str = hex.replace('#', '');
+	if (str.length === 3) str = str[0] + str[0] + str[1] + str[1] + str[2] + str[2];
+	const num = parseInt(str, 16);
+	return { r: num >> 16, g: (num >> 8) & 255, b: num & 255 };
 };
 
 /**
  * Convert RGB to HSL
- * @param {{ r: number, g: number, b: number }} rgb
- * @returns {{ h: number, s: number, l: number }}
+ * @param {{ r: number, g: number, b: number }} color RGB color object
+ * @returns {{ h: number, s: number, l: number }} HSL color object
  */
 const rgbToHsl = ({ r, g, b }) => {
-	const rn = r / 255, gn = g / 255, bn = b / 255;
-	const max = Math.max(rn, gn, bn), min = Math.min(rn, gn, bn);
-	const l = (max + min) / 2;
-	if (max === min) return { h: 0, s: 0, l: l * 100 };
-	const d = max - min;
-	const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-	let h = 0;
-	if (max === rn) h = ((gn - bn) / d + (gn < bn ? 6 : 0)) / 6;
-	else if (max === gn) h = ((bn - rn) / d + 2) / 6;
-	else h = ((rn - gn) / d + 4) / 6;
-	return { h: h * 360, s: s * 100, l: l * 100 };
+	const bn = b / 255;
+	const gn = g / 255;
+	const rn = r / 255;
+	const max = Math.max(rn, gn, bn);
+	const min = Math.min(rn, gn, bn);
+	const lightness = (max + min) / 2;
+	if (max === min) return { h: 0, s: 0, l: lightness * 100 };
+	const delta = max - min;
+	const saturation = lightness > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+	let hue = 0;
+	if (max === rn) hue = ((gn - bn) / delta + (gn < bn ? 6 : 0)) / 6;
+	else if (max === gn) hue = ((bn - rn) / delta + 2) / 6;
+	else hue = ((rn - gn) / delta + 4) / 6;
+	return { h: hue * 360, s: saturation * 100, l: lightness * 100 };
+};
+
+/**
+ * Interpolate between two values based on hue position
+ * @param {number} lo Low bound
+ * @param {number} hi High bound
+ * @param {number} frac Hue fraction
+ * @returns {number} Interpolated value
+ */
+const hue2rgb = (lo, hi, frac) => {
+	let tf = frac;
+	if (frac < 0) tf = frac + 1;
+	else if (frac > 1) tf = frac - 1;
+	if (tf < 1 / 6) return lo + (hi - lo) * 6 * tf;
+	if (tf < 1 / 2) return hi;
+	if (tf < 2 / 3) return lo + (hi - lo) * (2 / 3 - tf) * 6;
+	return lo;
 };
 
 /**
  * Convert HSL to RGB
- * @param {{ h: number, s: number, l: number }} hsl
- * @returns {{ r: number, g: number, b: number }}
+ * @param {{ h: number, s: number, l: number }} color HSL color object
+ * @returns {{ r: number, g: number, b: number }} RGB color object
  */
 const hslToRgb = ({ h, s, l }) => {
-	const sn = s / 100, ln = l / 100;
-	if (sn === 0) { const v = Math.round(ln * 255); return { r: v, g: v, b: v }; }
-	const hue2rgb = (p, q, t) => {
-		if (t < 0) t += 1;
-		if (t > 1) t -= 1;
-		if (t < 1 / 6) return p + (q - p) * 6 * t;
-		if (t < 1 / 2) return q;
-		if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-		return p;
-	};
-	const q = ln < 0.5 ? ln * (1 + sn) : ln + sn - ln * sn;
-	const p = 2 * ln - q;
+	const ln = l / 100;
+	const sn = s / 100;
+	if (sn === 0) { const grey = Math.round(ln * 255); return { r: grey, g: grey, b: grey }; }
+	const hi = ln < 0.5 ? ln * (1 + sn) : ln + sn - ln * sn;
+	const lo = 2 * ln - hi;
 	const hn = h / 360;
 	return {
-		r: Math.round(hue2rgb(p, q, hn + 1 / 3) * 255),
-		g: Math.round(hue2rgb(p, q, hn) * 255),
-		b: Math.round(hue2rgb(p, q, hn - 1 / 3) * 255)
+		r: Math.round(hue2rgb(lo, hi, hn + 1 / 3) * 255),
+		g: Math.round(hue2rgb(lo, hi, hn) * 255),
+		b: Math.round(hue2rgb(lo, hi, hn - 1 / 3) * 255)
 	};
 };
 
 /**
  * WCAG relative luminance of an RGB color
  * @param {number[]} rgb [r, g, b] values 0-255
- * @returns {number} relative luminance
+ * @returns {number} Relative luminance value
  */
 const relativeLuminance = ([r, g, b]) => {
 	const [rn, gn, bn] = [r / 255, g / 255, b / 255].map(
-		c => c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+		ch => ch <= 0.03928 ? ch / 12.92 : ((ch + 0.055) / 1.055) ** 2.4
 	);
 	return 0.2126 * rn + 0.7152 * gn + 0.0722 * bn;
 };
 
 /**
  * WCAG contrast ratio between two RGB colors
- * @param {number[]} a [r, g, b]
- * @param {number[]} b [r, g, b]
- * @returns {number} contrast ratio
+ * @param {number[]} colorA First [r, g, b] color
+ * @param {number[]} colorB Second [r, g, b] color
+ * @returns {number} Contrast ratio
  */
-const rgbContrast = (a, b) => {
-	const l1 = Math.max(relativeLuminance(a), relativeLuminance(b));
-	const l2 = Math.min(relativeLuminance(a), relativeLuminance(b));
+const rgbContrast = (colorA, colorB) => {
+	const lumA = relativeLuminance(colorA);
+	const lumB = relativeLuminance(colorB);
+	const l1 = Math.max(lumA, lumB);
+	const l2 = Math.min(lumA, lumB);
 	return (l1 + 0.05) / (l2 + 0.05);
 };
+
+/* eslint-enable id-length */
 
 // Constants
 /* eslint-disable @typescript-eslint/naming-convention */

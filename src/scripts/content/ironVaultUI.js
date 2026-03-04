@@ -2,7 +2,7 @@ import { dispatchMessage, once } from '../common/ipcBridge.js';
 import { generateUUID } from '../utils/mathUtils.js';
 import { renderTankIcon } from '../utils/gameUtils.js';
 import { timeAgo } from '../utils/timeUtils.js';
-import MenuOverlay from './menuOverlay.js';
+import MenuOverlay from './menuOverlay.js'; // eslint-disable-line sort-imports
 
 /**
  * Add space thousands delimiters to a number and return it as a string
@@ -330,7 +330,7 @@ export default class IronVaultUI extends MenuOverlay {
 		const codeblock = $('<div class="codeblock"></div>');
 
 		const value = JSON.stringify(playerDetails.data, null, 2)
-			.replace(/"(?<_>[^"]+)":/gu, '$1:');
+			.replace(/"(?<ext>[^"]+)":/gu, '$1:');
 
 		container.append([clicker, codeblock]);
 		container.appendTo('body');

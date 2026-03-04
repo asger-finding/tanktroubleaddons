@@ -37,6 +37,7 @@
  * @param {Phaser.Game} game Reference to the current game instance
  * @param {object} parent The parent object
  */
+import * as logger from '../common/logger.js';
 import { MaxRectsPacker } from 'maxrects-packer';
 
 Phaser.Plugin.ResourcePack = function(game, parent) {
@@ -221,8 +222,7 @@ Phaser.Plugin.ResourcePack.prototype.replaceResources = async function(resources
 		// Check if all succeeded
 		return results.every(success => success === true);
 	} catch (error) {
-		console.error('Batch replace failed:', error);
-
+		logger.error('Batch replace failed:', error);
 		return false;
 	}
 };
@@ -258,9 +258,9 @@ Phaser.Plugin.ResourcePack.prototype.insertFramesIntoAtlas = async function(atla
 		}
 
 		// Pack textures
-		for (const [frameName, image] of Object.entries(frames)) {
+		for (const [frameName, image] of Object.entries(frames))
 			this.Packer.add({ width: image.width, height: image.height, image, frameName });
-		}
+
 
 		const bin = this.Packer.bins[this.Packer.bins.length - 1];
 		if (!bin) {
@@ -289,7 +289,7 @@ Phaser.Plugin.ResourcePack.prototype.insertFramesIntoAtlas = async function(atla
 		newImg.src = canvas.toDataURL();
 		await new Promise((resolve, reject) => {
 			newImg.onload = resolve;
-			newImg.onerror = () => reject(new Error('Failed to load atlas canvas image'));
+			newImg.onerror = reject;
 		});
 
 		// Update atlas texture
@@ -305,8 +305,7 @@ Phaser.Plugin.ResourcePack.prototype.insertFramesIntoAtlas = async function(atla
 
 		return success;
 	} catch (error) {
-		console.error('Failed to insert frames into atlas:', error);
-
+		logger.error('Failed to insert frames into atlas:', error);
 		this.Packer.reset();
 		return false;
 	}
@@ -338,8 +337,7 @@ Phaser.Plugin.ResourcePack.prototype.replaceImage = async function(imageKey, new
 
 		return true;
 	} catch (error) {
-		console.error('Failed to replace image:', error);
-
+		logger.error('Failed to replace image:', error);
 		return false;
 	}
 };
@@ -365,8 +363,7 @@ Phaser.Plugin.ResourcePack.prototype.replaceSound = async function(soundKey, sou
 		this.game.cache.reloadSoundComplete(soundKey);
 		return true;
 	} catch (error) {
-		console.error('Failed to replace sound:', error);
-
+		logger.error('Failed to replace sound:', error);
 		return false;
 	}
 };

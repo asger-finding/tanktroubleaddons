@@ -71,17 +71,14 @@ async function toggleFullscreen(state?: 'on' | 'off') {
 	const { windowId } = tab;
 
 	if (isTankTrouble(tab.url)) {
-		browser.windows.get(windowId, window => {
-			if (chrome.runtime.lastError) return;
+		const window = await browser.windows.get(windowId);
+		const currentState = window.state ?? 'normal';
 
-			const currentState = window.state ?? 'normal';
-
-			browser.windows.update(windowId, {
-				state: state === 'on' ? 'fullscreen' : lastWindowState
-			});
-
-			lastWindowState = currentState;
+		await browser.windows.update(windowId, {
+			state: state === 'on' ? 'fullscreen' : lastWindowState
 		});
+
+		lastWindowState = currentState;
 	}
 }
 /**
@@ -149,9 +146,12 @@ browser.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 		}
 
 		fetch(resource, options || {})
-			.then(response => response.json())
+			.then(response => {
+				if (!response.ok) throw new Error(`HTTP ${response.status}`);
+				return response.json();
+			})
 			.then(data => sendResponse({ success: true, data, uuid }))
-			.catch(error => sendResponse({ success: false, error }));
+			.catch(error => sendResponse({ success: false, error: error.message ?? String(error) }));
 
 		return true;
 	} else if (request.action === 'FULLSCREEN') {

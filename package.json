@@ -52,7 +52,6 @@
   "dependencies": {
     "but-unzip": "^0.1.10",
     "discord_emoji": "github:asger-finding/discord_emoji",
-    "fflate": "^0.8.2",
     "iso-8859-15": "^3.0.4",
     "match-sorter": "^8.2.0",
     "maxrects-packer": "^2.7.3",

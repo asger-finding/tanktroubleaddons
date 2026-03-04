@@ -2,7 +2,7 @@ import './resourcePackPlugin.js';
 import { calculateFileHash } from '../utils/mathUtils.js';
 import { interceptFunction } from '../utils/gameUtils.js';
 import { mergeWithSchema } from '../utils/objectUtils.js';
-import { unzip } from 'fflate';
+import { unzip } from 'but-unzip';
 
 const storeName = 'resourcePacks';
 
@@ -188,62 +188,61 @@ const addResourcePackToStore = async(file, builtIn, timestamp = Date.now()) => {
 		/* eslint-disable jsdoc/require-jsdoc */
 		reader.addEventListener('load', async(event) => {
 			try {
-				unzip(new Uint8Array(event.target.result), (err, decoded) => {
-					if (err) {
-						reject(new Error(`Error when unzipping file: ${err.message}`));
+				const entries = unzip(new Uint8Array(event.target.result));
+				if (!entries || entries.length === 0) {
+					reject(new Error('No valid data found in the zip file'));
+					return;
+				}
+
+				const decoded = {};
+				for (const entry of entries)
+					decoded[entry.filename] = await entry.read();
+
+
+				let normalized = null;
+				let metafile = null;
+				try {
+					({ normalized } = normalizeResourcePack(decoded));
+					normalized = filterOutDirectories(normalized);
+					metafile = createMetaFile(file, decoded);
+				} catch (userReadableError) {
+					reject(userReadableError);
+					return;
+				}
+				const css = parseCSS(normalized);
+
+				const transaction = Addons.indexedDB.transaction([storeName], 'readwrite');
+				const store = transaction.objectStore(storeName);
+				const index = store.index('hashsum');
+				const hashRequest = index.get(hashsum);
+				hashRequest.onsuccess = async() => {
+					const existingFile = hashRequest.result;
+
+					// File with same hashsum exists
+					if (existingFile) {
+						reject(new Error('Resource pack already exists'));
 						return;
 					}
 
-					if (!decoded || Object.keys(decoded).length === 0) {
-						reject(new Error('No valid data found in the zip file'));
-						return;
-					}
+					// Generate new name with suffix if a resource
+					// pack with the same name already exists
+					const uniqueName = await generateUniqueName(store, metafile.pack.name);
+					// eslint-disable-next-line require-atomic-updates
+					metafile.pack.name = uniqueName;
 
-					let normalized = null;
-					let metafile = null;
-					try {
-						({ normalized } = normalizeResourcePack(decoded));
-						normalized = filterOutDirectories(normalized);
-						metafile = createMetaFile(file, decoded);
-					} catch (userReadableError) {
-						reject(userReadableError);
-						return;
-					}
-					const css = parseCSS(normalized);
-
-					const transaction = Addons.indexedDB.transaction([storeName], 'readwrite');
-					const store = transaction.objectStore(storeName);
-					const index = store.index('hashsum');
-					const hashRequest = index.get(hashsum);
-					hashRequest.onsuccess = async() => {
-						const existingFile = hashRequest.result;
-
-						// File with same hashsum exists
-						if (existingFile) {
-							reject(new Error('Resource pack already exists'));
-							return;
-						}
-
-						// Generate new name with suffix if a resource
-						// pack with the same name already exists
-						const uniqueName = await generateUniqueName(store, metafile.pack.name);
-						// eslint-disable-next-line require-atomic-updates
-						metafile.pack.name = uniqueName;
-
-						// Store resource pack
-						store.add({
-							name: metafile.pack.name,
-							hashsum,
-							timestamp,
-							metafile,
-							css,
-							builtin: builtIn,
-							textures: normalized
-						});
-						resolve(hashsum);
-					};
-					hashRequest.onerror = () => reject(hashRequest.error);
-				});
+					// Store resource pack
+					store.add({
+						name: metafile.pack.name,
+						hashsum,
+						timestamp,
+						metafile,
+						css,
+						builtin: builtIn,
+						textures: normalized
+					});
+					resolve(hashsum);
+				};
+				hashRequest.onerror = () => reject(hashRequest.error);
 			} catch (err) {
 				reject(new Error(`Failed to process zip file: ${err.message}`));
 			}
@@ -672,13 +671,12 @@ const insertResourcePackIntoGame = async(files, metafile) => {
 	for (const [path, data] of Object.entries(files)) {
 		const key = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
 
-		if (path.startsWith('sound/')) {
+		if (path.startsWith('sound/'))
 			resources.sounds[key] = data.buffer;
-		} else if (path.startsWith('image/')) {
+		else if (path.startsWith('image/'))
 			imagePromises.push(loadImage(data).then(img => { resources.images[key] = img; }));
-		} else if (path.startsWith('game/') && path.endsWith('.png')) {
+		else if (path.startsWith('game/') && path.endsWith('.png'))
 			imagePromises.push(loadImage(data).then(img => { frames[key] = img; }));
-		}
 	}
 
 	await Promise.all(imagePromises);

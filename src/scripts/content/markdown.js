@@ -11,16 +11,15 @@ import { micromark } from 'micromark';
  * @returns {object} Extension
  */
 const gfmFixNewlines = text => {
+	const lines = text.split('\n');
+
 	/**
 	 * Get the nth line of the text
 	 * @private
 	 * @param {number} line Line index
 	 * @returns {string|null} Line content or null
 	 */
-	const getLine = line => {
-		const lines = text.split('\n');
-		return typeof lines[line] !== 'undefined' ? `${lines[line]  }\n` : null;
-	};
+	const getLine = line => typeof lines[line] !== 'undefined' ? `${lines[line]  }\n` : null;
 
 	return {
 		// Preserve forum post newlines
@@ -108,6 +107,8 @@ const initializeCodeBlocks = markdownElement => {
 			setupCmThemeUpdate(markdownElement);
 		}, 1);
 	}
+
+	if (codeblocks.length) setupCmThemeUpdate(markdownElement);
 };
 
 /**

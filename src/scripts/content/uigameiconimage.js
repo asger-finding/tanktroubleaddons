@@ -38,7 +38,7 @@ UIGameIconImage.prototype.update = function() {
 	if (!this.exists)
 		return;
 
-	for (const icon in this.icons) {
+	for (const icon of this.icons) {
 		icon.name?.update();
 		icon.icon?.update();
 	}

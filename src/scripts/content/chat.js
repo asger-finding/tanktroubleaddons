@@ -327,8 +327,7 @@ const addAutocomplete = chatInput => {
 	 * from the input value, if prefixed by @
 	 * @returns {IndexiesOfWordInSelection|null} Mention username or null
 	 */
-	const getMentionFocus = () => {
-		const currentWord = getIndexiesOfWordInCurrentSelection();
+	const getMentionFocus = (currentWord = getIndexiesOfWordInCurrentSelection()) => {
 		const [mentions] = chatInput.value.split(/\s+(?=[^@])/u);
 		const isTypingUserChat = mentions.startsWith('@');
 
@@ -346,8 +345,7 @@ const addAutocomplete = chatInput => {
 	 * from the input value, if prefixed by :
 	 * @returns {IndexiesOfWordInSelection|null} Emoji identifier or null
 	 */
-	const getEmojiFocus = () => {
-		const currentWord = getIndexiesOfWordInCurrentSelection();
+	const getEmojiFocus = (currentWord = getIndexiesOfWordInCurrentSelection()) => {
 		if (!currentWord) return null;
 
 		const isTypingEmoji = currentWord.word.startsWith(':') && !(currentWord.word.endsWith(':'));
@@ -450,8 +448,10 @@ const addAutocomplete = chatInput => {
 	chatInput.addEventListener('input', ({ isComposing }) => {
 		if (isComposing) return;
 
+		const currentWord = getIndexiesOfWordInCurrentSelection();
+
 		// Handle username autocomplete
-		const userFocus = getMentionFocus();
+		const userFocus = getMentionFocus(currentWord);
 		if (userFocus === null) {
 			usernameAutocomplete.hide();
 		} else {
@@ -465,7 +465,7 @@ const addAutocomplete = chatInput => {
 		}
 
 		// Handle emoji autocomplete
-		const emojiFocus = getEmojiFocus();
+		const emojiFocus = getEmojiFocus(currentWord);
 		if (emojiFocus === null) {
 			emojiAutocomplete.hide();
 		} else {
@@ -504,6 +504,7 @@ const addAutocomplete = chatInput => {
 	}, true);
 
 	/** Event handler for TTClient.EVENTS.GAME_LIST_CHANGED */
+	const fetchedPlayerIds = new Set();
 	const handleGameListChanged = () => {
 		const gameStates = ClientManager.getClient().getAvailableGameStates();
 
@@ -512,6 +513,8 @@ const addAutocomplete = chatInput => {
 
 			for (const player of playerStates) {
 				const playerId = player.getPlayerId();
+				if (fetchedPlayerIds.has(playerId)) continue;
+				fetchedPlayerIds.add(playerId);
 
 				Backend.getInstance().getPlayerDetails(
 					insertMention,
@@ -533,6 +536,7 @@ const addAutocomplete = chatInput => {
 	const clientStateEventHandler = (_self, _oldState, newState) => {
 		switch (newState) {
 			case TTClient.STATES.UNCONNECTED:
+				fetchedPlayerIds.clear();
 				usernameAutocomplete.clearOptions();
 				break;
 			default:
@@ -685,10 +689,8 @@ const escapeBadCharacters = () => {
  * Intercept chat messages and insert emojis in the :emoji: syntax
  */
 const insertEmojis = () => {
-	const pattern = new RegExp(`:(${Object.keys(dismoji).join('|')}):`, 'gu');
-
 	interceptFunction(TankTrouble.ChatBox, '_renderChatMessage', (original, ...args) => {
-		args[6] = args[6].replace(pattern, match => dismoji[match.slice(1, -1)]);
+		args[6] = args[6].replace(/:([a-zA-Z0-9_]+):/gu, (match, key) => dismoji[key] ?? match);
 
 		return original(...args);
 	});

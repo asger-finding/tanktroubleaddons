@@ -2,6 +2,7 @@ import { dispatchMessage, once } from '../common/ipcBridge.js';
 import { generateUUID } from '../utils/mathUtils.js';
 import { renderTankIcon } from '../utils/gameUtils.js';
 import { timeAgo } from '../utils/timeUtils.js';
+import MenuOverlay from './menuOverlay.js';
 
 /**
  * Add space thousands delimiters to a number and return it as a string
@@ -21,59 +22,22 @@ const getOrdinal = number => {
 	return number + (suffixes[(value - 20) % 10] || suffixes[value] || suffixes[0]);
 };
 
-export default class IronVaultUI {
+export default class IronVaultUI extends MenuOverlay {
 
 	id = 'ironvault';
-
-	content = $(`<div class="content ${ this.id }"></div>`);
-
-	icon = $('<div class="menuicon"></div>');
-
-	#initialized = false;
-
-	#showing = false;
-
-	/**
-	 * Is the overlay showing?
-	 * @returns {boolean} Showing
-	 */
-	get isShowing() {
-		return this.#showing;
-	}
-
-	/**
-	 * @param {boolean} showing Should the menu show?
-	 * @returns {boolean} Showing
-	 */
-	set isShowing(showing) {
-		this.init();
-
-		this.#showing = showing;
-		this.content.toggle(showing);
-
-		return this.#showing;
-	}
 
 	/**
 	 * Construct IronVault overlay
 	 * @param {class} parent Menu class
 	 */
 	constructor(parent) {
-		fetch(Addons.t_url('assets/menu/ironvault.svg'))
-			.then(result => result.text())
-			.then(body => {
-				this.icon.html(body);
-			});
-
-		parent.bindOverlay(this);
+		super(parent, Addons.t_url('assets/menu/ironvault.svg'));
 	}
 
 	/**
 	 * Initialize the IronVault content
 	 */
-	init() {
-		if (this.#initialized) return;
-
+	_init() {
 		this.searchForPlayerWidget = $('<div></div>');
 		this.usernameInput = $('<input type="text" maxlength="32" placeholder="E.g.: Laika">');
 		this.usernameSubmit = $('<button type="submit">Search</button>');
@@ -105,34 +69,11 @@ export default class IronVaultUI {
 		});
 		this.usernameSubmit.on('mouseup', () => this.search(this.usernameInput.val()));
 
-		this.#createSection({
+		this.createSection({
 			title: 'Search for player',
 			id: 'ironvault-search',
 			requiresReload: false
 		}, [ this.searchForPlayerWidget ]);
-
-		this.#initialized = true;
-	}
-
-	/**
-	 * Create a new content block with options
-	 * @param {SectionOptions} sectionOpts Options for the section
-	 * @param  {Widget[]} widgets JQuery UI widgets
-	 * @returns New section
-	 */
-	#createSection(sectionOpts, widgets = []) {
-		const wrapper = $(`<fieldset id="${ sectionOpts.id }"></fieldset>`);
-		const legend = $(`<legend>${ sectionOpts.title }</legend>`);
-
-		if (sectionOpts.requiresReload) legend.append('<span class="requires-reload">*</span>');
-
-		wrapper.append(legend);
-
-		for (const widget of widgets) wrapper.append(widget);
-
-		this.content.append(wrapper);
-
-		return wrapper;
 	}
 
 	/**
@@ -148,17 +89,7 @@ export default class IronVaultUI {
 				this.searchSeparator.show();
 				this.searchResult.append(result);
 			})
-			.catch(err => IronVaultUI.#updateTooltipster(this.usernameSubmit, err.message));
-	}
-
-	/**
-	 * Update the search button error tooltip
-	 * @param {JQuery} element Tooltipstered element
-	 * @param {string} content Error content
-	 */
-	static #updateTooltipster(element, content) {
-		Utils.updateTooltip(element, content);
-		setTimeout(() => Utils.updateTooltip(element, ''), 1_500);
+			.catch(err => MenuOverlay.updateTooltipster(this.usernameSubmit, err.message));
 	}
 
 	/**
@@ -214,7 +145,7 @@ export default class IronVaultUI {
 		const tankContainer = $('<div class="tankcontainer"></div>');
 
 		const canvas = renderTankIcon(playerDetails, err => {
-			IronVaultUI.#updateTooltipster(canvas, err);
+			MenuOverlay.updateTooltipster(canvas, err);
 		});
 		canvas.width = UIConstants.TANK_ICON_WIDTH_LARGE;
 		canvas.height = UIConstants.TANK_ICON_HEIGHT_LARGE;

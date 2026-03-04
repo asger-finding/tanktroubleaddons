@@ -40,7 +40,6 @@ interceptFunction(Game.UIGameState, '_retireUI', function(original, ...args) {
 	original(...args);
 }, { isClassy: true });
 
-
 /** Position fullscreen button on resize */
 interceptFunction(Game.UIGameState, '_onSizeChangeHandler', function(original, ...args) {
 	const result = original(...args);

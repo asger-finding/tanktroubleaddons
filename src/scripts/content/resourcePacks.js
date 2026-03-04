@@ -270,8 +270,7 @@ const getAllResourcePacksFromStore = () => new Promise((resolve, reject) => {
 	/* eslint-disable jsdoc/require-jsdoc */
 	request.onsuccess = () => {
 		const files = request.result.map(({ name, hashsum, builtin, timestamp, metafile }) => ({ name, hashsum, builtin, timestamp, metafile }));
-		files.sort((first, sec) => first.timestamp - sec.timestamp)
-			.sort((first, sec) => sec.builtin - first.builtin);
+		files.sort((first, sec) => (sec.builtin - first.builtin) || (first.timestamp - sec.timestamp));
 
 		resolve(files);
 	};
@@ -411,11 +410,7 @@ const getActiveResourcePack = () => new Promise((resolve, reject) => {
  * @param {File} file The zip file to be added.
  * @returns {Promise<string>} Resolves with hashsum or error if fail
  */
-const storeResourcePack = file => new Promise((resolve, reject) => {
-	addResourcePackToStore(file, false)
-		.then(resolve)
-		.catch(reject);
-});
+const storeResourcePack = file => addResourcePackToStore(file, false);
 
 /**
  * Set the active resource pack in local storage
@@ -440,18 +435,16 @@ const setActiveResourcePack = hashsum => new Promise((resolve, reject) => {
  * @param {string} hashsum The hashsum of the resource pack to remove
  * @returns {Promise<object>} Resolves when resource pack has been removed
  */
-const removeResourcePack = hashsum => new Promise((resolve, reject) => {
-	removeResourcePackFromStore(hashsum).finally(() => {
-		localStorage.removeItem('resource');
+const removeResourcePack = hashsum => removeResourcePackFromStore(hashsum).finally(() => {
+	localStorage.removeItem('resource');
 
-		getFirstResourcePackFromStore().then(result => {
-			if (result !== false) {
-				Addons.setActiveResourcePack(result.hashsum);
-				Addons.reloadGame();
-			}
+	return getFirstResourcePackFromStore().then(result => {
+		if (result !== false) {
+			Addons.setActiveResourcePack(result.hashsum);
+			Addons.reloadGame();
+		}
 
-			resolve(result);
-		}).catch(err => reject(err));
+		return result;
 	});
 });
 
@@ -540,7 +533,10 @@ const loadImage = source =>
 			image.src = source;
 		}
 
-		image.addEventListener('load', () => resolve(image));
+		image.addEventListener('load', () => {
+			if (source instanceof Uint8Array) URL.revokeObjectURL(image.src);
+			resolve(image);
+		});
 	});
 
 /**

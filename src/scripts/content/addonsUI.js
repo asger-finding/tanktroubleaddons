@@ -1,59 +1,22 @@
 import { get, set } from '../common/store.js';
+import MenuOverlay from './menuOverlay.js';
 
-export default class AddonsUI {
+export default class AddonsUI extends MenuOverlay {
 
 	id = 'addons';
-
-	content = $(`<div class="content ${ this.id }"></div>`);
-
-	icon = $('<div class="menuicon"></div>');
-
-	#initialized = false;
-
-	#showing = false;
-
-	/**
-	 * Is the overlay showing?
-	 * @returns {boolean} Is showing?
-	 */
-	get isShowing() {
-		return this.#showing;
-	}
-
-	/**
-	 * Show or hide the menu depending on the setter
-	 * @param {boolean} showing Should the menu show?
-	 * @returns {boolean} Showing
-	 */
-	set isShowing(showing) {
-		this.init();
-
-		this.#showing = showing;
-		this.content.toggle(showing);
-
-		return this.#showing;
-	}
 
 	/**
 	 * Construct the addons content
 	 * @param {class} parent Menu class instance
 	 */
 	constructor(parent) {
-		fetch(Addons.t_url('assets/menu/addons/addons.svg'))
-			.then(result => result.text())
-			.then(body => {
-				this.icon.html(body);
-			});
-
-		parent.bindOverlay(this);
+		super(parent, Addons.t_url('assets/menu/addons/addons.svg'));
 	}
 
 	/**
 	 * Initialize the addons content
 	 */
-	init() {
-		if (this.#initialized) return;
-
+	_init() {
 		// Interface options
 		(() => {
 			const interfaceWidget = $('<div></div>');
@@ -71,7 +34,7 @@ export default class AddonsUI {
 			`);
 			const tintedBulletsCheckbox = $(`
 				<div class="heading" style="grid-area: title-2">Tinted bullets</div>
-				<input type="checkbox" style="grid-area: checkbox-2">	
+				<input type="checkbox" style="grid-area: checkbox-2">
 			`);
 
 			checkboxWrapper.append([fullscreenButtonCheckbox, tintedBulletsCheckbox]);
@@ -112,7 +75,7 @@ export default class AddonsUI {
 					});
 			});
 
-			this.#createSection({
+			this.createSection({
 				title: 'Interface',
 				id: 'theme',
 				requiresReload: false
@@ -182,7 +145,7 @@ export default class AddonsUI {
 					Addons.storeResourcePack(file)
 						.then(hashsum => Addons.setActiveResourcePack(hashsum)
 							.then(resourcePack => {
-								AddonsUI.#updateTooltipster(createNewSubmit, '');
+								MenuOverlay.updateTooltipster(createNewSubmit, '');
 								Utils.updateTooltip(createNewSubmit, '');
 								Addons.reloadGame();
 
@@ -196,7 +159,7 @@ export default class AddonsUI {
 								createNewWrapper.hide();
 							}))
 						.catch(err => {
-							AddonsUI.#updateTooltipster(createNewSubmit, err.message);
+							MenuOverlay.updateTooltipster(createNewSubmit, err.message);
 						});
 				}
 			});
@@ -232,45 +195,12 @@ export default class AddonsUI {
 
 			otherWidget.append([resourcePackHeading, resourcePackWrapper]);
 
-			this.#createSection({
+			this.createSection({
 				title: 'Other',
 				id: 'other',
 				requiresReload: false
 			}, [ otherWidget ]);
 		})();
-
-		this.#initialized = true;
-	}
-
-	/**
-	 * Create a new content block with options
-	 * @param {SectionOptions} sectionOpts Options for the section
-	 * @param  {Widget[]} widgets JQuery UI widgets
-	 * @returns {JQuery} New section
-	 */
-	#createSection(sectionOpts, widgets = []) {
-		const wrapper = $(`<fieldset id="${ sectionOpts.id }"></fieldset>`);
-		const legend = $(`<legend>${ sectionOpts.title }</legend>`);
-
-		if (sectionOpts.requiresReload) legend.append('<span class="requires-reload">*</span>');
-
-		wrapper.append(legend);
-
-		for (const widget of widgets) wrapper.append(widget);
-
-		this.content.append(wrapper);
-
-		return wrapper;
-	}
-
-	/**
-	 * Update the search button error tooltip
-	 * @param {JQuery} element Tooltipstered element
-	 * @param {string} content Error content
-	 */
-	static #updateTooltipster(element, content) {
-		Utils.updateTooltip(element, content);
-		setTimeout(() => Utils.updateTooltip(element, ''), 1_500);
 	}
 
 	/**

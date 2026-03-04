@@ -172,58 +172,64 @@ const excludeFiles = () => new Transform({
 const esbuildTransform = () => new Transform({
 	objectMode: true,
 
-	async transform(file, _enc, callback) {
-		const config = {
-			stdin: {
-				contents: String(file.contents),
-				resolveDir: dirname(file.path),
-				loader: 'ts',
-				sourcefile: file.path
-			},
-			minify: state.isProd,
-			bundle: false,
-			write: false,
-			metafile: true,
-			platform: 'browser',
-			format: 'esm',
-			loader: {
-				'.js': 'js',
-				'.ts': 'ts'
-			}
-		};
+	transform(file, _enc, callback) {
+		this._files ??= [];
+		this._files.push(file);
+		callback();
+	},
 
-		// If file is type module (capable of using import statements),
-		// then we only need to pack node_modules, else we pack everything
-		const { metafile } = await esbuild.build(config);
-		const isModule = Object.values(metafile.outputs)
-			.some(({ exports }) => exports.includes('_isESmodule'));
+	flush(callback) {
+		if (!this._files?.length) return callback();
 
-		esbuild.build({
-			...config,
-			bundle: true,
-			metafile: false,
-			plugins: [{
-				name: 'bundle-only-node-modules',
-				setup(build) {
-					build.onResolve({ filter: /[\s\S]*/ }, ({ path, resolveDir }) => {
-						if (relative(__dirname, resolveDir).startsWith('node_modules/')) return { external: false };
-
-						const external = isModule
-							? /^(?:\.\/|\.\.\/)/u.test(path)
-							: false;
-						return { external };
-					});
+		Promise.all(this._files.map(async file => {
+			const config = {
+				stdin: {
+					contents: String(file.contents),
+					resolveDir: dirname(file.path),
+					loader: 'ts',
+					sourcefile: file.path
+				},
+				minify: state.isProd,
+				bundle: false,
+				write: false,
+				metafile: true,
+				platform: 'browser',
+				format: 'esm',
+				loader: {
+					'.js': 'js',
+					'.ts': 'ts'
 				}
-			}]
-		}).then(result => {
+			};
+
+			// If file is type module (capable of using import statements),
+			// then we only need to pack node_modules, else we pack everything
+			const { metafile } = await esbuild.build(config);
+			const isModule = Object.values(metafile.outputs)
+				.some(({ exports }) => exports.includes('_isESmodule'));
+
+			const result = await esbuild.build({
+				...config,
+				bundle: true,
+				metafile: false,
+				plugins: [{
+					name: 'bundle-only-node-modules',
+					setup(build) {
+						build.onResolve({ filter: /[\s\S]*/ }, ({ path, resolveDir }) => {
+							if (relative(__dirname, resolveDir).startsWith('node_modules/')) return { external: false };
+
+							const external = isModule
+								? /^(?:\.\/|\.\.\/)/u.test(path)
+								: false;
+							return { external };
+						});
+					}
+				}]
+			});
+
 			file.contents = Buffer.from(result.outputFiles[0].text);
-
 			if (file.extname === '.ts') file.extname = '.js';
-
-			callback(null, file);
-		}).catch(err => {
-			callback(err);
-		});
+			this.push(file);
+		})).then(() => callback(), callback);
 	}
 });
 

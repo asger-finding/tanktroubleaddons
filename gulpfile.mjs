@@ -1,21 +1,31 @@
-const { src, dest, watch: gulpWatch, series, parallel } = require('gulp');
-const { dirname, basename, extname, relative } = require('path');
-const yargs = require('yargs');
-const package = require('./package.json');
-const del = require('del');
-const gulpif = require('gulp-if');
-const changed = require('gulp-changed');
-const postCSS = require('gulp-postcss');
-const sass = require('gulp-sass')(require('sass-embedded'));
-const autoprefixer = require('autoprefixer');
-const htmlmin = require('gulp-htmlmin');
-const jeditor = require('gulp-json-editor');
-const yaml = require('gulp-yaml');
-const sharp = require('sharp');
-const esbuild = require('esbuild');
-const tinyLr = require('tiny-lr');
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const { Transform } = require('stream');
+import gulp from 'gulp';
+import { dirname, basename, extname, relative } from 'path';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { Transform } from 'stream';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
+import { deleteAsync } from 'del';
+import gulpif from 'gulp-if';
+import changed from 'gulp-changed';
+import postCSS from 'gulp-postcss';
+import gulpSass from 'gulp-sass';
+import * as sassEmbedded from 'sass-embedded';
+import autoprefixer from 'autoprefixer';
+import htmlmin from 'gulp-htmlmin';
+import jeditor from 'gulp-json-editor';
+import yaml from 'gulp-yaml';
+import sharp from 'sharp';
+import esbuild from 'esbuild';
+import tinyLr from 'tiny-lr';
+
+const { src, dest, watch: gulpWatch, series, parallel } = gulp;
+
+const sass = gulpSass(sassEmbedded);
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
+const argv = yargs(hideBin(process.argv)).parseSync();
 
 const origin = './src';
 const paths = {
@@ -24,7 +34,7 @@ const paths = {
 	files: {
 		script: `${origin}/**/*.@(js|ts)`,
 		styles: [`${origin}/css/*.scss`, `${origin}/css/*.css`],
-		html: `${origin}/html/*.html`,
+		html: `${origin}/**/*.html`,
 		assets: `${origin}/assets/**/*.@(avif|gif|svg|zip)`,
 		bitmap: `${origin}/assets/**/*.@(png|jpg|jpeg)`,
 		meta: `${origin}/meta/**/*`,
@@ -52,7 +62,7 @@ const state = {
 		return this.DEV;
 	},
 	get current() {
-		return yargs.argv.state || this[this._defaultState];
+		return argv.state || this[this._defaultState];
 	},
 	get isDev() {
 		return this.current === this.DEV;
@@ -65,7 +75,7 @@ const state = {
 	}
 };
 
-paths.target = yargs.argv.target || 'mv3';
+paths.target = argv.target || 'mv3';
 
 const contentHMR = `// HMR Content Inject
 // ==Start==
@@ -77,7 +87,7 @@ const contentHMR = `// HMR Content Inject
 		try {
 			data = JSON.parse(event.data);
 		} catch (err) {
-			console.error('JSON.parse failed on data received to HMR'); 
+			console.error('JSON.parse failed on data received to HMR');
 		}
 		if (data !== null && data.command === 'reload') {
 			browser.runtime.sendMessage('hmr')
@@ -195,7 +205,7 @@ const esbuildTransform = () => new Transform({
 			plugins: [{
 				name: 'bundle-only-node-modules',
 				setup(build) {
-					build.onResolve({ filter: /[\s\S]*/u }, ({ path, resolveDir }) => {
+					build.onResolve({ filter: /[\s\S]*/ }, ({ path, resolveDir }) => {
 						if (relative(__dirname, resolveDir).startsWith('node_modules/')) return { external: false };
 
 						const external = isModule
@@ -305,8 +315,7 @@ const styles = () => {
 	return src(paths.files.styles)
 		.pipe(excludeFiles())
 		.pipe(sass({
-			silenceDeprecations: ['legacy-js-api'],
-			outputStyle: state.isProd ? 'compressed' : 'expanded'
+			style: state.isProd ? 'compressed' : 'expanded'
 		}))
 		.pipe(postCSS(plugins))
 		.pipe(conditionalReplacement())
@@ -321,7 +330,7 @@ const styles = () => {
  * Minifies (strips whitespace, newlines) if it's a production build
  * @returns Gulp end signal
  */
-const html = () => src(paths.files.html)
+const html = () => src(paths.files.html, { allowEmpty: true })
 	.pipe(changed(`${ state.dest }/html`))
 	.pipe(conditionalReplacement())
 	.pipe(excludeFiles())
@@ -333,7 +342,7 @@ const html = () => src(paths.files.html)
  * Pipe assets to the active folder
  * @returns Gulp end signal
  */
-const assets = () => src(paths.files.assets)
+const assets = () => src(paths.files.assets, { encoding: false })
 	.pipe(changed(`${ state.dest }/assets`))
 	.pipe(excludeFiles())
 	.pipe(dest(`${ state.dest }/assets`))
@@ -343,7 +352,7 @@ const assets = () => src(paths.files.assets)
  * Pipe bitmap assets to the active folder
  * @returns Gulp end signal
  */
-const bitmap = () => src(paths.files.bitmap)
+const bitmap = () => src(paths.files.bitmap, { encoding: false })
 	.pipe(changed(`${ state.dest }/assets`))
 	.pipe(excludeFiles())
 	.pipe(gulpif(state.isProd, new Transform({
@@ -365,7 +374,7 @@ const bitmap = () => src(paths.files.bitmap)
  * Pipe meta assets to the active folder
  * @returns Gulp end signal
  */
-const meta = () => src(paths.files.meta)
+const meta = () => src(paths.files.meta, { encoding: false })
 	.pipe(changed(`${ state.dest }/meta`))
 	.pipe(excludeFiles())
 	.pipe(dest(`${ state.dest }/meta`))
@@ -397,7 +406,7 @@ const manifest = () => src(paths.manifest)
 	.pipe(excludeFiles())
 	.pipe(yaml({ schema: 'DEFAULT_FULL_SCHEMA' }))
 	.pipe(jeditor(_json => {
-		_json.version = package.version;
+		_json.version = pkg.version;
 		return _json;
 	}, { beautify: !state.isProd }))
 	.pipe(dest(state.dest))
@@ -409,22 +418,22 @@ const manifest = () => src(paths.manifest)
  */
 const clean = () => {
 	// Before building, clean up the the target folder for all previous files
-	if (state.isProd) return del([paths.dist], { force: true });
-	return del([paths.build], { force: true });
+	if (state.isProd) return deleteAsync([paths.dist], { force: true });
+	return deleteAsync([paths.build], { force: true });
 };
 
 /**
  * Forcefully deletes both build folders
  * @returns Gulp end signal
  */
-const destroy = () => del([paths.baseDist, paths.baseBuild], { force: true });
+const destroy = () => deleteAsync([paths.baseDist, paths.baseBuild], { force: true });
 
 /**
  * Watch files and commit changes.
  *
  * Sends reload signal through LiveReload server.
  */
-const watch = () => {
+const watchFiles = () => {
 	process.stdout.write(`\x1b[35m# watching the ${paths.mvTarget} build for changes\x1b[0m . . .\n`);
 
 	gulpWatch(paths.files.script, scripts);
@@ -444,7 +453,9 @@ const broadcast = async() => {
 	process.stdout.write(`\x1b[35m# compiling ${state.current} build for ${paths.mvTarget}\x1b[0m . . .\n`);
 };
 
-exports.destroy = destroy;
-exports.build = series(broadcast, clean, parallel(scripts, styles, html, assets, bitmap, meta, json, manifest));
-exports.watch = series(setupLiveReload, exports.build, watch);
-exports.default = exports.build;
+const build = series(broadcast, clean, parallel(scripts, styles, html, assets, bitmap, meta, json, manifest));
+
+export { destroy };
+export { build };
+export const watch = series(setupLiveReload, build, watchFiles);
+export default build;

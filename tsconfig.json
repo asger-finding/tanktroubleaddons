@@ -21,7 +21,7 @@
         }
     },
     "include": [
-        "gulpfile.js",
+        "gulpfile.mjs",
         "src/**/*",
         "@types/**/*"
     ],

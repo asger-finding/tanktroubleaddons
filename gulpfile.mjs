@@ -357,14 +357,18 @@ const bitmap = () => src(paths.files.bitmap, { encoding: false })
 	.pipe(excludeFiles())
 	.pipe(gulpif(state.isProd, new Transform({
 		objectMode: true,
-		async transform(file, _enc, callback) {
-			try {
+		transform(file, _enc, callback) {
+			this._files ??= [];
+			this._files.push(file);
+			callback();
+		},
+		flush(callback) {
+			if (!this._files?.length) return callback();
+			Promise.all(this._files.map(async file => {
 				file.contents = await sharp(file.contents).avif({ quality: 90 }).toBuffer();
 				file.extname = '.avif';
-				callback(null, file);
-			} catch (err) {
-				callback(err);
-			}
+				this.push(file);
+			})).then(() => callback(), callback);
 		}
 	})))
 	.pipe(dest(`${ state.dest }/assets`))

@@ -44,7 +44,7 @@ const initDatabase = () => new Promise((resolve, reject) => {
 			}
 		};
 		resourcePackRequest.onerror = () => {
-			throw new Error('Error iterating through resource packs:', event.target.error);
+			reject(new Error(`Error iterating through resource packs: ${event.target.error}`));
 		};
 	};
 

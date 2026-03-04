@@ -400,7 +400,7 @@ const getActiveResourcePack = () => new Promise((resolve, reject) => {
 	} else {
 		getResourcePackFromStore(hashsum)
 			.then(resolve)
-			.catch(handleError());
+			.catch(handleError);
 	}
 
 });

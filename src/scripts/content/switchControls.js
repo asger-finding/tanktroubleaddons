@@ -14,7 +14,7 @@ const getInputSetAlias = inputSetId => {
 		case 'mouse':
 			return 'Mouse';
 		default:
-			throw new Error('Unalised input setrequested in getInputSetAlias');
+			throw new Error('Unaliased input set requested in getInputSetAlias');
 	}
 };
 

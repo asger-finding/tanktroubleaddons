@@ -11,7 +11,7 @@ const autoprefixer = require('autoprefixer');
 const htmlmin = require('gulp-htmlmin');
 const jeditor = require('gulp-json-editor');
 const yaml = require('gulp-yaml');
-const avif = require('gulp-avif');
+const sharp = require('sharp');
 const esbuild = require('esbuild');
 const tinyLr = require('tiny-lr');
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -61,7 +61,7 @@ const state = {
 		return this.current === this.PRODUCTION;
 	},
 	get dest() {
-		return this.prod ? paths.dist : paths.build;
+		return this.isProd ? paths.dist : paths.build;
 	}
 };
 
@@ -346,9 +346,17 @@ const assets = () => src(paths.files.assets)
 const bitmap = () => src(paths.files.bitmap)
 	.pipe(changed(`${ state.dest }/assets`))
 	.pipe(excludeFiles())
-	.pipe(gulpif(state.isProd, avif({
-		lossless: false,
-		quality: 90
+	.pipe(gulpif(state.isProd, new Transform({
+		objectMode: true,
+		async transform(file, _enc, callback) {
+			try {
+				file.contents = await sharp(file.contents).avif({ quality: 90 }).toBuffer();
+				file.extname = '.avif';
+				callback(null, file);
+			} catch (err) {
+				callback(err);
+			}
+		}
 	})))
 	.pipe(dest(`${ state.dest }/assets`))
 	.pipe(hotReload());

@@ -44,7 +44,6 @@ interceptFunction(Game.UILobbyState, '_clientEventHandler', (original, ...args) 
 			self.gameIcons[gameIconSpriteId].icon.remove();
 			self.gameIcons[gameIconSpriteId].button.remove();
 			self.gameIconPlacementsTaken[self.gameIcons[gameIconSpriteId].placement] = false;
-			self.gameIconPlacementsTaken[self.gameIcons[gameIconSpriteId].placement] = false;
 			delete self.gameIcons[gameIconSpriteId];
 		}
 

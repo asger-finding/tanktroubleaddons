@@ -39,11 +39,11 @@
 	--jq-iconColorActive: #454545;
 	--jq-bgColorHighlight: #fbf9ee;
 	--jq-fcHighlight: #363636;
-	--jq-iconColorHiighligh: #2e83ff;
+	--jq-iconColorHighlight: #2e83ff;
 	--jq-bgColorError: #fef1ec;
 	--jq-borderColorError: #cd0a0a;
 	--jq-fcError: #cd0a0a;
-	--jq-iconColorErroor: #cd0a0a;
+	--jq-iconColorError: #cd0a0a;
 	--jq-bgColorOverlay: #aaaaaa;
 	--jq-bgColorShadow: #aaaaaa;
 }

@@ -93,7 +93,7 @@ const initializeCodeBlocks = markdownElement => {
 		// eslint-disable-next-line new-cap
 		const editor = CodeMirror(codeblock, {
 			value,
-			mode: language || 'javacript',
+			mode: language || 'javascript',
 			theme: isDarkTheme ? 'blackboard' : 'default',
 			lineNumbers: false,
 			readOnly: true

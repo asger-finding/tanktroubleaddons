@@ -72,6 +72,8 @@ async function toggleFullscreen(state?: 'on' | 'off') {
 
 	if (isTankTrouble(tab.url)) {
 		browser.windows.get(windowId, window => {
+			if (chrome.runtime.lastError) return;
+
 			const currentState = window.state ?? 'normal';
 
 			browser.windows.update(windowId, {
@@ -134,6 +136,18 @@ browser.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 	if (request.action === 'CORS_EXEMPT_FETCH' && request.resource) {
 		const { resource, options, uuid } = request;
 
+		const allowedOrigins = ['https://ironvault.vercel.app'];
+		try {
+			const url = new URL(resource);
+			if (!allowedOrigins.includes(url.origin)) {
+				sendResponse({ success: false, error: `Disallowed origin: ${url.origin}` });
+				return true;
+			}
+		} catch {
+			sendResponse({ success: false, error: 'Invalid URL' });
+			return true;
+		}
+
 		fetch(resource, options || {})
 			.then(response => response.json())
 			.then(data => sendResponse({ success: true, data, uuid }))
@@ -142,8 +156,6 @@ browser.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 		return true;
 	} else if (request.action === 'FULLSCREEN') {
 		toggleFullscreen(request.state);
-
-		return true;
 	}
 
 	return null;

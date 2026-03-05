@@ -5,7 +5,6 @@ import { matchSorter } from 'match-sorter';
 import { timeUntil } from '../utils/timeUtils.js';
 
 // TODO: add auto-disappearing chat after timeout
-// TODO: add scroll
 
 /**
  * @typedef {{word:string, range:[number, number]}} IndexiesOfWordInSelection
@@ -696,8 +695,7 @@ const escapeBadCharacters = () => {
  * @param {HTMLElement} chatBody Chat body DOM element
  */
 const addChatScroll = chatBody => {
-	const maxChatMessages = 200;
-	UIConstants.CHAT_BOX_MAX_NUM_MESSAGES = maxChatMessages;
+	UIConstants.CHAT_BOX_MAX_NUM_MESSAGES = 200;
 
 	// Prevent draggable from capturing scroll events on the chat body
 	TankTrouble.ChatBox.chat.draggable('option', 'cancel', 'input, textarea, button, select, option, .body, .chat-scrollbar');
@@ -705,23 +703,380 @@ const addChatScroll = chatBody => {
 	// Move resize handle out of .body so it's not affected by the fade mask
 	const $handle = TankTrouble.ChatBox.chatBodyResizeHandle;
 	TankTrouble.ChatBox.chat[0].appendChild($handle[0]);
-	$handle.show = () => $handle.stop(true).css('display', '').animate({ opacity: 1 }, 200);
-	$handle.hide = () => $handle.stop(true).animate({ opacity: 0 }, 200, function() { $(this).css('display', 'none'); });
-
-	// Sync handle position to bottom-right of .body
+	/** Sync handle position to the inside bottom-right corner of .body */
 	const syncHandle = () => {
-		$handle[0].style.left = `${chatBody.offsetLeft + chatBody.offsetWidth - $handle[0].offsetWidth}px`;
-		$handle[0].style.top = `${chatBody.offsetTop + chatBody.offsetHeight - $handle[0].offsetHeight}px`;
+		const [handle] = $handle;
+		if (!handle.offsetWidth) return;
+		handle.style.left = `${chatBody.offsetLeft + chatBody.offsetWidth - handle.offsetWidth}px`;
+		handle.style.top = `${chatBody.offsetTop + chatBody.offsetHeight - handle.offsetHeight}px`;
 	};
+
+	/**
+	 * Fade in the resize handle, only if the chat is open.
+	 * Syncs position before showing since dimensions aren't available when hidden.
+	 * @returns {JQuery} Animation chain
+	 */
+	$handle.show = () => {
+		if (!TankTrouble.ChatBox.chat.hasClass('open') && !TankTrouble.ChatBox.chat.hasClass('opening')) return $handle;
+		$handle.stop(true).css({ display: '', opacity: 0 });
+		syncHandle();
+		return $handle.animate({ opacity: 1 }, 200);
+	};
+	/**
+	 * Fade out and hide the resize handle
+	 * @returns {JQuery} Animation chain
+	 */
+	$handle.hide = () => $handle.stop(true).animate({ opacity: 0 }, 200, function() { $(this).css('display', 'none'); });
 	new ResizeObserver(syncHandle).observe(chatBody);
 	new MutationObserver(syncHandle).observe(chatBody, { attributes: true, attributeFilter: ['style'] });
 
-	interceptFunction(TankTrouble.ChatBox, '_updateChat', () => {
-		const messages = TankTrouble.ChatBox.chatBody.find('div.chatMessage');
-		messages.slice(maxChatMessages).remove();
+	/**
+	 * Virtual scroll — only render messages near the viewport instead of all 200.
+	 * meta[] is parallel to TankTrouble.ChatBox.messages[] (oldest=0, newest=N-1).
+	 * DOM order is newest-first (prepend). scrollTop=0 shows newest messages.
+	 */
+
+	const defaultHeight = 17;
+	const bufferFactor = 2;
+	const $chatBody = $(chatBody);
+
+	/** @type {{ height: number|null, estimatedHeight: number, element: JQuery|null, rendered: boolean, lastWidth: number|null }[]} */
+	const meta = [];
+	/** @type {Set<ResizeObserver>} Pending height measurement observers, disconnected on close */
+	const pendingObservers = new Set();
+	let renderStart = 0;
+	let renderEnd = 0;
+	let lastBodyWidth = null;
+	let scrollRAF = null;
+
+	const topSpacer = document.createElement('div');
+	topSpacer.className = 'virtual-scroll-spacer';
+	const bottomSpacer = document.createElement('div');
+	bottomSpacer.className = 'virtual-scroll-spacer';
+	chatBody.appendChild(topSpacer);
+	chatBody.appendChild(bottomSpacer);
+
+	/**
+	 * Get the cached or estimated height of a message
+	 * @param {number} index Message index in meta[]
+	 * @returns {number} Measured height if valid, otherwise estimated or default
+	 */
+	const getHeight = index => {
+		const entry = meta[index];
+		if (!entry) return defaultHeight;
+		if (entry.height !== null && entry.lastWidth === lastBodyWidth) return entry.height;
+		return entry.estimatedHeight || defaultHeight;
+	};
+
+	/**
+	 * Align meta[] length with messages[], removing or adding entries as needed
+	 */
+	const syncMeta = () => {
+		const { messages } = TankTrouble.ChatBox;
+		while (meta.length > messages.length) {
+			const removed = meta.shift();
+			if (removed.element) removed.element.remove();
+			renderStart = Math.max(0, renderStart - 1);
+			renderEnd = Math.max(0, renderEnd - 1);
+		}
+		while (meta.length < messages.length)
+			meta.push({ height: null, estimatedHeight: defaultHeight, element: null, rendered: false, lastWidth: null });
+	};
+
+	/**
+	 * Calculate the [startIdx, endIdx) range of messages intersecting the buffered viewport
+	 * @returns {[number, number]} Inclusive start, exclusive end indices into messages[]
+	 */
+	const calculateVisibleRange = () => {
+		const count = TankTrouble.ChatBox.messages.length;
+		if (count === 0) return [0, 0];
+
+		const viewportHeight = chatBody.clientHeight;
+		const buffer = viewportHeight * bufferFactor;
+		const rangeTop = Math.max(0, chatBody.scrollTop - buffer);
+		const rangeBottom = chatBody.scrollTop + viewportHeight + buffer;
+
+		let cumulativeTop = 0;
+		let startMsgIdx = count;
+		let endMsgIdx = 0;
+
+		for (let domIdx = 0; domIdx < count; domIdx++) {
+			const msgIdx = count - 1 - domIdx;
+			const height = getHeight(msgIdx);
+
+			if (cumulativeTop + height > rangeTop && cumulativeTop < rangeBottom) {
+				startMsgIdx = Math.min(startMsgIdx, msgIdx);
+				endMsgIdx = Math.max(endMsgIdx, msgIdx + 1);
+			}
+
+			cumulativeTop += height;
+			if (cumulativeTop > rangeBottom) break;
+		}
+
+		return startMsgIdx >= count ? [0, 0] : [startMsgIdx, endMsgIdx];
+	};
+
+	/**
+	 * Insert a message element at the correct DOM position (newest first)
+	 * @param {number} msgIdx Index of the message in messages[]
+	 * @param {JQuery} $element jQuery element to insert
+	 */
+	const insertAtPosition = (msgIdx, $element) => {
+		const count = TankTrouble.ChatBox.messages.length;
+		for (let i = msgIdx + 1; i < count; i++) {
+			if (meta[i]?.rendered && meta[i].element) {
+				meta[i].element.after($element);
+				return;
+			}
+		}
+		$(topSpacer).after($element);
+	};
+
+	/**
+	 * Render a single message via native render functions and cache its element
+	 * @param {number} msgIdx Index of the message in messages[]
+	 */
+	const renderMessage = msgIdx => {
+		const msg = TankTrouble.ChatBox.messages[msgIdx];
+		if (!msg) return;
+
+		if (msg.type === 'chat') {
+			TankTrouble.ChatBox._renderChatMessage(
+				msg.from, msg.to, msg.usernameMap, msg.addRecipients,
+				msg.textColor, msg.strokeColor, msg.message,
+				msg.chatMessageId, msg.reported, false, false
+			);
+		} else if (msg.type === 'system') {
+			TankTrouble.ChatBox._renderSystemMessage(
+				msg.involvedPlayerIds, msg.involvedUsernameMap,
+				msg.message, false, false
+			);
+		}
+
+		// Native render prepends to chatBody — capture the new first element
+		const $el = $chatBody.children('.chatMessage').first();
+		$el.stop(true, true).css({ display: '', opacity: 1 });
+
+		const entry = meta[msgIdx];
+		entry.element = $el;
+		entry.height = $el[0].offsetHeight;
+		entry.lastWidth = lastBodyWidth;
+		entry.estimatedHeight = entry.height;
+
+		// Move from prepend position to correct sorted position
+		$el.detach();
+		insertAtPosition(msgIdx, $el);
+		entry.rendered = true;
+	};
+
+	/**
+	 * Detach a rendered message from the DOM, measuring its height first
+	 * @param {number} msgIdx Index of the message in messages[]
+	 */
+	const detachMessage = msgIdx => {
+		const entry = meta[msgIdx];
+		if (!entry?.rendered || !entry.element) return;
+
+		if (entry.height === null || entry.lastWidth !== lastBodyWidth) {
+			entry.height = entry.element[0].offsetHeight;
+			entry.lastWidth = lastBodyWidth;
+			entry.estimatedHeight = entry.height;
+		}
+
+		entry.element.detach();
+		entry.rendered = false;
+	};
+
+	/** Update spacer heights to represent off-screen messages */
+	const updateSpacers = () => {
+		const count = TankTrouble.ChatBox.messages.length;
+		let topHeight = 0;
+		for (let i = renderEnd; i < count; i++) topHeight += getHeight(i);
+		let bottomHeight = 0;
+		for (let i = 0; i < renderStart; i++) bottomHeight += getHeight(i);
+		topSpacer.style.height = `${topHeight}px`;
+		bottomSpacer.style.height = `${bottomHeight}px`;
+	};
+
+	/** Ensure spacers are at the start and end of the chat body */
+	const ensureSpacerOrder = () => {
+		if (topSpacer !== chatBody.firstChild) chatBody.insertBefore(topSpacer, chatBody.firstChild);
+		if (bottomSpacer !== chatBody.lastChild) chatBody.appendChild(bottomSpacer);
+	};
+
+	/** Reconcile rendered messages with the current visible range */
+	const reconcile = () => {
+		if (TankTrouble.ChatBox.messages.length === 0) return;
+
+		const [newStart, newEnd] = calculateVisibleRange();
+		if (newStart === renderStart && newEnd === renderEnd) return;
+
+		for (let i = renderStart; i < renderEnd; i++)
+			if (i < newStart || i >= newEnd) detachMessage(i);
+
+		for (let i = newStart; i < newEnd; i++) {
+			if (i < renderStart || i >= renderEnd) {
+				const entry = meta[i];
+				if (entry?.element && !entry.rendered) {
+					if (entry.lastWidth !== lastBodyWidth) {
+						entry.element.remove();
+						entry.element = null;
+						renderMessage(i);
+					} else {
+						insertAtPosition(i, entry.element);
+						entry.rendered = true;
+					}
+				} else if (!entry?.element) {
+					renderMessage(i);
+				}
+			}
+		}
+
+		renderStart = newStart;
+		renderEnd = newEnd;
+		updateSpacers();
+		ensureSpacerOrder();
+	};
+
+	/** Detach all rendered messages, invalidate stale caches and re-render the visible range */
+	const refresh = () => {
+		for (let i = renderStart; i < renderEnd; i++) {
+			const entry = meta[i];
+			if (entry?.rendered && entry.element) {
+				entry.element.detach();
+				entry.rendered = false;
+			}
+		}
+		$chatBody.children('.chatMessage').remove();
+		syncMeta();
+
+		const currentWidth = chatBody.clientWidth;
+		if (currentWidth !== lastBodyWidth) {
+			for (const entry of meta) {
+				entry.height = null;
+				if (entry.element) {
+					entry.element.remove();
+					entry.element = null;
+				}
+			}
+			lastBodyWidth = currentWidth;
+		}
+
+		renderStart = 0;
+		renderEnd = 0;
+		chatBody.scrollTop = 0;
+		reconcile();
+	};
+
+	/** Clear all cached elements and reset virtual scroll state */
+	const clear = () => {
+		for (const entry of meta)
+			if (entry.element) entry.element.remove();
+
+		meta.length = 0;
+		renderStart = 0;
+		renderEnd = 0;
+		topSpacer.style.height = '0px';
+		bottomSpacer.style.height = '0px';
+	};
+
+	/**
+	 * Handle a newly added message from _addChatMessage or _addSystemMessage.
+	 * Syncs meta[], captures the rendered element, and schedules reconciliation.
+	 * @param {Function} original Original intercepted function
+	 * @param {any[]} args Arguments passed to the original function
+	 */
+	const handleMessageAdded = (original, args) => {
+		const { messages } = TankTrouble.ChatBox;
+		const [oldestBefore] = messages;
+		const firstChildBefore = chatBody.querySelector('.chatMessage');
+
+		original(...args);
+
+		// Detect if oldest was shifted out (at cap)
+		if (messages.length > 0 && messages[0] !== oldestBefore && typeof oldestBefore !== 'undefined') {
+			const removed = meta.shift();
+			if (removed?.element) removed.element.remove();
+			renderStart = Math.max(0, renderStart - 1);
+			renderEnd = Math.max(0, renderEnd - 1);
+		}
+
+		// Detect if a new message was pushed
+		if (meta.length < messages.length) {
+			const newMeta = { height: null, estimatedHeight: defaultHeight, element: null, rendered: false, lastWidth: null };
+			meta.push(newMeta);
+
+			const firstChildAfter = chatBody.querySelector('.chatMessage');
+			if (firstChildAfter && firstChildAfter !== firstChildBefore) {
+				newMeta.element = $(firstChildAfter);
+				newMeta.rendered = true;
+				ensureSpacerOrder();
+
+				const observer = new ResizeObserver(() => {
+					observer.disconnect();
+					pendingObservers.delete(observer);
+					if (newMeta.element && newMeta.rendered) {
+						newMeta.height = newMeta.element[0].offsetHeight;
+						newMeta.lastWidth = lastBodyWidth;
+						newMeta.estimatedHeight = newMeta.height;
+					}
+					reconcile();
+				});
+				pendingObservers.add(observer);
+				observer.observe(firstChildAfter);
+			}
+		}
+	};
+
+	/** Hide the resize handle, cancel pending observers and destroy rendered messages on close */
+	interceptFunction(TankTrouble.ChatBox, 'close', (original, ...args) => {
+		$handle.stop(true).css({ display: 'none', opacity: 0 });
+		clearTimeout(TankTrouble.ChatBox.resizeHandleTimeout);
+
+		for (const observer of pendingObservers) observer.disconnect();
+		pendingObservers.clear();
+
+		for (const entry of meta) {
+			if (entry.element) entry.element.remove();
+			entry.element = null;
+			entry.rendered = false;
+		}
+		renderStart = 0;
+		renderEnd = 0;
+
+		return original(...args);
 	});
 
-	// Custom scrollbar
+	/** Intercept native chat functions to use virtual scroll */
+	interceptFunction(TankTrouble.ChatBox, '_updateChat', () => { reconcile(); });
+	interceptFunction(TankTrouble.ChatBox, '_refreshChat', (_original, animate) => {
+		if (animate) {
+			$chatBody.stop(true).fadeTo(200, 0, () => {
+				refresh();
+				$chatBody.fadeTo(200, 1);
+			});
+		} else {
+			refresh();
+		}
+	});
+	interceptFunction(TankTrouble.ChatBox, '_renderAllMessages', () => {});
+	interceptFunction(TankTrouble.ChatBox, '_addChatMessage', (original, ...args) => handleMessageAdded(original, args));
+	interceptFunction(TankTrouble.ChatBox, '_addSystemMessage', (original, ...args) => handleMessageAdded(original, args));
+	interceptFunction(TankTrouble.ChatBox, '_clearChat', (original, ...args) => {
+		original(...args);
+		if (TankTrouble.ChatBox.messages.length === 0) clear();
+	});
+
+	/** Scroll-driven reconciliation */
+	chatBody.addEventListener('scroll', () => {
+		if (scrollRAF) return;
+		scrollRAF = requestAnimationFrame(() => {
+			reconcile();
+			scrollRAF = null;
+		});
+	}, { passive: true });
+
+	/** Custom scrollbar component */
 	const scrollbar = document.createElement('div');
 	scrollbar.className = 'chat-scrollbar';
 	const thumb = document.createElement('div');
@@ -732,6 +1087,7 @@ const addChatScroll = chatBody => {
 
 	let dragging = false;
 
+	/** Update scrollbar thumb size and position to reflect the current scroll state */
 	const updateThumb = () => {
 		const { scrollTop, scrollHeight, clientHeight } = chatBody;
 		if (scrollHeight <= clientHeight) {
@@ -756,27 +1112,28 @@ const addChatScroll = chatBody => {
 	chatBody.addEventListener('scroll', updateThumb, { passive: true });
 	new ResizeObserver(updateThumb).observe(chatBody);
 	new MutationObserver(mutations => {
-		const relevant = mutations.some(m =>
-			m.type === 'childList' || m.target.classList.contains('chatMessage')
+		const relevant = mutations.some(mutation =>
+			mutation.type === 'childList' || mutation.target.classList.contains('chatMessage')
 		);
 		if (relevant) updateThumb();
 	}).observe(chatBody, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
 
 	// Thumb drag handling
-	let startY, startScroll;
-	thumb.addEventListener('mousedown', e => {
+	let startScroll = 0;
+	let startY = 0;
+	thumb.addEventListener('mousedown', evt => {
 		dragging = true;
-		startY = e.clientY;
+		startY = evt.clientY;
 		startScroll = chatBody.scrollTop;
 		thumb.classList.add('dragging');
-		e.preventDefault();
+		evt.preventDefault();
 	});
-	addEventListener('mousemove', e => {
+	addEventListener('mousemove', evt => {
 		if (!dragging) return;
 		const { scrollHeight, clientHeight } = chatBody;
 		const maxScroll = scrollHeight - clientHeight;
 		const thumbHeight = Math.max(20, (clientHeight / scrollHeight) * clientHeight);
-		chatBody.scrollTop = startScroll + (e.clientY - startY) * (maxScroll / (clientHeight - thumbHeight));
+		chatBody.scrollTop = startScroll + (evt.clientY - startY) * (maxScroll / (clientHeight - thumbHeight));
 	});
 	addEventListener('mouseup', () => {
 		if (!dragging) return;
@@ -823,17 +1180,40 @@ whenContentInitialized().then(() => {
 	// Allow more characters in the chat input
 	chatInput.setAttribute('maxlength', '255');
 
-	const formWidth = new CSSStyleSheet();
-	formWidth.insertRule('#chat:is(.opening,.open) .content, #chat:is(.opening,.open) textarea { width: 208px; }', 0);
-	document.adoptedStyleSheets.push(formWidth);
+	const [chatContent] = TankTrouble.ChatBox.chatContent;
 
-	// Create a mutation observer that looks for
-	// changes in the chatBody's attributes
+	/**
+	 * Set .content and textarea width to match the chat body, bypassing CSS transitions.
+	 * +14 accounts for the body's left margin (20px) minus the content's left padding (6px).
+	 */
+	const syncFormWidth = () => {
+		const width = `${Number(chatBody.offsetWidth || 220) + 14}px`;
+		chatContent.style.setProperty('width', width, 'important');
+		chatInput.style.setProperty('width', width, 'important');
+	};
+
+	/** Clear inline form widths so native CSS can collapse them */
+	const clearFormWidth = () => {
+		chatContent.style.removeProperty('width');
+		chatInput.style.removeProperty('width');
+	};
+
+	/** Set form width before open so it doesn't animate from 0 */
+	interceptFunction(TankTrouble.ChatBox, 'open', (original, ...args) => {
+		syncFormWidth();
+		return original(...args);
+	});
+
+	/** Clear form width on close so native CSS collapses it */
+	interceptFunction(TankTrouble.ChatBox, 'close', (original, ...args) => {
+		clearFormWidth();
+		return original(...args);
+	});
+
+	/** Sync .content and textarea width when the chat body resizes */
 	new MutationObserver(() => {
-		const width = Number(chatBody.offsetWidth || 220);
-
-		formWidth.deleteRule(0);
-		formWidth.insertRule(`#chat:is(.opening,.open) .content, #chat:is(.opening,.open) textarea { width: ${width - 12}px !important; }`, 0);
+		if (TankTrouble.ChatBox.chat.hasClass('open') || TankTrouble.ChatBox.chat.hasClass('opening'))
+			syncFormWidth();
 
 		chatInput.dispatchEvent(new InputEvent('input'));
 	}).observe(chatBody, {

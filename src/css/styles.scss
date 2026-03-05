@@ -575,6 +575,11 @@ div#statisticsSnippet {
 
 		/* Fade out the bottom of the chat to hint at more messages */
 		mask-image: linear-gradient(to bottom, #000 90%, transparent);
+
+		.virtual-scroll-spacer {
+			flex: none;
+			pointer-events: none;
+		}
 	}
 
 	/* Handle moved outside .body to avoid the fade mask */
@@ -719,10 +724,6 @@ div#statisticsSnippet {
 	&.global form .autocomplete-dropdown {
 		--background: rgb(104 197 255 / 1.0) !important;
 		--accent: rgb(57 123 165 / 1.0) !important;
-	}
-
-	&:is(.opening,.open) form {
-		padding-right: 26px;
 	}
 
 }

@@ -1067,15 +1067,6 @@ const addChatScroll = chatBody => {
 		if (TankTrouble.ChatBox.messages.length === 0) clear();
 	});
 
-	/** Scroll-driven reconciliation */
-	chatBody.addEventListener('scroll', () => {
-		if (scrollRAF) return;
-		scrollRAF = requestAnimationFrame(() => {
-			reconcile();
-			scrollRAF = null;
-		});
-	}, { passive: true });
-
 	/** Custom scrollbar component */
 	const scrollbar = document.createElement('div');
 	scrollbar.className = 'chat-scrollbar';
@@ -1119,27 +1110,38 @@ const addChatScroll = chatBody => {
 	}).observe(chatBody, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
 
 	// Thumb drag handling
-	let startScroll = 0;
-	let startY = 0;
+	let dragOffsetY = 0;
 	thumb.addEventListener('mousedown', evt => {
 		dragging = true;
-		startY = evt.clientY;
-		startScroll = chatBody.scrollTop;
+		dragOffsetY = evt.clientY - thumb.getBoundingClientRect().top;
 		thumb.classList.add('dragging');
 		evt.preventDefault();
 	});
 	addEventListener('mousemove', evt => {
 		if (!dragging) return;
-		const { scrollHeight, clientHeight } = chatBody;
-		const maxScroll = scrollHeight - clientHeight;
-		const thumbHeight = Math.max(20, (clientHeight / scrollHeight) * clientHeight);
-		chatBody.scrollTop = startScroll + (evt.clientY - startY) * (maxScroll / (clientHeight - thumbHeight));
+		const scrollbarRect = scrollbar.getBoundingClientRect();
+		const thumbHeight = thumb.offsetHeight;
+		const trackHeight = scrollbarRect.height - thumbHeight;
+		if (trackHeight <= 0) return;
+
+		const thumbTop = Math.max(0, Math.min(evt.clientY - scrollbarRect.top - dragOffsetY, trackHeight));
+		const scrollRatio = thumbTop / trackHeight;
+		chatBody.scrollTop = scrollRatio * (chatBody.scrollHeight - chatBody.clientHeight);
 	});
 	addEventListener('mouseup', () => {
 		if (!dragging) return;
 		dragging = false;
 		thumb.classList.remove('dragging');
 	});
+
+	/** Scroll-driven reconciliation */
+	chatBody.addEventListener('scroll', () => {
+		if (scrollRAF) return;
+		scrollRAF = requestAnimationFrame(() => {
+			reconcile();
+			scrollRAF = null;
+		});
+	}, { passive: true });
 };
 
 /**
@@ -1183,13 +1185,14 @@ whenContentInitialized().then(() => {
 	const [chatContent] = TankTrouble.ChatBox.chatContent;
 
 	/**
-	 * Set .content and textarea width to match the chat body, bypassing CSS transitions.
-	 * +14 accounts for the body's left margin (20px) minus the content's left padding (6px).
+	 * Set textarea and form width to match the chat body, bypassing CSS transitions.
+	 * The form uses fit-content so it derives its width from the textarea + padding.
+	 * 28 = textarea left offset (25px) + horizontal padding (2px * ~1.5)
 	 */
 	const syncFormWidth = () => {
-		const width = `${Number(chatBody.offsetWidth || 220) + 14}px`;
-		chatContent.style.setProperty('width', width, 'important');
-		chatInput.style.setProperty('width', width, 'important');
+		const bodyWidth = Number(chatBody.offsetWidth || 220);
+		chatContent.style.setProperty('width', `${bodyWidth + 14}px`, 'important');
+		chatInput.style.setProperty('width', `${bodyWidth - 8}px`, 'important');
 	};
 
 	/** Clear inline form widths so native CSS can collapse them */
@@ -1220,6 +1223,7 @@ whenContentInitialized().then(() => {
 		attributes: true,
 		characterData: false
 	});
+
 });
 
 export const _isESmodule = true;

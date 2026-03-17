@@ -107,6 +107,11 @@ body {
 }
 
 .ui-deleteselectmenu {
+	max-height: 240px;
+	overflow-y: auto;
+	scrollbar-width: thin;
+	scrollbar-color: rgb(0 0 0 / 0.15) transparent;
+
 	.ui-menu-item {
 		text-wrap: nowrap;
 		text-overflow: ellipsis;
@@ -726,6 +731,9 @@ div#statisticsSnippet {
 		--accent: rgb(57 123 165 / 1.0) !important;
 	}
 
+	&:is(.opening, .open) form {
+		padding-right: 26px !important;
+	}
 }
 
 /* Switch controls ui */

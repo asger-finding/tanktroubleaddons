@@ -4,7 +4,7 @@ import { interceptFunction } from '../utils/gameUtils.js';
 
 window.UIGameIconImage = UIGameIconImage;
 
-/** Create the scroller group */
+/** Create the scroller group and refresh game list on tab focus */
 interceptFunction(Game.UILobbyState, 'create', function(original, ...args) {
 	const result = original(...args);
 
@@ -14,6 +14,13 @@ interceptFunction(Game.UILobbyState, 'create', function(original, ...args) {
 		UIConstants.GAME_ICON_HEIGHT,
 		UIConstants.GAME_ICON_SCROLL_SPEED
 	));
+
+	if (!Game.UILobbyState._refreshOnFocusBound) {
+		Game.UILobbyState._refreshOnFocusBound = true;
+		document.addEventListener('visibilitychange', () => {
+			if (!document.hidden) ClientManager.getClient().updateGameList();
+		});
+	}
 
 	return result;
 }, { isClassy: true });

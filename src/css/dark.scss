@@ -561,4 +561,7 @@ $tooltipster-accent-dark: rgb(25 25 25);
 		@include generate-images($paginator-styles);
 	}
 
+	.ui-deleteselectmenu {
+		scrollbar-color: rgb(255 255 255 / 0.2) transparent;
+	}
 }

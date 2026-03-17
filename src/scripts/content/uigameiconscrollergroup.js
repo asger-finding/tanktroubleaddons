@@ -213,6 +213,9 @@ UIGameIconScrollerGroup.prototype._distributeGameIcons = function() {
 	const tweens = [];
 
 	this.gameIcons.forEach((gameIcon, i) => {
+		// Kill any in-flight position tweens to prevent conflicts
+		this.game.tweens.removeFrom(gameIcon.position);
+
 		if (i < visibleCount) {
 			// Tween visible icons to their grid positions
 			const x = this.leftMargin + this.iconSpacing * i;

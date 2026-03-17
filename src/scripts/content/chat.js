@@ -911,11 +911,16 @@ const addChatScroll = chatBody => {
 		const [newStart, newEnd] = calculateVisibleRange();
 		if (newStart === renderStart && newEnd === renderEnd) return;
 
+		// Track height estimate errors for messages entering from the top spacer
+		// (indices >= renderEnd, i.e. newer/higher messages that were above the viewport)
+		let topDelta = 0;
+
 		for (let i = renderStart; i < renderEnd; i++)
 			if (i < newStart || i >= newEnd) detachMessage(i);
 
 		for (let i = newStart; i < newEnd; i++) {
 			if (i < renderStart || i >= renderEnd) {
+				const estimatedBefore = getHeight(i);
 				const entry = meta[i];
 				if (entry?.element && !entry.rendered) {
 					if (entry.lastWidth !== lastBodyWidth) {
@@ -929,6 +934,10 @@ const addChatScroll = chatBody => {
 				} else if (!entry?.element) {
 					renderMessage(i);
 				}
+				// If this message was in the top spacer, compensate for height difference
+				if (i >= renderEnd) {
+					topDelta += getHeight(i) - estimatedBefore;
+				}
 			}
 		}
 
@@ -936,6 +945,9 @@ const addChatScroll = chatBody => {
 		renderEnd = newEnd;
 		updateSpacers();
 		ensureSpacerOrder();
+
+		// Adjust scroll position to absorb height changes above the viewport
+		if (topDelta !== 0) chatBody.scrollTop += topDelta;
 	};
 
 	/** Detach all rendered messages, invalidate stale caches and re-render the visible range */

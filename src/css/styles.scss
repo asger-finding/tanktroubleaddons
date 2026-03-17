@@ -195,12 +195,74 @@ body {
 				height: 100%;
 			}
 
+			/* Background gradients matching SVG fill → shadow → empty space */
+			&[style*="borderTop;"],
+			&[style*="borderTopLeftRight;"],
+			&[style*="borderTopRightLeft;"] {
+				/* viewBox 25h: gradient 0-18, shadow 18-20.8, empty 20.8-25 */
+				background: linear-gradient(to bottom, var(--border-accent-9) 72%, var(--border-shadow) 72% 83%, var(--background-color) 83%);
+			}
+
+			&[style*="borderBottom;"] {
+				/* viewBox 20.8: shadow at top, accent edge (4→7), main fill (10→8) */
+				background: linear-gradient(to bottom, var(--border-shadow) 14%, var(--border-accent-4) 14%, var(--border-accent-7) 24%, var(--border-accent-8) 24%);
+			}
+
+			&[style*="borderLeft;"],
+			&[style*="borderTopLeftBottom;"] {
+				/* viewBox 23w: gradient(accent-3→4) 0-16, shadow 16-18.8, empty 18.8-23 */
+				background: linear-gradient(to right, var(--border-accent-3) 0%, var(--border-accent-4) 70%, var(--border-shadow) 70% 82%, var(--background-color) 82%);
+			}
+
+			&[style*="borderRight;"],
+			&[style*="borderTopRightBottom;"] {
+				/* viewBox 23w mirrored: gradient(accent-2→4) 0-16, shadow 16-18.8, empty 18.8-23 */
+				background: linear-gradient(to left, var(--border-accent-2) 0%, var(--border-accent-4) 70%, var(--border-shadow) 70% 82%, var(--background-color) 82%);
+			}
+
+			&[style*="borderTopRight;"],
+			&[style*="borderTopLeft;"] {
+				background: none;
+				position: relative;
+				overflow: visible;
+			}
+
 			&[style*="borderTopRight;"] {
-				background: linear-gradient(45deg, var(--background-color) 63%, transparent 63%);
+				&::before {
+					content: '';
+					position: absolute;
+					top: 0;
+					left: -1px;
+					right: 0;
+					bottom: -1px;
+					z-index: -1;
+				}
 			}
 
 			&[style*="borderTopLeft;"] {
-				background: linear-gradient(315deg, var(--background-color) 63%, transparent 63%);
+				&::before {
+					content: '';
+					position: absolute;
+					top: 0;
+					left: 0;
+					right: -1px;
+					bottom: -1px;
+					z-index: -1;
+				}
+			}
+
+			&[style*="borderTopRight;"]::before {
+				clip-path: polygon(0 0, 25% 0, 100% 75%, 100% 100%, 0 100%);
+				background:
+					linear-gradient(to left, var(--border-accent-2) 0%, var(--border-accent-4) 70%, var(--border-shadow) 70% 82%, transparent 82%),
+					linear-gradient(to bottom, var(--border-accent-9) 72%, var(--border-shadow) 72% 83%, var(--background-color) 83%);
+			}
+
+			&[style*="borderTopLeft;"]::before {
+				clip-path: polygon(75% 0, 100% 0, 100% 100%, 0 100%, 0 75%);
+				background:
+					linear-gradient(to right, var(--border-accent-3) 0%, var(--border-accent-4) 70%, var(--border-shadow) 70% 82%, transparent 82%),
+					linear-gradient(to bottom, var(--border-accent-9) 72%, var(--border-shadow) 72% 83%, var(--background-color) 83%);
 			}
 		}
 

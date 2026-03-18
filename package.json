@@ -9,7 +9,8 @@
     "dev:mv3": "gulp watch --state=dev --target=mv3",
     "dev:mv2": "gulp watch --state=dev --target=mv2",
     "clean": "gulp destroy",
-    "lint": "eslint . --ext .ts,.js"
+    "lint": "eslint . --ext .ts,.js",
+    "typecheck": "tsc --noEmit"
   },
   "repository": {
     "type": "git",

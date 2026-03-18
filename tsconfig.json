@@ -16,6 +16,7 @@
         "allowJs": true,
         "allowImportingTsExtensions": true,
         "noEmit": true,
+        "skipLibCheck": true,
         "paths": {
             "*": ["@types/*"]
         }

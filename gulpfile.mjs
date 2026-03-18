@@ -329,6 +329,18 @@ const styles = () => {
 		}))
 		.pipe(postCSS(plugins))
 		.pipe(conditionalReplacement())
+		.pipe(gulpif(paths.mvTarget === 'mv2', new Transform({
+			objectMode: true,
+			transform(file, _enc, callback) {
+				let css = String(file.contents);
+				css = css.replaceAll('chrome-extension://', 'moz-extension://');
+				// Firefox resolves content script CSS url() relative to the extension,
+				// not the page. Convert page-relative asset paths to absolute URLs.
+				css = css.replaceAll('url(../assets/images/', 'url(https://tanktrouble.com/assets/images/');
+				file.contents = Buffer.from(css);
+				callback(null, file);
+			}
+		})))
 		.pipe(dest(`${ state.dest }/css`))
 		.pipe(hotReload());
 };

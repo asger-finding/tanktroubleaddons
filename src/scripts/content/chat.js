@@ -935,9 +935,7 @@ const addChatScroll = chatBody => {
 					renderMessage(i);
 				}
 				// If this message was in the top spacer, compensate for height difference
-				if (i >= renderEnd) {
-					topDelta += getHeight(i) - estimatedBefore;
-				}
+				if (i >= renderEnd) topDelta += getHeight(i) - estimatedBefore;
 			}
 		}
 

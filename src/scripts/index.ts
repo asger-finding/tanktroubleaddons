@@ -99,16 +99,13 @@ class Addons {
 	 * @returns {Promise<unknown>} Resolves with the fetched data
 	 */
 	static async fetchNoCors(resource: RequestInfo, options?: RequestInit): Promise<unknown> {
-		return new Promise((resolve, reject) => {
-			browser.runtime.sendMessage({
-				action: 'CORS_EXEMPT_FETCH',
-				resource,
-				options
-			}, response => {
-				if (response && response.success) resolve(response.data);
-				else reject(response?.error || 'Unknown error');
-			});
+		const response = await browser.runtime.sendMessage({
+			action: 'CORS_EXEMPT_FETCH',
+			resource,
+			options
 		});
+		if (response && response.success) return response.data;
+		throw response?.error || 'Unknown error';
 	}
 
 	/**
@@ -151,14 +148,9 @@ class Addons {
 			const state = detail.data?.state;
 			if (!state) throw new Error('No state provided for fullscreen request');
 
-			return new Promise((resolve, reject) => {
-				browser.runtime.sendMessage({
-					action: 'FULLSCREEN',
-					state
-				}, response => {
-					if (response && response.success) resolve(response.data);
-					else reject(response?.error || 'Unknown error');
-				});
+			return browser.runtime.sendMessage({
+				action: 'FULLSCREEN',
+				state
 			}).catch(error => {
 				dispatchMessage(null, {
 					type: 'FULLSCREEN_ERROR',

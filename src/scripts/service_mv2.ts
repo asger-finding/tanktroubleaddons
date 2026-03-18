@@ -17,7 +17,7 @@ const defaultState = {
 
 startSyncStore(defaultState);
 
-let lastWindowState: chrome.windows.windowStateEnum = 'normal';
+let lastWindowState = 'normal' as chrome.windows.WindowState;
 
 const disabledIconPaths = {
 	32: browser.runtime.getURL('meta/32-disabled.png'),
@@ -37,7 +37,7 @@ const enabledIconPaths = {
  * @param url Tab URL
  * @returns Is TankTrouble?
  */
-function isTankTrouble(url: chrome.tabs.Tab['url']) {
+function isTankTrouble(url?: string) {
 	if (typeof url === 'undefined') return false;
 
 	try {
@@ -72,7 +72,7 @@ async function toggleFullscreen(state?: 'on' | 'off') {
 
 	if (isTankTrouble(tab.url)) {
 		const window = await browser.windows.get(windowId);
-		const currentState = window.state ?? 'normal';
+		const currentState = (window.state ?? 'normal') as chrome.windows.WindowState;
 
 		await browser.windows.update(windowId, {
 			state: state === 'on' ? 'fullscreen' : lastWindowState
@@ -81,21 +81,23 @@ async function toggleFullscreen(state?: 'on' | 'off') {
 		lastWindowState = currentState; // eslint-disable-line require-atomic-updates
 	}
 }
+
 /**
  * Function to update the icon based on the URL
  * @param tabId Current tab id
  */
-function updateIcon(tabId: chrome.tabs.Tab['id']) {
+async function updateIcon(tabId?: number) {
 	if (typeof tabId === 'undefined') return;
 
-	chrome.tabs.get(tabId, tab => {
-		if (chrome.runtime.lastError) return;
-
+	try {
+		const tab = await browser.tabs.get(tabId);
 		const icons = isTankTrouble(tab.url)
 			? enabledIconPaths
 			: disabledIconPaths;
-		chrome.action.setIcon({ tabId, path: icons });
-	});
+		browser.browserAction.setIcon({ tabId, path: icons });
+	} catch {
+		// Tab may have been closed
+	}
 }
 
 /**
@@ -108,54 +110,49 @@ async function toggleMenu() {
 	if (typeof tab.id === 'undefined') return;
 
 	if (isTankTrouble(tab.url)) {
-		browser.scripting.executeScript({
-			target: { tabId: tab.id },
-			files: [ 'scripts/toggleMenu.js' ]
+		browser.tabs.executeScript(tab.id, {
+			file: 'scripts/toggleMenu.js'
 		});
 	}
 }
 
 // Event to toggle menu when extension's button is clicked
-browser.action.onClicked.addListener(toggleMenu);
+browser.browserAction.onClicked.addListener(toggleMenu);
 
 // Listen for tab updates
-chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+browser.tabs.onUpdated.addListener((tabId: number, changeInfo: { status?: string }) => {
 	if (changeInfo.status === 'complete') updateIcon(tabId);
 });
 
 // Listen for tab switches
-chrome.tabs.onActivated.addListener((activeInfo) => {
+browser.tabs.onActivated.addListener((activeInfo: { tabId: number }) => {
 	updateIcon(activeInfo.tabId);
 });
 
 // Listener for fetch requests from the content script
-browser.runtime.onMessage.addListener((request, _sender, sendResponse) => {
+browser.runtime.onMessage.addListener((request: Record<string, unknown>) => {
 	if (request.action === 'CORS_EXEMPT_FETCH' && request.resource) {
-		const { resource, options, uuid } = request;
+		const { resource, options, uuid } = request as { resource: string; options?: RequestInit; uuid?: string };
 
 		const allowedOrigins = ['https://ironvault.vercel.app'];
 		try {
 			const url = new URL(resource);
-			if (!allowedOrigins.includes(url.origin)) {
-				sendResponse({ success: false, error: `Disallowed origin: ${url.origin}` });
-				return true;
-			}
+			if (!allowedOrigins.includes(url.origin))
+				return Promise.resolve({ success: false, error: `Disallowed origin: ${url.origin}` });
+
 		} catch {
-			sendResponse({ success: false, error: 'Invalid URL' });
-			return true;
+			return Promise.resolve({ success: false, error: 'Invalid URL' });
 		}
 
-		fetch(resource, options || {})
+		return fetch(resource, options || {})
 			.then(response => {
 				if (!response.ok) throw new Error(`HTTP ${response.status}`);
 				return response.json();
 			})
-			.then(data => sendResponse({ success: true, data, uuid }))
-			.catch(error => sendResponse({ success: false, error: error.message ?? String(error) }));
-
-		return true;
+			.then(data => ({ success: true, data, uuid }))
+			.catch(error => ({ success: false, error: error.message ?? String(error) }));
 	} else if (request.action === 'FULLSCREEN') {
-		toggleFullscreen(request.state);
+		toggleFullscreen(request.state as 'on' | 'off' | undefined);
 	}
 
 	return null;

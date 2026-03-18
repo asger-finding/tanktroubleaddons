@@ -5,6 +5,11 @@ default_locale: en
 author: Asger Finding
 manifest_version: 2
 homepage_url: "https://github.com/asger-finding/tanktroubleaddons"
+icons:
+  32: meta/32.png
+  64: meta/64.png
+  96: meta/96.png
+  128: meta/128.png
 browser_action:
   default_title: __MSG_name__
 content_scripts:
@@ -18,8 +23,12 @@ content_scripts:
 background:
   scripts:
     - config/rules.js
+    - scripts/service.js
 permissions:
+  - tabs
   - "*://*.tanktrouble.com/*"
+  - "*://code.jquery.com/*"
+  - "*://ironvault.vercel.app/api/*"
   - webRequest
   - webRequestBlocking
   - storage

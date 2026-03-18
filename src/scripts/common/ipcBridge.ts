@@ -33,7 +33,7 @@ const foreignProcess: Process = typeof browser.runtime === 'undefined'
  */
 export const dispatchMessage = <T>(to: Process | null, data: MessageData<T>): void => {
 	const eventName = to || thisProcess;
-	const event = new CustomEvent(eventName, { detail: data });
+	const event = new CustomEvent(eventName, { detail: JSON.stringify(data) });
 	dispatchEvent(event);
 };
 
@@ -46,8 +46,10 @@ export const dispatchMessage = <T>(to: Process | null, data: MessageData<T>): vo
 export const listen = <T>(types: Array<MessageData['type']> | null, cb: Callback<T>, from?: Process | null): void => {
 	const eventName = from || foreignProcess;
 	addEventListener(eventName, (evt: Event) => {
-		const customEvt = evt as CustomIpcEvent<T>;
-		const type = customEvt.detail?.type;
+		const raw = (evt as CustomEvent).detail;
+		const detail: MessageData<T> | undefined = typeof raw === 'string' ? JSON.parse(raw) : raw;
+		const customEvt = Object.create(evt, { detail: { value: detail } }) as CustomIpcEvent<T>;
+		const type = detail?.type;
 
 		if (types === null || (type && types.includes(type))) return cb(customEvt);
 		return null;
@@ -75,8 +77,10 @@ export const once = <T>(
 	 * @param evt Event object
 	 */
 	const listener = (evt: Event): void => {
-		const customEvt = evt as CustomIpcEvent<T>;
-		if (customEvt.detail?.type && typeList.includes(customEvt.detail.type) && conditional(customEvt)) {
+		const raw = (evt as CustomEvent).detail;
+		const detail: MessageData<T> | undefined = typeof raw === 'string' ? JSON.parse(raw) : raw;
+		const customEvt = Object.create(evt, { detail: { value: detail } }) as CustomIpcEvent<T>;
+		if (detail?.type && typeList.includes(detail.type) && conditional(customEvt)) {
 			removeEventListener(eventName, listener);
 			// eslint-disable-next-line callback-return
 			cb(customEvt);

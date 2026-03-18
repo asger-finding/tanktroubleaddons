@@ -84,8 +84,8 @@ class Menu {
 			}
 		});
 		this.headerSvg = this.header.svg('get');
-		const headerText = this.headerSvg.text(1, 22, 'TankTroubleAddons', {
-			textAnchor: 'start',
+		const headerText = this.headerSvg.text(150, 22, 'TankTroubleAddons', {
+			textAnchor: 'middle',
 			fontFamily: 'TankTrouble',
 			fontSize: 24,
 			fontWeight: 'normal',
@@ -97,7 +97,7 @@ class Menu {
 			paintOrder: 'stroke'
 		});
 
-		const scaleAndTranslate = Utils.getSVGScaleAndTranslateToFit(300, 312, 34, 'left');
+		const scaleAndTranslate = Utils.getSVGScaleAndTranslateToFit(300, 312, 34, 'center');
 		this.headerSvg.configure(headerText, { transform: scaleAndTranslate });
 
 		this.body.append([this.draggable, this.icons, this.handle, this.header]);

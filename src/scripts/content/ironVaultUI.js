@@ -326,13 +326,17 @@ export default class IronVaultUI extends MenuOverlay {
 	 */
 	static #createPlayerDetailsJSON(playerDetails) {
 		const container = $('<div id="playerdetails-json"></div>');
-		const clicker = $('<input id="cm-toggle" class="hidden" type="checkbox"><label for="cm-toggle" class="clicker ui-widget" tabindex="1">View raw details ...</label>');
+		const input = $('<input id="cm-toggle" class="hidden" type="checkbox">');
+		const label = $('<label for="cm-toggle" class="clicker ui-widget" tabindex="1">View raw details ...</label>');
+		label[0].addEventListener('click', () => {
+			label.text(input.prop('checked') ? 'View raw details ...' : 'Hide raw details ...');
+		});
 		const codeblock = $('<div class="codeblock"></div>');
 
 		const value = JSON.stringify(playerDetails.data, null, 2)
 			.replace(/"(?<ext>[^"]+)":/gu, '$1:');
 
-		container.append([clicker, codeblock]);
+		container.append([input, label, codeblock]);
 		container.appendTo('body');
 
 		// Initialize CodeMirror

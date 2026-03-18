@@ -143,7 +143,7 @@ export default class IronVaultUI extends MenuOverlay {
 		const tankContainer = $('<div class="tankcontainer"></div>');
 
 		const canvas = renderTankIcon(playerDetails, err => {
-			MenuOverlay.updateTooltipster(canvas, err);
+			MenuOverlay.updateTooltipster($(canvas), err);
 		});
 		canvas.width = UIConstants.TANK_ICON_WIDTH_LARGE;
 		canvas.height = UIConstants.TANK_ICON_HEIGHT_LARGE;

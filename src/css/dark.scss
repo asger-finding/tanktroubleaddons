@@ -39,6 +39,12 @@ $tooltipster-accent-dark: rgb(25 25 25);
 }
 
 :root.dark {
+	--document-background-color: #{$body-color};
+	--document-color: #{$primary-font-color};
+
+	--highlight-post-background-color: rgb(42 63 32 / 1.0);
+	--highlight-post-border-color: rgb(80 108 0 / 1.0);
+
 	--jq-widget-header-bg: url("https://download.jqueryui.com/themeroller/images/ui-bg_highlight-soft_75_131313_1x100.png");
 	--jq-widget-button-disabled-hovered-or-active-bg: #{asset("/jquery-ui/ui-bg-glass-variant-01.{{png|avif}}")};
 	--jq-widget-hover-or-focus: #{asset("/jquery-ui/ui-bg-glass-variant-02.{{png|avif}}")};
@@ -81,9 +87,6 @@ $tooltipster-accent-dark: rgb(25 25 25);
 	--jq-bgColorOverlay: rgb(170 170 170);
 	--jq-bgColorShadow: rgb(170 170 170);
 
-	--highlight-post-background-color: rgb(42 63 32 / 1.0);
-	--highlight-post-border-color: rgb(80 108 0 / 1.0);
-
 	#addons-menu {
 		--lightness: 50%;
 		--icon-color: rgb(22 22 22 / 1.0);
@@ -107,11 +110,6 @@ $tooltipster-accent-dark: rgb(25 25 25);
 				filter: invert(1);
 			}
 		}
-	}
-
-	body {
-		color: $primary-font-color;
-		background: $body-color;
 	}
 
 	#content {

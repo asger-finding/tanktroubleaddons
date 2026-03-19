@@ -918,6 +918,16 @@ stroked-text {
 		animation: .5s ease-in 0.3s 2 alternate highlight-post;
 	}
 
+	/* Always show compose field */
+	.compose {
+		height: auto !important;
+		opacity: 1.0 !important;
+		margin-top: 10px !important;
+	}
+	.compose[style*="0;"] button {
+		display: none;
+	}
+
 	.reply {
 		&.left .tanks {
 			left: 0;

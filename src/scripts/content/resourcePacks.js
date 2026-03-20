@@ -347,7 +347,7 @@ const removeResourcePackFromStore = hashsum => new Promise((resolve, reject) => 
  * @protected
  */
 const storeDefaultResourcePacks = async() => {
-	const resourcePacks = await Promise.all(
+	const responses = await Promise.all(
 		[
 			Addons.t_url('assets/resourcepacks/Normal.zip'),
 			Addons.t_url('assets/resourcepacks/Dark.zip'),
@@ -356,20 +356,12 @@ const storeDefaultResourcePacks = async() => {
 		].map(url => fetch(url))
 	);
 
-	for (let i = 0; i < resourcePacks.length; i++) {
-		const resourcePack = resourcePacks[i];
-		const { url } = resourcePack;
-		resourcePack.arrayBuffer().then(arrayBuffer => {
-			const fileName = decodeURIComponent(url).replace(/^.*[\\/]/u, '');
-			const file = new File([arrayBuffer], fileName);
-			const builtIn = true;
-
-			addResourcePackToStore(file, builtIn, i)
-				// Resource pack is already stored.
-				// Intentionally do nothing.
-				.catch(() => {});
-		});
-	}
+	await Promise.all(responses.map(async(response, index) => {
+		const arrayBuffer = await response.arrayBuffer();
+		const fileName = decodeURIComponent(response.url).replace(/^.*[\\/]/u, '');
+		const file = new File([arrayBuffer], fileName);
+		await addResourcePackToStore(file, true, index).catch(() => {});
+	}));
 };
 
 /**
@@ -616,9 +608,10 @@ const getMazeThemeIndex = themeIfUnset => Addons._maze_theme !== -1 ? Addons._ma
 const setResourcePackSwitches = switchList => {
 	const validSwitches = [
 		'noTintBase',
+		'noTintTurret',
 		'noTintTreads',
-		'noTintHomingMissiles',
-		'noTintMines',
+		'noTintHomingMissile',
+		'noTintMine',
 		'noMazeThemes',
 		'localGameText',
 		'randomText',
@@ -642,7 +635,7 @@ const setResourcePackSwitches = switchList => {
  * @returns {{key: string, value: string|true|null}} Object with switch and found value
  */
 const getResourcePackSwitch = switchKey => {
-	if (!Addons._resource_pack_switches) return { key: switchKey, value: false };
+	if (!Addons._resource_pack_switches) return { key: switchKey, value: null };
 
 	const foundItem = Addons._resource_pack_switches.find(item => {
 		const [key] = item.split('=');
@@ -724,10 +717,9 @@ Object.assign(Addons, {
 	reloadGame
 });
 
-storeDefaultResourcePacks();
-
 // Apply resource pack CSS immediately so global styles don't wait for the game to load
-getActiveResourcePack()
+storeDefaultResourcePacks()
+	.then(() => getActiveResourcePack())
 	.then(({ css }) => insertResourcePackCSS(css))
 	.catch(() => {});
 
@@ -823,13 +815,13 @@ interceptFunction(UIMissileImage.prototype, 'spawn', function(original, ...args)
 interceptFunction(UIButtonGroup.prototype, 'spawn', function(original, ...args) {
 	switch (this.text) {
 		case 'Random':
-			this.setText(Addons.getResourcePackSwitch('randomText').value ?? this.text);
+			this.setText(Addons.getResourcePackSwitch('randomText').value || this.text);
 			break;
 		case 'New game':
-			this.setText(Addons.getResourcePackSwitch('newGameText').value ?? this.text);
+			this.setText(Addons.getResourcePackSwitch('newGameText').value || this.text);
 			break;
 		case 'Local game':
-			this.setText(Addons.getResourcePackSwitch('localGameText').value ?? this.text);
+			this.setText(Addons.getResourcePackSwitch('localGameText').value || this.text);
 			break;
 		default:
 			break;

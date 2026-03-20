@@ -640,9 +640,65 @@ div#statisticsSnippet {
 		/* Fade out the bottom of the chat to hint at more messages */
 		mask-image: linear-gradient(to bottom, #000 90%, transparent);
 
-		.virtual-scroll-spacer {
-			flex: none;
-			pointer-events: none;
+		.chatMessage {
+			display: block !important;
+			width: fit-content;
+			font-family: Arial, sans-serif;
+			font-weight: bold;
+			font-size: 12px;
+			line-height: 14px;
+			padding: 1px 1px 4px;
+			word-wrap: break-word;
+			overflow-wrap: break-word;
+
+			span {
+				overflow-wrap: normal;
+			}
+
+			.username {
+				--username-stroke: white;
+				paint-order: stroke fill;
+				-webkit-text-stroke: 2.5px var(--username-stroke);
+				user-select: none;
+
+				&.foreign {
+					cursor: pointer;
+
+					&:hover {
+						background-image: linear-gradient(var(--username-stroke) 1px, currentcolor 1px, currentcolor 2px, var(--username-stroke) 3px);
+						background-size: 100% 4px;
+						background-repeat: no-repeat;
+						padding-bottom: 3px;
+						background-position: 0px calc(100% - 1px);
+					}
+				}
+			}
+
+			.msg-text {
+				paint-order: stroke fill;
+				-webkit-text-stroke-width: 2.5px;
+				color: var(--text-color, #000);
+				-webkit-text-stroke-color: var(--stroke-color, #fff);
+			}
+
+			a.msg-text {
+				cursor: pointer;
+				background-image: linear-gradient(var(--stroke-color, #fff) 1px, var(--text-color, #000) 1px, var(--text-color, #000) 2px, var(--stroke-color, #fff) 3px);
+				background-size: 100% 4px;
+				background-repeat: no-repeat;
+				background-position: 0 calc(100% - 1px);
+				padding-bottom: 3px;
+			}
+
+			.system-text {
+				color: gray;
+				paint-order: stroke fill;
+				-webkit-text-stroke: 2.5px white;
+			}
+
+			.whistle {
+				display: inline-block;
+			}
 		}
 	}
 
@@ -667,9 +723,18 @@ div#statisticsSnippet {
 			border-radius: 3px;
 			cursor: pointer;
 			min-height: 20px;
-			outline: 1.5px solid rgb(0 0 0 / 0.15);
+			outline: rgb(117 117 117) solid 1px;
 			filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.3));
+			transition: background 0.15s;
 		}
+	}
+
+	&.user > .chat-scrollbar .chat-scrollbar-thumb {
+		background: #00ff02;
+	}
+
+	&.global > .chat-scrollbar .chat-scrollbar-thumb {
+		background: #68c5ff;
 	}
 
 	&:is(.opening, .open) > .chat-scrollbar {

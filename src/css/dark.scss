@@ -240,6 +240,8 @@ $tooltipster-accent-dark: rgb(25 25 25);
 	}
 
 	#chat {
+		$chat-text-color: rgb(230 230 230);
+
 		$chat-normal-bg: rgb(34 34 34);
 		$chat-user-bg: rgb(0 60 4);
 		$chat-global-bg: rgb(41 64 84);
@@ -251,14 +253,11 @@ $tooltipster-accent-dark: rgb(25 25 25);
 		form {
 			background-color: $chat-normal-bg;
 
-			textarea {
-				color: rgb(230 230 230);
-			}
+			color: $chat-text-color;
 
 			.autocomplete-dropdown {
 				--background: #{$chat-normal-bg};
 				--accent: #{$chat-normal-accent};
-	
 				&#mention {
 					--background: #{$chat-user-bg};
 					--accent: #{$chat-user-accent};
@@ -270,26 +269,41 @@ $tooltipster-accent-dark: rgb(25 25 25);
 			}
 		}
 
-		&.user form {
-			background-color: $chat-user-bg;
-
-			.autocomplete-dropdown {
-				--background: #{$chat-user-bg} !important;
-				--accent: #{$chat-user-accent} !important;
-			}
-		}
-		&.global form {
-			background-color: $chat-global-bg;
-
-			.autocomplete-dropdown {
-				--background: #{$chat-global-bg} !important;
-				--accent: #{$chat-global-accent} !important;
-			}
-		}
-
-		> .chat-scrollbar .chat-scrollbar-thumb {
+		.chat-scrollbar .chat-scrollbar-thumb {
 			background: $chat-normal-bg;
-			outline-color: rgb(255 255 255 / 0.15);
+			outline-color: $chat-normal-accent;
+		}
+
+		&.user {
+			form {
+				background-color: $chat-user-bg;
+
+				.autocomplete-dropdown {
+					--background: #{$chat-user-bg} !important;
+					--accent: #{$chat-user-accent} !important;
+				}
+			}
+
+			.chat-scrollbar .chat-scrollbar-thumb {
+				background: $chat-user-bg;
+				outline-color: $chat-user-accent;
+			}
+		}
+
+		&.global {
+			form {
+				background-color: $chat-global-bg;
+
+				.autocomplete-dropdown {
+					--background: #{$chat-global-bg} !important;
+					--accent: #{$chat-global-accent} !important;
+				}
+			}
+
+			.chat-scrollbar .chat-scrollbar-thumb {
+				background: $chat-global-bg;
+				outline-color: $chat-global-accent;
+			}
 		}
 	}
 

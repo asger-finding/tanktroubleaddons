@@ -650,16 +650,20 @@ div#statisticsSnippet {
 			padding: 1px 1px 4px;
 			word-wrap: break-word;
 			overflow-wrap: break-word;
+			user-select: none;
 
 			span {
 				overflow-wrap: normal;
+			}
+
+			.msg-text, .system-text {
+				user-select: text;
 			}
 
 			.username {
 				--username-stroke: white;
 				paint-order: stroke fill;
 				-webkit-text-stroke: 2.5px var(--username-stroke);
-				user-select: none;
 
 				&.foreign {
 					cursor: pointer;

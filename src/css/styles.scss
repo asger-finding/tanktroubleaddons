@@ -682,6 +682,7 @@ div#statisticsSnippet {
 				-webkit-text-stroke-width: 2.5px;
 				color: var(--text-color, #000);
 				-webkit-text-stroke-color: var(--stroke-color, #fff);
+				word-break: break-all;
 			}
 
 			a.msg-text {

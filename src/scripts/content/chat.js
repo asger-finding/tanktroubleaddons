@@ -996,12 +996,16 @@ const addonMethods = {
 				.join(', ');
 			whistle.tooltipster('content', reported ? `You have reported ${prettyUsernames}` : `Report ${prettyUsernames}`);
 
-			// Position next to the message
-			const msgRect = chatMessage[0].getBoundingClientRect();
+			// Position next to the last line of the message
 			const chatRect = this.chat[0].getBoundingClientRect();
+			const lastChild = chatMessage[0].lastChild;
+			const range = document.createRange();
+			range.selectNodeContents(lastChild?.nodeType === Node.TEXT_NODE ? lastChild.parentNode : lastChild || chatMessage[0]);
+			const lastLineRect = range.getClientRects();
+			const endRect = lastLineRect[lastLineRect.length - 1] || chatMessage[0].getBoundingClientRect();
 			whistle.css({
-				left: `${msgRect.right - chatRect.left + 2}px`,
-				top: `${msgRect.top - chatRect.top - 8}px`
+				left: `${endRect.right - chatRect.left + 2}px`,
+				top: `${endRect.top - chatRect.top - 10}px`
 			});
 
 			clearTimeout(this._whistleHideTimer);

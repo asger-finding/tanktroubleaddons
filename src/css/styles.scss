@@ -636,7 +636,6 @@ div#statisticsSnippet {
 		top: 0 !important;
 		display: flex;
 		flex-direction: column;
-
 		/* Fade out the bottom of the chat to hint at more messages */
 		mask-image: linear-gradient(to bottom, #000 90%, transparent);
 
@@ -700,10 +699,14 @@ div#statisticsSnippet {
 				-webkit-text-stroke: 2.5px white;
 			}
 
-			.whistle {
-				display: inline-block;
-			}
 		}
+	}
+
+	> .whistle {
+		position: absolute;
+		z-index: 2;
+		cursor: pointer;
+		display: none;
 	}
 
 	/* Handle moved outside .body to avoid the fade mask */

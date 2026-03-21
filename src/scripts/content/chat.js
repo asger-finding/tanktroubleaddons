@@ -471,8 +471,9 @@ const setupAutocomplete = chatInput => {
 	ClientManager.getClient().addEventListener(clientEventHandler, this);
 };
 /**
- *
- * @param message
+ * Replace :emoji_name: syntax with emoji characters
+ * @param {string} message Chat message text
+ * @returns {string} Message with emoji replacements
  */
 const insertEmojis = message => message.replace(/:(?<name>[a-zA-Z0-9_]+):/gu, (match, key) => dismoji[key] ?? match);
 
@@ -691,16 +692,10 @@ const addonMethods = {
 			}
 		}
 
-		// Report whistle for foreign users
-		const foundForeignUser = from.some(id => !localPlayerIds.includes(id));
+		// Mark message with chatMessageId for whistle hover
+		if (from.some(id => !localPlayerIds.includes(id)))
+			chatMessage.addClass('reportable');
 
-		if (foundForeignUser) {
-			const whistle = $(`<img class="whistle" src="${g_url('assets/images/chat/report.png')}" srcset="${g_url('assets/images/chat/report@2x.png')} 2x" title=""/>`);
-			whistle.hide();
-			whistle.tooltipster({ position: 'right', offsetX: 5 });
-			chatMessage.append(whistle);
-			this._updateWhistle(chatMessageId, reported);
-		}
 	},
 
 	_renderSystemMessage(involvedPlayerIds, involvedUsernameMap, message, animateHeight, animateFadeIn, localPlayerIds) {
@@ -709,9 +704,7 @@ const addonMethods = {
 
 		// Accumulate consecutive plain text into a single span
 		let textBuffer = '';
-		/**
-		 *
-		 */
+		/** Flush accumulated text buffer into a system-text span */
 		const flushText = () => {
 			if (textBuffer) {
 				chatMessage.append($('<span class="system-text"></span>').text(textBuffer));
@@ -963,6 +956,116 @@ const addonMethods = {
 			}
 		}
 	},
+	_initWhistle() {
+		const whistle = $(`<img class="whistle" src="${g_url('assets/images/chat/report.png')}" srcset="${g_url('assets/images/chat/report@2x.png')} 2x" title=""/>`);
+		whistle.tooltipster({ position: 'right', offsetX: 5 });
+		whistle.hide();
+		this.chat[0].appendChild(whistle[0]);
+		this._whistle = whistle;
+		this._whistleMessageId = null;
+
+		const [chatBody] = this.chatBody;
+
+		$(chatBody).on('mouseenter', '.chatMessage.reportable', evt => {
+			const chatMessage = $(evt.currentTarget);
+			const chatMessageId = this._getChatMessageId(chatMessage);
+			if (chatMessageId === null) return;
+
+			const wasVisible = this._whistleMessageId !== null;
+			this._whistleMessageId = chatMessageId;
+			const msg = this.messages.find(
+				item => item.type === 'chat' && item.chatMessageId === chatMessageId
+			);
+			if (!msg) return;
+
+			const { reported } = msg;
+
+			// Update whistle appearance
+			if (reported) {
+				whistle.attr('src', g_url('assets/images/chat/reportSelected.png'));
+				whistle.attr('srcset', `${g_url('assets/images/chat/reportSelected@2x.png')} 2x`);
+			} else {
+				whistle.attr('src', g_url('assets/images/chat/report.png'));
+				whistle.attr('srcset', `${g_url('assets/images/chat/report@2x.png')} 2x`);
+			}
+
+			// Update tooltip
+			const prettyUsernames = msg.from
+				.filter(id => !Users.isAnyUser(id))
+				.map(id => msg.usernameMap[id])
+				.join(', ');
+			whistle.tooltipster('content', reported ? `You have reported ${prettyUsernames}` : `Report ${prettyUsernames}`);
+
+			// Position next to the message
+			const msgRect = chatMessage[0].getBoundingClientRect();
+			const chatRect = this.chat[0].getBoundingClientRect();
+			whistle.css({
+				left: `${msgRect.right - chatRect.left + 2}px`,
+				top: `${msgRect.top - chatRect.top - 8}px`
+			});
+
+			clearTimeout(this._whistleHideTimer);
+			whistle.stop(true);
+			if (wasVisible)
+				whistle.css({ display: 'block', opacity: 0.25 }).animate({ opacity: 1 }, 500);
+			else
+				whistle.css({ display: 'block', opacity: 0 }).animate({ opacity: 1 }, 210);
+
+		});
+
+		$(chatBody).on('mouseleave', '.chatMessage.reportable', () => {
+			this._whistleHideTimer = setTimeout(() => {
+				whistle.stop(true).fadeOut(210);
+				this._whistleMessageId = null;
+			}, 30);
+		});
+
+		whistle.on('click', () => {
+			if (this._whistleMessageId === null) return;
+			const msg = this.messages.find(
+				item => item.type === 'chat' && item.chatMessageId === this._whistleMessageId
+			);
+			if (!msg) return;
+
+			if (msg.reported)
+				this._notifyEventListeners(TankTrouble.ChatBox.EVENTS.UNDO_CHAT_REPORT, this._whistleMessageId);
+			else
+				this._notifyEventListeners(TankTrouble.ChatBox.EVENTS.REPORT_CHAT, this._whistleMessageId);
+
+		});
+	},
+
+	_getChatMessageId(chatMessage) {
+		const classList = chatMessage[0].className;
+		const match = classList.match(/message-(\d+)/u);
+		return match ? Number(match[1]) : null;
+	},
+
+	_updateWhistle(chatMessageId, reported) {
+		const msg = this.messages.find(
+			item => item.type === 'chat' && item.chatMessageId === chatMessageId
+		);
+
+		// If the whistle is currently showing for this message, refresh it
+		if (this._whistleMessageId === chatMessageId && this._whistle) {
+			const prettyUsernames = msg?.from
+				.filter(id => !Users.isAnyUser(id))
+				.map(id => msg.usernameMap[id])
+				.join(', ') || '';
+
+			if (reported) {
+				this._whistle.attr('src', g_url('assets/images/chat/reportSelected.png'));
+				this._whistle.attr('srcset', `${g_url('assets/images/chat/reportSelected@2x.png')} 2x`);
+				this._whistle.tooltipster('content', `You have reported ${prettyUsernames}`);
+				this._whistle.show();
+			} else {
+				this._whistle.attr('src', g_url('assets/images/chat/report.png'));
+				this._whistle.attr('srcset', `${g_url('assets/images/chat/report@2x.png')} 2x`);
+				this._whistle.tooltipster('content', `Report ${prettyUsernames}`);
+			}
+		}
+	},
+
 	_initScrollbar() {
 		const scrollbar = document.createElement('div');
 		scrollbar.className = 'chat-scrollbar';
@@ -1057,7 +1160,7 @@ whenContentInitialized().then(() => {
 		'_resizeEventHandler', '_handleChatSendReceipt', '_updateInputBackground',
 		'_notifyNewMessage', '_removeLocalPlayersFromIgnored',
 		'_notifyEventListeners', '_parseChat', '_lookUpUsernamesAndAddChatMessage',
-		'_updateMessageReported', '_updateWhistle'
+		'_updateMessageReported'
 	];
 	for (const name of preserveList)
 		preserved[name] = chatBox[name];
@@ -1085,25 +1188,22 @@ whenContentInitialized().then(() => {
 		handle.style.top = `${chatBody.offsetTop + chatBody.offsetHeight - handle.offsetHeight}px`;
 	};
 
-	/**
-	 *
-	 */
+	/** Fade in the resize handle, syncing position first */
 	$handle.show = () => {
 		if (!chatBox.chat.hasClass('open') && !chatBox.chat.hasClass('opening')) return $handle;
 		$handle.stop(true).css({ display: '', opacity: 0 });
 		syncHandle();
 		return $handle.animate({ opacity: 1 }, 200);
 	};
-	/**
-	 *
-	 */
+	/** Fade out and hide the resize handle */
 	$handle.hide = () => $handle.stop(true).animate({ opacity: 0 }, 200, function() { $(this).css('display', 'none'); });
 
 	new ResizeObserver(syncHandle).observe(chatBody);
 	new MutationObserver(syncHandle).observe(chatBody, { attributes: true, attributeFilter: ['style'] });
 
-	// Initialize scrollbar
+	// Initialize scrollbar and whistle
 	chatBox._initScrollbar();
+	chatBox._initWhistle();
 
 	// Setup autocomplete
 	setupAutocomplete(chatInput);
@@ -1118,6 +1218,20 @@ whenContentInitialized().then(() => {
 
 	// Allow more characters
 	chatInput.setAttribute('maxlength', '255');
+
+	// Contain text selection within chat body
+	chatBody.addEventListener('mousedown', evt => {
+		if (evt.button !== 0) return;
+		document.body.style.setProperty('user-select', 'none', 'important');
+		document.body.style.setProperty('-webkit-user-select', 'none', 'important');
+		/** Re-enable text selection on the page */
+		const onMouseUp = () => {
+			document.body.style.removeProperty('user-select');
+			document.body.style.removeProperty('-webkit-user-select');
+			document.removeEventListener('mouseup', onMouseUp);
+		};
+		document.addEventListener('mouseup', onMouseUp);
+	});
 
 	// Form width sync on body resize
 	new MutationObserver(() => {

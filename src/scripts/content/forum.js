@@ -342,6 +342,21 @@ const proxy = new Proxy({}, {
 });
 
 /**
+ * Reset markdown preview state on a compose field
+ * @param {string} wrapper Selector for the compose wrapper
+ */
+const resetComposePreview = wrapper => {
+	const preview = $(`${wrapper} .compose .mdeditor-preview`);
+	const textarea = $(`${wrapper} .compose textarea`);
+	const previewButton = $(`${wrapper} .compose .mdeditor-toolbar-tool.active`);
+	if (preview.is(':visible')) {
+		preview.hide();
+		textarea.show();
+		previewButton.removeClass('active');
+	}
+};
+
+/**
  * Prepend (inject) custom event listeners to modify threads and replies
  */
 const { getInstance } = Forum;
@@ -355,6 +370,16 @@ Forum.classMethod('getInstance', function(...args) {
 	interceptFunction(instance, 'updateComposeAndStatus', (original, ...funcArgs) => {
 		addMarkdownPreviewToComposeFields();
 
+		return original(...funcArgs);
+	});
+
+	interceptFunction(instance, 'createForumThread', (original, ...funcArgs) => {
+		resetComposePreview('#threadsWrapper');
+		return original(...funcArgs);
+	});
+
+	interceptFunction(instance, 'createForumReply', (original, ...funcArgs) => {
+		resetComposePreview('#repliesWrapper');
 		return original(...funcArgs);
 	});
 

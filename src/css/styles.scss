@@ -1061,6 +1061,10 @@ stroked-text {
 		}
 	}
 
+	.compose .bubble .mdeditor-preview {
+		min-height: 42px;
+	}
+	.compose .bubble .mdeditor-preview,
 	.compose .bubble .mdeditor-toolbar ~ textarea {
 		padding: 5px;
 		width: calc(100% - 10px);

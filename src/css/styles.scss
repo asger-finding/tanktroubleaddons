@@ -641,8 +641,9 @@ div#statisticsSnippet {
 
 		.chatMessage {
 			display: block !important;
+			position: relative;
 			width: fit-content;
-			font-family: Arial, sans-serif;
+			font-family: Arial, sans-serif !important;
 			font-weight: bold;
 			font-size: 12px;
 			line-height: 14px;
@@ -680,24 +681,27 @@ div#statisticsSnippet {
 			.msg-text {
 				paint-order: stroke fill;
 				-webkit-text-stroke-width: 2.5px;
-				color: var(--text-color, #000);
-				-webkit-text-stroke-color: var(--stroke-color, #fff);
-				word-break: break-all;
 			}
 
 			a.msg-text {
 				cursor: pointer;
-				background-image: linear-gradient(var(--stroke-color, #fff) 1px, var(--text-color, #000) 1px, var(--text-color, #000) 2px, var(--stroke-color, #fff) 3px);
-				background-size: 100% 4px;
-				background-repeat: no-repeat;
-				background-position: 0 calc(100% - 1px);
-				padding-bottom: 3px;
+				text-decoration: underline;
+				word-break: break-all;
 			}
 
 			.system-text {
 				color: gray;
 				paint-order: stroke fill;
 				-webkit-text-stroke: 2.5px white;
+			}
+
+			&.reportable::after {
+				content: '';
+				position: absolute;
+				right: -32px;
+				width: 33px;
+				height: 23px;
+				top: -4px;
 			}
 
 		}
@@ -708,6 +712,24 @@ div#statisticsSnippet {
 		z-index: 2;
 		cursor: pointer;
 		display: none;
+	}
+
+	> .reported-whistle-wrapper {
+		position: absolute;
+		width: 23px;
+		height: 20px;
+		overflow: visible;
+		cursor: pointer;
+		z-index: 2;
+
+		.reported-whistle {
+			height: 40px;
+			width: auto;
+			pointer-events: none;
+			position: absolute;
+			top: -13px;
+			left: -3px;
+		}
 	}
 
 	/* Handle moved outside .body to avoid the fade mask */

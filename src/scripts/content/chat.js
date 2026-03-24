@@ -619,20 +619,21 @@ const addonMethods = {
 	},
 	_renderChatMessage(from, to, usernameMap, addRecipients, textColor, strokeColor, message, chatMessageId, reported, animateHeight, animateFadeIn, localPlayerIds) {
 		const chatMessage = $(`<div class="chatMessage message-${chatMessageId}"></div>`);
+		const content = $('<span class="chat-content"></span>');
 
 		if (!localPlayerIds) localPlayerIds = Users.getAllPlayerIds();
 
 		// Render "from" usernames
 		for (let i = 0; i < from.length; i++) {
 			const suffix = i < from.length - 1 ? ',' : (addRecipients ? ' @' : ':');
-			chatMessage.append(createUsernameSpan(from[i], usernameMap[from[i]] + suffix, localPlayerIds.includes(from[i])), ' ');
+			content.append(createUsernameSpan(from[i], usernameMap[from[i]] + suffix, localPlayerIds.includes(from[i])), ' ');
 		}
 
 		// Render "to" usernames if whisper
 		if (addRecipients && to) {
 			for (let i = 0; i < to.length; i++) {
 				const suffix = i < to.length - 1 ? ',' : ':';
-				chatMessage.append(createUsernameSpan(to[i], usernameMap[to[i]] + suffix, localPlayerIds.includes(to[i])), ' ');
+				content.append(createUsernameSpan(to[i], usernameMap[to[i]] + suffix, localPlayerIds.includes(to[i])), ' ');
 			}
 		}
 
@@ -640,32 +641,44 @@ const addonMethods = {
 		const processedMessage = insertEmojis(message);
 		const urlRegex = /https?:\/\/[\w\-_]+(?:\.[\w\-_]+)+(?:[\w\-.,@?^=%&:/~+#]*[\w\-@?^=%&/~+#])?/gu;
 
+		const msgStyle = `color:${textColor};-webkit-text-stroke-color:${strokeColor}`;
 		let lastIndex = 0;
 		let hasUrl = false;
 		for (const match of processedMessage.matchAll(urlRegex)) {
 			hasUrl = true;
 			if (match.index > lastIndex) {
-				chatMessage.append(
+				content.append(
 					$('<span class="msg-text"></span>')
 						.text(processedMessage.substring(lastIndex, match.index))
-						.css({ '--text-color': textColor, '--stroke-color': strokeColor })
+						.attr('style', msgStyle)
 				);
 			}
-			chatMessage.append(
+			content.append(
 				$('<a class="msg-text" target="_blank" rel="noopener"></a>')
 					.attr('href', match[0])
 					.text(match[0])
-					.css({ '--text-color': textColor, '--stroke-color': strokeColor })
+					.attr('style', msgStyle)
 			);
 			lastIndex = match.index + match[0].length;
 		}
 		const remainingText = hasUrl ? processedMessage.substring(lastIndex) : processedMessage;
 		if (remainingText) {
-			chatMessage.append(
+			content.append(
 				$('<span class="msg-text"></span>')
 					.text(remainingText)
-					.css({ '--text-color': textColor, '--stroke-color': strokeColor })
+					.attr('style', msgStyle)
 			);
+		}
+
+		chatMessage.append(content);
+
+		// Mark message with chatMessageId for whistle hover
+		if (from.some(id => !localPlayerIds.includes(id))) {
+			chatMessage.addClass('reportable');
+			if (reported) {
+				chatMessage.addClass('reported');
+				this._appendReportedWhistle(chatMessageId);
+			}
 		}
 
 		// Prepend to chat body
@@ -691,10 +704,6 @@ const addonMethods = {
 
 			}
 		}
-
-		// Mark message with chatMessageId for whistle hover
-		if (from.some(id => !localPlayerIds.includes(id)))
-			chatMessage.addClass('reportable');
 
 	},
 
@@ -915,12 +924,14 @@ const addonMethods = {
 				$(this).remove();
 			});
 		});
+		this.chat.find('.reported-whistle-wrapper').remove();
 	},
 
 	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	_updateChat() {},
 
 	_refreshChat(animate) {
+		this.chat.find('.reported-whistle-wrapper').remove();
 		this.chatBody.find('div.chatMessage').each(function() {
 			if (animate) {
 				$(this).stop(true).fadeOut(200, function() {
@@ -966,77 +977,65 @@ const addonMethods = {
 
 		const [chatBody] = this.chatBody;
 
+		this._scrollSuppressed = false;
+
 		$(chatBody).on('mouseenter', '.chatMessage.reportable', evt => {
+			if (this._scrollSuppressed) return;
+
 			const chatMessage = $(evt.currentTarget);
 			const chatMessageId = this._getChatMessageId(chatMessage);
 			if (chatMessageId === null) return;
 
-			const wasVisible = this._whistleMessageId !== null;
-			this._whistleMessageId = chatMessageId;
 			const msg = this.messages.find(
 				item => item.type === 'chat' && item.chatMessageId === chatMessageId
 			);
-			if (!msg) return;
+			if (!msg || msg.reported) return;
 
-			const { reported } = msg;
-
-			// Update whistle appearance
-			if (reported) {
-				whistle.attr('src', g_url('assets/images/chat/reportSelected.png'));
-				whistle.attr('srcset', `${g_url('assets/images/chat/reportSelected@2x.png')} 2x`);
-			} else {
-				whistle.attr('src', g_url('assets/images/chat/report.png'));
-				whistle.attr('srcset', `${g_url('assets/images/chat/report@2x.png')} 2x`);
-			}
+			const wasVisible = this._whistleMessageId !== null;
+			this._whistleMessageId = chatMessageId;
 
 			// Update tooltip
 			const prettyUsernames = msg.from
 				.filter(id => !Users.isAnyUser(id))
 				.map(id => msg.usernameMap[id])
 				.join(', ');
-			whistle.tooltipster('content', reported ? `You have reported ${prettyUsernames}` : `Report ${prettyUsernames}`);
+			whistle.tooltipster('content', `Report ${prettyUsernames}`);
 
 			// Position next to the last line of the message
-			const chatRect = this.chat[0].getBoundingClientRect();
-			const lastChild = chatMessage[0].lastChild;
-			const range = document.createRange();
-			range.selectNodeContents(lastChild?.nodeType === Node.TEXT_NODE ? lastChild.parentNode : lastChild || chatMessage[0]);
-			const lastLineRect = range.getClientRects();
-			const endRect = lastLineRect[lastLineRect.length - 1] || chatMessage[0].getBoundingClientRect();
+			const pos = this._getWhistlePosition(chatMessage[0]);
 			whistle.css({
-				left: `${endRect.right - chatRect.left + 2}px`,
-				top: `${endRect.top - chatRect.top - 10}px`
+				left: `${pos.left}px`,
+				top: `${pos.top}px`
 			});
 
 			clearTimeout(this._whistleHideTimer);
-			whistle.stop(true);
+			whistle.stop();
 			if (wasVisible)
-				whistle.css({ display: 'block', opacity: 0.25 }).animate({ opacity: 1 }, 500);
+				whistle.css('display', 'block').animate({ opacity: 1 }, 300);
 			else
 				whistle.css({ display: 'block', opacity: 0 }).animate({ opacity: 1 }, 210);
 
 		});
 
-		$(chatBody).on('mouseleave', '.chatMessage.reportable', () => {
-			this._whistleHideTimer = setTimeout(() => {
-				whistle.stop(true).fadeOut(210);
-				this._whistleMessageId = null;
-			}, 30);
+		$(chatBody).on('mouseleave', '.chatMessage.reportable', evt => {
+			if (whistle[0] === evt.relatedTarget || whistle[0].contains(evt.relatedTarget)) return;
+			whistle.stop(true).fadeOut(210);
+			this._whistleMessageId = null;
+		});
+
+		whistle.on('mouseleave', evt => {
+			// If mouse went back to the message's ::after zone, don't hide
+			const { relatedTarget } = evt;
+			if (relatedTarget && $(relatedTarget).closest('.chatMessage.reportable', chatBody).length) return;
+			whistle.stop(true).fadeOut(210);
+			this._whistleMessageId = null;
 		});
 
 		whistle.on('click', () => {
 			if (this._whistleMessageId === null) return;
-			const msg = this.messages.find(
-				item => item.type === 'chat' && item.chatMessageId === this._whistleMessageId
-			);
-			if (!msg) return;
-
-			if (msg.reported)
-				this._notifyEventListeners(TankTrouble.ChatBox.EVENTS.UNDO_CHAT_REPORT, this._whistleMessageId);
-			else
-				this._notifyEventListeners(TankTrouble.ChatBox.EVENTS.REPORT_CHAT, this._whistleMessageId);
-
+			this._notifyEventListeners(TankTrouble.ChatBox.EVENTS.REPORT_CHAT, this._whistleMessageId);
 		});
+
 	},
 
 	_getChatMessageId(chatMessage) {
@@ -1045,27 +1044,85 @@ const addonMethods = {
 		return match ? Number(match[1]) : null;
 	},
 
+	_getWhistlePosition(msgEl) {
+		const chatRect = this.chat[0].getBoundingClientRect();
+		const contentEl = msgEl.querySelector('.chat-content') || msgEl;
+		const { lastChild } = contentEl;
+		const range = document.createRange();
+		range.selectNodeContents(lastChild?.nodeType === Node.TEXT_NODE ? lastChild.parentNode : lastChild || contentEl);
+		const lastLineRect = range.getClientRects();
+		const endRect = lastLineRect[lastLineRect.length - 1] || msgEl.getBoundingClientRect();
+		return {
+			left: endRect.right - chatRect.left + 2,
+			top: endRect.top - chatRect.top - 10
+		};
+	},
+
+	_appendReportedWhistle(chatMessageId) {
+		const wrapper = document.createElement('div');
+		wrapper.className = 'reported-whistle-wrapper';
+		wrapper.dataset.messageId = chatMessageId;
+		const img = document.createElement('img');
+		img.className = 'reported-whistle';
+		img.src = g_url('assets/images/chat/reportSelected.png');
+		img.srcset = `${g_url('assets/images/chat/reportSelected@2x.png')} 2x`;
+		wrapper.appendChild(img);
+		wrapper.addEventListener('click', () => {
+			this._notifyEventListeners(TankTrouble.ChatBox.EVENTS.UNDO_CHAT_REPORT, chatMessageId);
+		});
+		this.chat[0].appendChild(wrapper);
+		this._positionReportedWhistle(wrapper);
+	},
+
+	_positionReportedWhistle(wrapper) {
+		const msgEl = this.chatBody[0].querySelector(`.message-${wrapper.dataset.messageId}`);
+		if (!msgEl) {
+			wrapper.style.display = 'none';
+			return;
+		}
+		// Hide if message is outside the visible scroll area
+		const bodyRect = this.chatBody[0].getBoundingClientRect();
+		const msgRect = msgEl.getBoundingClientRect();
+		if (msgRect.bottom < bodyRect.top || msgRect.top > bodyRect.bottom) {
+			wrapper.style.display = 'none';
+			return;
+		}
+		const pos = this._getWhistlePosition(msgEl);
+		wrapper.style.display = '';
+		wrapper.style.left = `${pos.left + 3}px`;
+		wrapper.style.top = `${pos.top + 3}px`;
+	},
+
+	_repositionAllReportedWhistles() {
+		this.chat[0].querySelectorAll('.reported-whistle-wrapper').forEach(wrapper => {
+			this._positionReportedWhistle(wrapper);
+		});
+	},
+
 	_updateWhistle(chatMessageId, reported) {
 		const msg = this.messages.find(
 			item => item.type === 'chat' && item.chatMessageId === chatMessageId
 		);
 
-		// If the whistle is currently showing for this message, refresh it
-		if (this._whistleMessageId === chatMessageId && this._whistle) {
-			const prettyUsernames = msg?.from
-				.filter(id => !Users.isAnyUser(id))
-				.map(id => msg.usernameMap[id])
-				.join(', ') || '';
+		// Toggle reported class on the message element
+		const msgEl = this.chatBody[0].querySelector(`.message-${chatMessageId}`);
+		if (msgEl) msgEl.classList.toggle('reported', reported);
 
+		// Toggle reported whistle outside .body
+		const existing = this.chat[0].querySelector(`.reported-whistle-wrapper[data-message-id="${chatMessageId}"]`);
+		if (reported && !existing) {
+			this._appendReportedWhistle(chatMessageId);
+		} else if (!reported && existing) {
+			existing.remove();
+		}
+
+		// Update hover whistle visibility
+		if (this._whistle) {
 			if (reported) {
-				this._whistle.attr('src', g_url('assets/images/chat/reportSelected.png'));
-				this._whistle.attr('srcset', `${g_url('assets/images/chat/reportSelected@2x.png')} 2x`);
-				this._whistle.tooltipster('content', `You have reported ${prettyUsernames}`);
-				this._whistle.show();
-			} else {
-				this._whistle.attr('src', g_url('assets/images/chat/report.png'));
-				this._whistle.attr('srcset', `${g_url('assets/images/chat/report@2x.png')} 2x`);
-				this._whistle.tooltipster('content', `Report ${prettyUsernames}`);
+				this._whistle.stop(true).hide();
+				this._whistleMessageId = null;
+			} else if (msgEl) {
+				$(msgEl).trigger('mouseenter');
 			}
 		}
 	},
@@ -1109,13 +1166,30 @@ const addonMethods = {
 			thumb.classList.remove('dragging');
 		});
 
-		chatBody.addEventListener('scroll', () => this._updateScrollbarThumb(), { passive: true });
-		new ResizeObserver(() => this._updateScrollbarThumb()).observe(chatBody);
+		let scrollEndTimer;
+		chatBody.addEventListener('scroll', () => {
+			this._updateScrollbarThumb();
+			this._repositionAllReportedWhistles();
+			if (this._whistleMessageId !== null) {
+				this._whistle.stop(true).hide();
+				this._whistleMessageId = null;
+			}
+			this._scrollSuppressed = true;
+			clearTimeout(scrollEndTimer);
+			scrollEndTimer = setTimeout(() => { this._scrollSuppressed = false; }, 150);
+		}, { passive: true });
+		new ResizeObserver(() => {
+			this._updateScrollbarThumb();
+			this._repositionAllReportedWhistles();
+		}).observe(chatBody);
 		new MutationObserver(mutations => {
 			const relevant = mutations.some(mutation =>
 				mutation.type === 'childList' || mutation.target.classList.contains('chatMessage')
 			);
-			if (relevant) this._updateScrollbarThumb();
+			if (relevant) {
+				this._updateScrollbarThumb();
+				this._repositionAllReportedWhistles();
+			}
 		}).observe(chatBody, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
 	},
 

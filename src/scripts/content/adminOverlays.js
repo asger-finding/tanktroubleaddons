@@ -56,25 +56,199 @@ const FILTERS = {
 
 const storeName = 'chatlogCache';
 
+let cacheKeyPromise = null;
+let alertedKeyFailure = false;
+let deauthListenerRegistered = false;
+
 /**
- * Add chat log item to database
- * @param {ChatLogMessage} chatMessage Chat log message item
+ * Lazily install a PLAYER_DEAUTHENTICATED listener on first key derivation.
+ * Invalidates the memoized key on logout so the next access re-derives
+ * under whichever account is authenticated afterwards.
+ */
+const ensureDeauthListener = () => {
+	if (deauthListenerRegistered) return;
+	deauthListenerRegistered = true;
+
+	Users.addEventListener((_ctxt, evt) => {
+		if (evt === Users.EVENTS.PLAYER_DEAUTHENTICATED) {
+			cacheKeyPromise = null;
+			alertedKeyFailure = false;
+		}
+	}, null);
+};
+
+/**
+ * Derive a non-extractable AES-GCM key from self-only data: the authenticated
+ * admin's email combined with the id, creation timestamp, and body of their
+ * oldest inbox message. The inbox read requires authentication, so a logged-out
+ * user (or a different account) cannot reproduce the key and therefore cannot
+ * decrypt cached chat log bodies. Memoized per page load.
+ * @returns {Promise<CryptoKey>} Session-scoped AES-GCM key
+ */
+const deriveCacheKey = () => {
+	if (cacheKeyPromise) return cacheKeyPromise;
+	ensureDeauthListener();
+
+	cacheKeyPromise = (async() => {
+		const playerId = Users.getHighestGmUser() || Users.getAllPlayerIds()[0];
+
+		/* eslint-disable jsdoc/require-jsdoc */
+		const email = await new Promise((resolve, reject) => {
+			Backend.getInstance().getEmail(
+				result => (result ? resolve(result) : reject(new Error('not authenticated'))),
+				err => reject(new Error(err || 'getEmail failed')),
+				null,
+				playerId,
+				{ get: () => null, set: () => null }
+			);
+		});
+
+		const getMessages = (offset, limit) => new Promise((resolve, reject) => {
+			Backend.getInstance().getMessages(resolve, reject, null, [playerId], offset, limit);
+		});
+		/* eslint-enable jsdoc/require-jsdoc */
+
+		const first = await getMessages(0, 1);
+		const total = first && first.totalMessages;
+		if (!total) throw new Error('empty inbox');
+
+		const last = await getMessages(total - 1, 1);
+		const oldest = last && last.messages && last.messages[0];
+		if (!oldest) throw new Error('failed to fetch oldest message');
+
+		const idPart = String(oldest.id);
+		const createdPart = String(oldest.created);
+		const bodyPart = String(oldest.body || '');
+
+		const material = [idPart, createdPart, bodyPart, email.trim().toLowerCase()].join('\x1f');
+
+		// PBKDF2 stretches the low-entropy material (id and created are
+		// tightly correlated and sum to ~28 bits on their own) so that each
+		// brute-force attempt costs ~100 ms instead of microseconds. Salt is
+		// a fixed constant because the material itself is per-user-unique.
+		const baseKey = await crypto.subtle.importKey(
+			'raw',
+			new TextEncoder().encode(material),
+			'PBKDF2',
+			false,
+			['deriveKey']
+		);
+
+		return crypto.subtle.deriveKey(
+			{
+				name: 'PBKDF2',
+				salt: new TextEncoder().encode('TankTroubleAddons/chatlogCache/v1'),
+				iterations: 200000,
+				hash: 'SHA-256'
+			},
+			baseKey,
+			{ name: 'AES-GCM', length: 256 },
+			false,
+			['encrypt', 'decrypt']
+		);
+	})().catch(err => {
+		if (err.message === 'empty inbox') {
+			// Poison the session for this specific error: retrying won't help
+			// until the user actually sends a message, and we don't want to
+			// re-run the derivation (or re-alert) on every cache read.
+			if (!alertedKeyFailure) {
+				alertedKeyFailure = true;
+				// eslint-disable-next-line no-alert
+				alert('Error: You must first have sent a message (any message) to the laboratory to use this feature (needed for message encryption schema).');
+			}
+		} else {
+			// Transient error (network, auth) — clear the memo so the next
+			// call can retry cleanly.
+			cacheKeyPromise = null;
+		}
+		throw err;
+	});
+
+	return cacheKeyPromise;
+};
+
+/**
+ * Encrypt a chat log message body for storage. Throws on any failure so the
+ * caller can skip the write rather than store plaintext.
+ * @param {string} plaintext Raw message text
+ * @returns {Promise<{iv: Uint8Array, ct: ArrayBuffer}>} Encrypted envelope
+ */
+const encryptMessage = async plaintext => {
+	const key = await deriveCacheKey();
+	const iv = crypto.getRandomValues(new Uint8Array(12));
+	const ct = await crypto.subtle.encrypt(
+		{ name: 'AES-GCM', iv },
+		key,
+		new TextEncoder().encode(plaintext)
+	);
+
+	return { iv, ct };
+};
+
+/**
+ * Decrypt a stored message body. Throws on any failure (wrong key, tampered
+ * ciphertext, unexpected shape) so the caller can drop the whole cache.
+ * @param {{iv: Uint8Array, ct: ArrayBuffer}} stored Stored envelope
+ * @returns {Promise<string>} Plaintext message
+ */
+const decryptMessage = async stored => {
+	const key = await deriveCacheKey();
+	const plain = await crypto.subtle.decrypt(
+		{ name: 'AES-GCM', iv: stored.iv },
+		key,
+		stored.ct
+	);
+
+	return new TextDecoder().decode(plain);
+};
+
+/**
+ * Wipe every record from the chat log cache store. Used when decryption fails,
+ * which typically means the derivation inputs have changed (different admin
+ * logged in, email changed, or the oldest inbox message was edited/removed).
  * @returns {Promise<void>} Promise when done
  */
-const addMessage = chatMessage => new Promise(resolve => {
+const clearCache = () => new Promise(resolve => {
 	const transaction = Addons.indexedDB.transaction([storeName], 'readwrite');
 	const store = transaction.objectStore(storeName);
-	const request = store.add(chatMessage);
+	const request = store.clear();
 
 	/* eslint-disable jsdoc/require-jsdoc */
 	request.onsuccess = () => resolve();
-
-	// Likely, the error is for if the item
-	// already exists in the IndexedDB store.
-	// In that case, we ignore and carry on.
 	request.onerror = () => resolve();
 	/* eslint-enable jsdoc/require-jsdoc */
 });
+
+/**
+ * Add chat log item to database. The message body is encrypted before storage;
+ * if encryption fails, the write is skipped entirely rather than falling back
+ * to plaintext.
+ * @param {ChatLogMessage} chatMessage Chat log message item
+ * @returns {Promise<void>} Promise when done
+ */
+const addMessage = async chatMessage => {
+	let encryptedMessage = null;
+	try {
+		encryptedMessage = await encryptMessage(chatMessage.message);
+	} catch {
+		return;
+	}
+
+	await new Promise(resolve => {
+		const transaction = Addons.indexedDB.transaction([storeName], 'readwrite');
+		const store = transaction.objectStore(storeName);
+		const request = store.add({ ...chatMessage, message: encryptedMessage });
+
+		/* eslint-disable jsdoc/require-jsdoc */
+		request.onsuccess = () => resolve();
+
+		// Likely, the error is for if the item
+		// already exists in the IndexedDB store.
+		// In that case, we ignore and carry on.
+		request.onerror = () => resolve();
+		/* eslint-enable jsdoc/require-jsdoc */
+	});
+};
 
 /**
  * Chunk series of numbers in an array into an object data structure
@@ -198,7 +372,20 @@ const findCacheGaps = ( messageIndex, playerId, offset, limit) => new Promise((r
 				.map(uncachedMessageIndex => messageIndex - uncachedMessageIndex - 1 + offset);
 			const digestible = [ ...chunk(uncached).entries() ];
 
-			resolve([matches, digestible]);
+			// Decrypt cached message bodies before handing them to the caller.
+			// If any fail to decrypt (wrong key, tampered, or unexpected shape),
+			// the whole cache is wiped and the caller is told to refetch the
+			// full requested window as a single gap.
+			try {
+				const decryptedMessages = await Promise.all(
+					matches.map(async match => ({ ...match, message: await decryptMessage(match.message) }))
+				);
+
+				resolve([decryptedMessages, digestible]);
+			} catch {
+				await clearCache();
+				resolve([[], [[offset, limit]]]);
+			}
 		}
 	};
 	request.onerror = event => reject(event.target.error);

@@ -7,7 +7,7 @@ import { interceptFunction } from '../utils/gameUtils.js';
  * @returns {Promise<IDBDatabase>} A promise that resolves to the initialized database.
  */
 const initDatabase = () => new Promise((resolve, reject) => {
-	const request = indexedDB.open('addons', 10);
+	const request = indexedDB.open('addons', 11);
 
 	/* eslint-disable jsdoc/require-jsdoc */
 	request.onupgradeneeded = (event) => {
@@ -29,9 +29,14 @@ const initDatabase = () => new Promise((resolve, reject) => {
 			store.createIndex('hashsum', 'hashsum', { unique: true });
 		}
 
+		// On any version upgrade, wipe the chat log cache. Records may have
+		// been written under a different encryption scheme or key derivation,
+		// and the cache is cheap to refill from the server on demand.
+		const { transaction } = event.target;
+		if (db.objectStoreNames.contains('chatlogCache')) transaction.objectStore('chatlogCache').clear();
+
 		// For any version upgrade, we clear the embedded resource packs
 		// in the assumption that they have been modified
-		const { transaction } = event.target;
 		const resourcePacksStore = transaction.objectStore('resourcePacks');
 
 		const resourcePackRequest = resourcePacksStore.openCursor();

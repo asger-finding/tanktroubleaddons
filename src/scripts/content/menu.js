@@ -1,3 +1,4 @@
+import * as logger from '../common/logger.js';
 import AddonsUI from './addonsUI.js';
 import IronVaultUI from './ironVaultUI.js';
 import { interceptFunction } from '../utils/gameUtils.js';
@@ -135,7 +136,7 @@ class Menu {
 					else if (icons.includes(name)) this.icons.append(image);
 					else if (handle.includes(name)) this.handle.append(image);
 					else this.body.append(image);
-				});
+				}).catch(logger.error);
 		}
 
 		this.draggable.draggable({

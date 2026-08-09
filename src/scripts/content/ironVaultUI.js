@@ -1,3 +1,4 @@
+import * as logger from '../common/logger.js';
 import { dispatchMessage, once } from '../common/ipcBridge.js';
 import { generateUUID } from '../utils/mathUtils.js';
 import { renderTankIcon } from '../utils/gameUtils.js';
@@ -305,7 +306,7 @@ export default class IronVaultUI extends MenuOverlay {
 
 			fetch(iconUrl)
 				.then(result => result.text())
-				.then(iconSvg => icon.append(iconSvg));
+				.then(iconSvg => icon.append(iconSvg)).catch(logger.error);
 
 			stat.text(value);
 			description.text(key);

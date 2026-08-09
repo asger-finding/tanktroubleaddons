@@ -1,3 +1,4 @@
+import * as logger from '../common/logger.js';
 import { get, set } from '../common/store.js';
 import { interceptFunction, whenContentInitialized } from '../utils/gameUtils.js';
 
@@ -27,7 +28,7 @@ TankTrouble.Statistics.handleStatisticsChange = function(change = 1) {
 
 	this.statisticsType.text(this.STATISTICS_VALUES[this.current].DESCRIPTION);
 	this._updateStatistics();
-	set('statisticsState', this.current);
+	set('statisticsState', this.current).catch(logger.error);
 };
 
 /**
@@ -47,7 +48,7 @@ interceptFunction(TankTrouble.Statistics, 'init', function(original, ...args) {
 		this.current = state;
 		this.handleStatisticsChange(0);
 		this.statisticsType.on('mouseup', () => this.handleStatisticsChange(1));
-	});
+	}).catch(logger.error);
 
 	this.content.append([
 		this.header,
@@ -104,6 +105,6 @@ TankTrouble.Statistics._clientEventHandler = function(self, evt) {
 
 whenContentInitialized().then(() => {
 	ClientManager.getClient().addEventListener(TankTrouble.Statistics._clientEventHandler, TankTrouble.Statistics);
-});
+}).catch(logger.error);
 
 export const _isESmodule = true;

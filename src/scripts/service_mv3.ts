@@ -1,3 +1,4 @@
+import * as logger from './common/logger.js';
 import { setBrowserNamespace } from './common/set-browser-namespace.js';
 import { startSyncStore } from 'webext-sync';
 
@@ -15,7 +16,7 @@ const defaultState = {
 	statisticsState: 'global'
 };
 
-startSyncStore(defaultState);
+startSyncStore(defaultState).catch(logger.error);
 
 let lastWindowState = chrome.windows.WindowState.NORMAL;
 
@@ -94,7 +95,7 @@ function updateIcon(tabId: chrome.tabs.Tab['id']) {
 		const icons = isTankTrouble(tab.url)
 			? enabledIconPaths
 			: disabledIconPaths;
-		chrome.action.setIcon({ tabId, path: icons });
+		chrome.action.setIcon({ tabId, path: icons }).catch(logger.error);
 	});
 }
 
@@ -111,7 +112,7 @@ async function toggleMenu() {
 		browser.scripting.executeScript({
 			target: { tabId: tab.id },
 			files: [ 'scripts/toggleMenu.js' ]
-		});
+		}).catch(logger.error);
 	}
 }
 
@@ -155,7 +156,7 @@ browser.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 
 		return true;
 	} else if (request.action === 'FULLSCREEN') {
-		toggleFullscreen(request.state);
+		toggleFullscreen(request.state).catch(logger.error);
 	}
 
 	return null;

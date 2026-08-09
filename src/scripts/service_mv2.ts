@@ -1,3 +1,4 @@
+import * as logger from './common/logger.js';
 import { setBrowserNamespace } from './common/set-browser-namespace.js';
 import { startSyncStore } from 'webext-sync';
 
@@ -15,7 +16,7 @@ const defaultState = {
 	statisticsState: 'global'
 };
 
-startSyncStore(defaultState);
+startSyncStore(defaultState).catch(logger.error);
 
 let lastWindowState = 'normal' as chrome.windows.WindowState;
 
@@ -112,7 +113,7 @@ async function toggleMenu() {
 	if (isTankTrouble(tab.url)) {
 		browser.tabs.executeScript(tab.id, {
 			file: 'scripts/toggleMenu.js'
-		});
+		}).catch(logger.error);
 	}
 }
 
@@ -121,12 +122,12 @@ browser.browserAction.onClicked.addListener(toggleMenu);
 
 // Listen for tab updates
 browser.tabs.onUpdated.addListener((tabId: number, changeInfo: { status?: string }) => {
-	if (changeInfo.status === 'complete') updateIcon(tabId);
+	if (changeInfo.status === 'complete') updateIcon(tabId).catch(logger.error);
 });
 
 // Listen for tab switches
 browser.tabs.onActivated.addListener((activeInfo: { tabId: number }) => {
-	updateIcon(activeInfo.tabId);
+	updateIcon(activeInfo.tabId).catch(logger.error);
 });
 
 // Listener for fetch requests from the content script
@@ -152,7 +153,7 @@ browser.runtime.onMessage.addListener((request: Record<string, unknown>) => {
 			.then(data => ({ success: true, data, uuid }))
 			.catch(error => ({ success: false, error: error.message ?? String(error) }));
 	} else if (request.action === 'FULLSCREEN') {
-		toggleFullscreen(request.state as 'on' | 'off' | undefined);
+		toggleFullscreen(request.state as 'on' | 'off' | undefined).catch(logger.error);
 	}
 
 	return null;

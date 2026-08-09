@@ -1,3 +1,4 @@
+import * as logger from '../common/logger.js';
 import { StoreEvent, get, onStateChange } from '../common/store.js';
 
 /**
@@ -15,7 +16,7 @@ const setTheme = (theme, prevTheme = null, colorScheme = 'light') => {
 
 get('theme').then(({ classToken, colorScheme }) => {
 	setTheme(classToken, null, colorScheme);
-});
+}).catch(logger.error);
 
 onStateChange(change => {
 	const { detail } = change;

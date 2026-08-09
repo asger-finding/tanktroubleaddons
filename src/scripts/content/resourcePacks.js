@@ -372,14 +372,17 @@ const storeDefaultResourcePacks = async() => {
  */
 const getActiveResourcePack = () => new Promise((resolve, reject) => {
 	/**
-	 * Fallback to first resource pack in store if error
-	 * @returns {Promise<Uint8Array>} Pack or reject
+	 * Fallback to first resource pack in store if error. Settles the outer promise,
+	 * so a store failure rejects instead of leaving it pending forever
 	 */
-	const handleError = () => getFirstResourcePackFromStore()
-		.then(result => {
-			if (result !== false) resolve(result);
-			else reject('Resource pack unset');
-		});
+	const handleError = () => {
+		getFirstResourcePackFromStore()
+			.then(result => {
+				if (result !== false) resolve(result);
+				else reject('Resource pack unset');
+			})
+			.catch(reject);
+	};
 
 	const hashsum = localStorage.getItem('resourcepack');
 	if (hashsum === null || !/\b[a-fA-F0-9]{64}\b/u.test(hashsum)) {

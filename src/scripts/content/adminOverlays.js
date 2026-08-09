@@ -1,3 +1,4 @@
+import * as logger from '../common/logger.js';
 import { interceptFunction } from '../utils/gameUtils.js';
 
 /**
@@ -325,7 +326,7 @@ const requestAndCache = async(adminId, playerId, offset, limit) => {
 		/** @type {ChatLogMessage} */
 		const dbMessage = { messageId, messageIndex, type, created, senders, recipients, serverName, gameId, message };
 
-		addMessage(dbMessage);
+		addMessage(dbMessage).catch(logger.error);
 
 		return dbMessage;
 	});
@@ -654,7 +655,7 @@ TankTrouble.AdminChatLogOverlay.filterAndRenderMessages = async function(offset,
 			messages.push(newMessage);
 
 			return renderChatMessage(newMessage, this.adminId);
-		})).then(messageElements => this.chatMessages.append(...messageElements));
+		})).then(messageElements => this.chatMessages.append(...messageElements)).catch(logger.error);
 	}
 
 	loadingMessage.remove();

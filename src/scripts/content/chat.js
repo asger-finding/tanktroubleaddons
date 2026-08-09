@@ -1,3 +1,4 @@
+import * as logger from '../common/logger.js';
 import { whenContentInitialized } from '../utils/gameUtils.js';
 import { decode } from 'iso-8859-15';
 import dismoji from 'discord_emoji';
@@ -541,7 +542,7 @@ const addonMethods = {
 							return timeUntil(banExpiry).substring(3);
 						}).join(', ');
 						this._addSystemMessage(bannedPlayers, usernameMap, unbannedMessage);
-					});
+					}).catch(logger.error);
 				}
 			}, () => {}, () => {}, loggedInPlayerIds, Caches.getTempBanValidityCache());
 			return;
@@ -1320,6 +1321,6 @@ whenContentInitialized().then(() => {
 		characterData: false
 	});
 
-});
+}).catch(logger.error);
 
 export const _isESmodule = true;

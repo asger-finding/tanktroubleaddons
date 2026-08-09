@@ -1,3 +1,4 @@
+import * as logger from '../common/logger.js';
 import { spaceAround } from '../utils/mathUtils.js';
 
 /**
@@ -229,7 +230,7 @@ UIGameIconScrollerGroup.prototype._distributeGameIcons = function() {
 		}
 	});
 
-	Promise.all(tweens).then(() => { this.scrolling = false; });
+	Promise.all(tweens).then(() => { this.scrolling = false; }).catch(logger.error);
 };
 
 UIGameIconScrollerGroup.prototype._calculateIconSpacing = function(count) {

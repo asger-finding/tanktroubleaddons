@@ -1,3 +1,4 @@
+import * as logger from '../common/logger.js';
 import { StoreEvent, get, onStateChange } from '../common/store.js';
 import { dispatchMessage } from '../common/ipcBridge.js';
 
@@ -12,7 +13,7 @@ const setShowFullscreenButton = option => {
 };
 
 // Initialize showFullscreenButton setting
-get('showFullscreenButton').then(setShowFullscreenButton);
+get('showFullscreenButton').then(setShowFullscreenButton).catch(logger.error);
 
 // Handle state changes
 onStateChange(({ detail }) => {

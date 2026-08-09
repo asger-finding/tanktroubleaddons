@@ -1,3 +1,4 @@
+import * as logger from '../common/logger.js';
 /**
  * Base class for menu overlay panels (Addons, IronVault, etc.)
  */
@@ -45,7 +46,7 @@ export default class MenuOverlay {
 			.then(result => result.text())
 			.then(body => {
 				this.icon.html(body);
-			});
+			}).catch(logger.error);
 
 		parent.bindOverlay(this);
 	}

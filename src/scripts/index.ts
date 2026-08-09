@@ -1,3 +1,4 @@
+import * as logger from './common/logger.js';
 import { dispatchMessage, listen } from './common/ipcBridge.js';
 import { setBrowserNamespace } from './common/set-browser-namespace.js';
 import { setupStoreHandler } from './common/store.js';
@@ -55,7 +56,7 @@ class Addons {
 
 			loader.textContent = '';
 			loader.remove();
-		});
+		}).catch(logger.error);
 	}
 
 	/**

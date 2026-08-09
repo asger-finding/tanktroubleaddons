@@ -1,3 +1,4 @@
+import * as logger from './logger.js';
 /* eslint-disable init-declarations */
 import { Callback, dispatchMessage, listen, once } from './ipcBridge.js';
 import { SyncStoreOptions } from 'webext-sync';
@@ -77,51 +78,10 @@ if (!browser.runtime) {
 	let syncStore: SyncStoreOptions;
 	let state: { [key: string]: any };
 
-	setupStoreHandler = () => {
-		listen(null, evt => {
-			const { detail } = evt;
-			if (!detail || typeof detail.key === 'undefined') return;
-
-			switch (detail.type) {
-				case StoreEvent.READ:
-					get(detail.key);
-					break;
-				case StoreEvent.WRITE:
-					set(detail.key, detail?.data);
-					break;
-				default:
-					break;
-			}
-		});
-	};
-
-	get = key => {
-		const result = state[key];
-
-		dispatchMessage(null, {
-			type: StoreEvent.READ_RESPONSE,
-			key,
-			data: result
-		});
-
-		return Promise.resolve(result);
-	};
-
-	set = async(key, value) => {
-		const result = await syncStore.setState({
-			...state,
-			[key]: value
-		});
-		dispatchMessage(null, {
-			type: StoreEvent.WRITE_RESPONSE,
-			key,
-			data: result[key]
-		});
-		return result;
-	};
-
-	// We are in a content script, which does have runtime access
-	import('webext-sync').then(async({ startSyncStore }) => {
+	// We are in a content script, which does have runtime access.
+	// Requests can arrive before the store has loaded, so reads and writes wait
+	// on this. Answering early would leave the inject side waiting forever.
+	const ready = import('webext-sync').then(async({ startSyncStore }) => {
 		syncStore = await startSyncStore();
 		state = await syncStore.getState();
 
@@ -152,5 +112,51 @@ if (!browser.runtime) {
 		});
 
 	});
+
+	setupStoreHandler = () => {
+		listen(null, evt => {
+			const { detail } = evt;
+			if (!detail || typeof detail.key === 'undefined') return;
+
+			switch (detail.type) {
+				case StoreEvent.READ:
+					get(detail.key).catch(logger.error);
+					break;
+				case StoreEvent.WRITE:
+					set(detail.key, detail?.data).catch(logger.error);
+					break;
+				default:
+					break;
+			}
+		});
+	};
+
+	get = async key => {
+		await ready;
+		const result = state[key];
+
+		dispatchMessage(null, {
+			type: StoreEvent.READ_RESPONSE,
+			key,
+			data: result
+		});
+
+		return result;
+	};
+
+	set = async(key, value) => {
+		await ready;
+		const result = await syncStore.setState({
+			...state,
+			[key]: value
+		});
+		dispatchMessage(null, {
+			type: StoreEvent.WRITE_RESPONSE,
+			key,
+			data: result[key]
+		});
+		return result;
+	};
+
 }
 /* eslint-enable jsdoc/require-jsdoc */

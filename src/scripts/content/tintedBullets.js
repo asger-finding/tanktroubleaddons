@@ -1,3 +1,4 @@
+import * as logger from '../common/logger.js';
 import { StoreEvent, get, onStateChange } from '../common/store.js';
 import { interceptFunction } from '../utils/gameUtils.js';
 import { smoothTransition } from '../utils/mathUtils.js';
@@ -134,7 +135,7 @@ const setTintedBullets = option => {
 };
 
 // Initialize tintedBullets setting
-get('tintedBullets').then(setTintedBullets);
+get('tintedBullets').then(setTintedBullets).catch(logger.error);
 
 // Handle state changes
 onStateChange(({ detail }) => {

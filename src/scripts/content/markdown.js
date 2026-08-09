@@ -1,3 +1,4 @@
+import * as logger from '../common/logger.js';
 import { StoreEvent, get, onStateChange } from '../common/store.js';
 import {
 	gfmAutolinkLiteral,
@@ -72,7 +73,7 @@ export const setupCmThemeUpdate = markdownElement => {
 	get('theme').then(({ colorScheme }) => {
 		for (const node of markdownElement.querySelectorAll('code .CodeMirror'))
 			refreshCodeMirrorTheme(node, colorScheme === 'dark');
-	});
+	}).catch(logger.error);
 };
 
 /**

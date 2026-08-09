@@ -1,3 +1,4 @@
+import * as logger from './common/logger.js';
 import { AddonsMeta } from './index.js';
 
 (async() => {
@@ -91,4 +92,4 @@ import { AddonsMeta } from './index.js';
 	// Run TankTrouble loader
 	// eslint-disable-next-line @typescript-eslint/no-implied-eval
 	Function(meta.loader)();
-})();
+})().catch(logger.error);

@@ -1,3 +1,4 @@
+import * as logger from '../common/logger.js';
 import { get, set } from '../common/store.js';
 import MenuOverlay from './menuOverlay.js';
 
@@ -51,10 +52,10 @@ export default class AddonsUI extends MenuOverlay {
 					if ($target.is(':checked')) {
 						const newTheme = $target.val();
 						const colorScheme = $target.attr('data-set-color-scheme');
-						set('theme', { classToken: newTheme, colorScheme });
+						set('theme', { classToken: newTheme, colorScheme }).catch(logger.error);
 					}
 				});
-			});
+			}).catch(logger.error);
 
 			get('showFullscreenButton').then(showFullscreenButton => {
 				fullscreenButtonCheckbox.filter('input[type="checkbox"]')
@@ -63,7 +64,7 @@ export default class AddonsUI extends MenuOverlay {
 						// eslint-disable-next-line jsdoc/require-jsdoc
 						change: (_event, { item }) => set('showFullscreenButton', item.value)
 					});
-			});
+			}).catch(logger.error);
 			get('tintedBullets').then(tintedBullets => {
 				tintedBulletsCheckbox.filter('input[type="checkbox"]')
 					.prop('checked', tintedBullets)
@@ -71,7 +72,7 @@ export default class AddonsUI extends MenuOverlay {
 						// eslint-disable-next-line jsdoc/require-jsdoc
 						change: (_event, { item }) => set('tintedBullets', item.value)
 					});
-			});
+			}).catch(logger.error);
 
 			this.createSection({
 				title: 'Interface',

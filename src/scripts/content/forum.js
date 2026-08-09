@@ -411,5 +411,3 @@ interceptFunction(ForumView, 'replyEditFinished', (original, ...args) => {
 
 	return original(...args);
 }, { isClassy: true });
-
-export const _isESmodule = true;

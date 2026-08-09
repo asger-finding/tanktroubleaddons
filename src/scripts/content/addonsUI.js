@@ -283,5 +283,3 @@ export default class AddonsUI extends MenuOverlay {
 	}
 
 }
-
-export const _isESmodule = true;

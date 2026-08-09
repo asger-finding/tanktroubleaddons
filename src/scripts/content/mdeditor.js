@@ -178,5 +178,3 @@ import { renderMarkdown } from './markdown.js';
 	};
 
 })(jQuery);
-
-export const _isESmodule = true;

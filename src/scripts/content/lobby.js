@@ -100,5 +100,3 @@ interceptFunction(Game.UILobbyState, '_onSizeChangeHandler', function() {
 
 	this.gameIconScroller.onSizeChangeHandler();
 }, { isClassy: true });
-
-export const _isESmodule = true;

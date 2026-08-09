@@ -71,5 +71,3 @@ interceptFunction(TankTrouble.TankInfoBox, 'show', function(original, ...args) {
 		this.infoDeathsSvg.configure(deathsText, { transform: scaleAndTranslate });
 	}, () => {}, () => {}, playerId, Caches.getPlayerDetailsCache());
 });
-
-export const _isESmodule = true;

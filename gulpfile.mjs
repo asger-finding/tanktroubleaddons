@@ -164,8 +164,7 @@ const excludeFiles = () => new Transform({
 /**
  * Passes files through an esbuild pipeline that:
  * - Transpiles TS down to JavaScript,
- * - Resolves and bundles imported code in non-module scripts.
- *   This is handled through scripts declaring a `const _isESmodule = true` export
+ * - Resolves and bundles imported code in entry point scripts
  * - Bundles imported node modules in all files
  * @returns Script transform plugin
  */
@@ -190,9 +189,7 @@ const esbuildTransform = () => new Transform({
 					sourcefile: file.path
 				},
 				minify: state.isProd,
-				bundle: false,
 				write: false,
-				metafile: true,
 				platform: 'browser',
 				format: 'esm',
 				loader: {
@@ -201,16 +198,16 @@ const esbuildTransform = () => new Transform({
 				}
 			};
 
-			// If file is type module (capable of using import statements),
-			// then we only need to pack node_modules, else we pack everything
-			const { metafile } = await esbuild.build(config);
-			const isModule = Object.values(metafile.outputs)
-				.some(({ exports }) => exports.includes('_isESmodule'));
+			// Scripts directly in the scripts folder are entry points that the browser
+			// loads as classic scripts, so they pack everything and get wrapped to keep
+			// their bindings off the shared global. Everything nested is loaded as a
+			// module, so it only needs node_modules packed and keeps its imports.
+			const isEntry = !relative(`${origin}/scripts`, dirname(file.path)).length;
 
 			const result = await esbuild.build({
 				...config,
+				format: isEntry ? 'iife' : 'esm',
 				bundle: true,
-				metafile: false,
 				plugins: [{
 					name: 'bundle-only-node-modules',
 					setup(build) {
@@ -221,9 +218,9 @@ const esbuildTransform = () => new Transform({
 						build.onResolve({ filter: /[\s\S]*/ }, ({ path, resolveDir }) => {
 							if (relative(__dirname, resolveDir).startsWith('node_modules/')) return { external: false };
 
-							const external = isModule
-								? /^(?:\.\/|\.\.\/)/u.test(path)
-								: false;
+							const external = isEntry
+								? false
+								: /^(?:\.\/|\.\.\/)/u.test(path);
 							return { external };
 						});
 					}

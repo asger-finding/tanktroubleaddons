@@ -124,5 +124,3 @@ interceptFunction($.widget, 'bridge', (original, ...args) => {
 		return result;
 	});
 })();
-
-export const _isESmodule = true;

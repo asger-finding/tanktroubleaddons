@@ -132,5 +132,3 @@ export const renderMarkdown = (element, text) => {
 
 	initializeCodeBlocks(element);
 };
-
-export const _isESmodule = true;

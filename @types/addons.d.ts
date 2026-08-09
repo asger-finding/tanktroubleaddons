@@ -1,4 +1,4 @@
-export const _isESmodule = true;
+export {};
 
 declare global {
 	// eslint-disable-next-line init-declarations

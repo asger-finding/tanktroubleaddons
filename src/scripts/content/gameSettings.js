@@ -26,5 +26,3 @@ interceptFunction(Game.UIGameState, '_addCameraShake', (original, ...args) => {
 	if (QualityManager.getQuality() !== QualityManager.QUALITY_SETTINGS.MINIMUM) return original(...args);
 	return null;
 }, { isClassy: true });
-
-export const _isESmodule = true;

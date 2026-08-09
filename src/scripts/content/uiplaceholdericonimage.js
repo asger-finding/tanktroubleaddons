@@ -93,5 +93,3 @@ UIPlaceholderIconImage.prototype.remove = function() {
 UIPlaceholderIconImage.prototype.retire = function() {
 	this.kill();
 };
-
-export const _isESmodule = true;

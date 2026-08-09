@@ -448,5 +448,3 @@ interceptFunction(TankTrouble.TankInfoBox, 'show', function(original, ...args) {
 	}
 
 });
-
-export const _isESmodule = true;

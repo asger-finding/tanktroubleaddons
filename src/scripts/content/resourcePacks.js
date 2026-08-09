@@ -845,5 +845,3 @@ interceptFunction(UIButtonGroup.prototype, 'spawn', function(original, ...args) 
 
 	original(...args);
 });
-
-export const _isESmodule = true;

@@ -1322,5 +1322,3 @@ whenContentInitialized().then(() => {
 	});
 
 }).catch(logger.error);
-
-export const _isESmodule = true;

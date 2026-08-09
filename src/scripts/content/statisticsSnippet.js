@@ -106,5 +106,3 @@ TankTrouble.Statistics._clientEventHandler = function(self, evt) {
 whenContentInitialized().then(() => {
 	ClientManager.getClient().addEventListener(TankTrouble.Statistics._clientEventHandler, TankTrouble.Statistics);
 }).catch(logger.error);
-
-export const _isESmodule = true;

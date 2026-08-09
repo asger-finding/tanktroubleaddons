@@ -24,5 +24,3 @@ interceptFunction(Game.UIGameState, 'create', function(original, ...args) {
 
 	return result;
 }, { isClassy: true });
-
-export const _isESmodule = true;

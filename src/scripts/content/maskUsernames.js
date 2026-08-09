@@ -75,5 +75,3 @@ const transformUsername = playerDetails => {
  * Override mask username method to show GM levels
  */
 Utils.classMethod('maskUnapprovedUsername', playerDetails => transformUsername(playerDetails));
-
-export const _isESmodule = true;

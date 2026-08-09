@@ -238,5 +238,3 @@ UIProjectileImage.prototype.updateColor = function(enabled) {
 		this.filters = null;
 	}
 };
-
-export const _isESmodule = true;

@@ -130,5 +130,3 @@ export const smoothTransition = (x: number, x0: number, x1: number, y0: number, 
 	const diff = (x - x0) / (x1 - x0);
 	return y0 + (y1 - y0) * (1 - Math.cos(Math.PI * diff)) / 2;
 };
-
-export const _isESmodule = true;

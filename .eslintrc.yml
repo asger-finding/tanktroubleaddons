@@ -42,9 +42,6 @@ rules:
   - error
   - selector: variable
     format: [camelCase]
-    filter:
-      regex: '^(_isESmodule)$'
-      match: false
 
   jsdoc/require-jsdoc:
     - error

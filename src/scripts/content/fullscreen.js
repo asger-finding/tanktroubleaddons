@@ -46,5 +46,3 @@ interceptFunction(Game.UIGameState, '_onSizeChangeHandler', function(original, .
 	this.fullscreenGameGroup.position.x = this.game.width - UIConstants.FULLSCREEN_GAME_MARGIN_X;
 	return result;
 }, { isClassy: true });
-
-export const _isESmodule = true;

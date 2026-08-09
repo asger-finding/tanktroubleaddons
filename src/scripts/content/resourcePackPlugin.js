@@ -367,5 +367,3 @@ Phaser.Plugin.ResourcePack.prototype.replaceSound = async function(soundKey, sou
 		return false;
 	}
 };
-
-export const _isESmodule = true;

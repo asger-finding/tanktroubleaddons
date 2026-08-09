@@ -407,5 +407,3 @@ export default class IronVaultUI extends MenuOverlay {
 		return container;
 	}
 }
-
-export const _isESmodule = true;

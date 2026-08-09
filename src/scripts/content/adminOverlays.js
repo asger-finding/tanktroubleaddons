@@ -991,5 +991,3 @@ interceptFunction(TankTrouble.AdminStatisticsOverlay, '_getStatistics', (origina
 		original(...args);
 	}
 });
-
-export const _isESmodule = true;

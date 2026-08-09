@@ -32,5 +32,3 @@ interceptFunction(TankTrouble.AccountOverlay, 'show', function(original, ...args
 		}
 	}, () => {}, () => {}, this.playerId, Caches.getPlayerDetailsCache());
 });
-
-export const _isESmodule = true;

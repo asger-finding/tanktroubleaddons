@@ -108,5 +108,3 @@ if (!customElements.get('stroked-text')) {
 		}
 	);
 }
-
-export const _isESmodule = true;

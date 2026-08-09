@@ -309,5 +309,3 @@ interceptFunction(TankTrouble.TankInfoBox, 'show', function(original, ...args) {
 		else inputButton.hide();
 	});
 });
-
-export const _isESmodule = true;

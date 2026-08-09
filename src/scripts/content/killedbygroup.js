@@ -124,5 +124,3 @@ UIKilledByGroup.prototype.retire = function() {
 	this.exists = false;
 	this.visible = false;
 };
-
-export const _isESmodule = true;

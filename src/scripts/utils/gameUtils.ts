@@ -388,5 +388,3 @@ export const renderTankIcon = (
 
 	return canvas;
 };
-
-export const _isESmodule = true;

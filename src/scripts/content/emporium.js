@@ -32,5 +32,3 @@ interceptFunction(TankTrouble.VirtualShopOverlay, 'show', function(original, ...
 		}
 	}, () => {}, () => {}, params.playerId, Caches.getCurrencyCache());
 });
-
-export const _isESmodule = true;

@@ -199,5 +199,3 @@ $.widget('custom.deleteselectmenu', $.ui.selectmenu, {
 		return li.append(wrapper).appendTo(ul);
 	}
 });
-
-export const _isESmodule = true;

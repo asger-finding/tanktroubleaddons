@@ -99,5 +99,3 @@ export default class MenuOverlay {
 	}
 
 }
-
-export const _isESmodule = true;

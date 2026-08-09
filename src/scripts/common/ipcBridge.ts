@@ -89,5 +89,3 @@ export const once = <T>(
 
 	addEventListener(eventName, listener, { passive: false });
 };
-
-export const _isESmodule = true;

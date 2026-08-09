@@ -117,5 +117,3 @@ export const sanitizeResourcePackCSS = (css: string, files: PackFiles) => {
 		dropped: [...new Set(dropped)]
 	};
 };
-
-export const _isESmodule = true;

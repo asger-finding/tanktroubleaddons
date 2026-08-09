@@ -38,5 +38,3 @@ interceptFunction(Game.UIGameState, '_onSizeChangeHandler', function(original, .
 	this.killedByGroup.position.x = this.game.width / 2.0;
 	return result;
 }, { isClassy: true });
-
-export const _isESmodule = true;

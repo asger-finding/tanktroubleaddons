@@ -66,5 +66,3 @@ export const timeUntil = (date: Date): string => {
 	const formatter = new Intl.RelativeTimeFormat('en');
 	return formatter.format(count, unit);
 };
-
-export const _isESmodule = true;

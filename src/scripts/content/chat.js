@@ -1103,6 +1103,7 @@ const addonMethods = {
 		const msg = this.messages.find(
 			item => item.type === 'chat' && item.chatMessageId === chatMessageId
 		);
+		if (msg) msg.reported = reported;
 
 		// Toggle reported class on the message element
 		const msgEl = this.chatBody[0].querySelector(`.message-${chatMessageId}`);
@@ -1110,11 +1111,8 @@ const addonMethods = {
 
 		// Toggle reported whistle outside .body
 		const existing = this.chat[0].querySelector(`.reported-whistle-wrapper[data-message-id="${chatMessageId}"]`);
-		if (reported && !existing) {
-			this._appendReportedWhistle(chatMessageId);
-		} else if (!reported && existing) {
-			existing.remove();
-		}
+		if (reported && !existing) this._appendReportedWhistle(chatMessageId);
+		else if (!reported && existing) existing.remove();
 
 		// Update hover whistle visibility
 		if (this._whistle) {

@@ -1,4 +1,4 @@
-type PackFiles = Record<string, Uint8Array>;
+type PackFiles = Record<string, Uint8Array<ArrayBuffer>>;
 
 const mimeTypes: Record<string, string> = {
 	avif: 'image/avif',

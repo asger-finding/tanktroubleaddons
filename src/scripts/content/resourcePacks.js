@@ -3,6 +3,7 @@ import * as logger from '../common/logger.js';
 import { calculateFileHash } from '../utils/mathUtils.js';
 import { interceptFunction } from '../utils/gameUtils.js';
 import { mergeWithSchema } from '../utils/objectUtils.js';
+import { sanitizeResourcePackCSS } from '../utils/cssUtils.js';
 import { unzip } from 'but-unzip';
 
 const storeName = 'resourcePacks';
@@ -38,8 +39,8 @@ const normalizeResourcePack = decoded => {
 	// If meta.json is in the root, no normalization needed
 	if (!metaDir) return { normalized: decoded, metaPath: metaFilePath };
 
-	// Create a new object with normalized paths
-	const normalized = {};
+	// Null prototype so a __proto__ entry cannot reassign the prototype
+	const normalized = Object.create(null);
 	for (const [path, data] of Object.entries(decoded)) {
 		if (path.startsWith(metaDir)) {
 			const newPath = path.substring(metaDir.length);
@@ -56,7 +57,7 @@ const normalizeResourcePack = decoded => {
  * @returns {Record<string, Uint8Array>} Filtered zip file
  */
 const filterOutDirectories = decoded => {
-	const result = {};
+	const result = Object.create(null);
 	for (const key in decoded) {
 		if (Object.prototype.hasOwnProperty.call(decoded, key) && !key.endsWith('/'))
 			result[key] = decoded[key];
@@ -402,14 +403,21 @@ const storeResourcePack = file => addResourcePackToStore(file, false);
 /**
  * Insert the resource pack css into the document
  * @param {string} css Resource pack css as a string
+ * @param {Record<string, Uint8Array>} files Resource pack files, used to resolve urls in the css
  */
-const insertResourcePackCSS = css => {
+const insertResourcePackCSS = (css, files = {}) => {
 	if (!Addons._resource_pack_styles) {
 		Addons._resource_pack_styles = new CSSStyleSheet();
 		document.adoptedStyleSheets.push(Addons._resource_pack_styles);
 	}
 
-	Addons._resource_pack_styles.replace(css);
+	for (const url of Addons._resource_pack_urls ?? []) URL.revokeObjectURL(url);
+
+	const { css: sanitized, urls, dropped } = sanitizeResourcePackCSS(css, files);
+	if (dropped.length) logger.warn(`insertResourcePackCSS: dropped ${dropped.length} url(s) not found in the resource pack:`, dropped);
+
+	Addons._resource_pack_urls = urls;
+	Addons._resource_pack_styles.replace(sanitized);
 };
 
 /**
@@ -426,7 +434,7 @@ const setActiveResourcePack = hashsum => new Promise((resolve, reject) => {
 	localStorage.setItem('resourcepack', hashsum);
 	Addons.getActiveResourcePack()
 		.then(pack => {
-			insertResourcePackCSS(pack.css);
+			insertResourcePackCSS(pack.css, pack.textures);
 			resolve(pack);
 		})
 		.catch(reject);
@@ -720,13 +728,13 @@ Object.assign(Addons, {
 // Apply resource pack CSS immediately so global styles don't wait for the game to load
 storeDefaultResourcePacks()
 	.then(() => getActiveResourcePack())
-	.then(({ css }) => insertResourcePackCSS(css))
+	.then(({ css, textures }) => insertResourcePackCSS(css, textures))
 	.catch(() => {});
 
 interceptFunction(Game.UIPreloadState, 'preload', (original, ...args) => {
 	Addons.getActiveResourcePack().then(({ textures, metafile, css }) => {
 		Addons.insertResourcePackIntoGame(textures, metafile);
-		Addons.insertResourcePackCSS(css);
+		Addons.insertResourcePackCSS(css, textures);
 	}).catch(err => alert(`Error getting active texture pack: ${err}. This should never happen.`)); // eslint-disable-line no-alert
 
 	return original(...args);

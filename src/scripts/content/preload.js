@@ -7,7 +7,7 @@ import { interceptFunction } from '../utils/gameUtils.js';
  * @returns {Promise<IDBDatabase>} A promise that resolves to the initialized database.
  */
 const initDatabase = () => new Promise((resolve, reject) => {
-	const request = indexedDB.open('addons', 11);
+	const request = indexedDB.open('addons', 12);
 
 	/* eslint-disable jsdoc/require-jsdoc */
 	request.onupgradeneeded = (event) => {

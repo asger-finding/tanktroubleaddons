@@ -515,6 +515,11 @@ const addonMethods = {
 			this.chatBodyResizeHandle.stop(true).css({ display: 'none', opacity: 0 });
 			clearTimeout(this.resizeHandleTimeout);
 
+			if (this._whistle) {
+				this._whistle.stop(true).hide();
+				this._whistleMessageId = null;
+			}
+
 			this._clearFormWidth();
 		}
 	},

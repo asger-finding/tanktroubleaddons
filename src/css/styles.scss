@@ -732,6 +732,10 @@ div#statisticsSnippet {
 		}
 	}
 
+	&:not(:is(.opening, .open)) > :is(.whistle, .reported-whistle-wrapper) {
+		@include hide();
+	}
+
 	/* Handle moved outside .body to avoid the fade mask */
 	> .handle {
 		position: absolute;

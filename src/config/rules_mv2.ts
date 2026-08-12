@@ -174,11 +174,6 @@ const rules: Array<{
 	{
 		urlFilter: /^https:\/\/cdn\.tanktrouble\.com\/RELEASE-[^/]+\/assets\/images\/accessories\/back32-320@2x\.png/u,
 		extensionPath: '/assets/accessories/back32-320@2x.{{png|avif}}'
-	},
-	// Rule 41: Phaser CE
-	{
-		urlFilter: /^https:\/\/cdn\.tanktrouble\.com\/RELEASE-[^/]+\/js\/phaser\/phaser\.min\.js/u,
-		redirectUrl: 'https://github.com/phaserjs/phaser-ce/releases/download/v2.20.2/phaser{{|.min}}.js'
 	}
 ];
 
